@@ -73,7 +73,7 @@ void Bs2DsK::Loop(TH1D &hBsM, TH2D &h2oangle)
        if ( lab2_MM[0] < 1944 && 1990 < lab2_MM[0] ) continue; // Ds mass
        if ( 100000 < lab1_P[0] ) continue;
        if ( BDTGResponse[0] < 0.1 ) continue;
-       if ( lab1_PIDK[0] < 5 ) continue;
+       // if ( lab1_PIDK[0] < 5 ) continue;
        if ( pPIDcut[0] != 1) continue;
 
        Pi3P.SetXYZM( lab3_PX[0], lab3_PY[0], lab3_PZ[0], lab3_M[0]);
