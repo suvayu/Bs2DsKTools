@@ -14,7 +14,7 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
-#include <TH2D.h>
+#include <TNtuple.h>
 
    const Int_t kMaxlab0_OWNPV_COV = 1;
    const Int_t kMaxlab0_ENDVERTEX_COV = 1;
@@ -41,7 +41,7 @@ public :
   virtual Int_t    GetEntry(Long64_t entry);
   virtual Long64_t LoadTree(Long64_t entry);
   virtual void     Init(TTree *tree);
-  virtual void     Loop(TH1D &hBsM, TH2D &h2oangle);
+  virtual void     Loop(TNtuple &noangle);
   virtual Bool_t   Notify();
   virtual void     Show(Long64_t entry = -1);
 

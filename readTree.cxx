@@ -17,7 +17,7 @@
 // #include "Event.h"
 
 #include <Rtypes.h>
-#include <TH2.h>
+#include <TNtuple.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <TLorentzVector.h>
@@ -712,7 +712,7 @@ Int_t readTree::Cut(Long64_t entry)
 }
 
 
-void readTree::Loop(TH1D &hBsM, TH2D &h2oangle)
+void readTree::Loop(TNtuple &noangle)
 {
 //   In a ROOT session, you can do:
 //      Root > .L readTree.C
@@ -739,11 +739,11 @@ void readTree::Loop(TH1D &hBsM, TH2D &h2oangle)
 //by  b_branchname->GetEntry(ientry); //read only this branch
    if (fChain == 0) return;
 
-   Long64_t nentries = fChain->GetEntriesFast();
+   Long64_t nentries = fChain->GetEntries();
 
    std::cout << nentries << " entries!" << std::endl;
 
-   Double_t BsM(0.0), DsM(0.0);
+   // Double_t BsM(0.0), DsM(0.0);
    TLorentzVector BsP(0,0,0,0), DsP(0,0,0,0), hP(0,0,0,0),
      Pi3P(0,0,0,0), K4P(0,0,0,0), K5P(0,0,0,0);
 
@@ -774,26 +774,31 @@ void readTree::Loop(TH1D &hBsM, TH2D &h2oangle)
        if ( 100000 < lab1_P ) continue;
        // if ( BDTGResponse[0] < 0.1 ) continue; // not in TTree!
        // if ( lab1_PIDK[0] < 5 ) continue;
-       // if ( pPIDcut[0] != 1) continue; // not in TTree
+       // if ( pPIDcut[0] != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
+       if (! lab5_PIDK - lab5_PIDp > 0) continue;
+
+       /*
+	 mass(K) = 493.677 MeV
+	 mass(π) = 139.57  MeV
+	*/
 
        Pi3P.SetXYZM( lab3_PX, lab3_PY, lab3_PZ, lab3_M);
        K4P .SetXYZM( lab4_PX, lab4_PY, lab4_PZ, lab4_M);
        K5P .SetXYZM( lab5_PX, lab5_PY, lab5_PZ, lab5_M);
-       hP  .SetXYZM( lab1_PX, lab1_PY, lab1_PZ, lab1_M);
+       hP  .SetXYZM( lab1_PX, lab1_PY, lab1_PZ, 493.677); // lab1_M
 
        DsP = Pi3P + K4P + K5P;
        BsP = DsP + hP;
 
-       DsM = DsP.M();
-       BsM = BsP.M();
-
-       hBsM.Fill(lab0_MM);
+       // DsM = DsP.M();
+       // BsM = BsP.M();
 
        boost = - BsP.BoostVector();
        //       DsP.Boost(boost(0), boost(1), boost(2));
        hP .Boost(boost(0), boost(1), boost(2));
 
-       h2oangle.Fill( TMath::Cos((hP.Angle(boost))), lab0_MM);
+       // noangle.Fill(lab0_MM, TMath::Cos((hP.Angle(boost))), lab1_TRUEID);
+       noangle.Fill(BsP.M(), TMath::Cos((hP.Angle(boost))), lab1_TRUEID);
 
        // printf("DsM: %.2f, %.2f, %.2f\n", DsM, lab2_MM[0], DsM - lab2_MM[0]);
        // printf("BsM: %.2f, %.2f, %.2f\n", BsM, lab0_MM[0], BsM - lab0_MM[0]);
