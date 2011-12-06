@@ -93,7 +93,7 @@ void Bs2DsK::Loop(TH1D &hBsM, TH2D &h2oangle)
        //       DsP.Boost(boost(0), boost(1), boost(2));
        hP .Boost(boost(0), boost(1), boost(2));
 
-       h2oangle.Fill( TMath::Cos((hP.Angle(boost))), lab0_MM[0]);
+       h2oangle.Fill( lab0_MM[0], TMath::Cos((hP.Angle(boost))));
 
        // printf("DsM: %.2f, %.2f, %.2f\n", DsM, lab2_MM[0], DsM - lab2_MM[0]);
        // printf("BsM: %.2f, %.2f, %.2f\n", BsM, lab0_MM[0], BsM - lab0_MM[0]);

@@ -41,12 +41,12 @@ int oangle()
 
   // opening angle
   TH2D h2oangle_Pi ("h2oangle_Pi", "#it{B_{s}} (#it{D_{s}#pi} hypothesis) vs #it{#vec{#beta}} #angle #it{h} in #it{B_{s}} rest frame",
-		    25, -1, 1, 150, 4500, 6000);
+		    150, 4500, 6000, 25, -1, 1);
   TH2D h2oangle_K ("h2oangle_K", "#it{B_{s}} (#it{D_{s}K} hypothesis) vs #it{#vec{#beta}} #angle #it{h} in #it{B_{s}} rest frame",
-		   25, -1, 1, 150, 4500, 6000);
+		   150, 4500, 6000, 25, -1, 1);
 
-  h2oangle_Pi.SetXTitle("Opening angle[deg]");
-  h2oangle_K .SetXTitle("Opening angle[deg]");
+  h2oangle_Pi.SetXTitle("Cosine of the opening angle[deg]");
+  h2oangle_K .SetXTitle("Cosine of the opening angle[deg]");
   h2oangle_Pi.SetYTitle("Mass[MeV]");
   h2oangle_K .SetYTitle("Mass[MeV]");
 
@@ -65,7 +65,7 @@ int oangle()
   leg.Draw();
 
   gPad->Update();
-  gPad->Print("Bs-mass.png");
+  gPad->Print("Bs-mass-data.png");
 
   gPad->Clear();
   gStyle->SetOptTitle(1);
