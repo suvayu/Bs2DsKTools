@@ -775,7 +775,15 @@ void readTree::Loop(TNtuple &noangle)
        // if ( BDTGResponse[0] < 0.1 ) continue; // not in TTree!
        // if ( lab1_PIDK[0] < 5 ) continue;
        // if ( pPIDcut[0] != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
-       if (! lab5_PIDK - lab5_PIDp > 0) continue;
+
+       /**
+	* This PID selection is the Lb veto
+	* + not required since Bs2DsK & Bs2Dsπ MC
+	* + moreover, s/lab5/lab1/ since only way to distinguish Lb
+	*   from Bs is using the bachelor particle (p and K/π)
+	* TODO: ask Rose
+	*/
+       // if (! lab5_PIDK - lab5_PIDp > 0) continue;
 
        /*
 	 mass(K) = 493.677 MeV
@@ -785,7 +793,8 @@ void readTree::Loop(TNtuple &noangle)
        Pi3P.SetXYZM( lab3_PX, lab3_PY, lab3_PZ, lab3_M);
        K4P .SetXYZM( lab4_PX, lab4_PY, lab4_PZ, lab4_M);
        K5P .SetXYZM( lab5_PX, lab5_PY, lab5_PZ, lab5_M);
-       hP  .SetXYZM( lab1_PX, lab1_PY, lab1_PZ, 493.677); // lab1_M
+       // K mass instead of lab1_M to emulate wrong mass hypothesis
+       hP  .SetXYZM( lab1_PX, lab1_PY, lab1_PZ, 493.677);
 
        DsP = Pi3P + K4P + K5P;
        BsP = DsP + hP;
@@ -809,4 +818,4 @@ void readTree::Loop(TNtuple &noangle)
    std::cout << "Read " << nbytes << " bytes." << std::endl;
 }
 
-#endif // #ifdef readTree_cxx
+#endif // readTree_cxx
