@@ -138,7 +138,7 @@ Bs2DsK::Bs2DsK(TTree *tree)
    if (tree == 0) {
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("FitTuple_BsDs1Pi_K_MU_BDTG_01_vavaStyle.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("FitTuple_BsDs1Pi_K_MU_BDTG_01_vavaStyle.root");
+         f = new TFile("../../ntuples/data/FitTuple_BsDs1Pi_K_MU_BDTG_01_vavaStyle.root");
       }
       f->GetObject("MyOffSelTree",tree);
 
