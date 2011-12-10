@@ -11,6 +11,7 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+#include <TH2D.h>
 
 class Bs2DsK {
 public :

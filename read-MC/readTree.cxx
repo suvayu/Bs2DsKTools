@@ -30,7 +30,7 @@ readTree::readTree(TTree *tree)
    if (tree == 0) {
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("Merged_Bs2DsK.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("../ntuples/MC/Merged_Bs2DsK.root");
+         f = new TFile("../../ntuples/MC/Merged_Bs2DsK.root");
       }
       f->GetObject("DecayTree",tree);
 

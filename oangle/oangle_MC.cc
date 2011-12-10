@@ -2,9 +2,7 @@ int oangle_MC()
 {
   // make chain
   TChain MCChain("MCChain");
-  MCChain.Add("../Bs-time-acceptance/Merged_Bs2Ds*.root/DecayTree");
-
-  gSystem->Load("readTree_cxx.so");
+  MCChain.Add("../read-MC/Merged_Bs2Ds*.root/DecayTree");
 
   readTree MCsample(&MCChain);
 
