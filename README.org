@@ -1,0 +1,10 @@
+# -*- mode: org; default-input-method: TeX; -*-
+
+* Intro
+Just a collection of tools for the Bs⁰ → DsK analysis. All the
+separate tools are modularised in sub-diretories. The different tree
+readers are inside the ~read-MC~ and ~read-data~ directories.
+
+Tools:
+1. Bs⁰ time acceptance
+2. Bs⁰ and bachelor particle opening angle as PID
