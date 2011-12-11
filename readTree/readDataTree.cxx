@@ -166,7 +166,7 @@ void readDataTree::Loop(TH1D &hBsM, TH2D &h2oangle)
 
    std::cout << nentries << " entries!" << std::endl;
 
-   Double_t BsM(0.0), DsM(0.0);
+   // Double_t BsM(0.0), DsM(0.0);
    TLorentzVector BsP(0,0,0,0), DsP(0,0,0,0), hP(0,0,0,0),
      Pi3P(0,0,0,0), K4P(0,0,0,0), K5P(0,0,0,0);
 
@@ -209,8 +209,8 @@ void readDataTree::Loop(TH1D &hBsM, TH2D &h2oangle)
        DsP = Pi3P + K4P + K5P;
        BsP = DsP + hP;
 
-       DsM = DsP.M();
-       BsM = BsP.M();
+       // DsM = DsP.M();
+       // BsM = BsP.M();
 
        hBsM.Fill(lab0_MM[0]);
 

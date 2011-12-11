@@ -11,16 +11,22 @@ class readTree {
 
 public:
 
+  // constructor & destructor
   readTree() {}
   readTree(TTree*) {}
   virtual ~readTree() {}
-  virtual Int_t GetEntry(Long64_t) const = 0;
-  virtual void  Show(Long64_t) const = 0;
-  virtual void  Loop() const = 0;
-  virtual void  Loop(TH1D&) const = 0;
-  virtual void  Loop(TH2D&) const = 0;
-  virtual void  Loop(TNtuple&) const = 0;
-  virtual void  Loop(TTree&) const = 0;
+
+  // accessors
+  // TODO: add const qualifer to methods
+  virtual Int_t GetEntry(Long64_t) = 0;
+  virtual void  Show(Long64_t) = 0;
+  virtual void  Loop() = 0;
+
+  // these should be removed later
+  virtual void  Loop(TH1D&) = 0;
+  virtual void  Loop(TH2D&) = 0;
+  virtual void  Loop(TNtuple&) = 0;
+  virtual void  Loop(TTree&) = 0;
 
 };
 
