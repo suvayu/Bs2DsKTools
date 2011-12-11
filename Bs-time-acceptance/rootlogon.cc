@@ -1,8 +1,8 @@
 void rootlogon()
 {
-  gSystem->SetIncludePath(" -I../read-data/ -I../read-MC/");
+  gSystem->AddIncludePath(" -I../readTree");
   cout << "Include path = " << gSystem->GetIncludePath() << endl;
 
-  gSystem->Load("../read-data/Bs2DsK_cc.so");
-  gSystem->Load("../read-MC/readTree_cxx.so");
+  gSystem->Load("../readTree/readDataTree_cxx.so");
+  gSystem->Load("../readTree/readMCTree_cxx.so");
 }

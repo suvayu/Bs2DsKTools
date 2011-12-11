@@ -24,8 +24,8 @@ int oangle()
 
   gROOT->LoadMacro("rootlogon.cc");
 
-  Bs2DsK ch_pi(&pi_hypo);
-  Bs2DsK ch_K (&K_hypo);
+  readDataTree ch_pi(&pi_hypo);
+  readDataTree ch_K (&K_hypo);
 
   // invariant mass
   TH1D hBsM_Pi ("hBsM_Pi", "B_{s} mass with #it{#pi} mass hypothesis", 150, 4500, 6000);

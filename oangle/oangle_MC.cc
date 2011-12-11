@@ -4,7 +4,7 @@ int oangle_MC()
   TChain MCChain("MCChain");
   MCChain.Add("../../ntuples/MC/Merged_Bs2Ds*.root/DecayTree");
 
-  readTree MCsample(&MCChain);
+  readMCTree MCsample(&MCChain);
 
   // ntuple with mass, cos(oangle) and species from MC truth
   TNtuple noangle("noangle", "Opening angle", "mass:cos_oangle:hID");
