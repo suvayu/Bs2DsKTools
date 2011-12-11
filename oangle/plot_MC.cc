@@ -1,5 +1,11 @@
 #include <string>
 
+#include <TStyle.h>
+#include <TNtuple.h>
+#include <TH2D.h>
+#include <TLegend.h>
+#include <TPad.h>
+
 using namespace std;
 
 int plot_MC(TNtuple &noangle)

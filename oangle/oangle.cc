@@ -1,3 +1,12 @@
+#include <TROOT.h>
+#include <TStyle.h>
+#include <TChain.h>
+#include <TH2D.h>
+#include <TLegend.h>
+#include <TPad.h>
+
+#include "readDataTree.hxx"
+
   // Manuel wrote:
   //
   // I think that would be useful to have. On MC, maybe you could make a plot
