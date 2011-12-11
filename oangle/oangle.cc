@@ -17,10 +17,10 @@ int oangle()
 
   // make chain
   TChain pi_hypo("pi_hypo");
-  pi_hypo.Add("../read-data/FitTuple_BsDs1Pi_Pi_*.root/MyOffSelTree");
+  pi_hypo.Add("../../ntuples/data/FitTuple_BsDs1Pi_Pi_*.root/MyOffSelTree");
 
   TChain K_hypo("K_hypo");
-  K_hypo.Add("../read-data/FitTuple_BsDs1Pi_K_*.root/MyOffSelTree");
+  K_hypo.Add("../../ntuples/data/FitTuple_BsDs1Pi_K_*.root/MyOffSelTree");
 
   gROOT->LoadMacro("rootlogon.cc");
 
