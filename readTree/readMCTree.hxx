@@ -67,7 +67,8 @@ private:
   Float_t         lab0_MINIP;
   Float_t         lab0_MINIPCHI2;
 
-  // TODO: not sure about this block
+  // this is the PV with respect to which the given particle has the
+  // smallest impact parameter.
   Float_t         lab0_OWNPV_X;
   Float_t         lab0_OWNPV_Y;
   Float_t         lab0_OWNPV_Z;
@@ -83,7 +84,7 @@ private:
   Float_t         lab0_FDCHI2_OWNPV;
   Float_t         lab0_DIRA_OWNPV;
 
-  // TODO: not sure about this block
+  // this is the decay vertex of the particle
   Float_t         lab0_ENDVERTEX_X;
   Float_t         lab0_ENDVERTEX_Y;
   Float_t         lab0_ENDVERTEX_Z;
@@ -113,6 +114,10 @@ private:
   Float_t         lab0_TRUEP_Y;
   Float_t         lab0_TRUEP_Z;
   Float_t         lab0_TRUEPT;
+
+  // this is the origin vertex of the particle. For the B this is just
+  // the same as "OWNPV" and so not filled. For the D this is the same
+  // as the B vertex.
   Float_t         lab0_TRUEORIGINVERTEX_X;
   Float_t         lab0_TRUEORIGINVERTEX_Y;
   Float_t         lab0_TRUEORIGINVERTEX_Z;
@@ -165,7 +170,9 @@ private:
   Float_t         lab1_IP_OWNPV;
   Float_t         lab1_IPCHI2_OWNPV;
 
-  // TODO: what is this?
+  // this is the origin vertex of the particle. For the B this is just
+  // the same as "OWNPV" and so not filled. For the D this is the same
+  // as the B vertex.
   Float_t         lab1_ORIVX_X;
   Float_t         lab1_ORIVX_Y;
   Float_t         lab1_ORIVX_Z;
@@ -667,7 +674,6 @@ private:
   TBranch         *b_lab0_MINIP;
   TBranch         *b_lab0_MINIPCHI2;
 
-  // TODO: not sure about this block
   TBranch         *b_lab0_OWNPV_X;
   TBranch         *b_lab0_OWNPV_Y;
   TBranch         *b_lab0_OWNPV_Z;
@@ -683,7 +689,6 @@ private:
   TBranch         *b_lab0_FDCHI2_OWNPV;
   TBranch         *b_lab0_DIRA_OWNPV;
 
-  // TODO: not sure about this block
   TBranch         *b_lab0_ENDVERTEX_X;
   TBranch         *b_lab0_ENDVERTEX_Y;
   TBranch         *b_lab0_ENDVERTEX_Z;
@@ -765,7 +770,6 @@ private:
   TBranch         *b_lab1_IP_OWNPV;
   TBranch         *b_lab1_IPCHI2_OWNPV;
 
-  // TODO: what is this?
   TBranch         *b_lab1_ORIVX_X;
   TBranch         *b_lab1_ORIVX_Y;
   TBranch         *b_lab1_ORIVX_Z;
