@@ -44,9 +44,7 @@ public :
   virtual void  Loop(TNtuple &);
   virtual void  Loop(TTree &);
 
-  void Loop(vector<TNtuple*>&, vector<TNtuple*>&);
-
-private:
+protected:
 
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   Int_t           fCurrent; //!current Tree number in a TChain
@@ -138,6 +136,19 @@ private:
   Int_t           lab0Hlt1Global_TOS;
 
   // HLT2 trigger
+  Int_t           lab0Hlt2TopoOSTF4BodyDecision_Dec;
+  Int_t           lab0Hlt2TopoOSTF4BodyDecision_TIS;
+  Int_t           lab0Hlt2TopoOSTF4BodyDecision_TOS;
+  Int_t           lab0Hlt2TopoOSTF3BodyDecision_Dec;
+  Int_t           lab0Hlt2TopoOSTF3BodyDecision_TIS;
+  Int_t           lab0Hlt2TopoOSTF3BodyDecision_TOS;
+  Int_t           lab0Hlt2TopoOSTF2BodyDecision_Dec;
+  Int_t           lab0Hlt2TopoOSTF2BodyDecision_TIS;
+  Int_t           lab0Hlt2TopoOSTF2BodyDecision_TOS;
+  Int_t           lab0Hlt2IncPhiDecision_Dec;
+  Int_t           lab0Hlt2IncPhiDecision_TIS;
+  Int_t           lab0Hlt2IncPhiDecision_TOS;
+
   Int_t           lab0Hlt2Global_Dec;
   Int_t           lab0Hlt2Global_TIS;
   Int_t           lab0Hlt2Global_TOS;
@@ -738,6 +749,19 @@ private:
   TBranch         *b_lab0Hlt1Global_TOS;
 
   // HLT2 trigger
+  TBranch         *b_lab0Hlt2TopoOSTF4BodyDecision_Dec;
+  TBranch         *b_lab0Hlt2TopoOSTF4BodyDecision_TIS;
+  TBranch         *b_lab0Hlt2TopoOSTF4BodyDecision_TOS;
+  TBranch         *b_lab0Hlt2TopoOSTF3BodyDecision_Dec;
+  TBranch         *b_lab0Hlt2TopoOSTF3BodyDecision_TIS;
+  TBranch         *b_lab0Hlt2TopoOSTF3BodyDecision_TOS;
+  TBranch         *b_lab0Hlt2TopoOSTF2BodyDecision_Dec;
+  TBranch         *b_lab0Hlt2TopoOSTF2BodyDecision_TIS;
+  TBranch         *b_lab0Hlt2TopoOSTF2BodyDecision_TOS;
+  TBranch         *b_lab0Hlt2IncPhiDecision_Dec;
+  TBranch         *b_lab0Hlt2IncPhiDecision_TIS;
+  TBranch         *b_lab0Hlt2IncPhiDecision_TOS;
+
   TBranch         *b_lab0Hlt2Global_Dec;
   TBranch         *b_lab0Hlt2Global_TIS;
   TBranch         *b_lab0Hlt2Global_TOS;

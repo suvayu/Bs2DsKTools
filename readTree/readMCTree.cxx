@@ -159,6 +159,18 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab0Hlt1Global_TOS", &lab0Hlt1Global_TOS, &b_lab0Hlt1Global_TOS);
 
   // HLT2 trigger
+  fChain->SetBranchAddress("lab0Hlt2TopoOSTF4BodyDecision_Dec", &lab0Hlt2TopoOSTF4BodyDecision_Dec, &b_lab0Hlt2TopoOSTF4BodyDecision_Dec);;
+  fChain->SetBranchAddress("lab0Hlt2TopoOSTF4BodyDecision_TIS", &lab0Hlt2TopoOSTF4BodyDecision_TIS, &b_lab0Hlt2TopoOSTF4BodyDecision_TIS);;
+  fChain->SetBranchAddress("lab0Hlt2TopoOSTF4BodyDecision_TOS", &lab0Hlt2TopoOSTF4BodyDecision_TOS, &b_lab0Hlt2TopoOSTF4BodyDecision_TOS);;
+  fChain->SetBranchAddress("lab0Hlt2TopoOSTF3BodyDecision_Dec", &lab0Hlt2TopoOSTF3BodyDecision_Dec, &b_lab0Hlt2TopoOSTF3BodyDecision_Dec);;
+  fChain->SetBranchAddress("lab0Hlt2TopoOSTF3BodyDecision_TIS", &lab0Hlt2TopoOSTF3BodyDecision_TIS, &b_lab0Hlt2TopoOSTF3BodyDecision_TIS);;
+  fChain->SetBranchAddress("lab0Hlt2TopoOSTF3BodyDecision_TOS", &lab0Hlt2TopoOSTF3BodyDecision_TOS, &b_lab0Hlt2TopoOSTF3BodyDecision_TOS);;
+  fChain->SetBranchAddress("lab0Hlt2TopoOSTF2BodyDecision_Dec", &lab0Hlt2TopoOSTF2BodyDecision_Dec, &b_lab0Hlt2TopoOSTF2BodyDecision_Dec);;
+  fChain->SetBranchAddress("lab0Hlt2TopoOSTF2BodyDecision_TIS", &lab0Hlt2TopoOSTF2BodyDecision_TIS, &b_lab0Hlt2TopoOSTF2BodyDecision_TIS);;
+  fChain->SetBranchAddress("lab0Hlt2TopoOSTF2BodyDecision_TOS", &lab0Hlt2TopoOSTF2BodyDecision_TOS, &b_lab0Hlt2TopoOSTF2BodyDecision_TOS);;
+  fChain->SetBranchAddress("lab0Hlt2IncPhiDecision_Dec", &lab0Hlt2IncPhiDecision_Dec, &b_lab0Hlt2IncPhiDecision_Dec);;
+  fChain->SetBranchAddress("lab0Hlt2IncPhiDecision_TIS", &lab0Hlt2IncPhiDecision_TIS, &b_lab0Hlt2IncPhiDecision_TIS);;
+  fChain->SetBranchAddress("lab0Hlt2IncPhiDecision_TOS", &lab0Hlt2IncPhiDecision_TOS, &b_lab0Hlt2IncPhiDecision_TOS);;
   fChain->SetBranchAddress("lab0Hlt2Global_Dec", &lab0Hlt2Global_Dec, &b_lab0Hlt2Global_Dec);
   fChain->SetBranchAddress("lab0Hlt2Global_TIS", &lab0Hlt2Global_TIS, &b_lab0Hlt2Global_TIS);
   fChain->SetBranchAddress("lab0Hlt2Global_TOS", &lab0Hlt2Global_TOS, &b_lab0Hlt2Global_TOS);
@@ -835,120 +847,6 @@ void readMCTree::Loop(TNtuple &noangle)
      }
 
    cout << "readMCTree::Loop(TNtuple&): Read " << nbytes << " bytes." << std::endl;
-}
-
-
-// not for use, keep only to not duplicate time in finding the right branches
-// copy paste from here into SetBranch() above in Loop(TTree &)
-void readMCTree::Loop(vector<TNtuple*>& nlabvector, vector<TNtuple*>& ntrulabvector)
-{
-   if (fChain == 0) return;
-
-   Long64_t nentries = fChain->GetEntries();
-
-   std::cout << nentries << " entries!" << std::endl;
-
-   // Double_t BsM(0.0), DsM(0.0);
-   TLorentzVector BsP(0,0,0,0), DsP(0,0,0,0), hP(0,0,0,0),
-     Pi3P(0,0,0,0), K4P(0,0,0,0), K5P(0,0,0,0);
-
-   Long64_t nbytes = 0, nb = 0;
-   for (Long64_t jentry=0; jentry<nentries;jentry++)
-     {
-       Long64_t ientry = LoadTree(jentry);
-       if (ientry < 0) break;
-       nb = fChain->GetEntry(jentry);   nbytes += nb;
-
-       if ( CommonSelection() == false ) continue;
-       // if ( BDTGResponse[0] < 0.1 ) continue; // not in TTree!
-       if ( lab1_PIDK < 5 ) continue;
-       // if ( pPIDcut[0] != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
-
-       /**
-	* This PID selection is the Lb veto
-	* + not required since Bs2DsK & Bs2Dsπ MC
-	* + moreover, s/lab5/lab1/ since only way to distinguish Lb
-	*   from Bs is using the bachelor particle (p and K/π)
-	* TODO: ask Rose
-	*/
-       if (lab5_PIDK - lab5_PIDp < 0) continue;
-
-       /*
-	 mass(K) = 493.677 MeV
-	 mass(π) = 139.57  MeV
-	*/
-
-       Pi3P.SetXYZM( lab3_PX, lab3_PY, lab3_PZ, lab3_M);
-       K4P .SetXYZM( lab4_PX, lab4_PY, lab4_PZ, lab4_M);
-       K5P .SetXYZM( lab5_PX, lab5_PY, lab5_PZ, lab5_M);
-       // K mass instead of lab1_M to emulate wrong mass hypothesis
-       hP  .SetXYZM( lab1_PX, lab1_PY, lab1_PZ, 493.677);
-
-       DsP = Pi3P + K4P + K5P;
-       BsP = DsP + hP;
-
-       // DsM = DsP.M();
-       // BsM = BsP.M();
-
-       // Bs meson
-       nlabvector[0]->Fill(lab0_OWNPV_X, lab0_OWNPV_Y, lab0_OWNPV_Z,
-			   0, 0, 0, // no ORIVX for Bs
-			   lab0_ENDVERTEX_X, lab0_ENDVERTEX_Y, lab0_ENDVERTEX_Z,
-			   lab0_PX, lab0_PY, lab0_PZ, lab0_MM);
-
-       // bachelor
-       nlabvector[1]->Fill(lab1_OWNPV_X, lab1_OWNPV_Y, lab1_OWNPV_Z,
-			   lab1_ORIVX_X, lab1_ORIVX_Y, lab1_ORIVX_Z,
-			   -1, -1, -1, // doesn't decay
-			   lab1_PX, lab1_PY, lab1_PZ, lab1_M);
-
-       nlabvector[2]->Fill(lab2_OWNPV_X, lab2_OWNPV_Y, lab2_OWNPV_Z,
-			   lab2_ORIVX_X, lab2_ORIVX_Y, lab2_ORIVX_Z,
-			   lab2_ENDVERTEX_X, lab2_ENDVERTEX_Y, lab2_ENDVERTEX_Z,
-			   lab2_PX, lab2_PY, lab2_PZ, lab2_MM);
-
-       nlabvector[3]->Fill(lab3_OWNPV_X, lab3_OWNPV_Y, lab3_OWNPV_Z,
-			   lab3_ORIVX_X, lab3_ORIVX_Y, lab3_ORIVX_Z,
-			   -1, -1, -1,
-			   lab3_PX, lab3_PY, lab3_PZ, lab3_M);
-
-       nlabvector[4]->Fill(lab4_OWNPV_X, lab4_OWNPV_Y, lab4_OWNPV_Z,
-			   lab4_ORIVX_X, lab4_ORIVX_Y, lab4_ORIVX_Z,
-			   -1, -1, -1,
-			   lab4_PX, lab4_PY, lab4_PZ, lab4_M);
-
-       nlabvector[5]->Fill(lab5_OWNPV_X, lab5_OWNPV_Y, lab5_OWNPV_Z,
-			   lab5_ORIVX_X, lab5_ORIVX_Y, lab5_ORIVX_Z,
-			   -1, -1, -1,
-			   lab5_PX, lab5_PY, lab5_PZ, lab5_M);
-
-       // MC truth
-       ntrulabvector[0]->Fill(lab0_TRUEID, lab0_TRUEP_E, lab0_TRUEP_X, lab0_TRUEP_Y, lab0_TRUEP_Z,
-			      lab0_TRUEORIGINVERTEX_X, lab0_TRUEORIGINVERTEX_Y, lab0_TRUEORIGINVERTEX_Z, 
-			      lab0_TRUEENDVERTEX_X, lab0_TRUEENDVERTEX_Y, lab0_TRUEENDVERTEX_Z, lab0_TRUETAU);
-
-       ntrulabvector[1]->Fill(lab1_TRUEID, lab1_TRUEP_E, lab1_TRUEP_X, lab1_TRUEP_Y, lab1_TRUEP_Z,
-			      lab1_TRUEORIGINVERTEX_X, lab1_TRUEORIGINVERTEX_Y, lab1_TRUEORIGINVERTEX_Z, 
-			      lab1_TRUEENDVERTEX_X, lab1_TRUEENDVERTEX_Y, lab1_TRUEENDVERTEX_Z, lab1_TRUETAU);
-
-       ntrulabvector[2]->Fill(lab2_TRUEID, lab2_TRUEP_E, lab2_TRUEP_X, lab2_TRUEP_Y, lab2_TRUEP_Z,
-			      lab2_TRUEORIGINVERTEX_X, lab2_TRUEORIGINVERTEX_Y, lab2_TRUEORIGINVERTEX_Z, 
-			      lab2_TRUEENDVERTEX_X, lab2_TRUEENDVERTEX_Y, lab2_TRUEENDVERTEX_Z, lab2_TRUETAU);
-
-       ntrulabvector[3]->Fill(lab3_TRUEID, lab3_TRUEP_E, lab3_TRUEP_X, lab3_TRUEP_Y, lab3_TRUEP_Z,
-			      lab3_TRUEORIGINVERTEX_X, lab3_TRUEORIGINVERTEX_Y, lab3_TRUEORIGINVERTEX_Z, 
-			      lab3_TRUEENDVERTEX_X, lab3_TRUEENDVERTEX_Y, lab3_TRUEENDVERTEX_Z, lab3_TRUETAU);
-
-       ntrulabvector[4]->Fill(lab4_TRUEID, lab4_TRUEP_E, lab4_TRUEP_X, lab4_TRUEP_Y, lab4_TRUEP_Z,
-			      lab4_TRUEORIGINVERTEX_X, lab4_TRUEORIGINVERTEX_Y, lab4_TRUEORIGINVERTEX_Z, 
-			      lab4_TRUEENDVERTEX_X, lab4_TRUEENDVERTEX_Y, lab4_TRUEENDVERTEX_Z, lab4_TRUETAU);
-
-       ntrulabvector[5]->Fill(lab5_TRUEID, lab5_TRUEP_E, lab5_TRUEP_X, lab5_TRUEP_Y, lab5_TRUEP_Z,
-			      lab5_TRUEORIGINVERTEX_X, lab5_TRUEORIGINVERTEX_Y, lab5_TRUEORIGINVERTEX_Z, 
-			      lab5_TRUEENDVERTEX_X, lab5_TRUEENDVERTEX_Y, lab5_TRUEENDVERTEX_Z, lab5_TRUETAU);
-     }
-
-   cout << "readMCTree::Loop(vector<TNtuple*>&, vector<TNtuple*>&): Read " << nbytes << " bytes." << std::endl;
 }
 
 
