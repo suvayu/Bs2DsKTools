@@ -11,11 +11,15 @@
 #ifndef __READMCTREE_HXX
 #define __READMCTREE_HXX
 
+#include <vector>
+
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
 
 #include "readTree.hxx"
+
+using namespace std;
 
    const Int_t kMaxlab0_OWNPV_COV = 1;
    const Int_t kMaxlab0_ENDVERTEX_COV = 1;
@@ -50,6 +54,7 @@ public :
   virtual void Loop(TH1D&) {}
   virtual void Loop(TH2D&) {}
   virtual void Loop(TNtuple &noangle);
+  virtual void Loop(vector<TNtuple*>&, vector<TNtuple*>&);
   virtual void Loop(TTree&) {}
   virtual void Show(Long64_t entry = -1);
 
