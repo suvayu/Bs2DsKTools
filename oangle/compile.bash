@@ -7,8 +7,3 @@ root -l -b <<EOF
 .L oangle.cc++
 .q
 EOF
-
-root -l -b <<EOF
-.L plot_MC.cc++
-.q
-EOF

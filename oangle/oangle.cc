@@ -1,11 +1,31 @@
+/**
+ * @file   oangle.cc
+ * @author Suvayu Ali <Suvayu.Ali@cern.ch>
+ * @date   Wed Dec 14 01:25:40 2011
+ *
+ * @brief  Opening angle study utilities
+ *
+ *
+ */
+
+#include <string>
+#include <iostream>
+#include <string>
+
 #include <TROOT.h>
 #include <TStyle.h>
 #include <TChain.h>
+#include <TNtuple.h>
 #include <TH2D.h>
 #include <TLegend.h>
 #include <TPad.h>
 
+#include "oangle.hh"
+
 #include "readDataTree.hxx"
+#include "readMCTree.hxx"
+
+using namespace std;
 
   // Manuel wrote:
   //
@@ -16,22 +36,86 @@
   // efficiency, so you should get a curve which tells you how you can trade
   // increased purity for some (hopefully little) loss.
 
-int oangle()
+
+int oangle(bool doSelect)
+{
+  // make chain
+  TChain MCChain("MCChain");
+  TNtuple *noangle = NULL;
+
+  string fileaccess((doSelect) ? "recreate" : "read");
+  TFile dump("dump.root", fileaccess.c_str());
+
+  if (doSelect) {
+    MCChain.Add("../../ntuples/MC/Merged_Bs2Ds*.root/DecayTree");
+    readMCTree MCsample(&MCChain);
+
+    // ntuple with mass, cos(oangle) and species from MC truth
+    noangle = new TNtuple("noangle", "Opening angle", "mass:cos_oangle:hID");
+    MCsample.Loop(*noangle);
+    cout << noangle->GetEntries() << " entries filled!" << endl;
+  } else {
+    noangle = (TNtuple*) dump.Get("noangle");
+    // bla->Scan("cos_oangle:mass", "abs(hID)==211");
+  }
+
+  oangleNtuple(*noangle);
+  if (doSelect) noangle->SaveAs("dump.root");
+
+  return 0;
+}
+
+
+int oangleNtuple(TNtuple &noangle)
 {
   gStyle->SetOptStat(0);
-  gStyle->SetOptTitle(0);
+  gStyle->SetOptTitle(1);
   gStyle->SetPalette(1); // "rainbow" color palette
   gStyle->SetNumberContours(256); // smooth color palette
   gStyle->SetTitleOffset( 1.2, "xy");
 
+  // cout << noangle.GetEntries() << " entries filled! Lets draw." << endl;
+  // noangle.Scan("*", "abs(hID)==211");
+
+  // invariant mass
+  TH1D hBsM ("hBsM", "B_{s} mass", 150, 4500, 6000);
+
+  hBsM.SetLineColor(kAzure);
+  hBsM.SetXTitle("Mass[MeV]");
+  hBsM.SetYTitle("Events");
+
+  // noangle.Draw("mass>>hBsM", "abs(hID)==321", "hist"); // K
+  noangle.Draw("mass>>hBsM", "1", "hist"); // K
+  gPad->Print("Bs-mass-MC.png");
+
+  // opening angle
+  TH2D h2oangle ("h2oangle", "#it{B_{s}} mass vs #it{#vec{#beta}} #angle #it{h} in #it{B_{s}} rest frame",
+		 150, 4500, 6000, 25, -1, 1);
+  h2oangle.SetYTitle("Cosine of the opening angle[deg]");
+  h2oangle.SetXTitle("Mass[MeV]");
+
+  gPad->Clear();
+  noangle.Draw("cos_oangle:mass>>h2oangle", "abs(hID)==321", "COLZ"); // K
+  // noangle.Draw("cos_oangle:mass>>h2oangle", "1", "COLZ"); // K
+  gPad->Print("Bs-opening-angle-w-MC-K.png");
+
+  gPad->Clear();
+  h2oangle.Reset("ICESM");
+  noangle.Draw("cos_oangle:mass>>h2oangle", "abs(hID)==211", "COLZ"); // pi
+  gPad->Print("Bs-opening-angle-w-MC-pi.png");
+
+  return 0;
+}
+
+
+int oangleHisto()
+{
   // make chain
   TChain pi_hypo("pi_hypo");
   pi_hypo.Add("../../ntuples/data/FitTuple_BsDs1Pi_Pi_*.root/MyOffSelTree");
 
   TChain K_hypo("K_hypo");
   K_hypo.Add("../../ntuples/data/FitTuple_BsDs1Pi_K_*.root/MyOffSelTree");
-
-  gROOT->LoadMacro("rootlogon.cc");
 
   readDataTree ch_pi(&pi_hypo);
   readDataTree ch_K (&K_hypo);
