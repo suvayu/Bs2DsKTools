@@ -22,12 +22,6 @@ public:
   virtual void  Show(Long64_t) = 0;
   virtual void  Loop() = 0;
 
-  // these should be removed later
-  virtual void  Loop(TH1D&) = 0;
-  virtual void  Loop(TH2D&) = 0;
-  virtual void  Loop(TNtuple&) = 0;
-  virtual void  Loop(TTree&) = 0;
-
 };
 
 #endif // __READTREE_HXX
