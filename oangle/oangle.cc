@@ -52,7 +52,7 @@ int oangle(bool doSelect)
 
     // ntuple with mass, cos(oangle) and species from MC truth
     noangle = new TNtuple("noangle", "Opening angle", "mass:cos_oangle:hID");
-    MCsample.Loop(*noangle);
+    MCsample.LoopOangle(*noangle);
     cout << noangle->GetEntries() << " entries filled!" << endl;
   } else {
     noangle = (TNtuple*) dump.Get("noangle");
