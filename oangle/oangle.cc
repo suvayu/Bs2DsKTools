@@ -60,7 +60,10 @@ int oangle(bool doSelect)
   }
 
   oangleNtuple(*noangle);
-  if (doSelect) noangle->SaveAs("dump.root");
+  if (doSelect) {
+    dump.cd();
+    noangle->Write();
+  }
 
   return 0;
 }
@@ -77,32 +80,48 @@ int oangleNtuple(TNtuple &noangle)
   // cout << noangle.GetEntries() << " entries filled! Lets draw." << endl;
   // noangle.Scan("*", "abs(hID)==211");
 
+  TFile fhisto("histos.root", "recreate");
+  fhisto.cd();
+
   // invariant mass
   TH1D hBsM ("hBsM", "B_{s} mass", 150, 4500, 6000);
-
   hBsM.SetLineColor(kAzure);
   hBsM.SetXTitle("Mass[MeV]");
   hBsM.SetYTitle("Events");
 
   // noangle.Draw("mass>>hBsM", "abs(hID)==321", "hist"); // K
   noangle.Draw("mass>>hBsM", "1", "hist"); // K
+  hBsM.Write();
   gPad->Print("Bs-mass-MC.png");
 
   // opening angle
-  TH2D h2oangle ("h2oangle", "#it{B_{s}} mass vs #it{#vec{#beta}} #angle #it{h} in #it{B_{s}} rest frame",
+  TH2D hDsK ("hDsK", "#it{B_{s}} mass vs #it{#vec{#beta}} #angle #it{h} in #it{B_{s}} rest frame",
 		 150, 4500, 6000, 25, -1, 1);
-  h2oangle.SetYTitle("Cosine of the opening angle[deg]");
-  h2oangle.SetXTitle("Mass[MeV]");
+  hDsK.SetYTitle("Cosine of the opening angle[deg]");
+  hDsK.SetXTitle("Mass[MeV]");
+  hDsK.Sumw2();
+
+  TH2D hDspi ("hDspi", "#it{B_{s}} mass vs #it{#vec{#beta}} #angle #it{h} in #it{B_{s}} rest frame",
+		 150, 4500, 6000, 25, -1, 1);
+  hDspi.SetYTitle("Cosine of the opening angle[deg]");
+  hDspi.SetXTitle("Mass[MeV]");
+  hDspi.Sumw2();
 
   gPad->Clear();
-  noangle.Draw("cos_oangle:mass>>h2oangle", "abs(hID)==321", "COLZ"); // K
-  // noangle.Draw("cos_oangle:mass>>h2oangle", "1", "COLZ"); // K
+  noangle.Draw("cos_oangle:mass>>hDsK", "abs(hID)==321", "COLZ"); // K
+  hDsK.Scale(1./hDsK.Integral());
+  hDsK.Draw("COLZ");
   gPad->Print("Bs-opening-angle-w-MC-K.png");
+  hDsK.Write();
 
   gPad->Clear();
-  h2oangle.Reset("ICESM");
-  noangle.Draw("cos_oangle:mass>>h2oangle", "abs(hID)==211", "COLZ"); // pi
+  noangle.Draw("cos_oangle:mass>>hDspi", "abs(hID)==211", "COLZ"); // pi
+  hDspi.Scale(1./hDspi.Integral());
+  hDspi.Draw("COLZ");
   gPad->Print("Bs-opening-angle-w-MC-pi.png");
+  hDspi.Write();
+
+  fhisto.Close();
 
   return 0;
 }
