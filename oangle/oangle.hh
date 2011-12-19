@@ -13,10 +13,14 @@
 
 #include <TNtuple.h>
 
+#include "readTree.hxx"
+
 int oangle(bool select=false);
 
 int oangleHisto();
 
-int oangleNtuple(TNtuple &noangle);
+TNtuple* oangleNtuple_get(readTree&);
+
+int oangleNtuple_plot(TNtuple &noangle);
 
 #endif // __OANGLE_HH

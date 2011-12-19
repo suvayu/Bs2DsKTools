@@ -49,17 +49,13 @@ int oangle(bool doSelect)
   if (doSelect) {
     MCChain.Add("../../ntuples/MC/Merged_Bs2Ds*.root/DecayTree");
     readMCTree MCsample(&MCChain);
-
-    // ntuple with mass, cos(oangle) and species from MC truth
-    noangle = new TNtuple("noangle", "Opening angle", "mass:cos_oangle:hID");
-    MCsample.LoopOangle(*noangle);
-    cout << noangle->GetEntries() << " entries filled!" << endl;
+    noangle = oangleNtuple_get(MCsample);
   } else {
     noangle = (TNtuple*) dump.Get("noangle");
     // bla->Scan("cos_oangle:mass", "abs(hID)==211");
   }
 
-  oangleNtuple(*noangle);
+  oangleNtuple_plot(*noangle);
   if (doSelect) {
     dump.cd();
     noangle->Write();
@@ -69,7 +65,18 @@ int oangle(bool doSelect)
 }
 
 
-int oangleNtuple(TNtuple &noangle)
+TNtuple* oangleNtuple_get(readTree &sample)
+{
+  // ntuple with mass, cos(oangle) and species from MC truth
+  TNtuple *ntpoangle = new TNtuple("noangle", "Opening angle", "mass:cos_oangle:hID");
+  sample.Loop(*ntpoangle);
+  cout << ntpoangle->GetEntries() << " entries filled!" << endl;
+
+  return ntpoangle;
+}
+
+
+int oangleNtuple_plot(TNtuple &noangle)
 {
   gStyle->SetOptStat(0);
   gStyle->SetOptTitle(1);
