@@ -228,3 +228,73 @@ void readDataTree::Loop(TH1D &hBsM, TH2D &h2oangle)
    // gPad->Print("BsMass.png");
    std::cout << "Read " << nbytes << " bytes." << std::endl;
 }
+
+
+void readDataTree::Loop(TNtuple &noangle)
+{
+  if (fChain == 0) return;
+
+  Long64_t nentries = fChain->GetEntries();
+
+  std::cout << nentries << " entries!" << std::endl;
+
+  // Double_t BsM(0.0), DsM(0.0);
+  TLorentzVector BsP(0,0,0,0), DsP(0,0,0,0), hP(0,0,0,0),
+    Pi3P(0,0,0,0), K4P(0,0,0,0), K5P(0,0,0,0);
+
+  TVector3 boost(0,0,0);
+
+  Long64_t nbytes = 0, nb = 0;
+  for (Long64_t jentry=0; jentry<nentries;jentry++)
+    {
+      Long64_t ientry = LoadTree(jentry);
+      if (ientry < 0) break;
+      nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+      if ( lab0_MM[0] < 5000 && 5800 < lab0_MM[0] ) continue; // Bs mass
+      if ( lab2_MM[0] < 1944 && 1990 < lab2_MM[0] ) continue; // Ds mass
+      if ( 100000 < lab1_P[0] ) continue;
+      if ( BDTGResponse[0] < 0.1 ) continue;
+      // if ( lab1_PIDK[0] < 5 ) continue;
+      // if ( pPIDcut[0] != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
+
+      /**
+       * This PID selection is the Lb veto
+       * + not required since Bs2DsK & Bs2Dsπ MC
+       * + moreover, s/lab5/lab1/ since only way to distinguish Lb
+       *   from Bs is using the bachelor particle (p and K/π)
+       * TODO: ask Rose
+       */
+      // if (! lab5_PIDK - lab5_PIDp > 0) continue;
+
+      /*
+	mass(K) = 493.677 MeV
+	mass(π) = 139.57  MeV
+      */
+
+      Pi3P.SetXYZM( lab3_PX[0], lab3_PY[0], lab3_PZ[0], lab3_M[0]);
+      K4P .SetXYZM( lab4_PX[0], lab4_PY[0], lab4_PZ[0], lab4_M[0]);
+      K5P .SetXYZM( lab5_PX[0], lab5_PY[0], lab5_PZ[0], lab5_M[0]);
+      // K mass instead of lab1_M to emulate wrong mass hypothesis
+      hP  .SetXYZM( lab1_PX[0], lab1_PY[0], lab1_PZ[0], lab1_M[0]);
+
+      DsP = Pi3P + K4P + K5P;
+      BsP = DsP + hP;
+
+      // DsM = DsP.M();
+      // BsM = BsP.M();
+
+      boost = - BsP.BoostVector();
+      //       DsP.Boost(boost(0), boost(1), boost(2));
+      hP .Boost(boost(0), boost(1), boost(2));
+
+      noangle.Fill(lab0_MM[0], TMath::Cos((hP.Angle(boost))), 0);
+
+      // printf("DsM: %.2f, %.2f, %.2f\n", DsM, lab2_MM[0], DsM - lab2_MM[0]);
+      // printf("BsM: %.2f, %.2f, %.2f\n", BsM, lab0_MM[0], BsM - lab0_MM[0]);
+    }
+
+  // hBsM.Draw();
+  // gPad->Print("BsMass.png");
+  std::cout << "Read " << nbytes << " bytes." << std::endl;
+}

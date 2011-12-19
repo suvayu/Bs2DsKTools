@@ -22,19 +22,17 @@ public :
   virtual ~readDataTree();
 
   // new methods
-  Int_t    GetEntry(Long64_t entry);
   Long64_t LoadTree(Long64_t entry);
   void     Init(TTree *tree);
   Bool_t   Notify();
 
   // overloaded virtual methods
-  virtual void     Loop() {}
-  virtual void     Loop(TH1D&) {}
-  virtual void     Loop(TH2D&) {}
-  virtual void     Loop(TNtuple&) {}
-  virtual void     Loop(TTree&) {}
+  virtual Int_t    GetEntry(Long64_t entry);
   virtual void     Show(Long64_t entry = -1);
-  virtual void     Loop(TH1D &hBsM, TH2D &h2oangle);
+  virtual void     Loop() {}
+  virtual void     Loop(TNtuple&);
+
+  void     Loop(TH1D &hBsM, TH2D &h2oangle);
 
 private:
 

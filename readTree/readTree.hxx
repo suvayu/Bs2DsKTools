@@ -21,6 +21,7 @@ public:
   virtual Int_t GetEntry(Long64_t) = 0;
   virtual void  Show(Long64_t) = 0;
   virtual void  Loop() = 0;
+  virtual void  Loop(TNtuple&) = 0;
 
 };
 

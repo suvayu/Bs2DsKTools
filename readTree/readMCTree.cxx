@@ -701,7 +701,7 @@ void readMCTree::Show(Long64_t entry)
 }
 
 
-void readMCTree::LoopOangle(TNtuple &noangle)
+void readMCTree::Loop(TNtuple &noangle)
 {
 //     This is the loop skeleton where:
 //    jentry is the global entry number in the chain
