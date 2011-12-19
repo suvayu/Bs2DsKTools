@@ -3,7 +3,7 @@
 # NOTE: compiling in same session links the 2nd library with the 1st.
 # Make sure to avoid that.
 
-if [[ $1 -eq "PID" ]]; then
+if [[ $1 = "PID" ]]; then
     root -l -b <<EOF
 .L oanglePID.cxx++
 .q
