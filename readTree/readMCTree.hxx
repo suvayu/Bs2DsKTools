@@ -21,19 +21,6 @@
 
 using namespace std;
 
-   const Int_t kMaxlab0_OWNPV_COV = 1;
-   const Int_t kMaxlab0_ENDVERTEX_COV = 1;
-   const Int_t kMaxlab1_OWNPV_COV = 1;
-   const Int_t kMaxlab1_ORIVX_COV = 1;
-   const Int_t kMaxlab2_OWNPV_COV = 1;
-   const Int_t kMaxlab2_ORIVX_COV = 1;
-   const Int_t kMaxlab2_ENDVERTEX_COV = 1;
-   const Int_t kMaxlab3_OWNPV_COV = 1;
-   const Int_t kMaxlab3_ORIVX_COV = 1;
-   const Int_t kMaxlab4_OWNPV_COV = 1;
-   const Int_t kMaxlab4_ORIVX_COV = 1;
-   const Int_t kMaxlab5_OWNPV_COV = 1;
-   const Int_t kMaxlab5_ORIVX_COV = 1;
 
 class readMCTree : public readTree {
 
