@@ -5,7 +5,7 @@
 
 if [[ $1 = "PID" ]]; then
     root -l -b <<EOF
-.L oanglePID.cxx++
+.L PIDsel.cc++
 .q
 EOF
 else

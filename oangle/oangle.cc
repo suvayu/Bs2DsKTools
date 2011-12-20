@@ -87,7 +87,7 @@ int oangleNtuple_plot(TNtuple &noangle)
   // cout << noangle.GetEntries() << " entries filled! Lets draw." << endl;
   // noangle.Scan("*", "abs(hID)==211");
 
-  TFile fhisto("histos.root", "recreate");
+  TFile fhisto("templates.root", "recreate");
   fhisto.cd();
 
   // invariant mass
@@ -103,13 +103,13 @@ int oangleNtuple_plot(TNtuple &noangle)
 
   // opening angle
   TH2D hDsK ("hDsK", "#it{B_{s}} mass vs #it{#vec{#beta}} #angle #it{h} in #it{B_{s}} rest frame",
-		 150, 4500, 6000, 25, -1, 1);
+	     150, 4500, 6000, 25, -1, 1);
   hDsK.SetYTitle("Cosine of the opening angle[deg]");
   hDsK.SetXTitle("Mass[MeV]");
   hDsK.Sumw2();
 
   TH2D hDspi ("hDspi", "#it{B_{s}} mass vs #it{#vec{#beta}} #angle #it{h} in #it{B_{s}} rest frame",
-		 150, 4500, 6000, 25, -1, 1);
+	      150, 4500, 6000, 25, -1, 1);
   hDspi.SetYTitle("Cosine of the opening angle[deg]");
   hDspi.SetXTitle("Mass[MeV]");
   hDspi.Sumw2();
