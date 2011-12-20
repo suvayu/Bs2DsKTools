@@ -736,13 +736,7 @@ void readMCTree::Loop(TNtuple &noangle)
        // t.BDTGResponse[0]>BDTGCut and
        // t.pPIDcut[0] == 1
 
-       // selecting only "true" DsK and Dsπ events.
-       if (! ( fabs(lab0_TRUEID) == 531 && fabs(lab2_TRUEID) == 431 &&
-	       ( fabs(lab1_TRUEID) == 321 || fabs(lab1_TRUEID) == 211 ))) continue;
-
-       if ( lab0_MM < 5000 && 5800 < lab0_MM ) continue; // Bs mass
-       if ( lab2_MM < 1944 && 1990 < lab2_MM ) continue; // Ds mass
-       if ( 100000 < lab1_P ) continue;
+       if ( CommonSelection() == false ) continue;
        // if ( BDTGResponse[0] < 0.1 ) continue; // not in TTree!
        // if ( lab1_PIDK[0] < 5 ) continue;
        // if ( pPIDcut[0] != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
@@ -803,9 +797,7 @@ void readMCTree::Loop(vector<TNtuple*>& nlabvector, vector<TNtuple*>& ntrulabvec
        if (ientry < 0) break;
        nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-       if ( lab0_MM < 5000 && 5800 < lab0_MM ) continue; // Bs mass
-       if ( lab2_MM < 1944 && 1990 < lab2_MM ) continue; // Ds mass
-       if ( 100000 < lab1_P ) continue;
+       if ( CommonSelection() == false ) continue;
        // if ( BDTGResponse[0] < 0.1 ) continue; // not in TTree!
        if ( lab1_PIDK < 5 ) continue;
        // if ( pPIDcut[0] != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
@@ -895,4 +887,16 @@ void readMCTree::Loop(vector<TNtuple*>& nlabvector, vector<TNtuple*>& ntrulabvec
      }
 
    std::cout << "readMCTree::Loop(vector<TNtuple*>&, vector<TNtuple*>&): Read " << nbytes << " bytes." << std::endl;
+}
+
+
+bool readMCTree::CommonSelection()
+{
+  // selecting only "true" Bs2DsK and Bs2Dsπ events
+  if ( fabs(lab0_TRUEID) == 531 and fabs(lab2_TRUEID) == 431 and
+       ( fabs(lab1_TRUEID) == 321 or fabs(lab1_TRUEID) == 211 ) and
+       ( 5000 < lab0_MM and lab0_MM < 5800 ) and // Bs mass
+       ( 1944 < lab2_MM and lab2_MM < 1990 ) and // Ds mass
+       ( lab1_P < 100000 )) return true;
+  else return false;
 }

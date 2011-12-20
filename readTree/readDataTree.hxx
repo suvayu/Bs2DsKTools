@@ -26,7 +26,7 @@ public :
   Long64_t LoadTree(Long64_t entry);
   void     Init(TTree *tree);
   Bool_t   Notify();
-  Bool_t   CommonSelection();
+  bool     CommonSelection();
 
   // overloaded virtual methods
   virtual Int_t    GetEntry(Long64_t entry);

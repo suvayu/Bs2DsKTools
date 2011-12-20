@@ -177,7 +177,7 @@ void readDataTree::Loop(TH1D &hBsM, TH2D &h2oangle)
        // t.BDTGResponse[0]>BDTGCut and
        // t.pPIDcut[0] == 1
 
-       if (! CommonSelection()) continue;
+       if ( CommonSelection() == false ) continue;
        // if ( lab1_PIDK[0] < 5 ) continue;
        if ( pPIDcut[0] != 1) continue;
 
@@ -228,7 +228,7 @@ void readDataTree::Loop(TNtuple &noangle)
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-      if (! CommonSelection()) continue;
+      if ( CommonSelection() == false ) continue;
       // if ( lab1_PIDK[0] < 5 ) continue;
       // if ( pPIDcut[0] != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
 
@@ -290,7 +290,7 @@ void readDataTree::Loop(oanglePID &pid, TH1D &hBsmK, TH2D &hDsK)
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-      if (! CommonSelection()) continue;
+      if ( CommonSelection() == false ) continue;
       // if ( lab1_PIDK[0] < 5 ) continue;
       // if ( pPIDcut[0] != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
 
@@ -322,7 +322,7 @@ void readDataTree::Loop(oanglePID &pid, TH1D &hBsmK, TH2D &hDsK)
       hP .Boost(boost(0), boost(1), boost(2));
       Cosoangle = TMath::Cos((hP.Angle(boost)));
 
-      if ( pid.GetoangleDLL(lab0_MM[0], Cosoangle) < 4 ) continue;
+      if ( pid.GetoangleDLL(lab0_MM[0], Cosoangle) < 2 ) continue;
 
       hBsmK.Fill(lab0_MM[0]);
       hDsK.Fill(lab0_MM[0], Cosoangle);
@@ -332,11 +332,10 @@ void readDataTree::Loop(oanglePID &pid, TH1D &hBsmK, TH2D &hDsK)
 }
 
 
-Bool_t readDataTree::CommonSelection()
+bool readDataTree::CommonSelection()
 {
-  if ( lab0_MM[0] < 5000 && 5800 < lab0_MM[0] ) return false; // Bs mass
-  else if ( lab2_MM[0] < 1944 && 1990 < lab2_MM[0] ) return false; // Ds mass
-  else if ( 100000 < lab1_P[0] ) return false;
-  else if ( BDTGResponse[0] < 0.1 ) return false;
-  else return true;
+  if (( 5000 < lab0_MM[0] and lab0_MM[0] < 5800 ) and // Bs mass
+      ( 1944 < lab2_MM[0] and lab2_MM[0] < 1990 ) and // Ds mass
+      ( lab1_P[0] < 100000 ) and ( 0.1 < BDTGResponse[0] )) return true;
+  else return false;
 }
