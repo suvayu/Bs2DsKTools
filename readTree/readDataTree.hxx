@@ -13,6 +13,7 @@
 #include <TFile.h>
 
 #include "readTree.hxx"
+#include "oanglePID.hxx"
 
 class readDataTree : public readTree {
 
@@ -25,6 +26,7 @@ public :
   Long64_t LoadTree(Long64_t entry);
   void     Init(TTree *tree);
   Bool_t   Notify();
+  Bool_t   CommonSelection();
 
   // overloaded virtual methods
   virtual Int_t    GetEntry(Long64_t entry);
@@ -32,6 +34,7 @@ public :
   virtual void     Loop() {}
   virtual void     Loop(TNtuple&);
 
+  void     Loop(oanglePID &pid, TH1D &hBsmK, TH2D &hDsK);
   void     Loop(TH1D &hBsM, TH2D &h2oangle);
 
 private:

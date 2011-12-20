@@ -703,21 +703,6 @@ void readMCTree::Show(Long64_t entry)
 
 void readMCTree::Loop(TNtuple &noangle)
 {
-//     This is the loop skeleton where:
-//    jentry is the global entry number in the chain
-//    ientry is the entry number in the current Tree
-//  Note that the argument to GetEntry must be:
-//    jentry for TChain::GetEntry
-//    ientry for TTree::GetEntry and TBranch::GetEntry
-//
-//       To read only selected branches, Insert statements like:
-// METHOD1:
-//    fChain->SetBranchStatus("*",0);  // disable all branches
-//    fChain->SetBranchStatus("branchname",1);  // activate branchname
-// METHOD2: replace line
-//    fChain->GetEntry(jentry);       //read all branches
-//by  b_branchname->GetEntry(ientry); //read only this branch
-
    if (fChain == 0) return;
 
    Long64_t nentries = fChain->GetEntries();
@@ -731,12 +716,14 @@ void readMCTree::Loop(TNtuple &noangle)
    TVector3 boost(0,0,0);
 
    Long64_t nbytes = 0, nb = 0;
+   // for (Long64_t jentry=0; jentry<10000;jentry++)
    for (Long64_t jentry=0; jentry<nentries;jentry++)
      {
        Long64_t ientry = LoadTree(jentry);
        if (ientry < 0) break;
        nb = fChain->GetEntry(jentry);   nbytes += nb;
 
+       // Selection in python:
        // PID_bach = 5.0
        // BMassRange =(5000,5800)
        // Ds_MM=(1944,1990)
@@ -748,6 +735,10 @@ void readMCTree::Loop(TNtuple &noangle)
        // t.lab1_P[0] < 100000 and
        // t.BDTGResponse[0]>BDTGCut and
        // t.pPIDcut[0] == 1
+
+       // selecting only "true" DsK and Dsπ events.
+       if (! ( fabs(lab0_TRUEID) == 531 && fabs(lab2_TRUEID) == 431 &&
+	       ( fabs(lab1_TRUEID) == 321 || fabs(lab1_TRUEID) == 211 ))) continue;
 
        if ( lab0_MM < 5000 && 5800 < lab0_MM ) continue; // Bs mass
        if ( lab2_MM < 1944 && 1990 < lab2_MM ) continue; // Ds mass
@@ -783,19 +774,13 @@ void readMCTree::Loop(TNtuple &noangle)
        // BsM = BsP.M();
 
        boost = - BsP.BoostVector();
-       //       DsP.Boost(boost(0), boost(1), boost(2));
        hP .Boost(boost(0), boost(1), boost(2));
 
        // noangle.Fill(lab0_MM, TMath::Cos((hP.Angle(boost))), lab1_TRUEID);
        noangle.Fill(BsP.M(), TMath::Cos((hP.Angle(boost))), lab1_TRUEID); // correct
-
-       // printf("DsM: %.2f, %.2f, %.2f\n", DsM, lab2_MM[0], DsM - lab2_MM[0]);
-       // printf("BsM: %.2f, %.2f, %.2f\n", BsM, lab0_MM[0], BsM - lab0_MM[0]);
      }
 
-   // hBsM.Draw();
-   // gPad->Print("BsMass.png");
-   std::cout << "Read " << nbytes << " bytes." << std::endl;
+   std::cout << "readMCTree::Loop(TNtuple&): Read " << nbytes << " bytes." << std::endl;
 }
 
 
@@ -907,12 +892,7 @@ void readMCTree::Loop(vector<TNtuple*>& nlabvector, vector<TNtuple*>& ntrulabvec
        ntrulabvector[5]->Fill(lab5_TRUEID, lab5_TRUEP_E, lab5_TRUEP_X, lab5_TRUEP_Y, lab5_TRUEP_Z,
 			      lab5_TRUEORIGINVERTEX_X, lab5_TRUEORIGINVERTEX_Y, lab5_TRUEORIGINVERTEX_Z, 
 			      lab5_TRUEENDVERTEX_X, lab5_TRUEENDVERTEX_Y, lab5_TRUEENDVERTEX_Z, lab5_TRUETAU);
-
-       // printf("DsM: %.2f, %.2f, %.2f\n", DsM, lab2_MM[0], DsM - lab2_MM[0]);
-       // printf("BsM: %.2f, %.2f, %.2f\n", BsM, lab0_MM[0], BsM - lab0_MM[0]);
      }
 
-   // hBsM.Draw();
-   // gPad->Print("BsMass.png");
-   std::cout << "Read " << nbytes << " bytes." << std::endl;
+   std::cout << "readMCTree::Loop(vector<TNtuple*>&, vector<TNtuple*>&): Read " << nbytes << " bytes." << std::endl;
 }
