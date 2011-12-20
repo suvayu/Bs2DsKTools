@@ -2,8 +2,10 @@
 
 * Intro
 Just a collection of tools for the Bs⁰ → DsK analysis. All the
-separate tools are modularised in sub-diretories. The different tree
-readers are inside the ~read-MC~ and ~read-data~ directories.
+separate tools are modularised in sub-directories. The different tree
+readers, ~readMCTree~ and ~readDataTree~, inherit from a purely
+virtual ~readTree~ class. There are several overlaoded ~Loop()~
+methods for different types of output.
 
 Tools:
 1. Bs⁰ time acceptance
