@@ -15,16 +15,23 @@ public:
   /**
    * Constructor for kinematic variable based PID
    *
-   * @param wt Relative weight
    * @param dsk Pointer to DsK histogram
    * @param dspi Pointer to Dspi histogram
    */
   oanglePID(TH2D* dsk, TH2D* dspi) : hDsK(dsk), hDspi(dspi) {}
 
+  oanglePID(const oanglePID& other) : hDsK(other.hDsK), hDspi(other.hDspi) {}
+
   // // FIXME: Do not use, doesn't work. Histograms go out of scope and segfaults later
   // oanglePID(string sDsK="hDsK", string sDspi="hDspi", string fname="histos.root") {}
 
   ~oanglePID() {}
+
+  oanglePID& operator=(const oanglePID& other) {
+    if (&other == this) return *this;
+    hDsK  = other.hDsK;
+    hDspi = other.hDspi;
+  }
 
   /**
    * Return PID delta log likelihood based on kinematics variables for
@@ -35,7 +42,7 @@ public:
    *
    * @return delta log likelihood (DLL = ln[pDsK/pDspi])
    */
-  double GetoangleDLL(double Bsmass, double oangleCosine) {
+  double GetoangleDLL(double Bsmass, double oangleCosine) const {
     // same binning for DsK and Dspi
     return GetoangleDLL( hDsK->FindBin( Bsmass, oangleCosine) );
   }
@@ -48,7 +55,7 @@ public:
    *
    * @return delta log likelihood (DLL = ln[pDsK/pDspi])
    */
-  double GetoangleDLL(int gBin) { // same binning for DsK and Dspi
+  double GetoangleDLL(int gBin) const { // same binning for DsK and Dspi
     // normalise the bin content before getting the DLL
     double pDsK ((hDsK ->GetBinContent(gBin) + numeric_limits<double>::epsilon()));
     double pDspi((hDspi->GetBinContent(gBin) + numeric_limits<double>::epsilon()));
@@ -70,7 +77,7 @@ public:
    *
    * @param opt Print options for TH2::Print()
    */
-  void   PrintHistos(const char* opt="") {
+  void   PrintHistos (const char* opt="") const {
     hDsK ->Print(opt);
     hDspi->Print(opt);
   }
