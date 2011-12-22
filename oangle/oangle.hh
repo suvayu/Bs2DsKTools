@@ -11,16 +11,23 @@
 #ifndef __OANGLE_HH
 #define __OANGLE_HH
 
+#include <TTree.h>
 #include <TNtuple.h>
 
 #include "readTree.hxx"
+
+int setStyle();
 
 int oangle(bool select=false);
 
 int oangleHisto();
 
+TTree* oangleTree_get(readTree&);
+
 TNtuple* oangleNtuple_get(readTree&);
 
-int oangleNtuple_plot(TNtuple &noangle);
+int makeTemplates(TTree&);
+
+int test_oangle();
 
 #endif // __OANGLE_HH

@@ -37,31 +37,53 @@ using namespace std;
   // increased purity for some (hopefully little) loss.
 
 
+int setStyle()
+{
+  gStyle->SetOptStat(0);
+  gStyle->SetOptTitle(1);
+  gStyle->SetPalette(1); // "rainbow" color palette
+  gStyle->SetNumberContours(256); // smooth color palette
+  gStyle->SetTitleOffset( 1.2, "xy");
+  return 0;
+}
+
+
 int oangle(bool doSelect)
 {
   // make chain
   TChain MCChain("MCChain");
-  TNtuple *noangle = NULL;
+  // TNtuple *noangle = NULL;
+  TTree *noangle = NULL;
 
   string fileaccess((doSelect) ? "recreate" : "read");
-  TFile dump("dump.root", fileaccess.c_str());
+  TFile treedump("treedump.root", fileaccess.c_str());
 
   if (doSelect) {
     MCChain.Add("../../ntuples/MC/Merged_Bs2Ds*.root/DecayTree");
     readMCTree MCsample(&MCChain);
-    noangle = oangleNtuple_get(MCsample);
+    // noangle = oangleNtuple_get(MCsample);
+    noangle = oangleTree_get(MCsample);
   } else {
-    noangle = (TNtuple*) dump.Get("noangle");
-    // bla->Scan("cos_oangle:mass", "abs(hID)==211");
+    noangle = (TTree*) treedump.Get("noangle");
   }
 
-  oangleNtuple_plot(*noangle);
+  makeTemplates(*noangle);
+
   if (doSelect) {
-    dump.cd();
+    treedump.cd();
     noangle->Write();
   }
 
   return 0;
+}
+
+
+TTree* oangleTree_get(readTree &sample)
+{
+  TTree *ftree = new TTree("noangle", "dump tree with opening angle");
+  sample.Loop(*ftree);
+  cout << ftree->GetEntries() << " entries filled!" << endl;
+  return ftree;
 }
 
 
@@ -71,35 +93,28 @@ TNtuple* oangleNtuple_get(readTree &sample)
   TNtuple *ntpoangle = new TNtuple("noangle", "Opening angle", "mass:cos_oangle:hID");
   sample.Loop(*ntpoangle);
   cout << ntpoangle->GetEntries() << " entries filled!" << endl;
-
   return ntpoangle;
 }
 
 
-int oangleNtuple_plot(TNtuple &noangle)
+int makeTemplates(TTree &noangle)
 {
-  gStyle->SetOptStat(0);
-  gStyle->SetOptTitle(1);
-  gStyle->SetPalette(1); // "rainbow" color palette
-  gStyle->SetNumberContours(256); // smooth color palette
-  gStyle->SetTitleOffset( 1.2, "xy");
-
-  // cout << noangle.GetEntries() << " entries filled! Lets draw." << endl;
+  setStyle();
   // noangle.Scan("*", "abs(hID)==211");
 
   TFile fhisto("templates.root", "recreate");
   fhisto.cd();
 
-  // invariant mass
-  TH1D hBsM ("hBsM", "B_{s} mass", 150, 4500, 6000);
-  hBsM.SetLineColor(kAzure);
-  hBsM.SetXTitle("Mass[MeV]");
-  hBsM.SetYTitle("Events");
+  // // invariant mass
+  // TH1D hBsM ("hBsM", "B_{s} mass", 150, 4500, 6000);
+  // hBsM.SetLineColor(kAzure);
+  // hBsM.SetXTitle("Mass[MeV]");
+  // hBsM.SetYTitle("Events");
 
-  // noangle.Draw("mass>>hBsM", "abs(hID)==321", "hist"); // K
-  noangle.Draw("mass>>hBsM", "1", "hist"); // K
-  hBsM.Write();
-  gPad->Print("Bs-mass-MC.png");
+  // // noangle.Draw("mass>>hBsM", "abs(hID)==321", "hist"); // K
+  // noangle.Draw("mass>>hBsM", "1", "hist"); // K
+  // hBsM.Write();
+  // gPad->Print("Bs-mass-MC.png");
 
   // opening angle
   TH2D hDsK ("hDsK", "#it{B_{s}} mass vs #it{#vec{#beta}} #angle #it{h} in #it{B_{s}} rest frame",
@@ -114,22 +129,21 @@ int oangleNtuple_plot(TNtuple &noangle)
   hDspi.SetXTitle("Mass[MeV]");
   hDspi.Sumw2();
 
-  gPad->Clear();
-  noangle.Draw("cos_oangle:mass>>hDsK", "abs(hID)==321", "COLZ"); // K
+  // gPad->Clear(); // uncomment when also plotting invariant mass
+  noangle.Draw("cosangle:Bsmass>>hDsK", "abs(hID)==321", "COLZ"); // K
+  gPad->Print("Bs-opening-angle-w-MC-K.png");
   hDsK.Scale(1./hDsK.Integral());
   hDsK.Draw("COLZ");
-  gPad->Print("Bs-opening-angle-w-MC-K.png");
   hDsK.Write();
 
   gPad->Clear();
-  noangle.Draw("cos_oangle:mass>>hDspi", "abs(hID)==211", "COLZ"); // pi
+  noangle.Draw("cosangle:Bsmass>>hDspi", "abs(hID)==211", "COLZ"); // pi
+  gPad->Print("Bs-opening-angle-w-MC-pi.png");
   hDspi.Scale(1./hDspi.Integral());
   hDspi.Draw("COLZ");
-  gPad->Print("Bs-opening-angle-w-MC-pi.png");
   hDspi.Write();
 
   fhisto.Close();
-
   return 0;
 }
 
@@ -195,5 +209,16 @@ int oangleHisto()
   h2oangle_K.Draw("COLZ");
   gPad->Print("Bs-opening-angle-K-hypo.png");
 
+  return 0;
+}
+
+
+int test_oangle()
+{
+  // make chain
+  TChain MCChain("MCChain");
+  MCChain.Add("../../ntuples/MC/Merged_Bs2Ds*.root/DecayTree");
+  readMCTree MCsample(&MCChain);
+  oangleNtuple_get(MCsample);
   return 0;
 }
