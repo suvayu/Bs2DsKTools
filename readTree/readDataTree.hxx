@@ -33,6 +33,7 @@ public :
   virtual void     Show(Long64_t entry = -1);
   virtual void     Loop() {}
   virtual void     Loop(TNtuple&);
+  virtual void     Loop(TTree&);
 
   void     Loop(oanglePID &pid, TH1D &hBsmK, TH2D &hDsK);
   void     Loop(TH1D &hBsM, TH2D &h2oangle);

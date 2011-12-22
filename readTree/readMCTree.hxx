@@ -18,6 +18,7 @@
 #include <TFile.h>
 
 #include "readTree.hxx"
+#include "oanglePID.hxx"
 
 using namespace std;
 
@@ -40,7 +41,8 @@ public :
   virtual Int_t GetEntry(Long64_t entry);
   virtual void  Show(Long64_t entry = -1);
   virtual void  Loop() {}
-  virtual void  Loop(TNtuple &noangle);
+  virtual void  Loop(TNtuple &);
+  virtual void  Loop(TTree &);
 
   void Loop(vector<TNtuple*>&, vector<TNtuple*>&);
 

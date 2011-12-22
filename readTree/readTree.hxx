@@ -22,6 +22,7 @@ public:
   virtual void  Show(Long64_t) = 0;
   virtual void  Loop() = 0;
   virtual void  Loop(TNtuple&) = 0;
+  virtual void  Loop(TTree&) = 0;
 
 };
 

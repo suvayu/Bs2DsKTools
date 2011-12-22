@@ -701,6 +701,64 @@ void readMCTree::Show(Long64_t entry)
 }
 
 
+void readMCTree::Loop(TTree &ftree)
+{
+   if (fChain == 0) return;
+
+   Long64_t nentries = fChain->GetEntries();
+
+   std::cout << nentries << " entries!" << std::endl;
+
+   Double_t Cosoangle(0.), BsM(0.0);
+   // Double_t BsM(0.0), DsM(0.0);
+   TLorentzVector BsP(0,0,0,0), DsP(0,0,0,0), hP(0,0,0,0),
+     Pi3P(0,0,0,0), K4P(0,0,0,0), K5P(0,0,0,0);
+
+   TVector3 boost(0,0,0);
+
+   // use BsM instead of lab0_MM to emulate wrong mass hypothesis
+   ftree.Branch("Bsmass"  , &BsM);
+   ftree.Branch("cosangle", &Cosoangle);
+   ftree.Branch("hPIDK"   , &lab1_PIDK);
+   ftree.Branch("BsID"    , &lab0_TRUEID);
+   ftree.Branch("hID"     , &lab1_TRUEID);
+
+   Long64_t nbytes = 0, nb = 0;
+   // for (Long64_t jentry=0; jentry<10000;jentry++) // for testing
+   for (Long64_t jentry=0; jentry<nentries;jentry++)
+     {
+       Long64_t ientry = LoadTree(jentry);
+       if (ientry < 0) break;
+       nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+       if ( CommonSelection() == false ) continue;
+       // if ( BDTGResponse[0] < 0.1 ) continue; // not in TTree!
+       // if ( lab1_PIDK < 5 ) continue; // off so that you can apply later
+       // if ( pPIDcut != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
+
+       Pi3P.SetXYZM( lab3_PX, lab3_PY, lab3_PZ, lab3_M);
+       K4P .SetXYZM( lab4_PX, lab4_PY, lab4_PZ, lab4_M);
+       K5P .SetXYZM( lab5_PX, lab5_PY, lab5_PZ, lab5_M);
+       // K mass instead of lab1_M to emulate wrong mass hypothesis
+       hP  .SetXYZM( lab1_PX, lab1_PY, lab1_PZ, 493.677);
+
+       DsP = Pi3P + K4P + K5P;
+       BsP = DsP + hP;
+
+       // DsM = DsP.M();
+       BsM = BsP.M();
+
+       boost = - BsP.BoostVector();
+       hP .Boost(boost(0), boost(1), boost(2));
+       Cosoangle = TMath::Cos((hP.Angle(boost)));
+
+       ftree.Fill();
+     }
+
+   cout << "readMCTree::Loop(TTree&): Read " << nbytes << " bytes." << std::endl;
+}
+
+
 void readMCTree::Loop(TNtuple &noangle)
 {
    if (fChain == 0) return;
@@ -709,6 +767,7 @@ void readMCTree::Loop(TNtuple &noangle)
 
    std::cout << nentries << " entries!" << std::endl;
 
+   Double_t Cosoangle(0.);
    // Double_t BsM(0.0), DsM(0.0);
    TLorentzVector BsP(0,0,0,0), DsP(0,0,0,0), hP(0,0,0,0),
      Pi3P(0,0,0,0), K4P(0,0,0,0), K5P(0,0,0,0);
@@ -738,7 +797,7 @@ void readMCTree::Loop(TNtuple &noangle)
 
        if ( CommonSelection() == false ) continue;
        // if ( BDTGResponse[0] < 0.1 ) continue; // not in TTree!
-       // if ( lab1_PIDK[0] < 5 ) continue;
+       if ( lab1_PIDK < 5 ) continue;
        // if ( pPIDcut[0] != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
 
        /**
@@ -769,15 +828,18 @@ void readMCTree::Loop(TNtuple &noangle)
 
        boost = - BsP.BoostVector();
        hP .Boost(boost(0), boost(1), boost(2));
+       Cosoangle = TMath::Cos((hP.Angle(boost)));
 
        // noangle.Fill(lab0_MM, TMath::Cos((hP.Angle(boost))), lab1_TRUEID);
-       noangle.Fill(BsP.M(), TMath::Cos((hP.Angle(boost))), lab1_TRUEID); // correct
+       noangle.Fill(BsP.M(), Cosoangle, lab1_TRUEID); // correct
      }
 
-   std::cout << "readMCTree::Loop(TNtuple&): Read " << nbytes << " bytes." << std::endl;
+   cout << "readMCTree::Loop(TNtuple&): Read " << nbytes << " bytes." << std::endl;
 }
 
 
+// not for use, keep only to not duplicate time in finding the right branches
+// copy paste from here into SetBranch() above in Loop(TTree &)
 void readMCTree::Loop(vector<TNtuple*>& nlabvector, vector<TNtuple*>& ntrulabvector)
 {
    if (fChain == 0) return;
@@ -886,7 +948,7 @@ void readMCTree::Loop(vector<TNtuple*>& nlabvector, vector<TNtuple*>& ntrulabvec
 			      lab5_TRUEENDVERTEX_X, lab5_TRUEENDVERTEX_Y, lab5_TRUEENDVERTEX_Z, lab5_TRUETAU);
      }
 
-   std::cout << "readMCTree::Loop(vector<TNtuple*>&, vector<TNtuple*>&): Read " << nbytes << " bytes." << std::endl;
+   cout << "readMCTree::Loop(vector<TNtuple*>&, vector<TNtuple*>&): Read " << nbytes << " bytes." << std::endl;
 }
 
 
