@@ -23,6 +23,8 @@ int oangle(bool select=false);
 // deprecated retain temporarily for record
 int oangleHisto();
 
+void oangleProject();
+
 TTree* oangleTree_get(readTree&);
 
 TNtuple* oangleNtuple_get(readTree&);

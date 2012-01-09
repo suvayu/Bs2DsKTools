@@ -18,7 +18,9 @@
 #include <TNtuple.h>
 #include <TH2D.h>
 #include <TLegend.h>
+#include <TCutG.h>
 #include <TPad.h>
+#include <TCanvas.h>
 
 #include "oangle.hh"
 
@@ -75,6 +77,110 @@ int oangle(bool doSelect)
   }
 
   return 0;
+}
+
+
+void oangleProject()
+{
+  setStyle();
+
+  TFile *fhisto = new TFile( "templates.root", "read");
+
+  TH2D *hDsK  = dynamic_cast<TH2D*> (fhisto->Get("hDsK" )->Clone());
+  TH2D *hDspi = dynamic_cast<TH2D*> (fhisto->Get("hDspi")->Clone());
+
+  hDsK ->SetLineColor(kAzure);
+  hDspi->SetLineColor(kRed);
+
+  // project full range
+  TH1D *hDsKcosoangle  = hDsK ->ProjectionY("hDsKcosoangle" );
+  TH1D *hDspicosoangle = hDspi->ProjectionY("hDspicosoangle");
+
+  hDsKcosoangle ->SetTitle("cos(#theta*) distrib for Bs mass range #in (5 GeV, 5.8 GeV)");
+  hDspicosoangle->SetTitle("cos(#theta*) distrib for Bs mass range #in (5 GeV, 5.8 GeV)");
+
+  TH1D *hDsKBsmass  = hDsK ->ProjectionX("hDsKBsmass" );
+  TH1D *hDspiBsmass = hDspi->ProjectionX("hDspiBsmass");
+
+  hDsKBsmass ->SetTitle("Bs mass distrib for entire cos(#theta*) range");
+  hDspiBsmass->SetTitle("Bs mass distrib for entire cos(#theta*) range");
+
+  // graphical cuts
+  TCutG *topcutg = new TCutG("topcutg",4);
+  topcutg->SetPoint(0, 5200, 0);
+  topcutg->SetPoint(1, 5600, 0);
+  topcutg->SetPoint(2, 5600, 1);
+  topcutg->SetPoint(3, 5200, 1);
+
+  TCutG *botcutg = new TCutG("botcutg",4);
+  botcutg->SetPoint(0, 5200, -1);
+  botcutg->SetPoint(1, 5600, -1);
+  botcutg->SetPoint(2, 5600, 0);
+  botcutg->SetPoint(3, 5200, 0);
+
+  // project with cuts
+  TH1D *hDsKcosoangle1  = hDsK ->ProjectionY("hDsKcosoangle1" ,0,-1,"[topcutg]");
+  TH1D *hDspicosoangle1 = hDspi->ProjectionY("hDspicosoangle1",0,-1,"[topcutg]");
+
+  hDsKcosoangle1 ->SetTitle("cos(#theta*) distrib for Bs mass range #in (5.2 GeV, 5.6 GeV)");
+  hDspicosoangle1->SetTitle("cos(#theta*) distrib for Bs mass range #in (5.2 GeV, 5.6 GeV)");
+
+  TH1D *hDsKcosoangle2  = hDsK ->ProjectionY("hDsKcosoangle2" ,0,-1,"[botcutg]");
+  TH1D *hDspicosoangle2 = hDspi->ProjectionY("hDspicosoangle2",0,-1,"[botcutg]");
+
+  hDsKcosoangle2 ->SetTitle("cos(#theta*) distrib for Bs mass range #in (5.2 GeV, 5.6 GeV)");
+  hDspicosoangle2->SetTitle("cos(#theta*) distrib for Bs mass range #in (5.2 GeV, 5.6 GeV)");
+
+  // plot w/o cuts
+  TCanvas *canvas = new TCanvas("canvas", "", 1200, 800);
+  canvas->Divide(2,2);
+
+  canvas->cd(1);
+  hDsKcosoangle ->Draw("hist");
+  hDspicosoangle->Draw("hist same");
+
+  TLegend *oleg = new TLegend( 0.5, 0.2, 0.7, 0.35);
+  oleg->SetFillColor(4000); // transparent
+  oleg->SetBorderSize(0);
+  oleg->AddEntry( hDsKcosoangle,  "DsK",   "l");
+  oleg->AddEntry( hDspicosoangle, "Ds#pi", "l");
+  oleg->Draw();
+
+  canvas->cd(2);
+  hDsKBsmass ->Draw("hist");
+  hDspiBsmass->Draw("hist same");
+
+  TLegend *mleg = new TLegend( 0.3, 0.45, 0.5, 0.6);
+  mleg->SetFillColor(4000); // transparent
+  mleg->SetBorderSize(0);
+  mleg->AddEntry( hDsKBsmass,  "DsK",   "l");
+  mleg->AddEntry( hDspiBsmass, "Ds#pi", "l");
+  mleg->Draw();
+
+  // plot with cuts
+  canvas->cd(3);
+  hDsKcosoangle1 ->Draw("hist");
+  hDspicosoangle1->Draw("hist same");
+
+  TLegend *oleg1 = new TLegend( 0.2, 0.2, 0.4, 0.35);
+  oleg1->SetFillColor(4000); // transparent
+  oleg1->SetBorderSize(0);
+  oleg1->AddEntry( hDsKcosoangle1,  "DsK",   "l");
+  oleg1->AddEntry( hDspicosoangle1, "Ds#pi", "l");
+  oleg1->Draw();
+
+  canvas->cd(4);
+  hDsKcosoangle2 ->Draw("hist");
+  hDspicosoangle2->Draw("hist same");
+
+  TLegend *oleg2 = new TLegend( 0.6, 0.2, 0.8, 0.35);
+  oleg2->SetFillColor(4000); // transparent
+  oleg2->SetBorderSize(0);
+  oleg2->AddEntry( hDsKcosoangle2,  "DsK",   "l");
+  oleg2->AddEntry( hDspicosoangle2, "Ds#pi", "l");
+  oleg2->Draw();
+
+  return;
 }
 
 
