@@ -31,8 +31,12 @@ int setStyle()
 }
 
 
+// deprecated retain temporarily for record
 int PIDsel()
 {
+  cout << "PIDsel(): This method is deprecated, quitting." << endl;
+  return 0;
+
   setStyle();
 
   TFile *fhisto = new TFile( "templates.root", "read");
@@ -70,7 +74,7 @@ int PIDsel()
   hdataDsK.SetXTitle("Mass[MeV]");
   hdataDsK.Sumw2();
 
-  ch_K.Loop(kPID, hdataBsmK, hdataDsK);
+  // ch_K.Loop(kPID, hdataBsmK, hdataDsK);
 
   hdataBsmK.Draw("hist");
   gPad->Print("Bs-mass-data-new-PID-K.png");

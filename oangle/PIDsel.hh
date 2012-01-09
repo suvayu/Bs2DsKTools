@@ -9,6 +9,7 @@ using namespace std;
 
 int setStyle();
 
+// deprecated retain temporarily for record
 int PIDsel();
 
 int PIDperf(TString);

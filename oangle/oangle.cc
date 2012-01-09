@@ -148,8 +148,12 @@ int makeTemplates(TTree &noangle)
 }
 
 
+// deprecated retain temporarily for record
 int oangleHisto()
 {
+  cout << "oangleHisto(): This method is deprecated, quitting." << endl;
+  return 0;
+
   // make chain
   TChain pi_hypo("pi_hypo");
   pi_hypo.Add("../../ntuples/data/FitTuple_BsDs1Pi_Pi_*.root/MyOffSelTree");
@@ -183,8 +187,8 @@ int oangleHisto()
   h2oangle_Pi.SetXTitle("Mass[MeV]");
   h2oangle_K .SetXTitle("Mass[MeV]");
 
-  ch_pi.Loop(hBsM_Pi, h2oangle_Pi);
-  ch_K .Loop(hBsM_K , h2oangle_K);
+  // ch_pi.Loop(hBsM_Pi, h2oangle_Pi);
+  // ch_K .Loop(hBsM_K , h2oangle_K);
 
   hBsM_Pi.Draw("hist");
   hBsM_K .Draw("hist same");

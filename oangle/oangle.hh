@@ -20,6 +20,7 @@ int setStyle();
 
 int oangle(bool select=false);
 
+// deprecated retain temporarily for record
 int oangleHisto();
 
 TTree* oangleTree_get(readTree&);
