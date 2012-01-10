@@ -13,6 +13,7 @@
 
 #include <TTree.h>
 #include <TNtuple.h>
+#include <TString.h>
 
 #include "readTree.hxx"
 
@@ -23,7 +24,7 @@ int oangle(bool select=false);
 // deprecated retain temporarily for record
 int oangleHisto();
 
-void oangleProject();
+void oangleProject(TString);
 
 TTree* oangleTree_get(readTree&);
 

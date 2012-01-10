@@ -80,9 +80,26 @@ int oangle(bool doSelect)
 }
 
 
-void oangleProject()
+void oangleProject(TString opt)
 {
   setStyle();
+  opt.ToLower();
+
+  bool doPrint(false);
+  TString format;
+  if ( opt.Contains("print") ) {
+    doPrint = true;
+    if ( opt.Contains("png") )          format = "png";
+    else if ( opt.Contains("jpg") )     format = "jpg";
+    else if ( opt.Contains("ps") )      format = "ps";
+    else if ( opt.Contains("pdf") )     format = "pdf";
+    else if ( opt.Contains("cscript") ) format = "C";
+    else {
+      cout << "Error PIDsel(): Bad print option! No recognised formats found.\n"
+	   << "Warning PIDsel(): Skipping canvas printing." << endl;
+      doPrint = false;
+    }
+  }
 
   TFile *fhisto = new TFile( "templates.root", "read");
 
@@ -139,23 +156,25 @@ void oangleProject()
   hDsKcosoangle ->Draw("hist");
   hDspicosoangle->Draw("hist same");
 
-  TLegend *oleg = new TLegend( 0.5, 0.2, 0.7, 0.35);
+  TLegend *oleg = new TLegend( 0.4, 0.2, 0.7, 0.35);
   oleg->SetFillColor(4000); // transparent
   oleg->SetBorderSize(0);
-  oleg->AddEntry( hDsKcosoangle,  "DsK",   "l");
-  oleg->AddEntry( hDspicosoangle, "Ds#pi", "l");
+  oleg->AddEntry( hDsKcosoangle,  "DsK - correct hypo", "l");
+  oleg->AddEntry( hDspicosoangle, "Ds#pi - wrong hypo", "l");
   oleg->Draw();
+  if (doPrint) gPad->Print(TString::Format("%s.%s", "oangle-projn", format.Data()));
 
   canvas->cd(2);
   hDsKBsmass ->Draw("hist");
   hDspiBsmass->Draw("hist same");
 
-  TLegend *mleg = new TLegend( 0.3, 0.45, 0.5, 0.6);
+  TLegend *mleg = new TLegend( 0.2, 0.45, 0.5, 0.6);
   mleg->SetFillColor(4000); // transparent
   mleg->SetBorderSize(0);
-  mleg->AddEntry( hDsKBsmass,  "DsK",   "l");
-  mleg->AddEntry( hDspiBsmass, "Ds#pi", "l");
+  mleg->AddEntry( hDsKBsmass,  "DsK - correct hypo", "l");
+  mleg->AddEntry( hDspiBsmass, "Ds#pi - wrong hypo", "l");
   mleg->Draw();
+  if (doPrint) gPad->Print(TString::Format("%s.%s", "Bs-mass-projn", format.Data()));
 
   // plot with cuts
   canvas->cd(3);
