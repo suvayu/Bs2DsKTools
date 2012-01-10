@@ -9,6 +9,7 @@
 #include <TPad.h>
 #include <TGraph.h>
 #include <TLegend.h>
+#include <TArrow.h>
 
 #include "readMCTree.hxx"
 #include "readDataTree.hxx"
@@ -96,6 +97,22 @@ int PIDperf(TString opt)
   gStyle->SetTitleYOffset(1.4);
   opt.ToLower();
 
+  bool doPrint(false);
+  TString format;
+  if ( opt.Contains("print") ) {
+    doPrint = true;
+    if ( opt.Contains("png") )          format = "png";
+    else if ( opt.Contains("jpg") )     format = "jpg";
+    else if ( opt.Contains("ps") )      format = "ps";
+    else if ( opt.Contains("pdf") )     format = "pdf";
+    else if ( opt.Contains("cscript") ) format = "C";
+    else {
+      cout << "Error PIDsel(): Bad print option! No recognised formats found.\n"
+	   << "Warning PIDsel(): Skipping canvas printing." << endl;
+      doPrint = false;
+    }
+  }
+
   oanglePID oPID(init_oanglePID());
   double mass(0), coso(0);
   float pidK(0);
@@ -110,18 +127,18 @@ int PIDperf(TString opt)
   int entries(ftree->GetEntries());
 
   // histograms before RICH PID
-  TH1D *DsKDLL  = new TH1D ("DsKDLL" , "DsKDLL" , 1000, -50, 50);
-  TH1D *DspiDLL = new TH1D ("DspiDLL", "DspiDLL", 1000, -50, 50);
-  TH1D *TotDLL  = new TH1D ("TotDLL" , "TotDLL" , 1000, -50, 50);
+  TH1D *DsKDLL  = new TH1D ("DsKDLL" , "DsK DLL before RICH PID"     , 1000, -50, 50);
+  TH1D *DspiDLL = new TH1D ("DspiDLL", "Ds#pi DLL before RICH PID"   , 1000, -50, 50);
+  TH1D *TotDLL  = new TH1D ("TotDLL" , "Combined DLL before RICH PID", 1000, -50, 50);
 
   DsKDLL ->SetLineColor(kGreen);
   DspiDLL->SetLineColor(kRed);
   TotDLL ->SetLineColor(kAzure);
 
   // histograms with RICH PID
-  TH1D *DsKDLL2  = new TH1D ("DsKDLL2" , "DsKDLL2" , 1000, -50, 50);
-  TH1D *DspiDLL2 = new TH1D ("DspiDLL2", "DspiDLL2", 1000, -50, 50);
-  TH1D *TotDLL2  = new TH1D ("TotDLL2" , "TotDLL2" , 1000, -50, 50);
+  TH1D *DsKDLL2  = new TH1D ("DsKDLL2" , "DsK DLL after RICH PID"     , 1000, -50, 50);
+  TH1D *DspiDLL2 = new TH1D ("DspiDLL2", "Ds#pi DLL after RICH PID"   , 1000, -50, 50);
+  TH1D *TotDLL2  = new TH1D ("TotDLL2" , "Combined DLL after RICH PID", 1000, -50, 50);
 
   DsKDLL2 ->SetLineColor(kGreen);
   DspiDLL2->SetLineColor(kRed);
@@ -167,15 +184,19 @@ int PIDperf(TString opt)
     TotDLL ->Draw("hist");
     canvas->cd(2);
     DsKDLL ->Draw("hist");
+    if (doPrint) gPad->Print(TString::Format("%s.%s", "kin-PID-DsK-no-RICH", format.Data()));
     canvas->cd(3);
     DspiDLL->Draw("hist");
+    if (doPrint) gPad->Print(TString::Format("%s.%s", "kin-PID-Dspi-no-RICH", format.Data()));
 
     canvas->cd(4);
     TotDLL2 ->Draw("hist");
     canvas->cd(5);
     DsKDLL2 ->Draw("hist");
+    if (doPrint) gPad->Print(TString::Format("%s.%s", "kin-PID-DsK-w-RICH", format.Data()));
     canvas->cd(6);
     DspiDLL2->Draw("hist");
+    if (doPrint) gPad->Print(TString::Format("%s.%s", "kin-PID-Dspi-w-RICH", format.Data()));
 
     // canvas->cd(7);
     // TotDLL3 ->Draw("hist");
@@ -232,6 +253,22 @@ int PIDperf(TString opt)
       }
     }
 
+    // RICH cut
+    double RICHeff(0), RICHpur(0), RICHDsKsel(0), RICHDspisel(0);
+    RICHDsKsel  = DsKDLL3 ->Integral( DsKDLL3 ->FindBin(5), tbins+1 );
+    RICHDspisel = DspiDLL3->Integral( DspiDLL3->FindBin(5), tbins+1 );
+
+    if (RICHDsKsel + RICHDspisel != 0) {
+      RICHeff = RICHDsKsel /  nDsKall3;
+      RICHpur = RICHDsKsel / (RICHDsKsel + scaleKPi * RICHDspisel);
+    }
+
+    TArrow *RICHcut = new TArrow(RICHeff-0.2, RICHpur, RICHeff, RICHpur, 0.03, "|>");
+    RICHcut->SetLineWidth(2);
+    RICHcut->SetAngle(40);
+    RICHcut->SetLineColor(kRed);
+    RICHcut->SetFillColor(kRed);
+
     TGraph *gr1 = new TGraph( eff.size(), &eff[0], &pur[0]);
     gr1->SetLineColor(kRed);
 
@@ -250,6 +287,8 @@ int PIDperf(TString opt)
     gr2->Draw("AC");
     gr3->Draw("C");
 
+    RICHcut->Draw();
+
     TLegend *leg = new TLegend( 0.2, 0.2, 0.6, 0.45);
     leg->SetFillColor(4000); // transparent
     leg->SetBorderSize(0);
@@ -257,6 +296,7 @@ int PIDperf(TString opt)
     leg->AddEntry( gr2, "Kin PID after RICH", "l");
     leg->AddEntry( gr3, "RICH PID", "l");
     leg->Draw();
+    if (doPrint) gPad->Print(TString::Format("%s.%s", "kin-PID-perf", format.Data()));
   }
 
   return 0;
