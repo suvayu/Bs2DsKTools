@@ -5,6 +5,7 @@
 
 if [[ $1 = "PID" ]]; then
     root -l -b <<EOF
+.L ../utils/utils_cc.so
 .L PIDsel.cc++
 .q
 EOF

@@ -11,6 +11,7 @@
 #include <TLegend.h>
 #include <TArrow.h>
 
+#include "utils.hh"
 #include "readMCTree.hxx"
 #include "readDataTree.hxx"
 #include "PIDsel.hh"
@@ -21,24 +22,13 @@
 using namespace std;
 
 
-int setStyle()
-{
-  gStyle->SetOptStat(0);
-  gStyle->SetOptTitle(1);
-  gStyle->SetPalette(1); // "rainbow" color palette
-  gStyle->SetNumberContours(256); // smooth color palette
-  gStyle->SetTitleOffset( 1.2, "xy");
-  return 0;
-}
-
-
 // deprecated retain temporarily for record
 int PIDsel()
 {
   cout << "PIDsel(): This method is deprecated, quitting." << endl;
   return 0;
 
-  setStyle();
+  Style::setStyle();
 
   TFile *fhisto = new TFile( "templates.root", "read");
 
@@ -92,26 +82,13 @@ int PIDsel()
 
 int PIDperf(TString opt)
 {
-  setStyle();
+  Style::setStyle();
   gStyle->SetPadLeftMargin(2);
   gStyle->SetTitleYOffset(1.4);
   opt.ToLower();
 
-  bool doPrint(false);
   TString format;
-  if ( opt.Contains("print") ) {
-    doPrint = true;
-    if ( opt.Contains("png") )          format = "png";
-    else if ( opt.Contains("jpg") )     format = "jpg";
-    else if ( opt.Contains("ps") )      format = "ps";
-    else if ( opt.Contains("pdf") )     format = "pdf";
-    else if ( opt.Contains("cscript") ) format = "C";
-    else {
-      cout << "Error PIDsel(): Bad print option! No recognised formats found.\n"
-	   << "Warning PIDsel(): Skipping canvas printing." << endl;
-      doPrint = false;
-    }
-  }
+  bool doPrint( Parsers::PrintOpts( opt, format ) );
 
   oanglePID oPID(init_oanglePID());
   double mass(0), coso(0);
