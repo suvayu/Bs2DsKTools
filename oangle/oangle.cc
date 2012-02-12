@@ -95,8 +95,8 @@ void oangleProject(TString opt)
     else if ( opt.Contains("pdf") )     format = "pdf";
     else if ( opt.Contains("cscript") ) format = "C";
     else {
-      cout << "Error PIDsel(): Bad print option! No recognised formats found.\n"
-	   << "Warning PIDsel(): Skipping canvas printing." << endl;
+      cout << "Error oangleProject(): Bad print option! No recognised formats found.\n"
+	   << "Warning oangleProject(): Skipping canvas printing." << endl;
       doPrint = false;
     }
   }

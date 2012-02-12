@@ -748,8 +748,8 @@ void readMCTree::Loop(TTree &ftree)
        // DsM = DsP.M();
        BsM = BsP.M();
 
-       boost = - BsP.BoostVector();
-       hP .Boost(boost(0), boost(1), boost(2));
+       boost = BsP.BoostVector();
+       hP .Boost(-boost(0), -boost(1), -boost(2));
        Cosoangle = TMath::Cos((hP.Angle(boost)));
 
        ftree.Fill();
