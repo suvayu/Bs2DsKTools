@@ -28,7 +28,7 @@ public :
   // overloaded virtual methods
   virtual void  Loop();
   virtual void  Loop(TNtuple &) {}
-  virtual void  Loop(TTree &) {}
+  virtual void  Loop(TTree &);
 
   // overloaded virtual methods
   bool  CommonSelection();
