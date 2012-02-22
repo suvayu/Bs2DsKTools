@@ -9,6 +9,7 @@ EOF
 elif [[ $1 = macros ]]; then
     root -l -b <<EOF
 .L lifetime_cxx.so
+.L ../utils/utils_cc.so
 .L accept.cc++
 .q
 EOF
