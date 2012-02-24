@@ -27,7 +27,7 @@ int accept(bool doSelect)
     lifetime MCsample(&MCChain);
     ftree = selAccTree(MCsample); // remember to delete ftree
   }
-  else ftree = (TTree*) rfile.Get("ftree");;
+  else ftree = (TTree*) rfile.Get("ftree");
 
   std::cout << "Entries: " << ftree->GetEntries() << std::endl;
   plotHistos(ftree);

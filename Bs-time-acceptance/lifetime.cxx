@@ -131,12 +131,15 @@ void lifetime::Loop(TTree &ftree)
 
    TLorentzVector BsMom(0,0,0,0);
    TVector3 OWNPV(0,0,0), ENDVX(0,0,0);
+   double wt(0), truewt(0);
 
    ftree.Branch("Bsmass" , &lab0_MM);
    ftree.Branch("BsMom"  , &BsMom);
    ftree.Branch("hID"    , &lab1_TRUEID);
    ftree.Branch("tau"    , &lab0_TAU);
    ftree.Branch("truetau", &lab0_TRUETAU);
+   ftree.Branch("wt"     , &wt);
+   ftree.Branch("truewt" , &truewt);
    ftree.Branch("oscil"  , &lab0_OSCIL);
    ftree.Branch("OWNPV"  , &OWNPV);
    ftree.Branch("ENDVX"  , &ENDVX);
@@ -156,6 +159,8 @@ void lifetime::Loop(TTree &ftree)
        if (( CommonSelection() == false ) or ( lab1_PIDK < 5 )) continue;
        // if ( pPIDcut != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
 
+       wt       = TMath::Exp(lab0_TAU*1e3/1.472);
+       truewt   = TMath::Exp(lab0_TRUETAU*1e3/1.472);
        BsMom.SetPxPyPzE(lab0_PX, lab0_PY, lab0_PZ, lab0_MM);
        OWNPV.SetXYZ(lab0_OWNPV_X, lab0_OWNPV_Y, lab0_OWNPV_Z);
        ENDVX.SetXYZ(lab0_ENDVERTEX_X, lab0_ENDVERTEX_Y, lab0_ENDVERTEX_Z);
