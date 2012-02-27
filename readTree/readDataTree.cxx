@@ -151,6 +151,7 @@ void readDataTree::Loop(TTree &ftree)
 
   std::cout << nentries << " entries!" << std::endl;
 
+  Double_t Cosoangle(0.);
   // Double_t BsM(0.0), DsM(0.0);
   TLorentzVector BsP(0,0,0,0), DsP(0,0,0,0), hP(0,0,0,0),
     Pi3P(0,0,0,0), K4P(0,0,0,0), K5P(0,0,0,0);
@@ -199,7 +200,8 @@ void readDataTree::Loop(TTree &ftree)
       // BsM = BsP.M();
 
       boost = - BsP.BoostVector();
-      hP .Boost(boost(0), boost(1), boost(2));
+      hP .Boost(-boost(0), -boost(1), -boost(2));
+      Cosoangle = TMath::Cos((hP.Angle(boost)));
 
       ftree.Fill();
     }
