@@ -22,6 +22,7 @@ void Hist::rescale(TH1 *h, Double_t factor)
   Double_t xmin = h->GetXaxis()->GetXmin();
   Double_t xmax = h->GetXaxis()->GetXmax();
   h->GetXaxis()->SetLimits(xmin*factor,xmax*factor);
+  return;
 }
 
 
@@ -55,7 +56,7 @@ void Parsers::readconf(std::vector<TString> &var, std::vector<TString> &val, std
   while (! inFile.eof()) {
     TString tmp;
     tmp.ReadToken(inFile);
-    if (tmp.BeginsWith("#")) {
+    if (tmp.BeginsWith("#") or tmp.IsWhitespace()) {
       tmp.ReadLine(inFile);
       continue;
     }
@@ -63,6 +64,26 @@ void Parsers::readconf(std::vector<TString> &var, std::vector<TString> &val, std
     tmp.ReadToken(inFile);
     val.push_back(tmp);
   }
+  return;
+}
+
+
+void Parsers::readlist(std::vector<TString> &var, std::string fname)
+{
+  ifstream inFile(fname.c_str());
+
+  while (! inFile.eof())
+    {
+      TString tmp;
+      tmp.ReadToken(inFile);
+      if (tmp.BeginsWith("#") or tmp.IsWhitespace())
+        {
+          tmp.ReadLine(inFile);
+          continue;
+        }
+      var.push_back(tmp);
+    }
+  return;
 }
 
 

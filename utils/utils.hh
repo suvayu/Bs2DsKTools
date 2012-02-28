@@ -51,6 +51,14 @@ namespace Parsers {
   void readconf(std::vector<TString> &var, std::vector<TString> &val, std::string fname);
 
   /**
+   * Parse file to read a list.
+   *
+   * @param var Vector of TString for file names.
+   * @param fname Filename with list
+   */
+  void readlist(std::vector<TString> &var, std::string fname);
+
+  /**
    * Search and replace string within provided string
    *
    * @param context Original string
