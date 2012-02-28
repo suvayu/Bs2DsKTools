@@ -31,9 +31,10 @@ public :
   // overloaded virtual methods
   virtual Int_t    GetEntry(Long64_t entry);
   virtual void     Show(Long64_t entry = -1);
-  virtual void     Loop() {}
+  virtual void     Loop();
   virtual void     Loop(TNtuple&);
   virtual void     Loop(TTree&);
+  virtual void     Loop(TTree &, TEntryList &);
 
 private:
 

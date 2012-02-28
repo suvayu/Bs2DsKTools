@@ -143,6 +143,9 @@ void readDataTree::Show(Long64_t entry)
 }
 
 
+void readDataTree::Loop() {}
+
+
 void readDataTree::Loop(TTree &ftree)
 {
   if (fChain == 0) return;
@@ -208,6 +211,9 @@ void readDataTree::Loop(TTree &ftree)
 
   std::cout << "readDataTree::Loop(TTree &): Read " << nbytes << " bytes." << std::endl;
 }
+
+
+void readDataTree::Loop(TTree &, TEntryList &) {}
 
 
 void readDataTree::Loop(TNtuple &noangle)

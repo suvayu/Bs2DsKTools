@@ -713,6 +713,9 @@ void readMCTree::Show(Long64_t entry)
 }
 
 
+void readMCTree::Loop() {}
+
+
 void readMCTree::Loop(TTree &ftree)
 {
    if (fChain == 0) return;
@@ -848,6 +851,9 @@ void readMCTree::Loop(TNtuple &noangle)
 
    cout << "readMCTree::Loop(TNtuple&): Read " << nbytes << " bytes." << std::endl;
 }
+
+
+void readMCTree::Loop(TTree &, TEntryList &) {}
 
 
 bool readMCTree::CommonSelection()
