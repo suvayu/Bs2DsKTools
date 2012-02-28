@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cassert>
 #include <string>
+#include <vector>
 
 #include <TChain.h>
 #include <TCanvas.h>
@@ -39,7 +40,8 @@ int accept(bool doSelect)
   std::cout << "Entries: " << ftree->GetEntries()
 	    << ", " << felist->GetN() << std::endl;
   // plotHistos(ftree);
-  plotHistos(felist);
+  // plotHistos(felist);
+  plotHistoPanel(felist);
 
   if (doSelect) {
     rfile.cd();
@@ -64,9 +66,10 @@ TChain* initChain(std::string name, std::string fileglob)
 void plotHistos(TEntryList* felist)
 {
   Style::setStyle();
+  TString trigger("(lab0Hlt2TopoOSTF4BodyDecision_TOS>0)");
 
-  TH1D *hlaccept = getLifetime(felist, true); // remember to delete
-  TH1D *hltime   = getLifetime(felist);       // remember to delete
+  TH1D *hlaccept = getLifetime(felist, trigger, true); // remember to delete
+  TH1D *hltime   = getLifetime(felist, trigger);       // remember to delete
 
   hlaccept->SetLineColor(kAzure);
   hltime  ->SetLineColor(kAzure);
@@ -82,8 +85,8 @@ void plotHistos(TEntryList* felist)
   canvas->Print(".png");
 
   // housekeeping
-  // hlaccept->Print("all");
-  // hltime  ->Print("all");
+  hlaccept->Print("all");
+  hltime  ->Print("all");
   delete hlaccept; delete hltime;
   return;
 }
@@ -149,9 +152,9 @@ TH1D* getLifetime(TTree* ftree, bool doAcc)
 }
 
 
-TH1D* getLifetime(TEntryList* felist, bool doAcc)
+TH1D* getLifetime(TEntryList* felist, TString cuts, bool doAcc)
 {
-  TString name, title, select, trigger, weight;
+  TString name, title, select, weight;
   TChain *chain = initChain("chain", "../../ntuples/MC/Merged_Bs2Ds*.root/DecayTree");
   chain->SetEntryList(felist);
 
@@ -165,13 +168,72 @@ TH1D* getLifetime(TEntryList* felist, bool doAcc)
   }
 
   if (doAcc) weight  = "*exp(lab0_TAU*1e3/1.472)";
-  trigger = "(lab0Hlt2TopoOSTF4BodyDecision_TOS>0)";
-  // trigger = "(HLT2Topo4Body>0)";
-  // trigger = "(1)";
-  select  = trigger + weight;
+  // cuts = "(lab0Hlt2TopoOSTF4BodyDecision_TOS>0)";
+  // cuts = "(HLT2Topo4Body>0)";
+  if (cuts == "") select = "(1)" + weight;
+  else select = "(" + cuts + ")" + weight;
 
-  // binning for ps, tree has lifetimes in ns
   TH1D* hist = new TH1D(name.Data(), title.Data(), 100, 0, 10);
   chain->Draw("lab0_TAU*1e3>>" + name, select.Data());
   return hist;
+}
+
+
+void getTriggers(std::vector<TString> &triggers)
+{
+  std::string fname("triggers.txt");
+  Parsers::readlist(triggers, fname);
+
+  for (unsigned int i = 0; i < triggers.size(); ++i) {
+    std::cout << "Trigger " << i << ": " << triggers[i] << std::endl;
+  }
+  return;
+}
+
+
+void plotHistoPanel(TEntryList *felist)
+{
+  std::vector<TH1D*> histAcVec, histLTVec;
+  std::vector<TString> triggers;
+  getTriggers(triggers);
+
+  unsigned int ntrigs(triggers.size());
+  double width(1200), height(450*ntrigs);
+
+  for (unsigned int i = 0; i < ntrigs; ++i) {
+    histAcVec.push_back( getLifetime(felist, triggers[i]+">0", true) );
+    histLTVec.push_back( getLifetime(felist, triggers[i]+">0") );
+
+    TH1D *h1 = histAcVec.back();
+    TH1D *h2 = histLTVec.back();
+    h1->SetNameTitle("hla_"+triggers[i], "Acceptance for "+triggers[i]);
+    h2->SetNameTitle("hlt_"+triggers[i], "Lifetime for "  +triggers[i]);
+    h1->SetLineColor(kAzure);
+    h2->SetLineColor(kRed);
+    h1->SetXTitle("Bs lifetime in ps");
+    h2->SetXTitle("Bs lifetime in ps");
+  }
+
+  assert(ntrigs = triggers.size() );
+  assert(ntrigs = histAcVec.size());
+  assert(ntrigs = histLTVec.size());
+
+  TCanvas *canvas = new TCanvas("histpanel", "", width, height);
+  canvas->Divide(2,ntrigs);
+  for (unsigned int i = 0; i < ntrigs; ++i) {
+    canvas->cd(i*2+1);
+    histAcVec[i]->Draw("hist");
+    canvas->cd(i*2+2);
+    histLTVec[i]->Draw("hist");
+  }
+  canvas->Print(".png");
+
+  histAcVec[0]->Print("all");
+  histLTVec[0]->Print("all");
+
+  // housekeeping
+  for (unsigned int i = 0; i < ntrigs; ++i) {
+    delete histAcVec[i]; delete histLTVec[i];
+  }
+  return;
 }

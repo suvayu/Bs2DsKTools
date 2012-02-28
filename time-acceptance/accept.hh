@@ -8,6 +8,7 @@
 #include <TTree.h>
 #include <TEntryList.h>
 #include <TH1D.h>
+#include <TString.h>
 
 #include "readTree.hxx"
 
@@ -52,9 +53,15 @@ void plotHistos(TTree* ftree);
  *
  * @return Acceptance/lifetime histogram
  */
-TH1D* getLifetime(TTree *ftree, bool doAcc=false);
+TH1D* getLifetime(TTree* ftree, bool doAcc=false);
 
 
-TH1D* getLifetime(TEntryList *felist, bool doAcc=false);
+TH1D* getLifetime(TEntryList* felist, TString cuts, bool doAcc=false);
+
+
+void getTriggers(std::vector<TString> &triggers);
+
+
+void plotHistoPanel(TEntryList *felist);
 
 #endif  // __ACCEPT_HH
