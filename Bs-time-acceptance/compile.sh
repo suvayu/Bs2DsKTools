@@ -6,11 +6,17 @@ if [[ $1 = lt ]]; then
 .L lifetime.cxx++
 .q
 EOF
-elif [[ $1 = macros ]]; then
+elif [[ $1 = mac ]]; then
     root -l -b <<EOF
 .L lifetime_cxx.so
 .L ../utils/utils_cc.so
 .L accept.cc++
+.q
+EOF
+elif [[ $1 = fit ]]; then
+    root -l -b <<EOF
+.L ../utils/utils_cc.so
+.L ltFit.cc++
 .q
 EOF
 fi

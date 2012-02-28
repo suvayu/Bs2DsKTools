@@ -13,6 +13,8 @@
 
 #include <vector>
 
+#include <TEntryList.h>
+
 #include "readMCTree.hxx"
 
 using namespace std;
@@ -29,6 +31,7 @@ public :
   virtual void  Loop();
   virtual void  Loop(TNtuple &) {}
   virtual void  Loop(TTree &);
+  virtual void  Loop(TTree &, TEntryList &);
 
   // overloaded non-virtual methods
   bool  CommonSelection();
