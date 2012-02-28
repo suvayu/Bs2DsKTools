@@ -156,6 +156,7 @@ void lifetime::Loop(TTree &ftree)
        if (ientry < 0) break;
        nb = fChain->GetEntry(jentry);   nbytes += nb;
 
+       // if (( UnbiasedSelection() == false ) or ( lab1_PIDK < 5 )) continue;
        if (( CommonSelection() == false ) or ( lab1_PIDK < 5 )) continue;
        // if ( pPIDcut != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
 
@@ -179,5 +180,16 @@ bool lifetime::CommonSelection()
        ( 5000 < lab0_MM and lab0_MM < 5800 ) and // Bs mass
        ( 1944 < lab2_MM and lab2_MM < 1990 ) and // Ds mass
        ( lab1_P < 100000 )) return true;
+  else return false;
+}
+
+
+bool lifetime::UnbiasedSelection()
+{
+  if ( lab1_TRACK_PCHI2 < 4 and lab1_P > 5000 and lab1_PT > 500 and
+       lab1_MINIPCHI2 > 0 and 1918 < lab2_MM and lab2_MM < 2018 and // 100 MeV Ds mass window
+       lab0_ENDVERTEX_CHI2 < 9 and lab0_IPCHI2_OWNPV < 250 and
+       -1000 < lab0_FDCHI2_OWNPV and -1 < lab0_DIRA_OWNPV and
+       5116 < lab0_MM and lab0_MM < 5616 ) return true; // 500 MeV Bs mass window
   else return false;
 }

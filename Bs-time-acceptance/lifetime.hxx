@@ -30,9 +30,9 @@ public :
   virtual void  Loop(TNtuple &) {}
   virtual void  Loop(TTree &);
 
-  // overloaded virtual methods
+  // overloaded non-virtual methods
   bool  CommonSelection();
-
+  bool  UnbiasedSelection();
 };
 
 #endif // #ifndef __LIFETIME_HXX
