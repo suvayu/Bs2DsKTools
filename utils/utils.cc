@@ -12,6 +12,7 @@ TStyle* Style::setStyle()
   gStyle->SetPalette(1); // "rainbow" color palette
   gStyle->SetNumberContours(256); // smooth color palette
   gStyle->SetTitleOffset( 1.2, "xy");
+  gStyle->SetCanvasPreferGL(true);
   return gStyle;
 }
 
