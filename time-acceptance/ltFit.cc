@@ -9,7 +9,6 @@
 #include <TCanvas.h>
 #include <TPad.h>
 // #include <TSystem.h>
-#include <TLegend.h>
 
 #include <TCollection.h>
 
@@ -43,12 +42,24 @@ void ltFit() //TTree *ftree)
   RooRealVar tau("tau", "lifetime in ns", 0.0001, 0.01);
   RooRealVar turnon("turnon", "turnon", 500, 5000);
 
-  // trigger
-  RooRealVar HLT2Topo4Body("HLT2Topo4Body", "HLT2Topo4Body", 0, 2);
+  // trigger:
+  // HLT2Topo4Body
+  // HLT2Topo3Body
+  // HLT2Topo2Body
+  // HLT2TopoIncPhi
+  std::string trigger("HLT2Topo4Body");
+  RooRealVar HLT2Topo4Body(trigger.c_str(), trigger.c_str(), 0, 2);
 
   // dataset
+  std::string cut(trigger+">0");
   RooDataSet dataset("dataset", "Dataset", RooArgSet(tau, HLT2Topo4Body),
-		     Import(*ftree), Cut("HLT2Topo4Body>0"));
+		     Import(*ftree), Cut(cut.c_str()));
+
+  // when using weights
+  RooRealVar wt("wt", "wt", 0, 1e5);
+  // weighted dataset
+  RooDataSet wdataset("wdataset", "Weighted dataset", RooArgSet(tau, wt, HLT2Topo4Body),
+		      WeightVar(wt), Import(*ftree), Cut(cut.c_str()));
 
   // Decay function: exp(-t*1e3/1.472)
   // RooGenericPdf exponent("exponent", "exp(-@0*1e3/1.472)", tau); // (1)
@@ -56,19 +67,29 @@ void ltFit() //TTree *ftree)
   // RooExponential exponent("exponent", "exponent", tau, Gamma);
   // or use RooRealConstant::value(-1.472/1E3) when needed
   RooExponential decay("decay", "Decay function for the B_{s}", tau, // (3)
-  			RooRealConstant::value(-1E3/1.472));
+		       RooRealConstant::value(-1E3/1.472));
+  // FIXME:
+  // RooExponential decayH("decayH", "Decay function for the B_{s,H}", tau,
+  // 			RooRealConstant::value(-1E3/1.536875));
+  // RooExponential decayL("decayL", "Decay function for the B_{s,L}", tau,
+  // 			RooRealConstant::value(-1E3/1.407125));
+  // RooAddPdf decay("decay", "Decay function for the B_{s}", RooArgList(decayH, decayL),
+  // 		  RooArgList(RooRealConstant::value(0.5)));
 
-  // acceptance model
-  RooGenericPdf acceptance("acceptance", "(@0*@1)**3/(1+(@0*@1)**3)", RooArgList(turnon, tau));
+  // acceptance model: 1-1/(1+(at)³)
+  RooGenericPdf acceptance("acceptance", "1-1/(1+(@0*@1)**3)", RooArgList(turnon, tau));
 
   RooProdPdf Model("Model", "Acceptance model", decay, acceptance);
-  Model.fitTo(dataset, Range(0.0001, 0.01)); // SumW2Error(kTRUE), Strategy(2),
+  RooFitResult *fitptr = Model.fitTo(dataset, Range(0.0001, 0.01), Save(true)); // SumW2Error(kTRUE), Strategy(2),
+
+  decay.Print("t");
 
   RooPlot *tframe1 = tau.frame(Name("pfit"), Title("Lifetime acceptance with Monte Carlo"));
   dataset.plotOn(tframe1, MarkerStyle(kFullTriangleUp));
   Model  .plotOn(tframe1);
 
   RooPlot *tframe2 = tau.frame(Name("pmodel"), Title("a(t) = exp(t/#Gamma_{s}) #times acc(t)"));
+  wdataset.plotOn(tframe2, MarkerStyle(kFullTriangleUp)); // , RefreshNorm()
   Model     .plotOn(tframe2, LineColor(kAzure));
   decay     .plotOn(tframe2, LineColor(kRed));
   acceptance.plotOn(tframe2, LineColor(kGreen));
@@ -80,15 +101,15 @@ void ltFit() //TTree *ftree)
   canvas .cd(2);
   tframe2->Draw();
 
- // for (unsigned int i = 0; i < 3; ++i) {
- //   TIter primitivesItr(canvas.cd(i)->GetListOfPrimitives());
- //   while (TObject *obj = primitivesItr()) {
- //     TClass *pclass = TClass::GetClass(obj->ClassName());
- //     std::cout << "Class: " << pclass->ClassName()
- // 	       << " Name: " << obj->GetName()
- // 	       << " Title: " << obj->GetTitle() << std::endl;
- //   }
- // }
+  // for (unsigned int i = 0; i < 3; ++i) {
+  //   TIter primitivesItr(canvas.cd(i)->GetListOfPrimitives());
+  //   while (TObject *obj = primitivesItr()) {
+  //     TClass *pclass = TClass::GetClass(obj->ClassName());
+  //     std::cout << "Class: " << pclass->ClassName()
+  // 	       << " Name: " << obj->GetName()
+  // 	       << " Title: " << obj->GetTitle() << std::endl;
+  //   }
+  // }
 
   canvas .Print(".png");
   return;
@@ -107,11 +128,13 @@ void wtltFit()
   // when using weights
   RooRealVar wt("wt", "wt", 0, 1e5);
   // trigger
-  RooRealVar HLT2Topo4Body("HLT2Topo4Body", "HLT2Topo4Body", 0, 2);
+  std::string trigger("HLT2Topo4Body");
+  RooRealVar HLT2Topo4Body(trigger.c_str(), trigger.c_str(), 0, 2);
 
   // weighted dataset
+  std::string cut(trigger+">0");
   RooDataSet dataset("dataset", "Weighted dataset", RooArgSet(tau, wt, HLT2Topo4Body),
-		     WeightVar(wt), Import(*ftree), Cut("HLT2Topo4Body>0"));
+		     WeightVar(wt), Import(*ftree), Cut(cut.c_str()));
 
   // acceptance model with weighted dataset
   RooGenericPdf accModel("accModel", "(@0*@1)**3/(1+(@0*@1)**3)", RooArgList(turnon, tau));
