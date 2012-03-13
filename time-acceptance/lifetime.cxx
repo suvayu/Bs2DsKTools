@@ -195,6 +195,7 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
    ftree.Branch("ENDVX"  , &ENDVX);
 
    ftree.Branch("HLT2Topo4Body" , &lab0Hlt2TopoOSTF4BodyDecision_TOS);
+   ftree.Branch("HLT2Topo3Body" , &lab0Hlt2TopoOSTF3BodyDecision_TOS);
    ftree.Branch("HLT2Topo2Body" , &lab0Hlt2TopoOSTF2BodyDecision_TOS);
    ftree.Branch("HLT2TopoIncPhi", &lab0Hlt2IncPhiDecision_TOS);
 

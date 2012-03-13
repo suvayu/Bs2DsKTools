@@ -41,7 +41,7 @@ int accept(bool doSelect)
 	    << ", " << felist->GetN() << std::endl;
   // plotHistos(ftree);
   // plotHistos(felist);
-  plotHistoPanel(felist);
+  // plotHistoPanel(felist);
 
   if (doSelect) {
     rfile.cd();
