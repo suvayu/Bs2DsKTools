@@ -22,11 +22,13 @@
 #include <RooExponential.h>
 #include <RooDecay.h>
 #include <RooGenericPdf.h>
+#include <RooEffProd.h>
+#include <RooFormulaVar.h>
 #include <RooAddPdf.h>
 #include <RooProdPdf.h>
 #include <RooDataSet.h>
 
-#include "utils.hh"
+// #include "utils.hh"
 
 using namespace RooFit;
 
@@ -62,44 +64,52 @@ void ltFit() //TTree *ftree)
 		      WeightVar(wt), Import(*ftree), Cut(cut.c_str()));
 
   // Decay function: exp(-t*1e3/1.472)
-  // RooGenericPdf exponent("exponent", "exp(-@0*1e3/1.472)", tau); // (1)
-  // RooRealVar Gamma("Gamma", "B_{s} lifetime in ns", -1E3/1.472); // (2)
-  // RooExponential exponent("exponent", "exponent", tau, Gamma);
-  // or use RooRealConstant::value(-1.472/1E3) when needed
-  RooExponential decay("decay", "Decay function for the B_{s}", tau, // (3)
-		       RooRealConstant::value(-1E3/1.472));
-  // FIXME:
-  // RooExponential decayH("decayH", "Decay function for the B_{s,H}", tau,
-  // 			RooRealConstant::value(-1E3/1.536875));
-  // RooExponential decayL("decayL", "Decay function for the B_{s,L}", tau,
-  // 			RooRealConstant::value(-1E3/1.407125));
+  // RooExponential decay("decay", "Decay function for the B_{s}", tau, // (1)
+  // 		       RooRealConstant::value(-1E3/1.472));
+  RooExponential decayH("decayH", "Decay function for the B_{s,H}", tau,
+			RooRealConstant::value(-1E3/1.536875));
+  RooExponential decayL("decayL", "Decay function for the B_{s,L}", tau,
+			RooRealConstant::value(-1E3/1.407125));
+  RooAddPdf decay("decay", "Decay function for the B_{s}", RooArgList(decayH, decayL),
+		  RooRealConstant::value(0.5)); // (2)
+  // RooRealVar ratio("ratio", "ration", 0, 1);
   // RooAddPdf decay("decay", "Decay function for the B_{s}", RooArgList(decayH, decayL),
-  // 		  RooArgList(RooRealConstant::value(0.5)));
+  // 		  RooArgList(ratio));
 
   // acceptance model: 1-1/(1+(at)³)
-  RooGenericPdf acceptance("acceptance", "1-1/(1+(@0*@1)**3)", RooArgList(turnon, tau));
+  // NB: acceptance is not a PDF by nature
+  RooFormulaVar acceptance("acceptance", "1-1/(1+(@0*@1)**3)", RooArgList(turnon, tau)); // for fit
+  RooGenericPdf acceptancePdf("acceptancePdf", "@0", RooArgList(acceptance)); // for plot
 
-  RooProdPdf Model("Model", "Acceptance model", decay, acceptance);
-  RooFitResult *fitptr = Model.fitTo(dataset, Range(0.0001, 0.01), Save(true)); // SumW2Error(kTRUE), Strategy(2),
+  RooEffProd Model("Model", "Acceptance model", decay, acceptance);
+  // RooProdPdf Model("Model", "Acceptance model", decay, acceptance);
+  Model.fitTo(dataset, Range(0.0001, 0.01)); // SumW2Error(kTRUE), Strategy(2),
+  // RooFitResult *fitptr = Model.fitTo(dataset, Range(0.0001, 0.01), Save(true)); // SumW2Error(kTRUE), Strategy(2),
 
-  decay.Print("t");
+  acceptance.Print("t");
 
   RooPlot *tframe1 = tau.frame(Name("pfit"), Title("Lifetime acceptance with Monte Carlo"));
   dataset.plotOn(tframe1, MarkerStyle(kFullTriangleUp));
   Model  .plotOn(tframe1);
 
   RooPlot *tframe2 = tau.frame(Name("pmodel"), Title("a(t) = exp(t/#Gamma_{s}) #times acc(t)"));
-  wdataset.plotOn(tframe2, MarkerStyle(kFullTriangleUp)); // , RefreshNorm()
-  Model     .plotOn(tframe2, LineColor(kAzure));
+  wdataset  .plotOn(tframe2, MarkerStyle(kFullTriangleUp)); // , RefreshNorm()
   decay     .plotOn(tframe2, LineColor(kRed));
-  acceptance.plotOn(tframe2, LineColor(kGreen));
+  // decay     .plotOn(tframe2, LineColor(kRed-9), LineStyle(2), Components(decayL));
+  // decay     .plotOn(tframe2, LineColor(kRed-1), LineStyle(2), Components(decayH));
+  acceptancePdf.plotOn(tframe2, LineColor(kGreen));
+  Model     .plotOn(tframe2, LineColor(kAzure));
 
-  TCanvas canvas("canvas", "canvas", 960, 400);
-  canvas .Divide(2,1);
-  canvas .cd(1);
+  TCanvas *canvas = new TCanvas("canvas", "canvas", 960, 400);
+  canvas ->Divide(2,1);
+  canvas ->cd(1);
   tframe1->Draw();
-  canvas .cd(2);
+  canvas ->cd(2);
   tframe2->Draw();
+
+  std::string ofile(trigger+"_ltFit.pdf");
+  canvas ->Print(ofile.c_str());
+  canvas ->Print(".png");
 
   // for (unsigned int i = 0; i < 3; ++i) {
   //   TIter primitivesItr(canvas.cd(i)->GetListOfPrimitives());
@@ -111,7 +121,6 @@ void ltFit() //TTree *ftree)
   //   }
   // }
 
-  canvas .Print(".png");
   return;
 }
 
