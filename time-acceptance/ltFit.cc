@@ -9,8 +9,7 @@
 #include <TCanvas.h>
 #include <TPad.h>
 // #include <TSystem.h>
-
-#include <TCollection.h>
+// #include <TCollection.h>
 
 #include <RooGlobalFunc.h>
 #include <RooPlot.h>
@@ -32,8 +31,6 @@
 
 using namespace RooFit;
 
-
-// void fitDataset() //TTree *ftree)
 
 void ltFit() //TTree *ftree)
 {
@@ -82,17 +79,14 @@ void ltFit() //TTree *ftree)
   RooGenericPdf acceptancePdf("acceptancePdf", "@0", RooArgList(acceptance)); // for plot
 
   RooEffProd Model("Model", "Acceptance model", decay, acceptance);
-  // RooProdPdf Model("Model", "Acceptance model", decay, acceptance);
   Model.fitTo(dataset, Range(0.0001, 0.01)); // SumW2Error(kTRUE), Strategy(2),
   // RooFitResult *fitptr = Model.fitTo(dataset, Range(0.0001, 0.01), Save(true)); // SumW2Error(kTRUE), Strategy(2),
-
-  acceptance.Print("t");
 
   RooPlot *tframe1 = tau.frame(Name("pfit"), Title("Lifetime acceptance with Monte Carlo"));
   dataset.plotOn(tframe1, MarkerStyle(kFullTriangleUp));
   Model  .plotOn(tframe1);
 
-  RooPlot *tframe2 = tau.frame(Name("pmodel"), Title("a(t) = exp(t/#Gamma_{s}) #times acc(t)"));
+  RooPlot *tframe2 = tau.frame(Name("pmodel"), Title("a(t) = decay(t) #times acc(t)"));
   wdataset  .plotOn(tframe2, MarkerStyle(kFullTriangleUp)); // , RefreshNorm()
   decay     .plotOn(tframe2, LineColor(kRed));
   // decay     .plotOn(tframe2, LineColor(kRed-9), LineStyle(2), Components(decayL));
@@ -121,50 +115,5 @@ void ltFit() //TTree *ftree)
   //   }
   // }
 
-  return;
-}
-
-
-void wtltFit()
-{
-  TFile rfile("smalltree.root", "read");
-  TTree *ftree = (TTree*) rfile.Get("ftree");
-
-  // acceptance
-  RooRealVar tau("tau", "lifetime in ns", 0.0001, 0.01);
-  RooRealVar turnon("turnon", "turnon", 500, 5000);
-
-  // when using weights
-  RooRealVar wt("wt", "wt", 0, 1e5);
-  // trigger
-  std::string trigger("HLT2Topo4Body");
-  RooRealVar HLT2Topo4Body(trigger.c_str(), trigger.c_str(), 0, 2);
-
-  // weighted dataset
-  std::string cut(trigger+">0");
-  RooDataSet dataset("dataset", "Weighted dataset", RooArgSet(tau, wt, HLT2Topo4Body),
-		     WeightVar(wt), Import(*ftree), Cut(cut.c_str()));
-
-  // acceptance model with weighted dataset
-  RooGenericPdf accModel("accModel", "(@0*@1)**3/(1+(@0*@1)**3)", RooArgList(turnon, tau));
-  // RooGenericPdf accModel("accModel", "1-1/(1+(@0*@1)**3)", RooArgList(turnon, tau));
-  accModel.fitTo(dataset, SumW2Error(kTRUE), Strategy(2), Range(0.0001, 0.008));
-
-  RooPlot *tframe1 = tau.frame(Title("Lifetime acceptance with Monte Carlo"));
-  dataset.plotOn(tframe1, MarkerStyle(kFullTriangleUp));
-  accModel.plotOn(tframe1);
-
-  RooPlot *tframe2 = tau.frame(Range(0.0001,0.002), Title("Lifetime acceptance with Monte Carlo"));
-  dataset.plotOn(tframe2, MarkerStyle(kFullTriangleUp));
-  accModel.plotOn(tframe2);
-
-  TCanvas canvas("canvas", "canvas", 960, 400);
-  canvas .Divide(2,1);
-  canvas .cd(1);
-  tframe1->Draw();
-  canvas .cd(2);
-  tframe2->Draw();
-
-  canvas .Print(".png");
   return;
 }
