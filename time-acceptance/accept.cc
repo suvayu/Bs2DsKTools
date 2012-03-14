@@ -140,14 +140,14 @@ TH1D* getLifetime(TTree* ftree, bool doAcc)
     name  = "hltime";
   }
 
-  if (doAcc) weight  = "*exp(tau*1e3/1.472)";
-  trigger = "(HLT2Topo4Body>0)";
+  if (doAcc) weight  = "*exp(time*1e3/1.472)";
+  trigger = "(HLT2Topo4BodyTOS>0)";
   // trigger = "(1)";
   select  = trigger + weight;
 
   // binning for ps, tree has lifetimes in ns
   TH1D* hist = new TH1D(name.Data(), title.Data(), 100, 0, 10);
-  ftree->Draw("tau*1e3>>" + name, select.Data());
+  ftree->Draw("time*1e3>>" + name, select.Data());
   return hist;
 }
 
@@ -169,7 +169,7 @@ TH1D* getLifetime(TEntryList* felist, TString cuts, bool doAcc)
 
   if (doAcc) weight  = "*exp(lab0_TAU*1e3/1.472)";
   // cuts = "(lab0Hlt2TopoOSTF4BodyDecision_TOS>0)";
-  // cuts = "(HLT2Topo4Body>0)";
+  // cuts = "(HLT2Topo4BodyTOS>0)";
   if (cuts == "") select = "(1)" + weight;
   else select = "(" + cuts + ")" + weight;
 

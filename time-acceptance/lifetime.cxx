@@ -137,17 +137,18 @@ void lifetime::Loop(TTree &ftree)
    ftree.Branch("Bsmass" , &lab0_MM);
    ftree.Branch("BsMom"  , &BsMom);
    ftree.Branch("hID"    , &lab1_TRUEID);
-   ftree.Branch("tau"    , &lab0_TAU);
-   ftree.Branch("truetau", &lab0_TRUETAU);
+   ftree.Branch("time"   , &lab0_TAU);
+   ftree.Branch("truetime", &lab0_TRUETAU);
    ftree.Branch("wt"     , &wt);
    ftree.Branch("truewt" , &truewt);
    ftree.Branch("oscil"  , &lab0_OSCIL);
    ftree.Branch("OWNPV"  , &OWNPV);
    ftree.Branch("ENDVX"  , &ENDVX);
 
-   ftree.Branch("HLT2Topo4Body" , &lab0Hlt2TopoOSTF4BodyDecision_TOS);
-   ftree.Branch("HLT2Topo2Body" , &lab0Hlt2TopoOSTF2BodyDecision_TOS);
-   ftree.Branch("HLT2TopoIncPhi", &lab0Hlt2IncPhiDecision_TOS);
+   ftree.Branch("HLT2Topo4BodyTOS" , &lab0Hlt2TopoOSTF4BodyDecision_TOS);
+   ftree.Branch("HLT2Topo3BodyTOS" , &lab0Hlt2TopoOSTF3BodyDecision_TOS);
+   ftree.Branch("HLT2Topo2BodyTOS" , &lab0Hlt2TopoOSTF2BodyDecision_TOS);
+   ftree.Branch("HLT2TopoIncPhiTOS", &lab0Hlt2IncPhiDecision_TOS);
 
    Long64_t nbytes = 0, nb = 0;
    // for (Long64_t jentry=0; jentry<nentries;jentry+=10) // for testing
@@ -186,18 +187,18 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
    ftree.Branch("Bsmass" , &lab0_MM);
    ftree.Branch("BsMom"  , &BsMom);
    ftree.Branch("hID"    , &lab1_TRUEID);
-   ftree.Branch("tau"    , &lab0_TAU);
-   ftree.Branch("truetau", &lab0_TRUETAU);
+   ftree.Branch("time"   , &lab0_TAU);
+   ftree.Branch("truetime", &lab0_TRUETAU);
    ftree.Branch("wt"     , &wt);
    ftree.Branch("truewt" , &truewt);
    ftree.Branch("oscil"  , &lab0_OSCIL);
    ftree.Branch("OWNPV"  , &OWNPV);
    ftree.Branch("ENDVX"  , &ENDVX);
 
-   ftree.Branch("HLT2Topo4Body" , &lab0Hlt2TopoOSTF4BodyDecision_TOS);
-   ftree.Branch("HLT2Topo3Body" , &lab0Hlt2TopoOSTF3BodyDecision_TOS);
-   ftree.Branch("HLT2Topo2Body" , &lab0Hlt2TopoOSTF2BodyDecision_TOS);
-   ftree.Branch("HLT2TopoIncPhi", &lab0Hlt2IncPhiDecision_TOS);
+   ftree.Branch("HLT2Topo4BodyTOS" , &lab0Hlt2TopoOSTF4BodyDecision_TOS);
+   ftree.Branch("HLT2Topo3BodyTOS" , &lab0Hlt2TopoOSTF3BodyDecision_TOS);
+   ftree.Branch("HLT2Topo2BodyTOS" , &lab0Hlt2TopoOSTF2BodyDecision_TOS);
+   ftree.Branch("HLT2TopoIncPhiTOS", &lab0Hlt2IncPhiDecision_TOS);
 
    Long64_t nbytes = 0, nb = 0;
    // for (Long64_t jentry=0; jentry<nentries;jentry+=10) // for testing

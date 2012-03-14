@@ -38,34 +38,34 @@ void ltFit() //TTree *ftree)
   TTree *ftree = (TTree*) rfile.Get("ftree");
 
   // acceptance
-  RooRealVar tau("tau", "lifetime in ns", 0.0001, 0.01);
+  RooRealVar time("time", "lifetime in ns", 0.0001, 0.01);
   RooRealVar turnon("turnon", "turnon", 500, 5000);
 
   // trigger:
-  // HLT2Topo4Body
-  // HLT2Topo3Body
-  // HLT2Topo2Body
-  // HLT2TopoIncPhi
-  std::string trigger("HLT2Topo4Body");
-  RooRealVar HLT2Topo4Body(trigger.c_str(), trigger.c_str(), 0, 2);
+  // HLT2Topo4BodyTOS
+  // HLT2Topo3BodyTOS
+  // HLT2Topo2BodyTOS
+  // HLT2TopoIncPhiTOS
+  std::string trigger("HLT2Topo4BodyTOS");
+  RooRealVar triggerVar(trigger.c_str(), trigger.c_str(), 0, 2);
 
   // dataset
   std::string cut(trigger+">0");
-  RooDataSet dataset("dataset", "Dataset", RooArgSet(tau, HLT2Topo4Body),
+  RooDataSet dataset("dataset", "Dataset", RooArgSet(time, triggerVar),
 		     Import(*ftree), Cut(cut.c_str()));
 
   // when using weights
   RooRealVar wt("wt", "wt", 0, 1e5);
   // weighted dataset
-  RooDataSet wdataset("wdataset", "Weighted dataset", RooArgSet(tau, wt, HLT2Topo4Body),
+  RooDataSet wdataset("wdataset", "Weighted dataset", RooArgSet(time, wt, triggerVar),
 		      WeightVar(wt), Import(*ftree), Cut(cut.c_str()));
 
   // Decay function: exp(-t*1e3/1.472)
-  // RooExponential decay("decay", "Decay function for the B_{s}", tau, // (1)
+  // RooExponential decay("decay", "Decay function for the B_{s}", time, // (1)
   // 		       RooRealConstant::value(-1E3/1.472));
-  RooExponential decayH("decayH", "Decay function for the B_{s,H}", tau,
+  RooExponential decayH("decayH", "Decay function for the B_{s,H}", time,
 			RooRealConstant::value(-1E3/1.536875));
-  RooExponential decayL("decayL", "Decay function for the B_{s,L}", tau,
+  RooExponential decayL("decayL", "Decay function for the B_{s,L}", time,
 			RooRealConstant::value(-1E3/1.407125));
   RooAddPdf decay("decay", "Decay function for the B_{s}", RooArgList(decayH, decayL),
 		  RooRealConstant::value(0.5)); // (2)
@@ -75,18 +75,18 @@ void ltFit() //TTree *ftree)
 
   // acceptance model: 1-1/(1+(at)³)
   // NB: acceptance is not a PDF by nature
-  RooFormulaVar acceptance("acceptance", "1-1/(1+(@0*@1)**3)", RooArgList(turnon, tau)); // for fit
+  RooFormulaVar acceptance("acceptance", "1-1/(1+(@0*@1)**3)", RooArgList(turnon, time)); // for fit
   RooGenericPdf acceptancePdf("acceptancePdf", "@0", RooArgList(acceptance)); // for plot
 
   RooEffProd Model("Model", "Acceptance model", decay, acceptance);
   Model.fitTo(dataset, Range(0.0001, 0.01)); // SumW2Error(kTRUE), Strategy(2),
   // RooFitResult *fitptr = Model.fitTo(dataset, Range(0.0001, 0.01), Save(true)); // SumW2Error(kTRUE), Strategy(2),
 
-  RooPlot *tframe1 = tau.frame(Name("pfit"), Title("Lifetime acceptance with Monte Carlo"));
+  RooPlot *tframe1 = time.frame(Name("pfit"), Title("Lifetime acceptance with Monte Carlo"));
   dataset.plotOn(tframe1, MarkerStyle(kFullTriangleUp));
   Model  .plotOn(tframe1);
 
-  RooPlot *tframe2 = tau.frame(Name("pmodel"), Title("a(t) = decay(t) #times acc(t)"));
+  RooPlot *tframe2 = time.frame(Name("pmodel"), Title("a(t) = decay(t) #times acc(t)"));
   wdataset  .plotOn(tframe2, MarkerStyle(kFullTriangleUp)); // , RefreshNorm()
   decay     .plotOn(tframe2, LineColor(kRed));
   // decay     .plotOn(tframe2, LineColor(kRed-9), LineStyle(2), Components(decayL));
