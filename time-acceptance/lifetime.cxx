@@ -188,6 +188,8 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
    ftree.Branch("BsMom"  , &BsMom);
    ftree.Branch("hID"    , &lab1_TRUEID);
    ftree.Branch("time"   , &lab0_TAU);
+   ftree.Branch("dt"     , &lab0_TAUERR);
+   ftree.Branch("tchi2"  , &lab0_TAUCHI2);
    ftree.Branch("truetime", &lab0_TRUETAU);
    ftree.Branch("wt"     , &wt);
    ftree.Branch("truewt" , &truewt);
