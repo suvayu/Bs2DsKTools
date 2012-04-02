@@ -213,6 +213,8 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
        // if (( UnbiasedSelection() == false ) or ( lab1_PIDK < 5 )) continue;
        if (( CommonSelection() == false ) or ( lab1_PIDK < 5 )) continue;
        // if ( pPIDcut != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
+       if (lab0_TAUERR <= 0 or lab0_TAUERR >= 0.0002 or
+	   lab0_TAUERR != lab0_TAUERR) continue;
 
        wt       = TMath::Exp(lab0_TAU*1e3/1.472);
        truewt   = TMath::Exp(lab0_TRUETAU*1e3/1.472);
