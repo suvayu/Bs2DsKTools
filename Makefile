@@ -29,60 +29,60 @@ HASTHREAD    := $(shell $(ROOTCONFIG) --has-thread)
 ROOTDICTTYPE := $(shell $(ROOTCONFIG) --dicttype)
 ROOTCINT     := rootcint
 
-PROJROOT     = $(PWD)
-INCDIR       = $(PROJROOT)/include
-SRCDIR       = $(PROJROOT)/src
-LIBDIR       = $(PROJROOT)/lib
-DICTDIR      = $(PROJROOT)/dict
-DOCDIR       = $(PROJROOT)/docs
-OBJDIR       = $(SRCDIR)
+# directories
+PROJROOT     =  $(PWD)
+INCDIR       =  $(PROJROOT)/include
+SRCDIR       =  $(PROJROOT)/src
+LIBDIR       =  $(PROJROOT)/lib
+DICTDIR      =  $(PROJROOT)/dict
+DOCDIR       =  $(PROJROOT)/docs
+OBJDIR       =  $(LIBDIR)
+TESTDIR      =  $(PROJROOT)/tests
 
-SRC          =
-SRC          += $(SRCDIR)/readMCTree.cxx
-SRC          += $(SRCDIR)/readDataTree.cxx
-SRC          += $(SRCDIR)/lifetime.cxx
-# SRC          += $(SRCDIR)/accept.cc
+# library sources
+LIBSRC       =
+LIBSRC       += readMCTree.cxx
+LIBSRC       += readDataTree.cxx
+LIBSRC       += lifetime.cxx
 
-OBJS     =  $(SRC:%.cxx=%.o)
+# BINSRC       += accept.cc
+# BINSRC       += oangle.cc
+# BINSRC       += PIDsel.cc
 
+OBJS         =  $(LIBSRC:%.cxx=%.o)
+
+LIBS         =
+LIBS         += libreadTree.so
+
+SRCFILES     =  $(LIBSRC:%=$(SRCDIR)/%)
+OBJFILES     =  $(OBJS:%=$(OBJDIR)/%)
+LIBFILES     =  $(LIBS:%=$(LIBDIR)/%)
 
 #------------------------------------------------------------------------------
 
 # .SUFFIXES: .$(SrcSuf) .$(ObjSuf) .$(DllSuf)
 # .PHONY:    Aclock Hello Tetris
 
-all:		libreadTree.so
+all:		$(LIBFILES)
 
-libreadTree.so:	$(OBJS) | $(LIBDIR)
-	$(LD) $(SOFLAGS) $(LDFLAGS) $(ROOTLIBS) $^ -o $(LIBDIR)/$@
+$(LIBFILES):	$(OBJFILES) | $(LIBDIR)
+	$(LD) $(SOFLAGS) $(LDFLAGS) $(ROOTLIBS) $^ -o $@
 	@echo "$@ done"
 
-# accept.so:		$()
-
-$(SRCDIR)/%.o:	$(SRCDIR)/%.cxx
+$(OBJDIR)/%.o:	$(SRCDIR)/%.cxx | $(OBJDIR)
 	$(CXX) $(CXXFLAGS) -I$(ROOTCFLAGS) -I$(INCDIR) $< -o $@
 
 $(LIBDIR):
 	@mkdir -p $(LIBDIR)
 
-clean:		clean-obj
-	@rm -f $(LIBDIR)/*
+clean:		clean-obj clean-so
 
 clean-obj:
-	@rm -f $(OBJDIR)/*.o
+	rm -f $(OBJDIR)/*.o
 
-# distclean:      clean
-# 		@rm -f $(PROGRAMS) $(EVENTSO) $(EVENTLIB) *Dict.* *.def *.exp \
-# 		   *.root *.ps *.so *.lib *.dll *.d *.log .def so_locations \
-# 		   files/*
-# 		@rm -rf cxx_repository
-# 		-@cd RootShower && $(MAKE) distclean
-# 		-@cd rhtml && $(MAKE) distclean
-# 		-@cd RootIDE && $(MAKE) distclean
-# 		-@cd periodic && $(MAKE) distclean
-# 		-@cd histviewer && $(MAKE) distclean
+clean-so:
+	rm -f $(LIBDIR)/*.so
 
-# .SUFFIXES: .$(SrcSuf)
 
 # ###
 # Event.$(ObjSuf): Event.h
