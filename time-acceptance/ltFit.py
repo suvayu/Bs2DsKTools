@@ -109,6 +109,9 @@ acceptancePdf   = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
 # Define PDF and fit
 Model           = RooEffProd('Model', 'Acceptance model', decay, acceptance)
 
+# debug
+# assert False
+
 Model.fitTo(dataset, # RooFit.Range(epsilon, 0.01), # cause of initial crashes
             RooFit.ConditionalObservables(dtargset),
             RooFit.NumCPU(2), RooFit.Optimize(True)) #, RooFit.Verbose(True))
@@ -118,6 +121,14 @@ tframe1         = time.frame(RooFit.Name('pfit'),
 dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
 Model  .plotOn(tframe1, RooFit.ProjWData(dtargset, dataset, True),
                RooFit.LineColor(kBlue))
+
+# # testing
+# decay  .plotOn(tframe1, RooFit.LineColor(kRed))
+# acceptancePdf.plotOn(tframe1, RooFit.LineColor(kGreen))
+
+# canvas          = TCanvas('canvas', 'canvas', 480, 400)
+# tframe1.Draw()
+# canvas.Print('.png')
 
 tframe2         = time.frame(RooFit.Name('pmodel'),
                              RooFit.Title('a(t) = decay(t) #times acc(t)'))
