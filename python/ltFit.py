@@ -24,9 +24,9 @@ from ROOT import RooExponential, RooDecay, RooGaussModel
 # setup
 gROOT.SetBatch(True)
 
-# Get tree
-ffile           = TFile('../data/smalltree.root', 'read')
-ftree           = ffile.Get('ftree')
+# # Get tree
+# ffile           = TFile('data/smalltree.root', 'read')
+# ftree           = ffile.Get('ftree')
 
 # observables
 time            = RooRealVar('time', 'B_{s} lifetime in ns', epsilon, 0.01)
@@ -35,7 +35,8 @@ dt              = RooRealVar('dt', 'Error in lifetime measurement (ns)',
 dt.setBins(100)
 
 # temporary RooArgSet with dt to circumvent scoping issues for nested
-# temporary obejcts
+# temporary objects
+timeargset        = RooArgSet(time)
 dtargset          = RooArgSet(dt)
 
 # parameters
@@ -51,35 +52,30 @@ trigger         = 'HLT2Topo3BodyTOS'
 triggerVar      = RooRealVar(trigger, trigger, 0, 2)
 
 # dataset
-cut             = trigger+'>0' # hack to avoid entries with negative errors
-dataset         = RooDataSet('dataset', 'Dataset',
-                             # RooArgSet(time, dt, triggerVar),
-                             RooArgSet(time, triggerVar),
-                             RooFit.Import(ftree), RooFit.Cut(cut))
+cut             = trigger+'>0'
+# dataset         = RooDataSet('dataset', 'Dataset',
+#                              # RooArgSet(time, dt, triggerVar),
+#                              RooArgSet(time, triggerVar),
+#                              RooFit.Import(ftree), RooFit.Cut(cut))
 
-gaussian1       = RooGaussian('gaussian1', 'Gaussian 1', dt,
+gaussian        = RooGaussian('gaussian', 'Gaussian', dt,
                               RooRealConstant.value(4E-5),
                               RooRealConstant.value(2E-5))
-gaussian2       = RooGaussian('gaussian2', 'Gaussian 2', dt,
-                              RooRealConstant.value(4E-5),
-                              RooRealConstant.value(1E-5))
-gaussian        = RooAddPdf('gaussian', 'Double gaussian', gaussian1, gaussian2,
-                            RooRealConstant.value(0.5))
-dtdataset       = gaussian.generate(dtargset, RooFit.Name('dtdataset'),
-                                    RooFit.NumEvents(dataset.numEntries()))
+# dtdataset       = gaussian.generate(dtargset, RooFit.Name('dtdataset'),
+#                                     RooFit.NumEvents(dataset.numEntries()))
 
-dataset.merge(dtdataset)
+# dataset.merge(dtdataset)
 
-# debug
-dataset.Print('v')
-dtdataset.Print('v')
+# # debug
+# dataset.Print('v')
+# dtdataset.Print('v')
 
-# weighted dataset
-wt              = RooRealVar('wt', 'wt', 0, 1e5)
-wdataset        = RooDataSet('wdataset', 'Weighted dataset',
-                             RooArgSet(time, wt, triggerVar),
-                             RooFit.WeightVar(wt), RooFit.Import(ftree),
-                             RooFit.Cut(cut))
+# # weighted dataset
+# wt              = RooRealVar('wt', 'wt', 0, 1e5)
+# wdataset        = RooDataSet('wdataset', 'Weighted dataset',
+#                              RooArgSet(time, wt, triggerVar),
+#                              RooFit.WeightVar(wt), RooFit.Import(ftree),
+#                              RooFit.Cut(cut))
 
 # resolution model
 mean            = RooRealVar("mean", "Mean", 0)
@@ -108,40 +104,55 @@ acceptancePdf   = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
 
 # Define PDF and fit
 Model           = RooEffProd('Model', 'Acceptance model', decay, acceptance)
+modelargset     = RooArgSet(Model)
+
+FullModel       = RooProdPdf('FullModel', 'Acceptance model with errors',
+                             RooArgSet(gaussian), RooFit.Conditional(modelargset, timeargset))
 
 # debug
 # assert False
 
-Model.fitTo(dataset, # RooFit.Range(epsilon, 0.01), # cause of initial crashes
-            RooFit.ConditionalObservables(dtargset),
-            RooFit.NumCPU(2), RooFit.Optimize(True)) #, RooFit.Verbose(True))
+# Model.fitTo(dataset, # RooFit.Range(epsilon, 0.01), # cause of initial crashes
+#             RooFit.ConditionalObservables(dtargset),
+#             RooFit.NumCPU(2), RooFit.Optimize(True)) #, RooFit.Verbose(True))
+
+toydataset      = FullModel.generate(RooArgSet(time,dt), 10000,
+                                     RooFit.Name('toydataset'),
+                                     RooFit.Verbose(True))
+
+# Model.fitTo(toydataset, RooFit.ConditionalObservables(dtargset),
+#             RooFit.NumCPU(4), RooFit.Optimize(True), RooFit.Verbose(True))
+FullModel.fitTo(toydataset, RooFit.NumCPU(4), RooFit.Optimize(True), RooFit.Verbose(True))
+
+toydataset.Print('v')
+FullModel.Print('v')
 
 tframe1         = time.frame(RooFit.Name('pfit'),
                              RooFit.Title('Lifetime acceptance with Monte Carlo'))
-dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
-Model  .plotOn(tframe1, RooFit.ProjWData(dtargset, dataset, True),
+toydataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
+Model  .plotOn(tframe1, RooFit.ProjWData(dtargset, toydataset, True),
                RooFit.LineColor(kBlue))
 
-# # testing
-# decay  .plotOn(tframe1, RooFit.LineColor(kRed))
-# acceptancePdf.plotOn(tframe1, RooFit.LineColor(kGreen))
+# testing
+decay  .plotOn(tframe1, RooFit.LineColor(kRed))
+acceptancePdf.plotOn(tframe1, RooFit.LineColor(kGreen))
 
-# canvas          = TCanvas('canvas', 'canvas', 480, 400)
-# tframe1.Draw()
-# canvas.Print('../plots/canvas.png')
-
-tframe2         = time.frame(RooFit.Name('pmodel'),
-                             RooFit.Title('a(t) = decay(t) #times acc(t)'))
-wdataset     .plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
-decay        .plotOn(tframe2, RooFit.LineColor(kRed))
-Model        .plotOn(tframe2, RooFit.LineColor(kAzure))
-acceptancePdf.plotOn(tframe2, RooFit.LineColor(kGreen))
-
-canvas          = TCanvas('canvas', 'canvas', 960, 400)
-canvas .Divide(2,1)
-canvas .cd(1)
+canvas          = TCanvas('canvas', 'canvas', 480, 400)
 tframe1.Draw()
-canvas .cd(2)
-tframe2.Draw()
-canvas.Print('../plots/'+trigger+'_ltFit_py.png')
-canvas.Print('../plots/'+trigger+'_ltFit_py.pdf')
+canvas.Print('plots/canvas.png')
+
+# tframe2         = time.frame(RooFit.Name('pmodel'),
+#                              RooFit.Title('a(t) = decay(t) #times acc(t)'))
+# wdataset     .plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
+# decay        .plotOn(tframe2, RooFit.LineColor(kRed))
+# Model        .plotOn(tframe2, RooFit.LineColor(kAzure))
+# acceptancePdf.plotOn(tframe2, RooFit.LineColor(kGreen))
+
+# canvas          = TCanvas('canvas', 'canvas', 960, 400)
+# canvas .Divide(2,1)
+# canvas .cd(1)
+# tframe1.Draw()
+# canvas .cd(2)
+# tframe2.Draw()
+# canvas.Print('../plots/'+trigger+'_ltFit_py.png')
+# canvas.Print('../plots/'+trigger+'_ltFit_py.pdf')
