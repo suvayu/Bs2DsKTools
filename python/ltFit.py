@@ -25,7 +25,7 @@ from ROOT import RooExponential, RooDecay, RooGaussModel
 gROOT.SetBatch(True)
 
 # Get tree
-ffile           = TFile('smalltree.root', 'read')
+ffile           = TFile('../data/smalltree.root', 'read')
 ftree           = ffile.Get('ftree')
 
 # observables
@@ -128,7 +128,7 @@ Model  .plotOn(tframe1, RooFit.ProjWData(dtargset, dataset, True),
 
 # canvas          = TCanvas('canvas', 'canvas', 480, 400)
 # tframe1.Draw()
-# canvas.Print('.png')
+# canvas.Print('../plots/canvas.png')
 
 tframe2         = time.frame(RooFit.Name('pmodel'),
                              RooFit.Title('a(t) = decay(t) #times acc(t)'))
@@ -143,5 +143,5 @@ canvas .cd(1)
 tframe1.Draw()
 canvas .cd(2)
 tframe2.Draw()
-canvas.Print(trigger+'_ltFit_py.png')
-canvas.Print(trigger+'_ltFit_py.pdf')
+canvas.Print('../plots/'+trigger+'_ltFit_py.png')
+canvas.Print('../plots/'+trigger+'_ltFit_py.pdf')
