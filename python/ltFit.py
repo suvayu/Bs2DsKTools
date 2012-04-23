@@ -51,6 +51,7 @@ from ROOT import RooGenericPdf, RooEffProd, RooAddPdf, RooProdPdf, RooHistPdf
 from ROOT import RooDataSet, RooDataHist
 from ROOT import RooDecay, RooGaussModel
 
+_import = getattr(RooWorkspace, 'import')
 
 def get_dataset(argset, isToy=True, PDF=False):
     """Return a dataset.
@@ -226,6 +227,17 @@ def main(fullPDF, isToy):
     # tframe2.Draw()
     # canvas.Print('plots/'+trigger+'_ltFit_py.png')
     # canvas.Print('plots/'+trigger+'_ltFit_py.pdf')
+
+    # Persistify variables, PDFs and datasets
+    workspace = RooWorkspace('workspace','Workspace with PDFs and dataset after fit')
+    supervarargset = RooArgSet(time, dt, turnon, exponent)
+    superpdfargset = RooArgSet(PDF, errorPdf, Model, acceptance, decay, resmodel)
+    _import(workspace, supervarargset)
+    _import(workspace, superpdfargset)
+    _import(workspace, dataset)
+    _import(workspace, datahist)
+    _import(workspace, tframe1)
+    workspace.writeToFile('data/fitresult.root', True)
 
 
 if __name__ == "__main__":
