@@ -147,28 +147,47 @@ def main(fullPDF, isToy):
     Model = RooEffProd('Model', 'Acceptance model', decay, acceptance)
 
     if fullPDF:
-        # Assuming Gaussian time error
-        gaussian = RooGaussian('gaussian', 'Gaussian', dt,
-                                      RooRealConstant.value(4E-5),
-                                      RooRealConstant.value(2E-5))
+        if isToy:
+            # Assuming Gaussian time error
+            errorPdf = RooGaussian('errorPdf', 'Time error Gaussian PDF', dt,
+                                   RooRealConstant.value(4E-5),
+                                   RooRealConstant.value(2E-5))
+        else:
+            argset = RooArgSet(time,dt)
+            try:
+                dataset = get_dataset(argset, isToy, False)
+            except TypeError:
+                print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
+
+            tmpdatahist = dataset.binnedClone('datahist','Binned data')
+            datahist = tmpdatahist.reduce(dtargset)
+            del tmpdatahist
+
+            errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
+                                   dtargset, datahist)
+
         modelargset = RooArgSet(Model)
         FullModel = RooProdPdf('FullModel', 'Acceptance model with errors',
-                               RooArgSet(gaussian),
+                               RooArgSet(errorPdf),
                                RooFit.Conditional(modelargset, timeargset))
         PDF = FullModel
     else:
         PDF = Model
 
-    argset = RooArgSet(time,dt)
-    try:
-        dataset = get_dataset(argset, True, PDF)
-    except TypeError:
-        print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
+    if isToy:
+        argset = RooArgSet(time,dt)
+        try:
+            dataset = get_dataset(argset, isToy, PDF)
+        except TypeError:
+            print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
     # PDF.fitTo(dataset, RooFit.ConditionalObservables(dtargset),
     #           RooFit.NumCPU(4), RooFit.Optimize(True), RooFit.Verbose(True))
     PDF.fitTo(dataset, RooFit.NumCPU(4), RooFit.Optimize(True),
               RooFit.Verbose(True))
+
+    # Debug
+    dataset.Print('v')
     PDF.Print('v')
 
     # # Weighted dataset
@@ -210,4 +229,4 @@ def main(fullPDF, isToy):
 
 
 if __name__ == "__main__":
-    main(True, True)
+    main(True, False)
