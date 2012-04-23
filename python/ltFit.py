@@ -198,8 +198,8 @@ def main(fullPDF, isToy):
     #                              RooFit.WeightVar(wt), RooFit.Import(ftree),
     #                              RooFit.Cut(cut))
 
-    tframe1 = time.frame(RooFit.Name('pfit'),
-                         RooFit.Title('Lifetime acceptance with Monte Carlo'))
+    tframe1 = time.frame(RooFit.Name('ptime'),
+                         RooFit.Title('Projection on time'))
     dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
     Model.plotOn(tframe1, RooFit.ProjWData(dtargset, dataset, True),
                  RooFit.LineColor(kBlue))
@@ -208,9 +208,10 @@ def main(fullPDF, isToy):
     decay.plotOn(tframe1, RooFit.LineColor(kRed))
     acceptancePdf.plotOn(tframe1, RooFit.LineColor(kGreen))
 
-    canvas = TCanvas('canvas', 'canvas', 480, 400)
-    tframe1.Draw()
-    canvas.Print('plots/canvas.png')
+    tframe2 = dt.frame(RooFit.Name('pdt'),
+                       RooFit.Title('Projection on dt'))
+    dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
+    errorPdf.plotOn(tframe2, RooFit.LineColor(kRed))
 
     # tframe2 = time.frame(RooFit.Name('pmodel'),
     #                              RooFit.Title('a(t) = decay(t) #times acc(t)'))
@@ -219,13 +220,13 @@ def main(fullPDF, isToy):
     # Model.plotOn(tframe2, RooFit.LineColor(kAzure))
     # acceptancePdf.plotOn(tframe2, RooFit.LineColor(kGreen))
 
-    # canvas = TCanvas('canvas', 'canvas', 960, 400)
-    # canvas.Divide(2,1)
-    # canvas.cd(1)
-    # tframe1.Draw()
-    # canvas.cd(2)
-    # tframe2.Draw()
-    # canvas.Print('plots/'+trigger+'_ltFit_py.png')
+    canvas = TCanvas('canvas', 'canvas', 960, 400)
+    canvas.Divide(2,1)
+    canvas.cd(1)
+    tframe1.Draw()
+    canvas.cd(2)
+    tframe2.Draw()
+    canvas.Print('plots/canvas.png')
     # canvas.Print('plots/'+trigger+'_ltFit_py.pdf')
 
     # Persistify variables, PDFs and datasets
