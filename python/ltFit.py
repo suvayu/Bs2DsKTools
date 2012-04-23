@@ -52,7 +52,7 @@ from ROOT import RooDataSet, RooDataHist
 from ROOT import RooDecay, RooGaussModel
 
 
-def get_dataset(argset, isToy=True, PDF=False):
+def get_dataset(argset, isToy=True, PDF=False, time=False, dt=False):
     """Return a dataset.
 
     If isToy is True and PDF is a RooFit Probability Distribution
@@ -68,35 +68,48 @@ def get_dataset(argset, isToy=True, PDF=False):
                                    RooFit.Verbose(True))
             dataset.Print('v')
             return dataset
-    # else:
-    #     # Get tree
-    #     ffile = TFile('data/smalltree.root', 'read')
-    #     ftree = ffile.Get('ftree')
+        else:
+            raise TypeError('Wrong type. PDF should inherit from RooAbsPdf.')
+    elif time and dt:
+        timeclass = TClass.GetClass(time.ClassName())
+        dtclass = TClass.GetClass(dt.ClassName())
 
-    #     # Trigger:
-    #     # HLT2Topo4BodyTOS
-    #     # HLT2Topo3BodyTOS
-    #     # HLT2Topo2BodyTOS
-    #     # HLT2TopoIncPhiTOS
-    #     trigger = 'HLT2Topo3BodyTOS'
-    #     triggerVar = RooRealVar(trigger, trigger, 0, 2)
-
-    #     # Dataset
-    #     cut = trigger+'>0'
-    #     dataset = RooDataSet('dataset', 'Dataset',
-    #                          RooArgSet(time, dt, triggerVar),
-    #                          # RooArgSet(time, triggerVar),
-    #                          RooFit.Import(ftree), RooFit.Cut(cut))
-
-    #     # dtdataset = gaussian.generate(dtargset,
-    #     #                               RooFit.Name('dtdataset'),
-    #     #                               RooFit.NumEvents(dataset.numEntries()))
-    #     # dataset.merge(dtdataset)
-
-    #     # # Debug
-    #     # dataset.Print('v')
-    #     # dtdataset.Print('v')
-    #     return dataset
+        istimeOK = timeclass.InheritsFrom(RooAbsReal.Class())
+        isdtOK = dtclass.InheritsFrom(RooAbsReal.Class())
+                                          
+        if istimeOK and isdtOK:
+            # Get tree
+            ffile = TFile('data/smalltree.root', 'read')
+            ftree = ffile.Get('ftree')
+    
+            # Trigger:
+            # HLT2Topo4BodyTOS
+            # HLT2Topo3BodyTOS
+            # HLT2Topo2BodyTOS
+            # HLT2TopoIncPhiTOS
+            trigger = 'HLT2Topo3BodyTOS'
+            triggerVar = RooRealVar(trigger, trigger, 0, 2)
+    
+            # Dataset
+            cut = trigger+'>0'
+            dataset = RooDataSet('dataset', 'Dataset',
+                                 RooArgSet(time, dt, triggerVar),
+                                 # RooArgSet(time, triggerVar),
+                                 RooFit.Import(ftree), RooFit.Cut(cut))
+    
+            # dtdataset = gaussian.generate(dtargset,
+            #                               RooFit.Name('dtdataset'),
+            #                               RooFit.NumEvents(dataset.numEntries()))
+            # dataset.merge(dtdataset)
+    
+            # # Debug
+            # dataset.Print('v')
+            # dtdataset.Print('v')
+            return dataset
+        else:
+            raise TypeError('Wrong type. time and dt should be RooRealVar.')
+    else:
+        raise TypeError('Wrong type for one of the arguments.')
 
 
 def main(fullPDF, isToy):
@@ -165,11 +178,15 @@ def main(fullPDF, isToy):
         PDF = Model
 
     argset = RooArgSet(time,dt)
-    dataset = get_dataset(argset, True, PDF)
+    try:
+        dataset = get_dataset(argset, True, PDF)
+    except TypeError:
+        print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
     # PDF.fitTo(dataset, RooFit.ConditionalObservables(dtargset),
     #           RooFit.NumCPU(4), RooFit.Optimize(True), RooFit.Verbose(True))
-    PDF.fitTo(dataset, RooFit.NumCPU(4), RooFit.Optimize(True), RooFit.Verbose(True))
+    PDF.fitTo(dataset, RooFit.NumCPU(4), RooFit.Optimize(True),
+              RooFit.Verbose(True))
     PDF.Print('v')
 
     # # Weighted dataset
