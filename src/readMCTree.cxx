@@ -859,10 +859,12 @@ void readMCTree::Loop(TTree &, TEntryList &) {}
 bool readMCTree::CommonSelection()
 {
   // selecting only "true" Bs2DsK and Bs2Dsπ events
-  if ( fabs(lab0_TRUEID) == 531 and fabs(lab2_TRUEID) == 431 and
-       ( fabs(lab1_TRUEID) == 321 or fabs(lab1_TRUEID) == 211 ) and
-       ( 5000 < lab0_MM and lab0_MM < 5800 ) and // Bs mass
-       ( 1944 < lab2_MM and lab2_MM < 1990 ) and // Ds mass
-       ( lab1_P < 100000 )) return true;
+  if (lab0_TRUEID*lab0_TRUEID == 531*531 and
+      lab2_TRUEID*lab2_TRUEID == 431*431 and
+      (lab1_TRUEID*lab1_TRUEID == 321*321 or
+       lab1_TRUEID*lab1_TRUEID == 211*211) and
+       (5000. < lab0_MM and lab0_MM < 5800.) and // Bs mass
+       (1944. < lab2_MM and lab2_MM < 1990.) and // Ds mass
+       (lab1_P < 100000.)) return true;
   else return false;
 }
