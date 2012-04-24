@@ -75,6 +75,10 @@ $(OBJDIR)/%.o:	$(SRCDIR)/%.cxx | $(OBJDIR)
 $(LIBDIR):
 	@mkdir -p $(LIBDIR)
 
+# Binaries
+%:     src/%.cc
+	$(CXX) -Wall -fPIC $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) -L$(LIBDIR) -lreadTree $< -o $@
+
 clean:		clean-obj clean-so
 
 clean-obj:
