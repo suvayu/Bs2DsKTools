@@ -45,7 +45,7 @@ from ROOT import TTree, TFile, TCanvas, TPad, TClass
 # RooFit classes
 from ROOT import RooFit, RooGlobalFunc, RooPlot, RooWorkspace, RooFitResult
 from ROOT import RooArgSet, RooArgList
-from ROOT import RooRealVar, RooRealConstant, RooFormulaVar
+from ROOT import RooAbsReal, RooRealVar, RooRealConstant, RooFormulaVar
 from ROOT import RooAbsPdf, RooGaussian
 from ROOT import RooGenericPdf, RooEffProd, RooAddPdf, RooProdPdf, RooHistPdf
 from ROOT import RooDataSet, RooDataHist
@@ -53,6 +53,10 @@ from ROOT import RooDecay, RooGaussModel
 
 # Hack around RooWorkspace.import() and python keyword import clash
 _import = getattr(RooWorkspace, 'import')
+
+# More precise integrals in RooFit
+RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-9)
+RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-9)
 
 def get_dataset(argset, isToy=True, PDF=False):
     """Return a dataset.
@@ -186,7 +190,7 @@ def main(fullPDF, isToy):
     # PDF.fitTo(dataset, RooFit.ConditionalObservables(dtargset),
     #           RooFit.NumCPU(4), RooFit.Optimize(True), RooFit.Verbose(True))
     PDF.fitTo(dataset, RooFit.NumCPU(4), RooFit.Optimize(True),
-              RooFit.Verbose(True))
+              RooFit.Verbose(True), RooFit.Strategy(2))
 
     # Debug
     dataset.Print('v')
