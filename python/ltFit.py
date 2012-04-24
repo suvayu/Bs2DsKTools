@@ -113,7 +113,7 @@ def main(fullPDF, isToy):
 
     # Parameters
     turnon = RooRealVar('turnon', 'turnon', 500, 5000)
-    exponent = RooRealVar('exponent', 'exponent', 2, 4)
+    exponent = RooRealVar('exponent', 'exponent', 1, 7)
 
     # Temporary RooArgSet to circumvent scoping issues for nested
     # temporary objects.
@@ -124,10 +124,10 @@ def main(fullPDF, isToy):
     mean = RooRealVar('mean', 'Mean', 0)
     scale = RooRealVar('scale', 'Per-event time error scale factor', 1)
     resmodel = RooGaussModel('resmodel', 'Time resolution model', time,
-                                    mean, scale, dt)
-                                    # RooRealConstant::value(0), scale, dt)
-                                    # RooRealConstant::value(0), scale,
-                                    # RooRealConstant::value(0.00004))
+                             mean, scale, dt)
+                             # RooRealConstant::value(0), scale, dt)
+                             # RooRealConstant::value(0), scale,
+                             # RooRealConstant::value(0.00004))
 
     # Decay model
     decayH = RooDecay('decayH', 'Decay function for the B_{s,H}',
