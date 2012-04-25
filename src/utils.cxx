@@ -2,7 +2,7 @@
 #include <vector>
 #include <fstream>
 
-#include "utils.hh"
+#include "utils.hxx"
 
 
 TStyle* Style::setStyle()
@@ -92,7 +92,7 @@ std::string& Parsers::replaceAll(std::string& context, const std::string& from, 
 {
   size_t lookHere = 0;
   size_t foundHere;
-  while((foundHere = context.find(from, lookHere)) != string::npos) {
+  while((foundHere = context.find(from, lookHere)) != std::string::npos) {
     context.replace(foundHere, from.size(), to);
     lookHere = foundHere + to.size();
   }

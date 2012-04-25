@@ -14,7 +14,7 @@
 #include "utils.hh"
 #include "readMCTree.hxx"
 #include "readDataTree.hxx"
-#include "PIDsel.hh"
+#include "PIDsel.hxx"
 
 // DsK / Dsπ = 0.067 or 0.081
 // DsK = 403, Dsπ = 6046

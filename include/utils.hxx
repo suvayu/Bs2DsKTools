@@ -1,5 +1,5 @@
-#ifndef __UTILS_HH
-#define __UTILS_HH
+#ifndef __UTILS_HXX
+#define __UTILS_HXX
 
 #include <string>
 
@@ -70,4 +70,4 @@ namespace Parsers {
   std::string& replaceAll(std::string& context, const std::string& from, const std::string& to);
 }
 
-#endif	// __UTILS_HH
+#endif	// __UTILS_HXX

@@ -9,7 +9,7 @@
 #include <TCanvas.h>
 #include <TH1D.h>
 
-#include "utils.hh"
+#include "utils.hxx"
 #include "lifetime.hxx"
 #include "accept.hh"
 
