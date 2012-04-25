@@ -14,18 +14,19 @@
 #include "accept.hh"
 
 
-int accept(bool doSelect)
+int main()
 {
+  bool doSelect = true;
   // remember to delete ftree and felist
   TTree *ftree = NULL;
   TEntryList *felist = NULL;
 
   string fileaccess((doSelect) ? "recreate" : "read");
-  TFile rfile("smalltree.root", fileaccess.c_str());
+  TFile rfile("data/smalltree-new-MC.root", fileaccess.c_str());
 
   // select
   if (doSelect) {
-    TChain * MCChain = initChain("MCChain", "../../ntuples/MC/Merged_Bs2Ds*.root/DecayTree");
+    TChain * MCChain = initChain("MCChain", "../ntuples/MC/Dsh-MC11/Merged_Bs2Ds*BsHypo_BDTG.root/DecayTree");
     lifetime MCsample(MCChain);
     selAccTree(MCsample, ftree, felist); // remember to delete ftree and felist
   } else {
