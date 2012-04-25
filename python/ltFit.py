@@ -111,6 +111,7 @@ def main(fullPDF, isToy):
 
     # Observables
     time = RooRealVar('time', 'B_{s} lifetime in ns', epsilon, 0.01)
+    time.setRange(epsilon, 0.01)
     # Limits determined from tree
     dt = RooRealVar('dt', 'Error in lifetime measurement (ns)', epsilon, 1E-4)
     dt.setBins(100)
@@ -189,7 +190,7 @@ def main(fullPDF, isToy):
 
     # PDF.fitTo(dataset, RooFit.ConditionalObservables(dtargset),
     #           RooFit.NumCPU(4), RooFit.Optimize(True), RooFit.Verbose(True))
-    PDF.fitTo(dataset, RooFit.NumCPU(4), RooFit.Optimize(True),
+    PDF.fitTo(dataset, RooFit.NumCPU(4), RooFit.Optimize(False),
               RooFit.Verbose(True), RooFit.Strategy(2))
 
     # Debug
