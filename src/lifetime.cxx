@@ -83,8 +83,8 @@ void lifetime::Loop()
 
        // cout << setw(20) << lab0_TRUETAU << endl;
 
-       if (( lab0Hlt2TopoOSTF4BodyDecision_TOS == false )
-       // if (( lab0Hlt2TopoOSTF2BodyDecision_TOS == false )
+       if (( lab0Hlt2Topo4BodyBBDTDecision_TOS == false )
+       // if (( lab0Hlt2Topo2BodyBBDTDecision_TOS == false )
        // if (( lab0Hlt2IncPhiDecision_TOS == false )
 	   or ( CommonSelection() == false ) or ( lab1_PIDK < 5 )) {
 	 // off so that you can apply later
@@ -145,9 +145,9 @@ void lifetime::Loop(TTree &ftree)
    ftree.Branch("OWNPV"  , &OWNPV);
    ftree.Branch("ENDVX"  , &ENDVX);
 
-   ftree.Branch("HLT2Topo4BodyTOS" , &lab0Hlt2TopoOSTF4BodyDecision_TOS);
-   ftree.Branch("HLT2Topo3BodyTOS" , &lab0Hlt2TopoOSTF3BodyDecision_TOS);
-   ftree.Branch("HLT2Topo2BodyTOS" , &lab0Hlt2TopoOSTF2BodyDecision_TOS);
+   ftree.Branch("HLT2Topo4BodyTOS" , &lab0Hlt2Topo4BodyBBDTDecision_TOS);
+   ftree.Branch("HLT2Topo3BodyTOS" , &lab0Hlt2Topo3BodyBBDTDecision_TOS);
+   ftree.Branch("HLT2Topo2BodyTOS" , &lab0Hlt2Topo2BodyBBDTDecision_TOS);
    ftree.Branch("HLT2TopoIncPhiTOS", &lab0Hlt2IncPhiDecision_TOS);
 
    Long64_t nbytes = 0, nb = 0;
@@ -197,9 +197,9 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
    ftree.Branch("OWNPV"  , &OWNPV);
    ftree.Branch("ENDVX"  , &ENDVX);
 
-   ftree.Branch("HLT2Topo4BodyTOS" , &lab0Hlt2TopoOSTF4BodyDecision_TOS);
-   ftree.Branch("HLT2Topo3BodyTOS" , &lab0Hlt2TopoOSTF3BodyDecision_TOS);
-   ftree.Branch("HLT2Topo2BodyTOS" , &lab0Hlt2TopoOSTF2BodyDecision_TOS);
+   ftree.Branch("HLT2Topo4BodyTOS" , &lab0Hlt2Topo4BodyBBDTDecision_TOS);
+   ftree.Branch("HLT2Topo3BodyTOS" , &lab0Hlt2Topo3BodyBBDTDecision_TOS);
+   ftree.Branch("HLT2Topo2BodyTOS" , &lab0Hlt2Topo2BodyBBDTDecision_TOS);
    ftree.Branch("HLT2TopoIncPhiTOS", &lab0Hlt2IncPhiDecision_TOS);
 
    Long64_t nbytes = 0, nb = 0;

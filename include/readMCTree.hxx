@@ -129,29 +129,34 @@ protected:
   Int_t           lab0L0Global_Dec;
   Int_t           lab0L0Global_TIS;
   Int_t           lab0L0Global_TOS;
+  Int_t           lab0L0HadronDecision_Dec;
+  Int_t           lab0L0HadronDecision_TIS;
+  Int_t           lab0L0HadronDecision_TOS;
 
   // HLT1 trigger
   Int_t           lab0Hlt1Global_Dec;
   Int_t           lab0Hlt1Global_TIS;
   Int_t           lab0Hlt1Global_TOS;
+  Int_t           lab0Hlt1TrackAllL0Decision_Dec;
+  Int_t           lab0Hlt1TrackAllL0Decision_TIS;
+  Int_t           lab0Hlt1TrackAllL0Decision_TOS;
 
   // HLT2 trigger
-  Int_t           lab0Hlt2TopoOSTF4BodyDecision_Dec;
-  Int_t           lab0Hlt2TopoOSTF4BodyDecision_TIS;
-  Int_t           lab0Hlt2TopoOSTF4BodyDecision_TOS;
-  Int_t           lab0Hlt2TopoOSTF3BodyDecision_Dec;
-  Int_t           lab0Hlt2TopoOSTF3BodyDecision_TIS;
-  Int_t           lab0Hlt2TopoOSTF3BodyDecision_TOS;
-  Int_t           lab0Hlt2TopoOSTF2BodyDecision_Dec;
-  Int_t           lab0Hlt2TopoOSTF2BodyDecision_TIS;
-  Int_t           lab0Hlt2TopoOSTF2BodyDecision_TOS;
-  Int_t           lab0Hlt2IncPhiDecision_Dec;
-  Int_t           lab0Hlt2IncPhiDecision_TIS;
-  Int_t           lab0Hlt2IncPhiDecision_TOS;
-
   Int_t           lab0Hlt2Global_Dec;
   Int_t           lab0Hlt2Global_TIS;
   Int_t           lab0Hlt2Global_TOS;
+  Int_t           lab0Hlt2Topo2BodyBBDTDecision_Dec;
+  Int_t           lab0Hlt2Topo2BodyBBDTDecision_TIS;
+  Int_t           lab0Hlt2Topo2BodyBBDTDecision_TOS;
+  Int_t           lab0Hlt2Topo3BodyBBDTDecision_Dec;
+  Int_t           lab0Hlt2Topo3BodyBBDTDecision_TIS;
+  Int_t           lab0Hlt2Topo3BodyBBDTDecision_TOS;
+  Int_t           lab0Hlt2Topo4BodyBBDTDecision_Dec;
+  Int_t           lab0Hlt2Topo4BodyBBDTDecision_TIS;
+  Int_t           lab0Hlt2Topo4BodyBBDTDecision_TOS;
+  Int_t           lab0Hlt2IncPhiDecision_Dec;
+  Int_t           lab0Hlt2IncPhiDecision_TIS;
+  Int_t           lab0Hlt2IncPhiDecision_TOS;
 
   /**
    * Declaration of leaf types for the bachelor (h, lab1_*)
@@ -159,6 +164,8 @@ protected:
    */
 
   // TODO: what is mini?
+  Float_t         lab1_CosTheta;
+
   Float_t         lab1_MINIP;
   Float_t         lab1_MINIPCHI2;
 
@@ -215,31 +222,22 @@ protected:
   // lifetime?
   Int_t           lab1_OSCIL;
   Int_t           lab1_ID;
-  Float_t         lab1_PIDe;	// TODO: what are PIDx ?
+  Float_t         lab1_PIDe;
   Float_t         lab1_PIDmu;
   Float_t         lab1_PIDK;
   Float_t         lab1_PIDp;
+  Float_t         lab1_ProbNNe;
+  Float_t         lab1_ProbNNk;
+  Float_t         lab1_ProbNNp;
+  Float_t         lab1_ProbNNpi;
+  Float_t         lab1_ProbNNmu;
+  Float_t         lab1_ProbNNghost;
   Float_t         lab1_CaloEcalE;      /**< Calibrated EM energy? */
   Float_t         lab1_CaloHcalE;      /**< Calibrated Hadronic energy? */
   Int_t           lab1_hasMuon;
   Int_t           lab1_isMuon;
   Int_t           lab1_hasRich;
   Int_t           lab1_hasCalo;
-
-  // L0 trigger
-  Int_t           lab1L0Global_Dec;
-  Int_t           lab1L0Global_TIS;
-  Int_t           lab1L0Global_TOS;
-
-  // HLT1 trigger
-  Int_t           lab1Hlt1Global_Dec;
-  Int_t           lab1Hlt1Global_TIS;
-  Int_t           lab1Hlt1Global_TOS;
-
-  // HLT2 trigger
-  Int_t           lab1Hlt2Global_Dec;
-  Int_t           lab1Hlt2Global_TIS;
-  Int_t           lab1Hlt2Global_TOS;
 
   // tracking
   Int_t           lab1_TRACK_Type;
@@ -253,6 +251,8 @@ protected:
    * Declaration of leaf types for the Ds (lab2_*)
    *
    */
+
+  Float_t         lab2_CosTheta; // TODO: Opening angle?
 
   Float_t         lab2_MINIP;
   Float_t         lab2_MINIPCHI2;
@@ -330,27 +330,14 @@ protected:
   Float_t         lab2_TAUERR;
   Float_t         lab2_TAUCHI2;
 
-  // L0 trigger
-  Int_t           lab2L0Global_Dec;
-  Int_t           lab2L0Global_TIS;
-  Int_t           lab2L0Global_TOS;
-
-  // HLT1 trigger
-  Int_t           lab2Hlt1Global_Dec;
-  Int_t           lab2Hlt1Global_TIS;
-  Int_t           lab2Hlt1Global_TOS;
-
-  // HLT2 trigger
-  Int_t           lab2Hlt2Global_Dec;
-  Int_t           lab2Hlt2Global_TIS;
-  Int_t           lab2Hlt2Global_TOS;
-
   /**
    * Declaration of leaf types for the K (lab3_*)
    *
    */
 
   // what is mini?
+  Float_t         lab3_CosTheta;
+
   Float_t         lab3_MINIP;
   Float_t         lab3_MINIPCHI2;
 
@@ -407,27 +394,18 @@ protected:
   Float_t         lab3_PIDmu;
   Float_t         lab3_PIDK;
   Float_t         lab3_PIDp;
+  Float_t         lab3_ProbNNe;
+  Float_t         lab3_ProbNNk;
+  Float_t         lab3_ProbNNp;
+  Float_t         lab3_ProbNNpi;
+  Float_t         lab3_ProbNNmu;
+  Float_t         lab3_ProbNNghost;
   Float_t         lab3_CaloEcalE;
   Float_t         lab3_CaloHcalE;
   Int_t           lab3_hasMuon;
   Int_t           lab3_isMuon;
   Int_t           lab3_hasRich;
   Int_t           lab3_hasCalo;
-
-  // L0 trigger
-  Int_t           lab3L0Global_Dec;
-  Int_t           lab3L0Global_TIS;
-  Int_t           lab3L0Global_TOS;
-
-  // HLT1 trigger
-  Int_t           lab3Hlt1Global_Dec;
-  Int_t           lab3Hlt1Global_TIS;
-  Int_t           lab3Hlt1Global_TOS;
-
-  // HLT2 trigger
-  Int_t           lab3Hlt2Global_Dec;
-  Int_t           lab3Hlt2Global_TIS;
-  Int_t           lab3Hlt2Global_TOS;
 
   // tracking
   Int_t           lab3_TRACK_Type;
@@ -441,6 +419,8 @@ protected:
    * Declaration of leaf types for the K (lab4_*)
    *
    */
+
+  Float_t         lab4_CosTheta;
 
   Float_t         lab4_MINIP;
   Float_t         lab4_MINIPCHI2;
@@ -498,27 +478,18 @@ protected:
   Float_t         lab4_PIDmu;
   Float_t         lab4_PIDK;
   Float_t         lab4_PIDp;
+  Float_t         lab4_ProbNNe;
+  Float_t         lab4_ProbNNk;
+  Float_t         lab4_ProbNNp;
+  Float_t         lab4_ProbNNpi;
+  Float_t         lab4_ProbNNmu;
+  Float_t         lab4_ProbNNghost;
   Float_t         lab4_CaloEcalE;
   Float_t         lab4_CaloHcalE;
   Int_t           lab4_hasMuon;
   Int_t           lab4_isMuon;
   Int_t           lab4_hasRich;
   Int_t           lab4_hasCalo;
-
-  // L0 trigger
-  Int_t           lab4L0Global_Dec;
-  Int_t           lab4L0Global_TIS;
-  Int_t           lab4L0Global_TOS;
-
-  // HLT1 trigger
-  Int_t           lab4Hlt1Global_Dec;
-  Int_t           lab4Hlt1Global_TIS;
-  Int_t           lab4Hlt1Global_TOS;
-
-  // HLT2 trigger
-  Int_t           lab4Hlt2Global_Dec;
-  Int_t           lab4Hlt2Global_TIS;
-  Int_t           lab4Hlt2Global_TOS;
 
   // tracking
   Int_t           lab4_TRACK_Type;
@@ -532,6 +503,8 @@ protected:
    * Declaration of leaf types for the pi (lab5_*)
    *
    */
+
+  Float_t         lab5_CosTheta;
 
   Float_t         lab5_MINIP;
   Float_t         lab5_MINIPCHI2;
@@ -587,27 +560,18 @@ protected:
   Float_t         lab5_PIDmu;
   Float_t         lab5_PIDK;
   Float_t         lab5_PIDp;
+  Float_t         lab5_ProbNNe;
+  Float_t         lab5_ProbNNk;
+  Float_t         lab5_ProbNNp;
+  Float_t         lab5_ProbNNpi;
+  Float_t         lab5_ProbNNmu;
+  Float_t         lab5_ProbNNghost;
   Float_t         lab5_CaloEcalE;
   Float_t         lab5_CaloHcalE;
   Int_t           lab5_hasMuon;
   Int_t           lab5_isMuon;
   Int_t           lab5_hasRich;
   Int_t           lab5_hasCalo;
-
-  // L0 trigger
-  Int_t           lab5L0Global_Dec;
-  Int_t           lab5L0Global_TIS;
-  Int_t           lab5L0Global_TOS;
-
-  // HLT1 trigger
-  Int_t           lab5Hlt1Global_Dec;
-  Int_t           lab5Hlt1Global_TIS;
-  Int_t           lab5Hlt1Global_TOS;
-
-  // HLT2 trigger
-  Int_t           lab5Hlt2Global_Dec;
-  Int_t           lab5Hlt2Global_TIS;
-  Int_t           lab5Hlt2Global_TOS;
 
   // tracking
   Int_t           lab5_TRACK_Type;
@@ -645,29 +609,18 @@ protected:
   Float_t         PVCHI2[100];   //[nPV]
   Float_t         PVNDOF[100];   //[nPV]
   Float_t         PVNTRACKS[100];   //[nPV]
-  Int_t           ChargedProtos;
-  Int_t           NeutralProtos;
-  Int_t           BestTracks;
-  Int_t           MuonTracks;
-  Int_t           ITClusters;
-  Int_t           VeloLiteClusters;
-  Int_t           OTClusters;
-  Int_t           spdMult;
-  Int_t           backwardTracks;
-  Int_t           veloTracks;
 
-  // trigger
-  Int_t           L0Global;
-  Int_t           Hlt1Global;
-  Int_t           Hlt2Global;
-  Int_t           L0HadronDecision;
-  Int_t           L0MuonDecision;
-  Int_t           L0MuonHighDecision;
-  Int_t           L0DiMuonDecision;
-  Int_t           L0ElectronDecision;
-  Int_t           L0PhotonDecision;
-  Int_t           L0nSelections;
-
+  Int_t           nPVs;
+  Int_t           nTracks;
+  Int_t           nLongTracks;
+  Int_t           nDownstreamTracks;
+  Int_t           nUpstreamTracks;
+  Int_t           nVeloTracks;
+  Int_t           nTTracks;
+  Int_t           nBackTracks;
+  Int_t           nRich1Hits;
+  Int_t           nRich2Hits;
+  Float_t         BDTGResponse_1;
 
   /**
    * Declaration of branches
@@ -743,28 +696,36 @@ protected:
   TBranch         *b_lab0L0Global_TIS;
   TBranch         *b_lab0L0Global_TOS;
 
+  TBranch         *b_lab0L0HadronDecision_Dec;
+  TBranch         *b_lab0L0HadronDecision_TIS;
+  TBranch         *b_lab0L0HadronDecision_TOS;
+
   // HLT1 trigger
   TBranch         *b_lab0Hlt1Global_Dec;
   TBranch         *b_lab0Hlt1Global_TIS;
   TBranch         *b_lab0Hlt1Global_TOS;
 
-  // HLT2 trigger
-  TBranch         *b_lab0Hlt2TopoOSTF4BodyDecision_Dec;
-  TBranch         *b_lab0Hlt2TopoOSTF4BodyDecision_TIS;
-  TBranch         *b_lab0Hlt2TopoOSTF4BodyDecision_TOS;
-  TBranch         *b_lab0Hlt2TopoOSTF3BodyDecision_Dec;
-  TBranch         *b_lab0Hlt2TopoOSTF3BodyDecision_TIS;
-  TBranch         *b_lab0Hlt2TopoOSTF3BodyDecision_TOS;
-  TBranch         *b_lab0Hlt2TopoOSTF2BodyDecision_Dec;
-  TBranch         *b_lab0Hlt2TopoOSTF2BodyDecision_TIS;
-  TBranch         *b_lab0Hlt2TopoOSTF2BodyDecision_TOS;
-  TBranch         *b_lab0Hlt2IncPhiDecision_Dec;
-  TBranch         *b_lab0Hlt2IncPhiDecision_TIS;
-  TBranch         *b_lab0Hlt2IncPhiDecision_TOS;
+  TBranch         *b_lab0Hlt1TrackAllL0Decision_Dec;
+  TBranch         *b_lab0Hlt1TrackAllL0Decision_TIS;
+  TBranch         *b_lab0Hlt1TrackAllL0Decision_TOS;
 
+  // HLT2 trigger
   TBranch         *b_lab0Hlt2Global_Dec;
   TBranch         *b_lab0Hlt2Global_TIS;
   TBranch         *b_lab0Hlt2Global_TOS;
+
+  TBranch         *b_lab0Hlt2Topo2BodyBBDTDecision_Dec;
+  TBranch         *b_lab0Hlt2Topo2BodyBBDTDecision_TIS;
+  TBranch         *b_lab0Hlt2Topo2BodyBBDTDecision_TOS;
+  TBranch         *b_lab0Hlt2Topo3BodyBBDTDecision_Dec;
+  TBranch         *b_lab0Hlt2Topo3BodyBBDTDecision_TIS;
+  TBranch         *b_lab0Hlt2Topo3BodyBBDTDecision_TOS;
+  TBranch         *b_lab0Hlt2Topo4BodyBBDTDecision_Dec;
+  TBranch         *b_lab0Hlt2Topo4BodyBBDTDecision_TIS;
+  TBranch         *b_lab0Hlt2Topo4BodyBBDTDecision_TOS;
+  TBranch         *b_lab0Hlt2IncPhiDecision_Dec;
+  TBranch         *b_lab0Hlt2IncPhiDecision_TIS;
+  TBranch         *b_lab0Hlt2IncPhiDecision_TOS;
 
   /**
    * Declaration of branches for the bachelor (h, lab1_*)
@@ -772,6 +733,8 @@ protected:
    */
 
   // TODO: what is mini?
+  TBranch         *b_lab1_CosTheta;
+
   TBranch         *b_lab1_MINIP;
   TBranch         *b_lab1_MINIPCHI2;
 
@@ -822,34 +785,24 @@ protected:
   TBranch         *b_lab1_TRUEISSTABLE;
   TBranch         *b_lab1_TRUETAU;
 
-  // lifetime?
   TBranch         *b_lab1_OSCIL;
   TBranch         *b_lab1_ID;
-  TBranch         *b_lab1_PIDe;	// TODO: what are PIDx ?
+  TBranch         *b_lab1_PIDe;
   TBranch         *b_lab1_PIDmu;
   TBranch         *b_lab1_PIDK;
   TBranch         *b_lab1_PIDp;
+  TBranch         *b_lab1_ProbNNe;
+  TBranch         *b_lab1_ProbNNk;
+  TBranch         *b_lab1_ProbNNp;
+  TBranch         *b_lab1_ProbNNpi;
+  TBranch         *b_lab1_ProbNNmu;
+  TBranch         *b_lab1_ProbNNghost;
   TBranch         *b_lab1_CaloEcalE;      /**< Calibrated EM energy? */
   TBranch         *b_lab1_CaloHcalE;      /**< Calibrated Hadronic energy? */
   TBranch         *b_lab1_hasMuon;
   TBranch         *b_lab1_isMuon;
   TBranch         *b_lab1_hasRich;
   TBranch         *b_lab1_hasCalo;
-
-  // L0 trigger
-  TBranch         *b_lab1L0Global_Dec;
-  TBranch         *b_lab1L0Global_TIS;
-  TBranch         *b_lab1L0Global_TOS;
-
-  // HLT1 trigger
-  TBranch         *b_lab1Hlt1Global_Dec;
-  TBranch         *b_lab1Hlt1Global_TIS;
-  TBranch         *b_lab1Hlt1Global_TOS;
-
-  // HLT2 trigger
-  TBranch         *b_lab1Hlt2Global_Dec;
-  TBranch         *b_lab1Hlt2Global_TIS;
-  TBranch         *b_lab1Hlt2Global_TOS;
 
   // tracking
   TBranch         *b_lab1_TRACK_Type;
@@ -863,6 +816,8 @@ protected:
    * Declaration of branches for the Ds (lab2_*)
    *
    */
+
+  TBranch         *b_lab2_CosTheta;
 
   TBranch         *b_lab2_MINIP;
   TBranch         *b_lab2_MINIPCHI2;
@@ -940,27 +895,14 @@ protected:
   TBranch         *b_lab2_TAUERR;
   TBranch         *b_lab2_TAUCHI2;
 
-  // L0 trigger
-  TBranch         *b_lab2L0Global_Dec;
-  TBranch         *b_lab2L0Global_TIS;
-  TBranch         *b_lab2L0Global_TOS;
-
-  // HLT1 trigger
-  TBranch         *b_lab2Hlt1Global_Dec;
-  TBranch         *b_lab2Hlt1Global_TIS;
-  TBranch         *b_lab2Hlt1Global_TOS;
-
-  // HLT2 trigger
-  TBranch         *b_lab2Hlt2Global_Dec;
-  TBranch         *b_lab2Hlt2Global_TIS;
-  TBranch         *b_lab2Hlt2Global_TOS;
-
   /**
    * Declaration of branches for the K (lab3_*)
    *
    */
 
   // what is mini?
+  TBranch         *b_lab3_CosTheta;
+
   TBranch         *b_lab3_MINIP;
   TBranch         *b_lab3_MINIPCHI2;
 
@@ -1017,27 +959,18 @@ protected:
   TBranch         *b_lab3_PIDmu;
   TBranch         *b_lab3_PIDK;
   TBranch         *b_lab3_PIDp;
+  TBranch         *b_lab3_ProbNNe;
+  TBranch         *b_lab3_ProbNNk;
+  TBranch         *b_lab3_ProbNNp;
+  TBranch         *b_lab3_ProbNNpi;
+  TBranch         *b_lab3_ProbNNmu;
+  TBranch         *b_lab3_ProbNNghost;
   TBranch         *b_lab3_CaloEcalE;
   TBranch         *b_lab3_CaloHcalE;
   TBranch         *b_lab3_hasMuon;
   TBranch         *b_lab3_isMuon;
   TBranch         *b_lab3_hasRich;
   TBranch         *b_lab3_hasCalo;
-
-  // L0 trigger
-  TBranch         *b_lab3L0Global_Dec;
-  TBranch         *b_lab3L0Global_TIS;
-  TBranch         *b_lab3L0Global_TOS;
-
-  // HLT1 trigger
-  TBranch         *b_lab3Hlt1Global_Dec;
-  TBranch         *b_lab3Hlt1Global_TIS;
-  TBranch         *b_lab3Hlt1Global_TOS;
-
-  // HLT2 trigger
-  TBranch         *b_lab3Hlt2Global_Dec;
-  TBranch         *b_lab3Hlt2Global_TIS;
-  TBranch         *b_lab3Hlt2Global_TOS;
 
   // tracking
   TBranch         *b_lab3_TRACK_Type;
@@ -1051,6 +984,8 @@ protected:
    * Declaration of branches for the K (lab4_*)
    *
    */
+
+  TBranch         *b_lab4_CosTheta;
 
   TBranch         *b_lab4_MINIP;
   TBranch         *b_lab4_MINIPCHI2;
@@ -1108,27 +1043,18 @@ protected:
   TBranch         *b_lab4_PIDmu;
   TBranch         *b_lab4_PIDK;
   TBranch         *b_lab4_PIDp;
+  TBranch         *b_lab4_ProbNNe;
+  TBranch         *b_lab4_ProbNNk;
+  TBranch         *b_lab4_ProbNNp;
+  TBranch         *b_lab4_ProbNNpi;
+  TBranch         *b_lab4_ProbNNmu;
+  TBranch         *b_lab4_ProbNNghost;
   TBranch         *b_lab4_CaloEcalE;
   TBranch         *b_lab4_CaloHcalE;
   TBranch         *b_lab4_hasMuon;
   TBranch         *b_lab4_isMuon;
   TBranch         *b_lab4_hasRich;
   TBranch         *b_lab4_hasCalo;
-
-  // L0 trigger
-  TBranch         *b_lab4L0Global_Dec;
-  TBranch         *b_lab4L0Global_TIS;
-  TBranch         *b_lab4L0Global_TOS;
-
-  // HLT1 trigger
-  TBranch         *b_lab4Hlt1Global_Dec;
-  TBranch         *b_lab4Hlt1Global_TIS;
-  TBranch         *b_lab4Hlt1Global_TOS;
-
-  // HLT2 trigger
-  TBranch         *b_lab4Hlt2Global_Dec;
-  TBranch         *b_lab4Hlt2Global_TIS;
-  TBranch         *b_lab4Hlt2Global_TOS;
 
   // tracking
   TBranch         *b_lab4_TRACK_Type;
@@ -1142,6 +1068,8 @@ protected:
    * Declaration of branches for the pi (lab5_*)
    *
    */
+
+  TBranch         *b_lab5_CosTheta;
 
   TBranch         *b_lab5_MINIP;
   TBranch         *b_lab5_MINIPCHI2;
@@ -1197,27 +1125,18 @@ protected:
   TBranch         *b_lab5_PIDmu;
   TBranch         *b_lab5_PIDK;
   TBranch         *b_lab5_PIDp;
+  TBranch         *b_lab5_ProbNNe;
+  TBranch         *b_lab5_ProbNNk;
+  TBranch         *b_lab5_ProbNNp;
+  TBranch         *b_lab5_ProbNNpi;
+  TBranch         *b_lab5_ProbNNmu;
+  TBranch         *b_lab5_ProbNNghost;
   TBranch         *b_lab5_CaloEcalE;
   TBranch         *b_lab5_CaloHcalE;
   TBranch         *b_lab5_hasMuon;
   TBranch         *b_lab5_isMuon;
   TBranch         *b_lab5_hasRich;
   TBranch         *b_lab5_hasCalo;
-
-  // L0 trigger
-  TBranch         *b_lab5L0Global_Dec;
-  TBranch         *b_lab5L0Global_TIS;
-  TBranch         *b_lab5L0Global_TOS;
-
-  // HLT1 trigger
-  TBranch         *b_lab5Hlt1Global_Dec;
-  TBranch         *b_lab5Hlt1Global_TIS;
-  TBranch         *b_lab5Hlt1Global_TOS;
-
-  // HLT2 trigger
-  TBranch         *b_lab5Hlt2Global_Dec;
-  TBranch         *b_lab5Hlt2Global_TIS;
-  TBranch         *b_lab5Hlt2Global_TOS;
 
   // tracking
   TBranch         *b_lab5_TRACK_Type;
@@ -1255,28 +1174,18 @@ protected:
   TBranch         *b_PVCHI2;   //[nPV]
   TBranch         *b_PVNDOF;   //[nPV]
   TBranch         *b_PVNTRACKS;   //[nPV]
-  TBranch         *b_ChargedProtos;
-  TBranch         *b_NeutralProtos;
-  TBranch         *b_BestTracks;
-  TBranch         *b_MuonTracks;
-  TBranch         *b_ITClusters;
-  TBranch         *b_VeloLiteClusters;
-  TBranch         *b_OTClusters;
-  TBranch         *b_spdMult;
-  TBranch         *b_backwardTracks;
-  TBranch         *b_veloTracks;
 
-  // trigger
-  TBranch         *b_L0Global;
-  TBranch         *b_Hlt1Global;
-  TBranch         *b_Hlt2Global;
-  TBranch         *b_L0HadronDecision;
-  TBranch         *b_L0MuonDecision;
-  TBranch         *b_L0MuonHighDecision;
-  TBranch         *b_L0DiMuonDecision;
-  TBranch         *b_L0ElectronDecision;
-  TBranch         *b_L0PhotonDecision;
-  TBranch         *b_L0nSelections;
+  TBranch        *b_nPVs;
+  TBranch        *b_nTracks;
+  TBranch        *b_nLongTracks;
+  TBranch        *b_nDownstreamTracks;
+  TBranch        *b_nUpstreamTracks;
+  TBranch        *b_nVeloTracks;
+  TBranch        *b_nTTracks;
+  TBranch        *b_nBackTracks;
+  TBranch        *b_nRich1Hits;
+  TBranch        *b_nRich2Hits;
+  TBranch        *b_BDTGResponse_1;
 
 };
 

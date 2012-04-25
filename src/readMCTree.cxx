@@ -152,27 +152,36 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab0L0Global_TIS", &lab0L0Global_TIS, &b_lab0L0Global_TIS);
   fChain->SetBranchAddress("lab0L0Global_TOS", &lab0L0Global_TOS, &b_lab0L0Global_TOS);
 
+  fChain->SetBranchAddress("lab0L0HadronDecision_Dec", &lab0L0HadronDecision_Dec, &b_lab0L0HadronDecision_Dec);
+  fChain->SetBranchAddress("lab0L0HadronDecision_TIS", &lab0L0HadronDecision_TIS, &b_lab0L0HadronDecision_TIS);
+  fChain->SetBranchAddress("lab0L0HadronDecision_TOS", &lab0L0HadronDecision_TOS, &b_lab0L0HadronDecision_TOS);
+
   // HLT1 trigger
   fChain->SetBranchAddress("lab0Hlt1Global_Dec", &lab0Hlt1Global_Dec, &b_lab0Hlt1Global_Dec);
   fChain->SetBranchAddress("lab0Hlt1Global_TIS", &lab0Hlt1Global_TIS, &b_lab0Hlt1Global_TIS);
   fChain->SetBranchAddress("lab0Hlt1Global_TOS", &lab0Hlt1Global_TOS, &b_lab0Hlt1Global_TOS);
 
+  fChain->SetBranchAddress("lab0Hlt1TrackAllL0Decision_Dec", &lab0Hlt1TrackAllL0Decision_Dec, &b_lab0Hlt1TrackAllL0Decision_Dec);
+  fChain->SetBranchAddress("lab0Hlt1TrackAllL0Decision_TIS", &lab0Hlt1TrackAllL0Decision_TIS, &b_lab0Hlt1TrackAllL0Decision_TIS);
+  fChain->SetBranchAddress("lab0Hlt1TrackAllL0Decision_TOS", &lab0Hlt1TrackAllL0Decision_TOS, &b_lab0Hlt1TrackAllL0Decision_TOS);
+
   // HLT2 trigger
-  fChain->SetBranchAddress("lab0Hlt2TopoOSTF4BodyDecision_Dec", &lab0Hlt2TopoOSTF4BodyDecision_Dec, &b_lab0Hlt2TopoOSTF4BodyDecision_Dec);;
-  fChain->SetBranchAddress("lab0Hlt2TopoOSTF4BodyDecision_TIS", &lab0Hlt2TopoOSTF4BodyDecision_TIS, &b_lab0Hlt2TopoOSTF4BodyDecision_TIS);;
-  fChain->SetBranchAddress("lab0Hlt2TopoOSTF4BodyDecision_TOS", &lab0Hlt2TopoOSTF4BodyDecision_TOS, &b_lab0Hlt2TopoOSTF4BodyDecision_TOS);;
-  fChain->SetBranchAddress("lab0Hlt2TopoOSTF3BodyDecision_Dec", &lab0Hlt2TopoOSTF3BodyDecision_Dec, &b_lab0Hlt2TopoOSTF3BodyDecision_Dec);;
-  fChain->SetBranchAddress("lab0Hlt2TopoOSTF3BodyDecision_TIS", &lab0Hlt2TopoOSTF3BodyDecision_TIS, &b_lab0Hlt2TopoOSTF3BodyDecision_TIS);;
-  fChain->SetBranchAddress("lab0Hlt2TopoOSTF3BodyDecision_TOS", &lab0Hlt2TopoOSTF3BodyDecision_TOS, &b_lab0Hlt2TopoOSTF3BodyDecision_TOS);;
-  fChain->SetBranchAddress("lab0Hlt2TopoOSTF2BodyDecision_Dec", &lab0Hlt2TopoOSTF2BodyDecision_Dec, &b_lab0Hlt2TopoOSTF2BodyDecision_Dec);;
-  fChain->SetBranchAddress("lab0Hlt2TopoOSTF2BodyDecision_TIS", &lab0Hlt2TopoOSTF2BodyDecision_TIS, &b_lab0Hlt2TopoOSTF2BodyDecision_TIS);;
-  fChain->SetBranchAddress("lab0Hlt2TopoOSTF2BodyDecision_TOS", &lab0Hlt2TopoOSTF2BodyDecision_TOS, &b_lab0Hlt2TopoOSTF2BodyDecision_TOS);;
-  fChain->SetBranchAddress("lab0Hlt2IncPhiDecision_Dec", &lab0Hlt2IncPhiDecision_Dec, &b_lab0Hlt2IncPhiDecision_Dec);;
-  fChain->SetBranchAddress("lab0Hlt2IncPhiDecision_TIS", &lab0Hlt2IncPhiDecision_TIS, &b_lab0Hlt2IncPhiDecision_TIS);;
-  fChain->SetBranchAddress("lab0Hlt2IncPhiDecision_TOS", &lab0Hlt2IncPhiDecision_TOS, &b_lab0Hlt2IncPhiDecision_TOS);;
   fChain->SetBranchAddress("lab0Hlt2Global_Dec", &lab0Hlt2Global_Dec, &b_lab0Hlt2Global_Dec);
   fChain->SetBranchAddress("lab0Hlt2Global_TIS", &lab0Hlt2Global_TIS, &b_lab0Hlt2Global_TIS);
   fChain->SetBranchAddress("lab0Hlt2Global_TOS", &lab0Hlt2Global_TOS, &b_lab0Hlt2Global_TOS);
+
+  fChain->SetBranchAddress("lab0Hlt2Topo2BodyBBDTDecision_Dec", &lab0Hlt2Topo2BodyBBDTDecision_Dec, &b_lab0Hlt2Topo2BodyBBDTDecision_Dec);
+  fChain->SetBranchAddress("lab0Hlt2Topo2BodyBBDTDecision_TIS", &lab0Hlt2Topo2BodyBBDTDecision_TIS, &b_lab0Hlt2Topo2BodyBBDTDecision_TIS);
+  fChain->SetBranchAddress("lab0Hlt2Topo2BodyBBDTDecision_TOS", &lab0Hlt2Topo2BodyBBDTDecision_TOS, &b_lab0Hlt2Topo2BodyBBDTDecision_TOS);
+  fChain->SetBranchAddress("lab0Hlt2Topo3BodyBBDTDecision_Dec", &lab0Hlt2Topo3BodyBBDTDecision_Dec, &b_lab0Hlt2Topo3BodyBBDTDecision_Dec);
+  fChain->SetBranchAddress("lab0Hlt2Topo3BodyBBDTDecision_TIS", &lab0Hlt2Topo3BodyBBDTDecision_TIS, &b_lab0Hlt2Topo3BodyBBDTDecision_TIS);
+  fChain->SetBranchAddress("lab0Hlt2Topo3BodyBBDTDecision_TOS", &lab0Hlt2Topo3BodyBBDTDecision_TOS, &b_lab0Hlt2Topo3BodyBBDTDecision_TOS);
+  fChain->SetBranchAddress("lab0Hlt2Topo4BodyBBDTDecision_Dec", &lab0Hlt2Topo4BodyBBDTDecision_Dec, &b_lab0Hlt2Topo4BodyBBDTDecision_Dec);
+  fChain->SetBranchAddress("lab0Hlt2Topo4BodyBBDTDecision_TIS", &lab0Hlt2Topo4BodyBBDTDecision_TIS, &b_lab0Hlt2Topo4BodyBBDTDecision_TIS);
+  fChain->SetBranchAddress("lab0Hlt2Topo4BodyBBDTDecision_TOS", &lab0Hlt2Topo4BodyBBDTDecision_TOS, &b_lab0Hlt2Topo4BodyBBDTDecision_TOS);
+  fChain->SetBranchAddress("lab0Hlt2IncPhiDecision_Dec", &lab0Hlt2IncPhiDecision_Dec, &b_lab0Hlt2IncPhiDecision_Dec);;
+  fChain->SetBranchAddress("lab0Hlt2IncPhiDecision_TIS", &lab0Hlt2IncPhiDecision_TIS, &b_lab0Hlt2IncPhiDecision_TIS);;
+  fChain->SetBranchAddress("lab0Hlt2IncPhiDecision_TOS", &lab0Hlt2IncPhiDecision_TOS, &b_lab0Hlt2IncPhiDecision_TOS);;
 
   /**
    * Declaration of branches for the bachelor (h, lab1_*)
@@ -180,6 +189,8 @@ void readMCTree::Init(TTree *tree)
    */
 
   // TODO: what is mini?
+  fChain->SetBranchAddress("lab1_CosTheta", &lab1_CosTheta, &b_lab1_CosTheta);
+
   fChain->SetBranchAddress("lab1_MINIP", &lab1_MINIP, &b_lab1_MINIP);
   fChain->SetBranchAddress("lab1_MINIPCHI2", &lab1_MINIPCHI2, &b_lab1_MINIPCHI2);
 
@@ -238,27 +249,18 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab1_PIDmu", &lab1_PIDmu, &b_lab1_PIDmu);
   fChain->SetBranchAddress("lab1_PIDK", &lab1_PIDK, &b_lab1_PIDK);
   fChain->SetBranchAddress("lab1_PIDp", &lab1_PIDp, &b_lab1_PIDp);
+  fChain->SetBranchAddress("lab1_ProbNNe", &lab1_ProbNNe, &b_lab1_ProbNNe);
+  fChain->SetBranchAddress("lab1_ProbNNk", &lab1_ProbNNk, &b_lab1_ProbNNk);
+  fChain->SetBranchAddress("lab1_ProbNNp", &lab1_ProbNNp, &b_lab1_ProbNNp);
+  fChain->SetBranchAddress("lab1_ProbNNpi", &lab1_ProbNNpi, &b_lab1_ProbNNpi);
+  fChain->SetBranchAddress("lab1_ProbNNmu", &lab1_ProbNNmu, &b_lab1_ProbNNmu);
+  fChain->SetBranchAddress("lab1_ProbNNghost", &lab1_ProbNNghost, &b_lab1_ProbNNghost);
   fChain->SetBranchAddress("lab1_CaloEcalE", &lab1_CaloEcalE, &b_lab1_CaloEcalE);      /**< Calibrated EM energy? */
   fChain->SetBranchAddress("lab1_CaloHcalE", &lab1_CaloHcalE, &b_lab1_CaloHcalE);      /**< Calibrated Hadronic energy? */
   fChain->SetBranchAddress("lab1_hasMuon", &lab1_hasMuon, &b_lab1_hasMuon);
   fChain->SetBranchAddress("lab1_isMuon", &lab1_isMuon, &b_lab1_isMuon);
   fChain->SetBranchAddress("lab1_hasRich", &lab1_hasRich, &b_lab1_hasRich);
   fChain->SetBranchAddress("lab1_hasCalo", &lab1_hasCalo, &b_lab1_hasCalo);
-
-  // L0 trigger
-  fChain->SetBranchAddress("lab1L0Global_Dec", &lab1L0Global_Dec, &b_lab1L0Global_Dec);
-  fChain->SetBranchAddress("lab1L0Global_TIS", &lab1L0Global_TIS, &b_lab1L0Global_TIS);
-  fChain->SetBranchAddress("lab1L0Global_TOS", &lab1L0Global_TOS, &b_lab1L0Global_TOS);
-
-  // HLT1 trigger
-  fChain->SetBranchAddress("lab1Hlt1Global_Dec", &lab1Hlt1Global_Dec, &b_lab1Hlt1Global_Dec);
-  fChain->SetBranchAddress("lab1Hlt1Global_TIS", &lab1Hlt1Global_TIS, &b_lab1Hlt1Global_TIS);
-  fChain->SetBranchAddress("lab1Hlt1Global_TOS", &lab1Hlt1Global_TOS, &b_lab1Hlt1Global_TOS);
-
-  // HLT2 trigger
-  fChain->SetBranchAddress("lab1Hlt2Global_Dec", &lab1Hlt2Global_Dec, &b_lab1Hlt2Global_Dec);
-  fChain->SetBranchAddress("lab1Hlt2Global_TIS", &lab1Hlt2Global_TIS, &b_lab1Hlt2Global_TIS);
-  fChain->SetBranchAddress("lab1Hlt2Global_TOS", &lab1Hlt2Global_TOS, &b_lab1Hlt2Global_TOS);
 
   // tracking
   fChain->SetBranchAddress("lab1_TRACK_Type", &lab1_TRACK_Type, &b_lab1_TRACK_Type);
@@ -272,6 +274,8 @@ void readMCTree::Init(TTree *tree)
    * Declaration of branches for the Ds (lab2_*)
    *
    */
+
+  fChain->SetBranchAddress("lab2_CosTheta", &lab2_CosTheta, &b_lab2_CosTheta);
 
   fChain->SetBranchAddress("lab2_MINIP", &lab2_MINIP, &b_lab2_MINIP);
   fChain->SetBranchAddress("lab2_MINIPCHI2", &lab2_MINIPCHI2, &b_lab2_MINIPCHI2);
@@ -349,27 +353,14 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab2_TAUERR", &lab2_TAUERR, &b_lab2_TAUERR);
   fChain->SetBranchAddress("lab2_TAUCHI2", &lab2_TAUCHI2, &b_lab2_TAUCHI2);
 
-  // L0 trigger
-  fChain->SetBranchAddress("lab2L0Global_Dec", &lab2L0Global_Dec, &b_lab2L0Global_Dec);
-  fChain->SetBranchAddress("lab2L0Global_TIS", &lab2L0Global_TIS, &b_lab2L0Global_TIS);
-  fChain->SetBranchAddress("lab2L0Global_TOS", &lab2L0Global_TOS, &b_lab2L0Global_TOS);
-
-  // HLT1 trigger
-  fChain->SetBranchAddress("lab2Hlt1Global_Dec", &lab2Hlt1Global_Dec, &b_lab2Hlt1Global_Dec);
-  fChain->SetBranchAddress("lab2Hlt1Global_TIS", &lab2Hlt1Global_TIS, &b_lab2Hlt1Global_TIS);
-  fChain->SetBranchAddress("lab2Hlt1Global_TOS", &lab2Hlt1Global_TOS, &b_lab2Hlt1Global_TOS);
-
-  // HLT2 trigger
-  fChain->SetBranchAddress("lab2Hlt2Global_Dec", &lab2Hlt2Global_Dec, &b_lab2Hlt2Global_Dec);
-  fChain->SetBranchAddress("lab2Hlt2Global_TIS", &lab2Hlt2Global_TIS, &b_lab2Hlt2Global_TIS);
-  fChain->SetBranchAddress("lab2Hlt2Global_TOS", &lab2Hlt2Global_TOS, &b_lab2Hlt2Global_TOS);
-
   /**
    * Declaration of branches for the K (lab3_*)
    *
    */
 
   // what is mini?
+  fChain->SetBranchAddress("lab3_CosTheta", &lab3_CosTheta, &b_lab3_CosTheta);
+
   fChain->SetBranchAddress("lab3_MINIP", &lab3_MINIP, &b_lab3_MINIP);
   fChain->SetBranchAddress("lab3_MINIPCHI2", &lab3_MINIPCHI2, &b_lab3_MINIPCHI2);
 
@@ -426,27 +417,18 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab3_PIDmu", &lab3_PIDmu, &b_lab3_PIDmu);
   fChain->SetBranchAddress("lab3_PIDK", &lab3_PIDK, &b_lab3_PIDK);
   fChain->SetBranchAddress("lab3_PIDp", &lab3_PIDp, &b_lab3_PIDp);
+  fChain->SetBranchAddress("lab3_ProbNNe", &lab3_ProbNNe, &b_lab3_ProbNNe);
+  fChain->SetBranchAddress("lab3_ProbNNk", &lab3_ProbNNk, &b_lab3_ProbNNk);
+  fChain->SetBranchAddress("lab3_ProbNNp", &lab3_ProbNNp, &b_lab3_ProbNNp);
+  fChain->SetBranchAddress("lab3_ProbNNpi", &lab3_ProbNNpi, &b_lab3_ProbNNpi);
+  fChain->SetBranchAddress("lab3_ProbNNmu", &lab3_ProbNNmu, &b_lab3_ProbNNmu);
+  fChain->SetBranchAddress("lab3_ProbNNghost", &lab3_ProbNNghost, &b_lab3_ProbNNghost);
   fChain->SetBranchAddress("lab3_CaloEcalE", &lab3_CaloEcalE, &b_lab3_CaloEcalE);
   fChain->SetBranchAddress("lab3_CaloHcalE", &lab3_CaloHcalE, &b_lab3_CaloHcalE);
   fChain->SetBranchAddress("lab3_hasMuon", &lab3_hasMuon, &b_lab3_hasMuon);
   fChain->SetBranchAddress("lab3_isMuon", &lab3_isMuon, &b_lab3_isMuon);
   fChain->SetBranchAddress("lab3_hasRich", &lab3_hasRich, &b_lab3_hasRich);
   fChain->SetBranchAddress("lab3_hasCalo", &lab3_hasCalo, &b_lab3_hasCalo);
-
-  // L0 trigger
-  fChain->SetBranchAddress("lab3L0Global_Dec", &lab3L0Global_Dec, &b_lab3L0Global_Dec);
-  fChain->SetBranchAddress("lab3L0Global_TIS", &lab3L0Global_TIS, &b_lab3L0Global_TIS);
-  fChain->SetBranchAddress("lab3L0Global_TOS", &lab3L0Global_TOS, &b_lab3L0Global_TOS);
-
-  // HLT1 trigger
-  fChain->SetBranchAddress("lab3Hlt1Global_Dec", &lab3Hlt1Global_Dec, &b_lab3Hlt1Global_Dec);
-  fChain->SetBranchAddress("lab3Hlt1Global_TIS", &lab3Hlt1Global_TIS, &b_lab3Hlt1Global_TIS);
-  fChain->SetBranchAddress("lab3Hlt1Global_TOS", &lab3Hlt1Global_TOS, &b_lab3Hlt1Global_TOS);
-
-  // HLT2 trigger
-  fChain->SetBranchAddress("lab3Hlt2Global_Dec", &lab3Hlt2Global_Dec, &b_lab3Hlt2Global_Dec);
-  fChain->SetBranchAddress("lab3Hlt2Global_TIS", &lab3Hlt2Global_TIS, &b_lab3Hlt2Global_TIS);
-  fChain->SetBranchAddress("lab3Hlt2Global_TOS", &lab3Hlt2Global_TOS, &b_lab3Hlt2Global_TOS);
 
   // tracking
   fChain->SetBranchAddress("lab3_TRACK_Type", &lab3_TRACK_Type, &b_lab3_TRACK_Type);
@@ -460,6 +442,8 @@ void readMCTree::Init(TTree *tree)
    * Declaration of branches for the K (lab4_*)
    *
    */
+
+  fChain->SetBranchAddress("lab4_CosTheta", &lab4_CosTheta, &b_lab4_CosTheta);
 
   fChain->SetBranchAddress("lab4_MINIP", &lab4_MINIP, &b_lab4_MINIP);
   fChain->SetBranchAddress("lab4_MINIPCHI2", &lab4_MINIPCHI2, &b_lab4_MINIPCHI2);
@@ -517,27 +501,18 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab4_PIDmu", &lab4_PIDmu, &b_lab4_PIDmu);
   fChain->SetBranchAddress("lab4_PIDK", &lab4_PIDK, &b_lab4_PIDK);
   fChain->SetBranchAddress("lab4_PIDp", &lab4_PIDp, &b_lab4_PIDp);
+  fChain->SetBranchAddress("lab4_ProbNNe", &lab4_ProbNNe, &b_lab4_ProbNNe);
+  fChain->SetBranchAddress("lab4_ProbNNk", &lab4_ProbNNk, &b_lab4_ProbNNk);
+  fChain->SetBranchAddress("lab4_ProbNNp", &lab4_ProbNNp, &b_lab4_ProbNNp);
+  fChain->SetBranchAddress("lab4_ProbNNpi", &lab4_ProbNNpi, &b_lab4_ProbNNpi);
+  fChain->SetBranchAddress("lab4_ProbNNmu", &lab4_ProbNNmu, &b_lab4_ProbNNmu);
+  fChain->SetBranchAddress("lab4_ProbNNghost", &lab4_ProbNNghost, &b_lab4_ProbNNghost);
   fChain->SetBranchAddress("lab4_CaloEcalE", &lab4_CaloEcalE, &b_lab4_CaloEcalE);
   fChain->SetBranchAddress("lab4_CaloHcalE", &lab4_CaloHcalE, &b_lab4_CaloHcalE);
   fChain->SetBranchAddress("lab4_hasMuon", &lab4_hasMuon, &b_lab4_hasMuon);
   fChain->SetBranchAddress("lab4_isMuon", &lab4_isMuon, &b_lab4_isMuon);
   fChain->SetBranchAddress("lab4_hasRich", &lab4_hasRich, &b_lab4_hasRich);
   fChain->SetBranchAddress("lab4_hasCalo", &lab4_hasCalo, &b_lab4_hasCalo);
-
-  // L0 trigger
-  fChain->SetBranchAddress("lab4L0Global_Dec", &lab4L0Global_Dec, &b_lab4L0Global_Dec);
-  fChain->SetBranchAddress("lab4L0Global_TIS", &lab4L0Global_TIS, &b_lab4L0Global_TIS);
-  fChain->SetBranchAddress("lab4L0Global_TOS", &lab4L0Global_TOS, &b_lab4L0Global_TOS);
-
-  // HLT1 trigger
-  fChain->SetBranchAddress("lab4Hlt1Global_Dec", &lab4Hlt1Global_Dec, &b_lab4Hlt1Global_Dec);
-  fChain->SetBranchAddress("lab4Hlt1Global_TIS", &lab4Hlt1Global_TIS, &b_lab4Hlt1Global_TIS);
-  fChain->SetBranchAddress("lab4Hlt1Global_TOS", &lab4Hlt1Global_TOS, &b_lab4Hlt1Global_TOS);
-
-  // HLT2 trigger
-  fChain->SetBranchAddress("lab4Hlt2Global_Dec", &lab4Hlt2Global_Dec, &b_lab4Hlt2Global_Dec);
-  fChain->SetBranchAddress("lab4Hlt2Global_TIS", &lab4Hlt2Global_TIS, &b_lab4Hlt2Global_TIS);
-  fChain->SetBranchAddress("lab4Hlt2Global_TOS", &lab4Hlt2Global_TOS, &b_lab4Hlt2Global_TOS);
 
   // tracking
   fChain->SetBranchAddress("lab4_TRACK_Type", &lab4_TRACK_Type, &b_lab4_TRACK_Type);
@@ -551,6 +526,8 @@ void readMCTree::Init(TTree *tree)
    * Declaration of branches for the pi (lab5_*)
    *
    */
+
+  fChain->SetBranchAddress("lab5_CosTheta", &lab5_CosTheta, &b_lab5_CosTheta);
 
   fChain->SetBranchAddress("lab5_MINIP", &lab5_MINIP, &b_lab5_MINIP);
   fChain->SetBranchAddress("lab5_MINIPCHI2", &lab5_MINIPCHI2, &b_lab5_MINIPCHI2);
@@ -606,27 +583,18 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab5_PIDmu", &lab5_PIDmu, &b_lab5_PIDmu);
   fChain->SetBranchAddress("lab5_PIDK", &lab5_PIDK, &b_lab5_PIDK);
   fChain->SetBranchAddress("lab5_PIDp", &lab5_PIDp, &b_lab5_PIDp);
+  fChain->SetBranchAddress("lab5_ProbNNe", &lab5_ProbNNe, &b_lab5_ProbNNe);
+  fChain->SetBranchAddress("lab5_ProbNNk", &lab5_ProbNNk, &b_lab5_ProbNNk);
+  fChain->SetBranchAddress("lab5_ProbNNp", &lab5_ProbNNp, &b_lab5_ProbNNp);
+  fChain->SetBranchAddress("lab5_ProbNNpi", &lab5_ProbNNpi, &b_lab5_ProbNNpi);
+  fChain->SetBranchAddress("lab5_ProbNNmu", &lab5_ProbNNmu, &b_lab5_ProbNNmu);
+  fChain->SetBranchAddress("lab5_ProbNNghost", &lab5_ProbNNghost, &b_lab5_ProbNNghost);
   fChain->SetBranchAddress("lab5_CaloEcalE", &lab5_CaloEcalE, &b_lab5_CaloEcalE);
   fChain->SetBranchAddress("lab5_CaloHcalE", &lab5_CaloHcalE, &b_lab5_CaloHcalE);
   fChain->SetBranchAddress("lab5_hasMuon", &lab5_hasMuon, &b_lab5_hasMuon);
   fChain->SetBranchAddress("lab5_isMuon", &lab5_isMuon, &b_lab5_isMuon);
   fChain->SetBranchAddress("lab5_hasRich", &lab5_hasRich, &b_lab5_hasRich);
   fChain->SetBranchAddress("lab5_hasCalo", &lab5_hasCalo, &b_lab5_hasCalo);
-
-  // L0 trigger
-  fChain->SetBranchAddress("lab5L0Global_Dec", &lab5L0Global_Dec, &b_lab5L0Global_Dec);
-  fChain->SetBranchAddress("lab5L0Global_TIS", &lab5L0Global_TIS, &b_lab5L0Global_TIS);
-  fChain->SetBranchAddress("lab5L0Global_TOS", &lab5L0Global_TOS, &b_lab5L0Global_TOS);
-
-  // HLT1 trigger
-  fChain->SetBranchAddress("lab5Hlt1Global_Dec", &lab5Hlt1Global_Dec, &b_lab5Hlt1Global_Dec);
-  fChain->SetBranchAddress("lab5Hlt1Global_TIS", &lab5Hlt1Global_TIS, &b_lab5Hlt1Global_TIS);
-  fChain->SetBranchAddress("lab5Hlt1Global_TOS", &lab5Hlt1Global_TOS, &b_lab5Hlt1Global_TOS);
-
-  // HLT2 trigger
-  fChain->SetBranchAddress("lab5Hlt2Global_Dec", &lab5Hlt2Global_Dec, &b_lab5Hlt2Global_Dec);
-  fChain->SetBranchAddress("lab5Hlt2Global_TIS", &lab5Hlt2Global_TIS, &b_lab5Hlt2Global_TIS);
-  fChain->SetBranchAddress("lab5Hlt2Global_TOS", &lab5Hlt2Global_TOS, &b_lab5Hlt2Global_TOS);
 
   // tracking
   fChain->SetBranchAddress("lab5_TRACK_Type", &lab5_TRACK_Type, &b_lab5_TRACK_Type);
@@ -664,28 +632,17 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("PVCHI2", PVCHI2, &b_PVCHI2);   //[nPV]
   fChain->SetBranchAddress("PVNDOF", PVNDOF, &b_PVNDOF);   //[nPV]
   fChain->SetBranchAddress("PVNTRACKS", PVNTRACKS, &b_PVNTRACKS);   //[nPV]
-  fChain->SetBranchAddress("ChargedProtos", &ChargedProtos, &b_ChargedProtos);
-  fChain->SetBranchAddress("NeutralProtos", &NeutralProtos, &b_NeutralProtos);
-  fChain->SetBranchAddress("BestTracks", &BestTracks, &b_BestTracks);
-  fChain->SetBranchAddress("MuonTracks", &MuonTracks, &b_MuonTracks);
-  fChain->SetBranchAddress("ITClusters", &ITClusters, &b_ITClusters);
-  fChain->SetBranchAddress("VeloLiteClusters", &VeloLiteClusters, &b_VeloLiteClusters);
-  fChain->SetBranchAddress("OTClusters", &OTClusters, &b_OTClusters);
-  fChain->SetBranchAddress("spdMult", &spdMult, &b_spdMult);
-  fChain->SetBranchAddress("backwardTracks", &backwardTracks, &b_backwardTracks);
-  fChain->SetBranchAddress("veloTracks", &veloTracks, &b_veloTracks);
-
-  // trigger
-  fChain->SetBranchAddress("L0Global", &L0Global, &b_L0Global);
-  fChain->SetBranchAddress("Hlt1Global", &Hlt1Global, &b_Hlt1Global);
-  fChain->SetBranchAddress("Hlt2Global", &Hlt2Global, &b_Hlt2Global);
-  fChain->SetBranchAddress("L0HadronDecision", &L0HadronDecision, &b_L0HadronDecision);
-  fChain->SetBranchAddress("L0MuonDecision", &L0MuonDecision, &b_L0MuonDecision);
-  fChain->SetBranchAddress("L0MuonHighDecision", &L0MuonHighDecision, &b_L0MuonHighDecision);
-  fChain->SetBranchAddress("L0DiMuonDecision", &L0DiMuonDecision, &b_L0DiMuonDecision);
-  fChain->SetBranchAddress("L0ElectronDecision", &L0ElectronDecision, &b_L0ElectronDecision);
-  fChain->SetBranchAddress("L0PhotonDecision", &L0PhotonDecision, &b_L0PhotonDecision);
-  fChain->SetBranchAddress("L0nSelections", &L0nSelections, &b_L0nSelections);
+  fChain->SetBranchAddress("nPVs", &nPVs, &b_nPVs);
+  fChain->SetBranchAddress("nTracks", &nTracks, &b_nTracks);
+  fChain->SetBranchAddress("nLongTracks", &nLongTracks, &b_nLongTracks);
+  fChain->SetBranchAddress("nDownstreamTracks", &nDownstreamTracks, &b_nDownstreamTracks);
+  fChain->SetBranchAddress("nUpstreamTracks", &nUpstreamTracks, &b_nUpstreamTracks);
+  fChain->SetBranchAddress("nVeloTracks", &nVeloTracks, &b_nVeloTracks);
+  fChain->SetBranchAddress("nTTracks", &nTTracks, &b_nTTracks);
+  fChain->SetBranchAddress("nBackTracks", &nBackTracks, &b_nBackTracks);
+  fChain->SetBranchAddress("nRich1Hits", &nRich1Hits, &b_nRich1Hits);
+  fChain->SetBranchAddress("nRich2Hits", &nRich2Hits, &b_nRich2Hits);
+  fChain->SetBranchAddress("BDTGResponse_1", &BDTGResponse_1, &b_BDTGResponse_1);
 
   Notify();
 }
