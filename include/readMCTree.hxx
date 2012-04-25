@@ -2,10 +2,10 @@
  * @file   readMCTree.hxx
  * @author Suvayu Ali <Suvayu.Ali@cern.ch>
  * @date   Sun Dec 11 01:25:13 2011
- * 
- * @brief  
- * 
- * 
+ *
+ * @brief
+ *
+ *
  */
 
 #ifndef __READMCTREE_HXX
@@ -18,7 +18,6 @@
 #include <TFile.h>
 
 #include "readTree.hxx"
-#include "oanglePID.hxx"
 
 using namespace std;
 

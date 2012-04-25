@@ -2,16 +2,15 @@
  * @file   readMCTree.cxx
  * @author Suvayu Ali <Suvayu.Ali@cern.ch>
  * @date   Sun Dec 11 01:27:13 2011
- * 
- * @brief  
- * 
- * 
+ *
+ * @brief
+ *
+ *
  */
 
 #include <iostream>
 
 #include "readMCTree.hxx"
-// #include "Event.h"
 
 #include <Rtypes.h>
 #include <TNtuple.h>
