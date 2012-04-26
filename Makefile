@@ -112,7 +112,7 @@ $(LIBDIR):
 
 # Binaries
 $(BINFILES): $(BINDIR)/%:	$(SRCDIR)/%.cc $(LIBFILES) | $(BINDIR)
-	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) -L$(LIBDIR) -lreadTree -lutils $< -o $@
+	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) -L$(LIBDIR) -lreadTree -lutils $< -o $@
 
 $(BINDIR):
 	mkdir -p $(BINDIR)
@@ -120,7 +120,7 @@ $(BINDIR):
 clean:		clean-obj clean-so
 
 clean-obj:
-	rm -f $(OBJDIR)/*.o
+	rm -f $(LIBDIR)/*.o
 
 clean-so:
 	rm -f $(LIBDIR)/*.so
