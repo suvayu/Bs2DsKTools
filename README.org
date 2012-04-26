@@ -1,12 +1,30 @@
 # -*- mode: org; default-input-method: TeX; -*-
 
 * Intro
-Just a collection of tools for the Bs⁰ → DsK analysis. All the
-separate tools are modularised in sub-directories. The different tree
-readers, ~readMCTree~ and ~readDataTree~, inherit from a purely
-virtual ~readTree~ class. There are several overlaoded ~Loop()~
-methods for different types of output.
+Just a collection of tools and classes for the Bs⁰ → DsK/Dsπ analysis.
+The different tree readers, =readMCTree=, =readDataTree= and
+=lifetime= inherit from a purely virtual class, =readTree=. There are
+several overloaded =readTree::Loop()= methods for different types of
+output.
 
-Tools:
+_Studies:_
 1. Bs⁰ time acceptance
 2. Bs⁰ and bachelor particle opening angle as PID
+
+
+* Classes
+_Tree reader:_
++ Inherits from purely virtual =readTree=
++ =readDataTree= reads data ntuples
++ =readMCTree= reads Monte Carlo ntuples
++ =lifetime= reads Monte Carlo ntuples for lifetime acceptance studies
+
+_Opening angle:_
+=oanglePID= implements a DLL like PID variable from opening angle
+
+
+* Utilities
++ =accept.cc=: an utility to select events using the =lifetime= tree
+  reader for lifetime acceptance studies
++ =resolution.cc=: make residual and pull plots from Monte Carlo
++ =ltFit.py=: fit for the trigger lifetime acceptance function
