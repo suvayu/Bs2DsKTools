@@ -26,7 +26,7 @@ is read from an ntuple and fitted to the model otherwise.
 # Python modules
 import sys
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
-epsilon = 1E-6
+epsilon = 1E-4
 
 # FIXME: Batch running fails on importing anything but gROOT
 # ROOT global variables
@@ -118,7 +118,8 @@ def main(fullPDF, isToy):
 
     # Parameters
     turnon = RooRealVar('turnon', 'turnon', 500, 5000)
-    exponent = RooRealVar('exponent', 'exponent', 1, 7)
+    offset = RooRealVar('offset', 'offset', 1E-4, 1E-2)
+    exponent = RooRealVar('exponent', 'exponent', 1, 5)
 
     # Temporary RooArgSet to circumvent scoping issues for nested
     # temporary objects.
@@ -146,8 +147,9 @@ def main(fullPDF, isToy):
 
     # Acceptance model: 1-1/(1+(at)³)
     # NB: Acceptance is not a PDF by nature
-    acceptance = RooFormulaVar('acceptance', '1-1/(1+(@0*@1)**@2)',
-                                    RooArgList(turnon, time, exponent))
+    acceptance = RooFormulaVar('acceptance',
+                               '@1<@2?0:(1-1/(1+(@0*(@1-@2))**@3))',
+                               RooArgList(turnon, time, offset, exponent))
     acceptancePdf = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
 
     # Define PDF and fit
