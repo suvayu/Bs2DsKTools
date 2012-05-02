@@ -24,6 +24,7 @@ is read from an ntuple and fitted to the model otherwise.
 """
 
 # Python modules
+import os
 import sys
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
 epsilon = 1E-4
@@ -72,30 +73,36 @@ def get_dataset(argset, isToy=True, PDF=False):
         if objclass.InheritsFrom(RooAbsPdf.Class()):
             dataset = PDF.generate(argset, 10000, RooFit.Name('toydataset'),
                                    RooFit.Verbose(True))
+            print 'Toy generation complete'
             return dataset
         else:
             raise TypeError('Wrong type. PDF should inherit from RooAbsPdf.')
     elif not isToy:
-        # Get tree
-        ffile = TFile('data/smalltree.root', 'read')
-        ftree = ffile.Get('ftree')
+        fname = 'data/smalltree-new-MC.root'
+        if os.path.exists(fname):
+            # Get tree
+            ffile = TFile(fname, 'read')
+            ftree = ffile.Get('ftree')
 
-        # Trigger:
-        # HLT2Topo4BodyTOS
-        # HLT2Topo3BodyTOS
-        # HLT2Topo2BodyTOS
-        # HLT2TopoIncPhiTOS
-        trigger = 'HLT2Topo3BodyTOS'
-        triggerVar = RooRealVar(trigger, trigger, 0, 2)
-        cut = trigger+'>0'
-        argsetclone = argset.clone('argsetclone')
-        argsetclone.add(triggerVar) # Add triggerVar to apply cut
+            # Trigger:
+            # HLT2Topo4BodyTOS
+            # HLT2Topo3BodyTOS
+            # HLT2Topo2BodyTOS
+            # HLT2TopoIncPhiTOS
+            trigger = 'HLT2Topo3BodyTOS'
+            triggerVar = RooRealVar(trigger, trigger, 0, 2)
+            cut = trigger+'>0'
+            argsetclone = argset.clone('argsetclone')
+            argsetclone.add(triggerVar) # Add triggerVar to apply cut
 
-        # Dataset
-        tmpdataset = RooDataSet('dataset', 'Dataset', argsetclone,
-                             RooFit.Import(ftree), RooFit.Cut(cut))
-        dataset = tmpdataset.reduce(argset)
-        del tmpdataset
+            # Dataset
+            tmpdataset = RooDataSet('dataset', 'Dataset', argsetclone,
+                                    RooFit.Import(ftree), RooFit.Cut(cut))
+            dataset = tmpdataset.reduce(argset)
+            del tmpdataset
+            print 'Read dataset from ntuple'
+        else:
+            raise IOError('File %s does not exist!' % fname)
 
         return dataset
 
@@ -183,11 +190,12 @@ def main(fullPDF, isToy):
     else:
         PDF = Model
 
+    # Generate toy if requested
     if isToy:
         argset = RooArgSet(time,dt)
         try:
             dataset = get_dataset(argset, isToy, PDF)
-        except TypeError:
+        except TypeError, IOError:
             print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
     # PDF.fitTo(dataset, RooFit.ConditionalObservables(dtargset),
