@@ -120,13 +120,13 @@ def main(fullPDF, isToy):
     time = RooRealVar('time', 'B_{s} lifetime in ns', epsilon, 0.01)
     time.setRange(epsilon, 0.01)
     # Limits determined from tree
-    dt = RooRealVar('dt', 'Error in lifetime measurement (ns)', epsilon, 1E-4)
+    dt = RooRealVar('dt', 'Error in lifetime measurement (ns)', 1E-5, 9E-5)
     dt.setBins(100)
 
     # Parameters
-    turnon = RooRealVar('turnon', 'turnon', 500, 5000)
-    offset = RooRealVar('offset', 'offset', 1E-4, 1E-2)
-    exponent = RooRealVar('exponent', 'exponent', 1, 5)
+    turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
+    offset = RooRealVar('offset', 'offset', 3E-4, 1E-4, 5E-4)
+    exponent = RooRealVar('exponent', 'exponent', 2., 1., 5.)
 
     # Temporary RooArgSet to circumvent scoping issues for nested
     # temporary objects.
@@ -134,8 +134,8 @@ def main(fullPDF, isToy):
     dtargset = RooArgSet(dt)
 
     # Resolution model
-    mean = RooRealVar('mean', 'Mean', 0)
-    scale = RooRealVar('scale', 'Per-event time error scale factor', 1)
+    mean = RooRealVar('mean', 'Mean', 0.)
+    scale = RooRealVar('scale', 'Per-event time error scale factor', 1.)
     resmodel = RooGaussModel('resmodel', 'Time resolution model', time,
                              mean, scale, dt)
                              # RooRealConstant::value(0), scale, dt)
