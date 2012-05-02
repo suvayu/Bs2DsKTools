@@ -137,13 +137,13 @@ def main(fullPDF, isToy):
 
     # Decay model
     decayH = RooDecay('decayH', 'Decay function for the B_{s,H}',
-                               time, RooRealConstant.value(1.536875/1E3),
-                               resmodel, RooDecay.SingleSided)
+                      time, RooRealConstant.value(1.536875/1E3),
+                      resmodel, RooDecay.SingleSided)
     decayL = RooDecay('decayL', 'Decay function for the B_{s,L}',
-                               time, RooRealConstant.value(1.407125/1E3),
-                               resmodel, RooDecay.SingleSided)
+                      time, RooRealConstant.value(1.407125/1E3),
+                      resmodel, RooDecay.SingleSided)
     decay = RooAddPdf('decay', 'Decay function for the B_{s}',
-                                decayH, decayL, RooRealConstant.value(0.5))
+                      decayH, decayL, RooRealConstant.value(0.5))
 
     # Acceptance model: 1-1/(1+(at)³)
     # NB: Acceptance is not a PDF by nature
@@ -222,7 +222,7 @@ def main(fullPDF, isToy):
     errorPdf.plotOn(tframe2, RooFit.LineColor(kRed))
 
     # tframe2 = time.frame(RooFit.Name('pmodel'),
-    #                              RooFit.Title('a(t) = decay(t) #times acc(t)'))
+    #                      RooFit.Title('a(t) = decay(t) #times acc(t)'))
     # wdataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
     # decay.plotOn(tframe2, RooFit.LineColor(kRed))
     # Model.plotOn(tframe2, RooFit.LineColor(kAzure))
@@ -238,13 +238,13 @@ def main(fullPDF, isToy):
     # canvas.Print('plots/'+trigger+'_ltFit_py.pdf')
 
     # Persistify variables, PDFs and datasets
-    workspace = RooWorkspace('workspace','Workspace with PDFs and dataset after fit')
+    workspace = RooWorkspace('workspace',
+                             'Workspace with PDFs and dataset after fit')
     supervarargset = RooArgSet(time, dt, turnon, exponent)
     superpdfargset = RooArgSet(PDF)
     _import(workspace, supervarargset)
     _import(workspace, superpdfargset)
     _import(workspace, dataset)
-    # _import(workspace, datahist)
     _import(workspace, tframe1)
     workspace.writeToFile('data/fitresult.root', True)
 
