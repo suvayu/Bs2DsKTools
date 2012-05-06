@@ -44,7 +44,8 @@ from ROOT import kFullTriangleUp
 from ROOT import TTree, TFile, TCanvas, TPad, TClass
 
 # RooFit classes
-from ROOT import RooFit, RooGlobalFunc, RooPlot, RooWorkspace, RooFitResult
+from ROOT import RooFit, RooGlobalFunc
+from ROOT import RooPlot, RooWorkspace, RooFitResult
 from ROOT import RooArgSet, RooArgList
 from ROOT import RooAbsReal, RooRealVar, RooRealConstant, RooFormulaVar
 from ROOT import RooAbsPdf, RooGaussian
@@ -254,7 +255,7 @@ def main(fullPDF, isToy):
     canvas.cd(2)
     tframe2.Draw()
     canvas.Print('plots/canvas.png')
-    # canvas.Print('plots/'+trigger+'_ltFit_py.pdf')
+    # canvas.Print('plots/%s_ltFit_py.pdf' % trigger)
 
     # Persistify variables, PDFs and datasets
     workspace = RooWorkspace('workspace',
