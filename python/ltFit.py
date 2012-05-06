@@ -125,7 +125,7 @@ def main(fullPDF, isToy):
 
     # Parameters
     turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
-    offset = RooRealVar('offset', 'offset', 3E-4, 1E-4, 5E-4)
+    offset = RooRealVar('offset', 'offset', 0, -5E-4, 5E-4)
     exponent = RooRealVar('exponent', 'exponent', 2., 1., 5.)
 
     # Temporary RooArgSet to circumvent scoping issues for nested
@@ -154,8 +154,12 @@ def main(fullPDF, isToy):
 
     # Acceptance model: 1-1/(1+(at)³)
     # NB: Acceptance is not a PDF by nature
+    # Other functional forms:
+    # 1. no offset - (1.-1./(1.+(@0*@1)**@2)) with
+    #    RooArgList(turnon, time, offset, exponent)
+    # 2. Error function - 0.5*(TMath::Erf((time-1)/0.5)+1)
     acceptance = RooFormulaVar('acceptance',
-                               '@1<@2?0:(1-1/(1+(@0*(@1-@2))**@3))',
+                               '@1+@2<0?0:(1.-1./(1.+(@0*(@1+@2))**@3))',
                                RooArgList(turnon, time, offset, exponent))
     acceptancePdf = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
 
