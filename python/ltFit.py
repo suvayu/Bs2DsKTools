@@ -162,8 +162,15 @@ def main(fullPDF, isToy):
     #    RooArgList(turnon, time, offset, exponent)
     # 2. Error function - 0.5*(TMath::Erf((@1-@2)/@0)+1) with
     #    RooArgList(turnon, time, offset)
-    acceptance = RooFormulaVar('acceptance',
-                               '(@1-@2)<0?0:(1.-1./(1.+(@0*(@1-@2))**@3))',
+
+    # Condition to ensure acceptance function is always +ve definite.
+    # The first condition protects against the undefined nature of the
+    # function for times less than 0. Whereas the second condition
+    # ensures the 0.2 ps selection cut present in the sample is
+    # incorporated into the model.
+    acc_cond = '((@1-@2)<0 || @1<0.0002)'
+    expr = '(1.-1./(1.+(@0*(@1-@2))**@3))'
+    acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
                                RooArgList(turnon, time, offset, exponent))
     acceptancePdf = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
 
