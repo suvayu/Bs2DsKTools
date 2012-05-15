@@ -245,10 +245,13 @@ def main(fullPDF, isToy):
     decay.plotOn(tframe1, RooFit.LineColor(kRed))
     acceptancePdf.plotOn(tframe1, RooFit.LineColor(kGreen))
 
-    tframe2 = dt.frame(RooFit.Name('pdt'),
-                       RooFit.Title('Projection on dt'))
-    dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
-    errorPdf.plotOn(tframe2, RooFit.LineColor(kRed))
+    # NOTE: this range is for the dataset binning
+    time.setRange('zoom', 0., 1E-3)
+    # NOTE: this range is for the RooPlot axis
+    tframe2 = time.frame(RooFit.Range('zoom'), RooFit.Name('pztime'),
+                         RooFit.Title('Projection on time (zoomed)'))
+    dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp),
+                   RooFit.CutRange('zoom'))
 
     # tframe2 = time.frame(RooFit.Name('pmodel'),
     #                      RooFit.Title('a(t) = decay(t) #times acc(t)'))
@@ -257,7 +260,7 @@ def main(fullPDF, isToy):
     # Model.plotOn(tframe2, RooFit.LineColor(kAzure))
     # acceptancePdf.plotOn(tframe2, RooFit.LineColor(kGreen))
 
-    canvas = TCanvas('canvas', 'canvas', 960, 400)
+    canvas = TCanvas('canvas', 'canvas', 1600, 1200)
     canvas.Divide(2,1)
     canvas.cd(1)
     tframe1.Draw()
