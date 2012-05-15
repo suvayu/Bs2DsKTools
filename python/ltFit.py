@@ -153,14 +153,15 @@ def main(fullPDF, isToy):
     decay = RooAddPdf('decay', 'Decay function for the B_{s}',
                       decayH, decayL, RooRealConstant.value(0.5))
 
-    # Acceptance model: 1-1/(1+(at)³)
+    # Acceptance model: 1-1/(1+(a*(t-t₀)³)
     # NB: Acceptance is not a PDF by nature
     # Other functional forms:
     # 1. no offset - (1.-1./(1.+(@0*@1)**@2)) with
     #    RooArgList(turnon, time, offset, exponent)
-    # 2. Error function - 0.5*(TMath::Erf((time-1)/0.5)+1)
+    # 2. Error function - 0.5*(TMath::Erf((@1-@2)/@0)+1) with
+    #    RooArgList(turnon, time, offset)
     acceptance = RooFormulaVar('acceptance',
-                               '@1+@2<0?0:(1.-1./(1.+(@0*(@1+@2))**@3))',
+                               '(@1-@2)<0?0:(1.-1./(1.+(@0*(@1-@2))**@3))',
                                RooArgList(turnon, time, offset, exponent))
     acceptancePdf = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
 
