@@ -74,7 +74,7 @@ def get_dataset(argset, isToy=True, PDF=False):
         if objclass.InheritsFrom(RooAbsPdf.Class()):
             dataset = PDF.generate(argset, 10000, RooFit.Name('toydataset'),
                                    RooFit.Verbose(True))
-            print 'Toy generation complete'
+            print 'Toy generation completed with %s' % PDF.GetName()
             return dataset
         else:
             raise TypeError('Wrong type. PDF should inherit from RooAbsPdf.')
@@ -101,7 +101,7 @@ def get_dataset(argset, isToy=True, PDF=False):
                                     RooFit.Import(ftree), RooFit.Cut(cut))
             dataset = tmpdataset.reduce(argset)
             del tmpdataset
-            print 'Read dataset from ntuple'
+            print 'Created dataset from tree in %s' % fname
         else:
             raise IOError('File %s does not exist!' % fname)
 
@@ -204,9 +204,8 @@ def main(fullPDF, isToy):
 
     # Generate toy if requested
     if isToy:
-        argset = RooArgSet(time,dt)
         try:
-            dataset = get_dataset(argset, isToy, PDF)
+            dataset = get_dataset(RooArgSet(time,dt), isToy, PDF)
         except TypeError, IOError:
             print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
