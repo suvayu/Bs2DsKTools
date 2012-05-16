@@ -59,6 +59,9 @@ _import = getattr(RooWorkspace, 'import')
 # More precise integrals in RooFit
 RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-9)
 RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-9)
+# Set how intervals are determined and integrals calculated
+RooAbsReal.defaultIntegratorConfig().getConfigSection('RooAdaptiveGaussKronrodIntegrator1D').setCatLabel('method','21Points')
+RooAbsReal.defaultIntegratorConfig().getConfigSection('RooAdaptiveGaussKronrodIntegrator1D').setRealValue('maxSeg', 100000)
 
 def get_dataset(argset, isToy=True, PDF=False):
     """Return a dataset.
@@ -119,8 +122,8 @@ def main(fullPDF, isToy):
     """
 
     # Observables
-    time = RooRealVar('time', 'B_{s} lifetime in ns', epsilon, 0.01)
-    time.setRange(epsilon, 0.01)
+    time = RooRealVar('time', 'B_{s} lifetime in ns', epsilon, 0.01+epsilon)
+    time.setRange('fullrange', epsilon, 0.01+epsilon)
     # Limits determined from tree
     dt = RooRealVar('dt', 'Error in lifetime measurement (ns)', 1E-5, 9E-5)
     dt.setBins(100)
