@@ -27,8 +27,7 @@ is read from an ntuple and fitted to the model otherwise.
 import os
 import sys
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
-epsilon = 1E-4                  # small number
-scutoff = 2E-4                  # selection cutoff in sample
+epsilon = 1E-4
 
 # FIXME: Batch running fails on importing anything but gROOT
 # ROOT global variables
@@ -97,7 +96,6 @@ def get_dataset(argset, isToy=True, PDF=False):
             argsetclone = argset.clone('argsetclone')
             argsetclone.add(triggerVar) # Add triggerVar to apply cut
 
-            # FIXME: change from ns to ps
             # Dataset
             tmpdataset = RooDataSet('dataset', 'Dataset', argsetclone,
                                     RooFit.Import(ftree), RooFit.Cut(cut))
@@ -120,8 +118,8 @@ def main(fullPDF, isToy):
     """
 
     # Observables
-    time = RooRealVar('time', 'B_{s} lifetime in ns', scutoff, 0.01)
-    time.setRange('fullrange', scutoff, 0.01)
+    time = RooRealVar('time', 'B_{s} lifetime in ns', epsilon, 0.01)
+    time.setRange(epsilon, 0.01)
     # Limits determined from tree
     dt = RooRealVar('dt', 'Error in lifetime measurement (ns)', 1E-5, 9E-5)
     dt.setBins(100)
