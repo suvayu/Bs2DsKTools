@@ -75,13 +75,13 @@ def main(identifier='zoomed'):
     """Plot PDF and dataset from workspace."""
 
     # workspace
-    workspace = get_workspace('data/fitresult.root')
+    workspace = get_workspace('data/fitresult-fixed.root')
     # variables
     time = get_obj(objname='time', workspace=workspace, objtype='var')
     dt = get_obj(objname='dt', workspace=workspace, objtype='var')
     # PDFs
-    acceptance = get_obj(objname='acceptance', workspace=workspace, objtype='var')
-    acceptancePdf = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
+    # acceptance = get_obj(objname='acceptance', workspace=workspace, objtype='var')
+    # acceptancePdf = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
     PDF = get_obj(objname='FullModel', workspace=workspace, objtype='pdf')
     # dataset
     dataset = get_obj(objname='dataset', workspace=workspace, objtype='data')
@@ -101,7 +101,7 @@ def main(identifier='zoomed'):
                    RooFit.CutRange('zoom'))
     PDF.plotOn(tframe1, RooFit.ProjWData(dtargset, dataset, True),
                RooFit.LineColor(kBlue))
-    acceptancePdf.plotOn(tframe1, RooFit.LineColor(kGreen))
+    # acceptancePdf.plotOn(tframe1, RooFit.LineColor(kGreen))
 
     # draw and print
     canvas = TCanvas('canvas', 'canvas', 800, 600)
