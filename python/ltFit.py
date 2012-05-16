@@ -96,6 +96,7 @@ def get_dataset(argset, isToy=True, PDF=False):
             argsetclone = argset.clone('argsetclone')
             argsetclone.add(triggerVar) # Add triggerVar to apply cut
 
+            # FIXME: change from ns to ps
             # Dataset
             tmpdataset = RooDataSet('dataset', 'Dataset', argsetclone,
                                     RooFit.Import(ftree), RooFit.Cut(cut))
@@ -126,7 +127,7 @@ def main(fullPDF, isToy):
 
     # Parameters
     turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
-    offset = RooRealVar('offset', 'offset', 0, -5E-4, 5E-4)
+    offset = RooRealVar('offset', 'offset', 0., -5E-4, 5E-4)
     exponent = RooRealVar('exponent', 'exponent', 2., 1., 5.)
 
     # Temporary RooArgSet to circumvent scoping issues for nested
@@ -250,6 +251,7 @@ def main(fullPDF, isToy):
                          RooFit.Title('Projection on time (zoomed)'))
     dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp),
                    RooFit.CutRange('zoom'))
+    acceptancePdf.plotOn(tframe2, RooFit.LineColor(kGreen))
 
     # tframe2 = time.frame(RooFit.Name('pmodel'),
     #                      RooFit.Title('a(t) = decay(t) #times acc(t)'))
@@ -258,7 +260,7 @@ def main(fullPDF, isToy):
     # Model.plotOn(tframe2, RooFit.LineColor(kAzure))
     # acceptancePdf.plotOn(tframe2, RooFit.LineColor(kGreen))
 
-    canvas = TCanvas('canvas', 'canvas', 1600, 1200)
+    canvas = TCanvas('canvas', 'canvas', 1600, 600)
     canvas.Divide(2,1)
     canvas.cd(1)
     tframe1.Draw()
