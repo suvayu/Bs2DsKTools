@@ -112,7 +112,7 @@ def get_dataset(argset, isToy=True, PDF=False):
         return dataset
 
 
-def main(isToy):
+def main(accType='powerlaw', isToy=False):
     """Setup RooFit variables then construct the PDF as per options.
 
     Fit the model to a dataset. If toy generation is requested,
@@ -129,7 +129,15 @@ def main(isToy):
     dt.setBins(100)
 
     # Parameters
-    turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
+    if accType == 'powerlaw':
+        turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
+    elif accType == 'erf':
+        # turnon has a different range as it is in the denominator
+        turnon = RooRealVar('turnon', 'turnon', 1., 0.01, 100.)
+    else:
+        print 'Unknown acceptance type. Aborting'
+        return
+
     offset = RooRealVar('offset', 'offset', 0., -5E-4, 5E-4)
     exponent = RooRealVar('exponent', 'exponent', 2., 1., 5.)
 
@@ -165,16 +173,26 @@ def main(isToy):
     # 2. Error function - 0.5*(TMath::Erf((@1-@2)/@0)+1) with
     #    RooArgList(turnon, time, offset)
 
-    # Condition to ensure acceptance function is always +ve definite.
-    # The first condition protects against the undefined nature of the
-    # function for times less than 0. Whereas the second condition
-    # ensures the 0.2 ps selection cut present in the sample is
-    # incorporated into the model.
-    acc_cond = '((@1-@2)<0 || @1<0.0002)'
-    expr = '(1.-1./(1.+(@0*(@1-@2))**@3))'
-    acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
-                               RooArgList(turnon, time, offset, exponent))
-    acceptancePdf = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
+    if accType == 'powerlaw':
+        # Condition to ensure acceptance function is always +ve definite.
+        # The first condition protects against the undefined nature of the
+        # function for times less than 0. Whereas the second condition
+        # ensures the 0.2 ps selection cut present in the sample is
+        # incorporated into the model.
+        acc_cond = '((@1-@2)<0 || @1<0.0002)'
+        expr = '(1.-1./(1.+(@0*(@1-@2))**@3))'
+        acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
+                                   RooArgList(turnon, time, offset, exponent))
+        acceptancePdf = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
+    elif accType == 'erf':
+        acc_cond = '(@1<0.0002)'
+        expr = '(0.5*(TMath::Erf((@1-@2)/@0)+1))'
+        acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
+                                   RooArgList(turnon, time, offset))
+        acceptancePdf = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
+    else:
+        print 'Unknown acceptance type. Aborting'
+        return
 
     # Define PDF and fit
     ModelL = RooEffProd('ModelL', 'Acceptance model B_{s,L}', decayL, acceptance)
@@ -281,4 +299,4 @@ def main(isToy):
 
 
 if __name__ == "__main__":
-    main(False)
+    main('powerlaw', False)
