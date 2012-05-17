@@ -112,7 +112,7 @@ def get_dataset(argset, isToy=True, PDF=False):
         return dataset
 
 
-def main(fullPDF, isToy):
+def main(isToy):
     """Setup RooFit variables then construct the PDF as per options.
 
     Fit the model to a dataset. If toy generation is requested,
@@ -181,38 +181,34 @@ def main(fullPDF, isToy):
     ModelH = RooEffProd('ModelH', 'Acceptance model B_{s,H}', decayH, acceptance)
 
     # Build full 2-D PDF (t, δt)
-    if fullPDF:
-        argset = RooArgSet(time,dt)
-        try:
-            dataset = get_dataset(argset, isToy=False)
-        except TypeError, IOError:
-            print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
+    argset = RooArgSet(time,dt)
+    try:
+        dataset = get_dataset(argset, isToy=False)
+    except TypeError, IOError:
+        print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
-        tmpdatahist = dataset.binnedClone('datahist','Binned data')
-        datahist = tmpdatahist.reduce(dtargset)
-        del tmpdatahist
-        if isToy:
-            del dataset
+    tmpdatahist = dataset.binnedClone('datahist','Binned data')
+    datahist = tmpdatahist.reduce(dtargset)
+    del tmpdatahist
+    if isToy:
+        del dataset
 
-        errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
-                               dtargset, datahist)
+    errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
+                           dtargset, datahist)
 
-        modelargset = RooArgSet(ModelL)
-        FullModelL = RooProdPdf('FullModelL', 'Acceptance model with errors B_{s,L}',
-                                RooArgSet(errorPdf),
-                                RooFit.Conditional(modelargset, timeargset))
+    modelargset = RooArgSet(ModelL)
+    FullModelL = RooProdPdf('FullModelL', 'Acceptance model with errors B_{s,L}',
+                            RooArgSet(errorPdf),
+                            RooFit.Conditional(modelargset, timeargset))
 
-        modelargset = RooArgSet(ModelH)
-        FullModelH = RooProdPdf('FullModelH', 'Acceptance model with errors B_{s,H}',
-                                RooArgSet(errorPdf),
-                                RooFit.Conditional(modelargset, timeargset))
+    modelargset = RooArgSet(ModelH)
+    FullModelH = RooProdPdf('FullModelH', 'Acceptance model with errors B_{s,H}',
+                            RooArgSet(errorPdf),
+                            RooFit.Conditional(modelargset, timeargset))
 
-        PDF = RooAddPdf('FullModel', 'Acceptance model',
-                        FullModelH, FullModelL,
-                        RooRealConstant.value(0.5))
-    else:
-        PDF = RooAddPdf('Model', 'Acceptance model', ModelH, ModelL,
-                        RooRealConstant.value(0.5))
+    PDF = RooAddPdf('FullModel', 'Acceptance model',
+                    FullModelH, FullModelL,
+                    RooRealConstant.value(0.5))
 
     # Generate toy if requested
     if isToy:
@@ -285,4 +281,4 @@ def main(fullPDF, isToy):
 
 
 if __name__ == "__main__":
-    main(True, False)
+    main(False)
