@@ -53,6 +53,7 @@ TESTDIR      =  $(PROJROOT)/tests
 LIBS         =  
 LIBS         += libreadTree.so
 LIBS         += libutils.so
+LIBS         += libacceptance.so
 
 LIBFILES     =  $(LIBS:%=$(LIBDIR)/%)
 
@@ -65,6 +66,12 @@ TREESRC      += lifetime.cxx
 
 TREEOBJF     =  $(TREESRC:%.cxx=$(LIBDIR)/%.o)
 
+# libreadTree.so
+ACCSRC      =
+ACCSRC      += PowLawAcceptance.cxx
+
+ACCOBJF     =  $(ACCSRC:%.cxx=$(LIBDIR)/%.o)
+
 # libraries with one source file
 # other libraries
 LIBSRC       =
@@ -72,6 +79,7 @@ LIBSRC       += readMCTree.cxx
 LIBSRC       += readDataTree.cxx
 LIBSRC       += lifetime.cxx
 LIBSRC       += utils.cxx
+LIBSRC       += PowLawAcceptance.cxx
 
 OBJFILES     =  $(SRCDIR)/%.o
 
@@ -103,6 +111,10 @@ $(LIBDIR)/libreadTree.so:	$(TREEOBJF) | $(LIBDIR)
 
 $(LIBDIR)/libutils.so:		$(LIBDIR)/utils.o | $(LIBDIR)
 	$(LINK-LIBS)
+
+$(LIBDIR)/libacceptance.so:	$(ACCOBJF) | $(LIBDIR)
+	$(LD) $(LDFLAGS) $(SOFLAGS) $(ROOTLIBS) $(ROOFITLIBS) $^ -o $@
+	@echo "$@ done"
 
 $(LIBDIR)/%.o:	$(SRCDIR)/%.cxx | $(LIBDIR)
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -I$(INCDIR) $< -o $@
