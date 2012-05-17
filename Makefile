@@ -1,8 +1,13 @@
+# Makefile notes: `:=' is evaluated immediately but `=' is not. So if
+# a variable contains parameters which are to be expanded later, then
+# use `='.
+
 #-----------------------------------------------------
 # shell utilities
 #-----------------------------------------------------
 SHELL        := /bin/bash
 ROOTCONFIG   := root-config
+PKGCONFIG    := pkg-config
 
 #-----------------------------------------------------
 # compiler flags and options
@@ -12,19 +17,20 @@ ifneq ($(findstring debug, $(strip $(shell $(ROOTCONFIG) --config))),)
 OPT           = -g
 endif
 
-# compile with g++ 
-CXX          := $(shell $(ROOTCONFIG) --cxx) -Wall -fPIC
+# compile with g++
+CXX          := $(shell $(ROOTCONFIG) --cxx)
+OPT          += -Wall -fPIC $(DEBUG)
 CXXFLAGS     := -c $(OPT)
 
 # link
-LD           := $(shell $(ROOTCONFIG) --ld) -Wall -fPIC
+LD           := $(shell $(ROOTCONFIG) --ld)
 LDFLAGS      := $(shell $(ROOTCONFIG) --ldflags) $(OPT)
-SOFLAGS      := -shared
+SOFLAGS       = -shared -Wl,-soname,$@
 
 # ROOT compile flags
 ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
 
-# linking to ROOT 
+# linking to ROOT
 ROOTLIBS     := $(shell $(ROOTCONFIG) --libs)
 ROOFITLIBS   := -lRooFitCore -lRooFit
 ROOTGLIBS    := $(shell $(ROOTCONFIG) --glibs)
@@ -37,83 +43,87 @@ ROOTCINT     := rootcint
 #-----------------------------------------------------
 # directories
 #-----------------------------------------------------
-PROJROOT     =  $(PWD)
-INCDIR       =  $(PROJROOT)/include
-SRCDIR       =  $(PROJROOT)/src
-LIBDIR       =  $(PROJROOT)/lib
-DICTDIR      =  $(PROJROOT)/dict
-DOCDIR       =  $(PROJROOT)/docs
-BINDIR       =  $(PROJROOT)/bin
-TESTDIR      =  $(PROJROOT)/tests
+# PROJROOT      = $(PWD)
+PROJROOT      = .
+INCDIR        = $(PROJROOT)/include
+SRCDIR        = $(PROJROOT)/src
+LIBDIR        = $(PROJROOT)/lib
+DICTDIR       = $(PROJROOT)/dict
+DOCDIR        = $(PROJROOT)/docs
+BINDIR        = $(PROJROOT)/bin
+PYDIR         = $(PROJROOT)/python
+TESTDIR       = $(PROJROOT)/tests
 
 #-----------------------------------------------------
 # project source, object, dictionary and lib filenames
 #-----------------------------------------------------
 # libraries
-LIBS         =  
+LIBS          =
 LIBS         += libreadTree.so
 LIBS         += libutils.so
 LIBS         += libacceptance.so
 
-LIBFILES     =  $(LIBS:%=$(LIBDIR)/%)
-
 # libraries with multiple source files need special handling
 # libreadTree.so
-TREESRC      =
+TREESRC       =
 TREESRC      += readMCTree.cxx
 TREESRC      += readDataTree.cxx
 TREESRC      += lifetime.cxx
 
-TREEOBJF     =  $(TREESRC:%.cxx=$(LIBDIR)/%.o)
+TREEOBJF      = $(TREESRC:%.cxx=$(LIBDIR)/%.o)
 
 # libreadTree.so
-ACCSRC      =
-ACCSRC      += PowLawAcceptance.cxx
+ACCSRC        =
+ACCSRC       += PowLawAcceptance.cxx
 
-ACCOBJF     =  $(ACCSRC:%.cxx=$(LIBDIR)/%.o)
+ACCOBJF       = $(ACCSRC:%.cxx=$(LIBDIR)/%.o)
 
 # libraries with one source file
 # other libraries
-LIBSRC       =
+LIBSRC        =
 LIBSRC       += readMCTree.cxx
 LIBSRC       += readDataTree.cxx
 LIBSRC       += lifetime.cxx
 LIBSRC       += utils.cxx
 LIBSRC       += PowLawAcceptance.cxx
 
-OBJFILES     =  $(SRCDIR)/%.o
-
 # binaries
-BINSRC       =
+BINSRC        =
 BINSRC       += accept.cc
 BINSRC       += resolution.cc
 
-BINFILES     =  $(BINSRC:%.cc=$(BINDIR)/%)
+BINS          = $(BINSRC:%.cc=%)
+BINFILES      = $(BINSRC:%.cc=$(BINDIR)/%)
 
 #-----------------------------------------------------
 # canned recipes
 #-----------------------------------------------------
 define LINK-LIBS =
-$(LD) $(LDFLAGS) $(SOFLAGS) $(ROOTLIBS) $^ -o $@
-@echo "$@ done"
+$(LD) $(LDFLAGS) $(SOFLAGS) $(ROOTLIBS)
 endef
 
 #------------------------------------------------------------------------------
 # Rules
 #------------------------------------------------------------------------------
-.PHONY:		all clean clean-obj clean-so docs
+.PHONY:		all libs $(LIBS) $(BINS) clean bin-clean obj-clean docs
 
-all:		$(LIBFILES) $(BINFILES)
+all:		libs $(BINS)
 
 # libraries
+libs:		$(LIBS)
+
+$(LIBS): %:	$(LIBDIR)/%
+
 $(LIBDIR)/libreadTree.so:	$(TREEOBJF) | $(LIBDIR)
-	$(LINK-LIBS)
+	$(LINK-LIBS) $^ -o $@
+	@echo "$@ done"
 
 $(LIBDIR)/libutils.so:		$(LIBDIR)/utils.o | $(LIBDIR)
-	$(LINK-LIBS)
+	$(LINK-LIBS) $^ -o $@
+	@echo "$@ done"
 
 $(LIBDIR)/libacceptance.so:	$(ACCOBJF) | $(LIBDIR)
-	$(LD) $(LDFLAGS) $(SOFLAGS) $(ROOTLIBS) $(ROOFITLIBS) $^ -o $@
+	$(LINK-LIBS) $(ROOFITLIBS) $^ -o $@
 	@echo "$@ done"
 
 $(LIBDIR)/%.o:	$(SRCDIR)/%.cxx | $(LIBDIR)
@@ -123,18 +133,19 @@ $(LIBDIR):
 	mkdir -p $(LIBDIR)
 
 # Binaries
-$(BINFILES): $(BINDIR)/%:	$(SRCDIR)/%.cc $(LIBFILES) | $(BINDIR)
-	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) -L$(LIBDIR) -lreadTree -lutils $< -o $@
+$(BINS): %:	$(SRCDIR)/%.cc $(LIBFILES) | $(BINDIR)
+	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) -L$(LIBDIR) -lreadTree -lutils $< -o $(BINDIR)/$@
 
 $(BINDIR):
 	mkdir -p $(BINDIR)
 
-clean:		clean-obj clean-so
+clean:		obj-clean bin-clean
 
-clean-obj:
+bin-clean:
+	rm -f $(foreach FILE,$(BINS),$(BINDIR)/$(FILE))
+
+obj-clean:
 	rm -f $(LIBDIR)/*.o
-
-clean-so:
 	rm -f $(LIBDIR)/*.so
 
 
