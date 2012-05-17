@@ -27,7 +27,7 @@ is read from an ntuple and fitted to the model otherwise.
 import os
 import sys
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
-epsilon = 1E-4
+epsilon = 2E-4
 
 # FIXME: Batch running fails on importing anything but gROOT
 # ROOT global variables
