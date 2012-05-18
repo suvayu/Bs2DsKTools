@@ -72,9 +72,10 @@ TREESRC      += lifetime.cxx
 
 TREEOBJF      = $(TREESRC:%.cxx=$(LIBDIR)/%.o)
 
-# libreadTree.so
+# libacceptance.so
 ACCSRC        =
 ACCSRC       += PowLawAcceptance.cxx
+ACCSRC       += ErfAcceptance.cxx
 
 ACCOBJF       = $(ACCSRC:%.cxx=$(LIBDIR)/%.o)
 
@@ -86,6 +87,7 @@ LIBSRC       += readDataTree.cxx
 LIBSRC       += lifetime.cxx
 LIBSRC       += utils.cxx
 LIBSRC       += PowLawAcceptance.cxx
+LIBSRC       += ErfAcceptance.cxx
 
 # binaries
 BINSRC        =
