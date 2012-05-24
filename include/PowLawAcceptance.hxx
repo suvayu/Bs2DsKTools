@@ -48,8 +48,8 @@ protected:
 
 private:
 
-  //  ClassDef(PowLawAcceptance,1) // This class implements a power law
-			       // acceptance function.
+  ClassDef(PowLawAcceptance,1);	// This class implements a power law
+			        // acceptance function.
 };
 
 #endif	// __POWLAWACCEPTANCE_HXX

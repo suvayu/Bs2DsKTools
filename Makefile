@@ -76,6 +76,11 @@ ACCSRC        =
 ACCSRC       += PowLawAcceptance.cxx
 ACCSRC       += ErfAcceptance.cxx
 
+# linkdef files for dictionaries
+LINKDEFS     =
+LINKDEFS     += readTreeLinkDef.h
+LINKDEFS     += utilsLinkDef.h
+
 # binaries
 BINSRC        =
 BINSRC       += accept.cc
@@ -91,6 +96,16 @@ define LINK-LIBS =
 $(LD) $(LDFLAGS) $(SOFLAGS) $(ROOTLIBS)
 endef
 
+define DICTNAMES =
+$(foreach NAME,$(LIBS),$(NAME:lib%.so=$(DICTDIR)/%Dict.cxx))
+endef
+
+# getting linkdef name $(patsubst %Dict.cxx,%LinkDef.h,$@)
+define MAKE-DICT =
+	$(ROOTCINT) -f $@ -c -p $^
+	@echo "Generated $@ from $^"
+endef
+
 #------------------------------------------------------------------------------
 # Rules
 #------------------------------------------------------------------------------
@@ -98,28 +113,39 @@ endef
 
 all:		libs $(BINS)
 
-# libraries
+# Libraries
 libs:		$(LIBS)
 
 $(LIBS): %:	$(LIBDIR)/%
-
-$(LIBDIR)/libreadTree.so:	$(TREESRC:%.cxx=$(LIBDIR)/%.o) | $(LIBDIR)
-	$(LINK-LIBS) $^ -o $@
 	@echo "$@ done"
+
+$(LIBDIR)/libreadTree.so:	$(TREESRC:%.cxx=$(LIBDIR)/%.o) $(DICTDIR)/readTreeDict.o | $(LIBDIR)
+	$(LINK-LIBS) $^ -o $@
 
 $(LIBDIR)/libutils.so:		$(LIBDIR)/utils.o | $(LIBDIR)
 	$(LINK-LIBS) $^ -o $@
-	@echo "$@ done"
 
-$(LIBDIR)/libacceptance.so:	$(ACCSRC:%.cxx=$(LIBDIR)/%.o) | $(LIBDIR)
+$(LIBDIR)/libacceptance.so:	$(ACCSRC:%.cxx=$(LIBDIR)/%.o) $(DICTDIR)/acceptanceDict.o | $(LIBDIR)
 	$(LINK-LIBS) $(ROOFITLIBS) $^ -o $@
-	@echo "$@ done"
 
 $(LIBDIR)/%.o:	$(SRCDIR)/%.cxx | $(LIBDIR)
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -I$(INCDIR) $< -o $@
 
 $(LIBDIR):
 	mkdir -p $(LIBDIR)
+
+# Dictionaries
+$(DICTDIR)/readTreeDict.cxx:	$(TREESRC:%.cxx=$(INCDIR)/%.hxx) $(DICTDIR)/readTreeLinkDef.h
+	$(MAKE-DICT)
+
+$(DICTDIR)/acceptanceDict.cxx:	$(ACCSRC:%.cxx=$(INCDIR)/%.hxx) $(DICTDIR)/acceptanceLinkDef.h
+	$(MAKE-DICT)
+
+# $(DICTDIR)/utilsDict.cxx:	$(INCDIR)/utils.hxx $(DICTDIR)/utilsLinkDef.h
+# 	$(MAKE-DICT)
+
+$(DICTDIR)/%.o:	$(DICTDIR)/%.cxx
+	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -I$(PROJROOT) $< -o $@
 
 # Binaries
 $(BINS): %:	$(SRCDIR)/%.cc $(LIBS) | $(BINDIR)
