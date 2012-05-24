@@ -27,7 +27,7 @@ is read from an ntuple and fitted to the model otherwise.
 import os
 import sys
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
-epsilon = 1E-4
+epsilon = 2E-4
 
 # FIXME: Batch running fails on importing anything but gROOT
 # ROOT global variables
@@ -59,6 +59,9 @@ _import = getattr(RooWorkspace, 'import')
 # More precise integrals in RooFit
 RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-9)
 RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-9)
+# Set how intervals are determined and integrals calculated
+RooAbsReal.defaultIntegratorConfig().getConfigSection('RooAdaptiveGaussKronrodIntegrator1D').setCatLabel('method','21Points')
+RooAbsReal.defaultIntegratorConfig().getConfigSection('RooAdaptiveGaussKronrodIntegrator1D').setRealValue('maxSeg', 100000)
 
 def get_dataset(argset, isToy=True, PDF=False):
     """Return a dataset.
@@ -74,7 +77,7 @@ def get_dataset(argset, isToy=True, PDF=False):
         if objclass.InheritsFrom(RooAbsPdf.Class()):
             dataset = PDF.generate(argset, 10000, RooFit.Name('toydataset'),
                                    RooFit.Verbose(True))
-            print 'Toy generation complete'
+            print 'Toy generation completed with %s' % PDF.GetName()
             return dataset
         else:
             raise TypeError('Wrong type. PDF should inherit from RooAbsPdf.')
@@ -96,19 +99,20 @@ def get_dataset(argset, isToy=True, PDF=False):
             argsetclone = argset.clone('argsetclone')
             argsetclone.add(triggerVar) # Add triggerVar to apply cut
 
+            # FIXME: change from ns to ps
             # Dataset
             tmpdataset = RooDataSet('dataset', 'Dataset', argsetclone,
                                     RooFit.Import(ftree), RooFit.Cut(cut))
             dataset = tmpdataset.reduce(argset)
             del tmpdataset
-            print 'Read dataset from ntuple'
+            print 'Created dataset from tree in %s' % fname
         else:
             raise IOError('File %s does not exist!' % fname)
 
         return dataset
 
 
-def main(fullPDF, isToy):
+def main(accType='powerlaw', isToy=False):
     """Setup RooFit variables then construct the PDF as per options.
 
     Fit the model to a dataset. If toy generation is requested,
@@ -118,15 +122,23 @@ def main(fullPDF, isToy):
     """
 
     # Observables
-    time = RooRealVar('time', 'B_{s} lifetime in ns', epsilon, 0.01)
-    time.setRange(epsilon, 0.01)
+    time = RooRealVar('time', 'B_{s} lifetime in ns', epsilon, 0.01+epsilon)
+    time.setRange('fullrange', epsilon, 0.01+epsilon)
     # Limits determined from tree
     dt = RooRealVar('dt', 'Error in lifetime measurement (ns)', 1E-5, 9E-5)
     dt.setBins(100)
 
     # Parameters
-    turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
-    offset = RooRealVar('offset', 'offset', 0, -5E-4, 5E-4)
+    if accType == 'powerlaw':
+        turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
+    elif accType == 'erf':
+        # turnon has a different range as it is in the denominator
+        turnon = RooRealVar('turnon', 'turnon', 1., 0.01, 100.)
+    else:
+        print 'Unknown acceptance type. Aborting'
+        return
+
+    offset = RooRealVar('offset', 'offset', 0., -5E-4, 5E-4)
     exponent = RooRealVar('exponent', 'exponent', 2., 1., 5.)
 
     # Temporary RooArgSet to circumvent scoping issues for nested
@@ -153,60 +165,73 @@ def main(fullPDF, isToy):
     decay = RooAddPdf('decay', 'Decay function for the B_{s}',
                       decayH, decayL, RooRealConstant.value(0.5))
 
-    # Acceptance model: 1-1/(1+(at)³)
+    # Acceptance model: 1-1/(1+(a*(t-t₀)³)
     # NB: Acceptance is not a PDF by nature
     # Other functional forms:
     # 1. no offset - (1.-1./(1.+(@0*@1)**@2)) with
     #    RooArgList(turnon, time, offset, exponent)
-    # 2. Error function - 0.5*(TMath::Erf((time-1)/0.5)+1)
-    acceptance = RooFormulaVar('acceptance',
-                               '@1+@2<0?0:(1.-1./(1.+(@0*(@1+@2))**@3))',
-                               RooArgList(turnon, time, offset, exponent))
-    acceptancePdf = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
+    # 2. Error function - 0.5*(TMath::Erf((@1-@2)/@0)+1) with
+    #    RooArgList(turnon, time, offset)
+
+    if accType == 'powerlaw':
+        # Condition to ensure acceptance function is always +ve definite.
+        # The first condition protects against the undefined nature of the
+        # function for times less than 0. Whereas the second condition
+        # ensures the 0.2 ps selection cut present in the sample is
+        # incorporated into the model.
+        acc_cond = '((@1-@2)<0 || @1<0.0002)'
+        expr = '(1.-1./(1.+(@0*(@1-@2))**@3))'
+        acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
+                                   RooArgList(turnon, time, offset, exponent))
+        acceptancePdf = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
+    elif accType == 'erf':
+        acc_cond = '(@1<0.0002)'
+        expr = '(0.5*(TMath::Erf((@1-@2)/@0)+1))'
+        acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
+                                   RooArgList(turnon, time, offset))
+        acceptancePdf = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
+    else:
+        print 'Unknown acceptance type. Aborting'
+        return
 
     # Define PDF and fit
     ModelL = RooEffProd('ModelL', 'Acceptance model B_{s,L}', decayL, acceptance)
     ModelH = RooEffProd('ModelH', 'Acceptance model B_{s,H}', decayH, acceptance)
 
     # Build full 2-D PDF (t, δt)
-    if fullPDF:
-        argset = RooArgSet(time,dt)
-        try:
-            dataset = get_dataset(argset, isToy=False)
-        except TypeError, IOError:
-            print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
+    argset = RooArgSet(time,dt)
+    try:
+        dataset = get_dataset(argset, isToy=False)
+    except TypeError, IOError:
+        print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
-        tmpdatahist = dataset.binnedClone('datahist','Binned data')
-        datahist = tmpdatahist.reduce(dtargset)
-        del tmpdatahist
-        if isToy:
-            del dataset
+    tmpdatahist = dataset.binnedClone('datahist','Binned data')
+    datahist = tmpdatahist.reduce(dtargset)
+    del tmpdatahist
+    if isToy:
+        del dataset
 
-        errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
-                               dtargset, datahist)
+    errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
+                           dtargset, datahist)
 
-        modelargset = RooArgSet(ModelL)
-        FullModelL = RooProdPdf('FullModelL', 'Acceptance model with errors B_{s,L}',
-                                RooArgSet(errorPdf),
-                                RooFit.Conditional(modelargset, timeargset))
+    modelargset = RooArgSet(ModelL)
+    FullModelL = RooProdPdf('FullModelL', 'Acceptance model with errors B_{s,L}',
+                            RooArgSet(errorPdf),
+                            RooFit.Conditional(modelargset, timeargset))
 
-        modelargset = RooArgSet(ModelH)
-        FullModelH = RooProdPdf('FullModelH', 'Acceptance model with errors B_{s,H}',
-                                RooArgSet(errorPdf),
-                                RooFit.Conditional(modelargset, timeargset))
+    modelargset = RooArgSet(ModelH)
+    FullModelH = RooProdPdf('FullModelH', 'Acceptance model with errors B_{s,H}',
+                            RooArgSet(errorPdf),
+                            RooFit.Conditional(modelargset, timeargset))
 
-        PDF = RooAddPdf('FullModel', 'Acceptance model',
-                        FullModelH, FullModelL,
-                        RooRealConstant.value(0.5))
-    else:
-        PDF = RooAddPdf('Model', 'Acceptance model', ModelH, ModelL,
-                        RooRealConstant.value(0.5))
+    PDF = RooAddPdf('FullModel', 'Acceptance model',
+                    FullModelH, FullModelL,
+                    RooRealConstant.value(0.5))
 
     # Generate toy if requested
     if isToy:
-        argset = RooArgSet(time,dt)
         try:
-            dataset = get_dataset(argset, isToy, PDF)
+            dataset = get_dataset(RooArgSet(time,dt), isToy, PDF)
         except TypeError, IOError:
             print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
@@ -236,10 +261,14 @@ def main(fullPDF, isToy):
     decay.plotOn(tframe1, RooFit.LineColor(kRed))
     acceptancePdf.plotOn(tframe1, RooFit.LineColor(kGreen))
 
-    tframe2 = dt.frame(RooFit.Name('pdt'),
-                       RooFit.Title('Projection on dt'))
-    dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
-    errorPdf.plotOn(tframe2, RooFit.LineColor(kRed))
+    # NOTE: this range is for the dataset binning
+    time.setRange('zoom', 0., 1E-3)
+    # NOTE: this range is for the RooPlot axis
+    tframe2 = time.frame(RooFit.Range('zoom'), RooFit.Name('pztime'),
+                         RooFit.Title('Projection on time (zoomed)'))
+    dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp),
+                   RooFit.CutRange('zoom'))
+    acceptancePdf.plotOn(tframe2, RooFit.LineColor(kGreen))
 
     # tframe2 = time.frame(RooFit.Name('pmodel'),
     #                      RooFit.Title('a(t) = decay(t) #times acc(t)'))
@@ -248,7 +277,7 @@ def main(fullPDF, isToy):
     # Model.plotOn(tframe2, RooFit.LineColor(kAzure))
     # acceptancePdf.plotOn(tframe2, RooFit.LineColor(kGreen))
 
-    canvas = TCanvas('canvas', 'canvas', 960, 400)
+    canvas = TCanvas('canvas', 'canvas', 1600, 600)
     canvas.Divide(2,1)
     canvas.cd(1)
     tframe1.Draw()
@@ -270,4 +299,4 @@ def main(fullPDF, isToy):
 
 
 if __name__ == "__main__":
-    main(True, False)
+    main('powerlaw', False)
