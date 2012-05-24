@@ -25,7 +25,8 @@ CXXFLAGS     := -c $(OPT)
 # link
 LD           := $(shell $(ROOTCONFIG) --ld)
 LDFLAGS      := $(shell $(ROOTCONFIG) --ldflags) $(OPT)
-SOFLAGS       = -shared -Wl,-soname,$@
+SOFLAGS       = -shared
+# SOFLAGS       = -shared -Wl,-soname,$@ # not needed, default is fine
 
 # ROOT compile flags
 ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
@@ -70,24 +71,10 @@ TREESRC      += readMCTree.cxx
 TREESRC      += readDataTree.cxx
 TREESRC      += lifetime.cxx
 
-TREEOBJF      = $(TREESRC:%.cxx=$(LIBDIR)/%.o)
-
 # libacceptance.so
 ACCSRC        =
 ACCSRC       += PowLawAcceptance.cxx
 ACCSRC       += ErfAcceptance.cxx
-
-ACCOBJF       = $(ACCSRC:%.cxx=$(LIBDIR)/%.o)
-
-# libraries with one source file
-# other libraries
-LIBSRC        =
-LIBSRC       += readMCTree.cxx
-LIBSRC       += readDataTree.cxx
-LIBSRC       += lifetime.cxx
-LIBSRC       += utils.cxx
-LIBSRC       += PowLawAcceptance.cxx
-LIBSRC       += ErfAcceptance.cxx
 
 # binaries
 BINSRC        =
@@ -107,7 +94,7 @@ endef
 #------------------------------------------------------------------------------
 # Rules
 #------------------------------------------------------------------------------
-.PHONY:		all libs $(LIBS) $(BINS) clean bin-clean obj-clean docs
+.PHONY:		all libs $(LIBS) $(BINS) cleanall clean bin-clean so-clean obj-clean docs
 
 all:		libs $(BINS)
 
@@ -116,7 +103,7 @@ libs:		$(LIBS)
 
 $(LIBS): %:	$(LIBDIR)/%
 
-$(LIBDIR)/libreadTree.so:	$(TREEOBJF) | $(LIBDIR)
+$(LIBDIR)/libreadTree.so:	$(TREESRC:%.cxx=$(LIBDIR)/%.o) | $(LIBDIR)
 	$(LINK-LIBS) $^ -o $@
 	@echo "$@ done"
 
@@ -124,7 +111,7 @@ $(LIBDIR)/libutils.so:		$(LIBDIR)/utils.o | $(LIBDIR)
 	$(LINK-LIBS) $^ -o $@
 	@echo "$@ done"
 
-$(LIBDIR)/libacceptance.so:	$(ACCOBJF) | $(LIBDIR)
+$(LIBDIR)/libacceptance.so:	$(ACCSRC:%.cxx=$(LIBDIR)/%.o) | $(LIBDIR)
 	$(LINK-LIBS) $(ROOFITLIBS) $^ -o $@
 	@echo "$@ done"
 
@@ -135,19 +122,23 @@ $(LIBDIR):
 	mkdir -p $(LIBDIR)
 
 # Binaries
-$(BINS): %:	$(SRCDIR)/%.cc $(LIBFILES) | $(BINDIR)
+$(BINS): %:	$(SRCDIR)/%.cc $(LIBS) | $(BINDIR)
 	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) -L$(LIBDIR) -lreadTree -lutils $< -o $(BINDIR)/$@
 
 $(BINDIR):
 	mkdir -p $(BINDIR)
 
-clean:		obj-clean bin-clean
+cleanall:	obj-clean so-clean bin-clean
+
+clean:		obj-clean
 
 bin-clean:
 	rm -f $(foreach FILE,$(BINS),$(BINDIR)/$(FILE))
 
 obj-clean:
 	rm -f $(LIBDIR)/*.o
+
+so-clean:
 	rm -f $(LIBDIR)/*.so
 
 
