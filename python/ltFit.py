@@ -26,6 +26,7 @@ is read from an ntuple and fitted to the model otherwise.
 # Python modules
 import os
 import sys
+from datetime import datetime
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
 epsilon = 2E-4
 
@@ -183,13 +184,11 @@ def main(accType='powerlaw', isToy=False):
         expr = '(1.-1./(1.+(@0*(@1-@2))**@3))'
         acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
                                    RooArgList(turnon, time, offset, exponent))
-        acceptancePdf = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
     elif accType == 'erf':
         acc_cond = '(@1<0.0002)'
         expr = '(0.5*(TMath::Erf((@1-@2)/@0)+1))'
         acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
                                    RooArgList(turnon, time, offset))
-        acceptancePdf = RooGenericPdf('acceptancePdf', '@0', RooArgList(acceptance))
     else:
         print 'Unknown acceptance type. Aborting'
         return
@@ -251,6 +250,7 @@ def main(accType='powerlaw', isToy=False):
     #                              RooFit.WeightVar(wt), RooFit.Import(ftree),
     #                              RooFit.Cut(cut))
 
+    # RooFit.Range(0, 0.01+epsilon),
     tframe1 = time.frame(RooFit.Name('ptime'),
                          RooFit.Title('Projection on time'))
     dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
@@ -259,23 +259,24 @@ def main(accType='powerlaw', isToy=False):
 
     # Testing
     decay.plotOn(tframe1, RooFit.LineColor(kRed))
-    acceptancePdf.plotOn(tframe1, RooFit.LineColor(kGreen))
+    acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
+                      RooFit.Normalization(1000, RooAbsReal.Relative))
 
-    # NOTE: this range is for the dataset binning
-    time.setRange('zoom', 0., 1E-3)
     # NOTE: this range is for the RooPlot axis
-    tframe2 = time.frame(RooFit.Range('zoom'), RooFit.Name('pztime'),
+    tframe2 = time.frame(RooFit.Range(0., 1E-3), RooFit.Name('pztime'),
                          RooFit.Title('Projection on time (zoomed)'))
     dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp),
                    RooFit.CutRange('zoom'))
-    acceptancePdf.plotOn(tframe2, RooFit.LineColor(kGreen))
+    acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
+                      RooFit.Normalization(1000, RooAbsReal.Relative))
 
     # tframe2 = time.frame(RooFit.Name('pmodel'),
     #                      RooFit.Title('a(t) = decay(t) #times acc(t)'))
     # wdataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
     # decay.plotOn(tframe2, RooFit.LineColor(kRed))
     # Model.plotOn(tframe2, RooFit.LineColor(kAzure))
-    # acceptancePdf.plotOn(tframe2, RooFit.LineColor(kGreen))
+    # acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
+    #                   RooFit.Normalization(1000, RooAbsReal.Relative))
 
     canvas = TCanvas('canvas', 'canvas', 1600, 600)
     canvas.Divide(2,1)
@@ -283,8 +284,13 @@ def main(accType='powerlaw', isToy=False):
     tframe1.Draw()
     canvas.cd(2)
     tframe2.Draw()
-    canvas.Print('plots/canvas.png')
-    # canvas.Print('plots/%s_ltFit_py.pdf' % trigger)
+
+    # Save plots and PDFs
+    fname_suffix = datetime.strftime(datetime.today(), '%Y-%m-%d-%a-%H-%M')
+
+    # Print plots
+    canvas.Print('plots/canvas-%s-%s.png' % (accType, fname_suffix))
+    # canvas.Print('plots/canvas_%s_%s.pdf' % (accType, fname_suffix))
 
     # Persistify variables, PDFs and datasets
     workspace = RooWorkspace('workspace',
@@ -295,7 +301,8 @@ def main(accType='powerlaw', isToy=False):
     _import(workspace, superpdfargset)
     _import(workspace, dataset)
     _import(workspace, tframe1)
-    workspace.writeToFile('data/fitresult.root', True)
+    workspace.writeToFile('data/fitresult-%s-%s.root' %
+                          (accType, fname_suffix), True)
 
 
 if __name__ == "__main__":
