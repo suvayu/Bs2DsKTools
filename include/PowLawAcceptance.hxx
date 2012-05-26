@@ -33,9 +33,11 @@ public:
   virtual ~PowLawAcceptance();
   virtual TObject* clone(const char* newname) const;
 
+/* // disable analytical integral
   Int_t getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars,
 			      const char* rangeName=0) const;
   Double_t analyticalIntegral(Int_t code, const char* rangeName=0) const;
+*/
 
 protected:
 

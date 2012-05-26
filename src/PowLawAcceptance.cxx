@@ -64,6 +64,7 @@ Double_t PowLawAcceptance::evaluate() const
 }
 
 
+/* // disable analytical integral
 Int_t PowLawAcceptance::getAnalyticalIntegral(RooArgSet& allVars,
 					      RooArgSet& analVars,
 					      const char* rangeName) const
@@ -91,3 +92,4 @@ Double_t PowLawAcceptance::analyticalIntegral(Int_t code,
   // return (x.max(rangeName)-x.min(rangeName));
   return 0;
 }
+*/
