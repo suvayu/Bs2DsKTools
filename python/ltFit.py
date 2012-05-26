@@ -139,7 +139,7 @@ def main(accType='powerlaw', isToy=False):
         print 'Unknown acceptance type. Aborting'
         return
 
-    offset = RooRealVar('offset', 'offset', 0., -5E-4, 5E-4)
+    offset = RooRealVar('offset', 'offset', 0., -1E-3, 1E-3)
     exponent = RooRealVar('exponent', 'exponent', 2., 1., 5.)
 
     # Temporary RooArgSet to circumvent scoping issues for nested
