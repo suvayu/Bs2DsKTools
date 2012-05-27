@@ -236,7 +236,7 @@ def main(accType='powerlaw', isToy=False):
 
     # PDF.fitTo(dataset, RooFit.ConditionalObservables(dtargset),
     #           RooFit.NumCPU(4), RooFit.Optimize(True), RooFit.Verbose(True))
-    PDF.fitTo(dataset, RooFit.NumCPU(4), RooFit.Optimize(False),
+    PDF.fitTo(dataset, RooFit.NumCPU(1), RooFit.Optimize(False),
               RooFit.Verbose(True), RooFit.Strategy(2))
 
     # Debug
