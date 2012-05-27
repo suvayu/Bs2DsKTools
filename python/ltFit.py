@@ -265,10 +265,11 @@ def main(accType='powerlaw', isToy=False):
     # NOTE: this range is for the RooPlot axis
     tframe2 = time.frame(RooFit.Range(0., 1E-3), RooFit.Name('pztime'),
                          RooFit.Title('Projection on time (zoomed)'))
-    dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp),
-                   RooFit.CutRange('zoom'))
+    dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
+    PDF.plotOn(tframe2, RooFit.ProjWData(dtargset, dataset, True),
+               RooFit.LineColor(kBlue))
     acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
-                      RooFit.Normalization(1000, RooAbsReal.Relative))
+                      RooFit.Normalization(300, RooAbsReal.Relative))
 
     # tframe2 = time.frame(RooFit.Name('pmodel'),
     #                      RooFit.Title('a(t) = decay(t) #times acc(t)'))
