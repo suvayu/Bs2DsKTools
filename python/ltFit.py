@@ -132,14 +132,19 @@ def main(accType='powerlaw', isToy=False):
     # Parameters
     if accType == 'powerlaw':
         turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
+        offset = RooRealVar('offset', 'offset', 0., -1E-3, 1E-3)
+    elif accType == 'arctan':
+        # turnon has a different range as it is in the denominator
+        turnon = RooRealVar('turnon', 'turnon', 1., 0.01, 100.)
+        offset = RooRealVar('offset', 'offset', 1E-3, 0, 5E-3)
     elif accType == 'erf':
         # turnon has a different range as it is in the denominator
         turnon = RooRealVar('turnon', 'turnon', 1., 0.01, 100.)
+        offset = RooRealVar('offset', 'offset', 0., -1E-3, 1E-3)
     else:
         print 'Unknown acceptance type. Aborting'
         return
 
-    offset = RooRealVar('offset', 'offset', 0., -1E-3, 1E-3)
     exponent = RooRealVar('exponent', 'exponent', 2., 1., 5.)
 
     # Temporary RooArgSet to circumvent scoping issues for nested
@@ -184,6 +189,11 @@ def main(accType='powerlaw', isToy=False):
         expr = '(1.-1./(1.+(@0*(@1-@2))**@3))'
         acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
                                    RooArgList(turnon, time, offset, exponent))
+    elif accType == 'arctan':
+        acc_cond = '(@0<0.0002)'
+        expr = '(atan(@0*exp(@1*@0-@2)))'
+        acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
+                                   RooArgList(time, turnon, offset))
     elif accType == 'erf':
         acc_cond = '(@1<0.0002)'
         expr = '(0.5*(TMath::Erf((@1-@2)/@0)+1))'
