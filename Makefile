@@ -155,6 +155,16 @@ $(BINS): %:	$(SRCDIR)/%.cc $(LIBS) | $(BINDIR)
 $(BINDIR):
 	mkdir -p $(BINDIR)
 
+# generic rule to build a test binary
+# $(TESTDIR)/%: %:	%.cc
+# 	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) -L$(LIBDIR) -lreadTree -lutils $< -o $(TESTDIR)/$@
+
+$(TESTDIR)/acctest:	$(TESTDIR)/acctest.cc $(LIBDIR)/libacceptance.so
+	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) -L$(LIBDIR) -lacceptance $< -o $@
+
+$(TESTDIR)/treetest:	$(TESTDIR)/treetest.cc
+	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) $(ROOFITLIBS) $< -o $@
+
 cleanall:	obj-clean so-clean bin-clean
 
 clean:		obj-clean
