@@ -139,13 +139,13 @@ def main(accType='powerlaw', isToy=False):
         offset = RooRealVar('offset', 'offset', 1E-3, 0, 5E-3)
     elif accType == 'erf':
         # turnon has a different range as it is in the denominator
-        turnon = RooRealVar('turnon', 'turnon', 1., 0.01, 100.)
+        turnon = RooRealVar('turnon', 'turnon', 1., 1E-4, 100.)
         offset = RooRealVar('offset', 'offset', 0., -1E-3, 1E-3)
     else:
         print 'Unknown acceptance type. Aborting'
         return
 
-    exponent = RooRealVar('exponent', 'exponent', 2., 1., 5.)
+    # exponent = RooRealVar('exponent', 'exponent', 2., 1., 5.)
 
     # Temporary RooArgSet to circumvent scoping issues for nested
     # temporary objects.
@@ -186,9 +186,9 @@ def main(accType='powerlaw', isToy=False):
         # ensures the 0.2 ps selection cut present in the sample is
         # incorporated into the model.
         acc_cond = '((@1-@2)<0 || @1<0.0002)'
-        expr = '(1.-1./(1.+(@0*(@1-@2))**@3))'
+        expr = '(1.-1./(1.+(@0*(@1-@2))**3))'
         acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
-                                   RooArgList(turnon, time, offset, exponent))
+                                   RooArgList(turnon, time, offset))
     elif accType == 'arctan':
         acc_cond = '(@0<0.0002)'
         expr = '(atan(@0*exp(@1*@0-@2)))'
@@ -306,7 +306,7 @@ def main(accType='powerlaw', isToy=False):
     # Persistify variables, PDFs and datasets
     workspace = RooWorkspace('workspace',
                              'Workspace with PDFs and dataset after fit')
-    supervarargset = RooArgSet(time, dt, turnon, exponent)
+    supervarargset = RooArgSet(time, dt, turnon)
     superpdfargset = RooArgSet(PDF)
     _import(workspace, supervarargset)
     _import(workspace, superpdfargset)
