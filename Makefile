@@ -85,6 +85,7 @@ LINKDEFS     += utilsLinkDef.h
 BINSRC        =
 BINSRC       += accept.cc
 BINSRC       += resolution.cc
+BINSRC       += addTreeBranch.cc
 
 BINS          = $(BINSRC:%.cc=%)
 BINFILES      = $(BINSRC:%.cc=$(BINDIR)/%)
@@ -149,7 +150,7 @@ $(DICTDIR)/%.o:	$(DICTDIR)/%.cxx
 
 # Binaries
 $(BINS): %:	$(SRCDIR)/%.cc $(LIBS) | $(BINDIR)
-	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) -L$(LIBDIR) -lreadTree -lutils $< -o $(BINDIR)/$@
+	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) $(ROOFITLIBS) -L$(LIBDIR) -lreadTree -lutils $< -o $(BINDIR)/$@
 
 $(BINDIR):
 	mkdir -p $(BINDIR)
