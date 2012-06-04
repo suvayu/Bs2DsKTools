@@ -96,6 +96,34 @@ def get_toy_dataset(varargset, PDF=None):
         raise TypeError('Wrong type. PDF should inherit from RooAbsPdf.')
 
 
+def get_dataset(varargset, ftree, selection):
+    """Return a dataset.
+
+    Return a dataset from the ntuple `ftree'. Apply a selection cut
+    based on `selection'.
+
+    """
+
+    # Trigger:
+    # HLT2Topo4BodyTOS
+    # HLT2Topo3BodyTOS
+    # HLT2Topo2BodyTOS
+    # HLT2TopoIncPhiTOS
+    trigger = 'HLT2Topo3BodyTOS'
+    triggerVar = RooRealVar(trigger, trigger, 0, 2)
+    cut = trigger+'>0'
+    varargsetclone = varargset.clone('varargsetclone')
+    varargsetclone.add(triggerVar) # Add triggerVar to apply cut
+
+    # FIXME: change from ns to ps
+    # Dataset
+    tmpdataset = RooDataSet('dataset', 'Dataset', varargsetclone,
+                            RooFit.Import(ftree), RooFit.Cut(cut))
+    dataset = tmpdataset.reduce(varargset)
+    del tmpdataset
+    return dataset
+
+
 def __get_key_argset(argsetdict, key):
     """Internal method used by `save_in_workspace'."""
     argset = RooArgSet()
