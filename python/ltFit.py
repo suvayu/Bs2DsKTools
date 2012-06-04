@@ -135,7 +135,7 @@ def main(accType='powerlaw', isToy=False):
         offset = RooRealVar('offset', 'offset', 0., -1E-3, 1E-3)
     elif accType == 'arctan':
         # turnon has a different range as it is in the denominator
-        turnon = RooRealVar('turnon', 'turnon', 1., 0.01, 100.)
+        turnon = RooRealVar('turnon', 'turnon', 1., 1E-3, 1.)
         offset = RooRealVar('offset', 'offset', 1E-3, 0, 5E-3)
     elif accType == 'erf':
         # turnon has a different range as it is in the denominator
