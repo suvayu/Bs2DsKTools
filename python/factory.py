@@ -24,7 +24,7 @@ from ROOT import TTree, TFile, TCanvas, TPad, TClass
 from ROOT import RooFit
 from ROOT import RooPlot, RooWorkspace
 from ROOT import RooArgSet, RooArgList
-from ROOT import RooAbsReal, RooAbsPdf
+from ROOT import RooAbsArg, RooAbsReal, RooAbsPdf
 from ROOT import RooRealVar
 from ROOT import RooDataSet, RooDataHist
 
@@ -118,28 +118,19 @@ def get_dataset(varargset, ftree, cutVar, cut):
         raise TypeError('cutVar should inherit from RooAbsReal.')
 
 
-def __get_key_argset(argsetdict, key):
-    """Internal method used by `save_in_workspace'."""
-    argset = RooArgSet()
-    for arg in argsetdict[key]:
-        argset.add(arg)
-
-
-def save_in_workspace(fname, **argsetdict):
+def save_in_workspace(fname, **argsets):
     """Save RooFit objects in workspace and persistify.
 
-    Pass the different types of objects as a dictionary of lists. e.g.
-    argsetdict = { 'pdf': [pdf1, pdf2], 'variable': [var1, var2] }
+    Pass the different types of objects as a keyword arguments. e.g.
+    save_in_workspace(pdf=[pdf1, pdf2], variable=[var1, var2])
 
     """
+
     # Persistify variables, PDFs and datasets
     workspace = RooWorkspace('workspace',
                              'Workspace saved at %s' % get_timestamp())
-
-    dictkeys = argsetdict.keys()
-    for key in dictkeys:
-        argset = __get_key_argset(argsetdict, key)
+    keys = argsets.keys()
+    for key in keys:
         print 'Importing RooFit objects in %s list.' % key
-        _import(workspace, argset)
-
+        for arg in argsets[key]: _import(workspace, arg)
     workspace.writeToFile(fname)
