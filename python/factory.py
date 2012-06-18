@@ -21,6 +21,7 @@ from datetime import datetime
 from ROOT import TTree, TFile, TCanvas, TPad, TClass
 
 # RooFit classes
+from ROOT import RooFit
 from ROOT import RooPlot, RooWorkspace
 from ROOT import RooArgSet, RooArgList
 from ROOT import RooAbsReal, RooAbsPdf
@@ -93,35 +94,28 @@ def get_toy_dataset(varargset, PDF=None):
         print 'Toy generation completed with %s' % PDF.GetName()
         return dataset
     else:
-        raise TypeError('Wrong type. PDF should inherit from RooAbsPdf.')
+        raise TypeError('PDF should inherit from RooAbsPdf.')
 
 
-def get_dataset(varargset, ftree, selection):
+def get_dataset(varargset, ftree, cutVar, cut):
     """Return a dataset.
 
     Return a dataset from the ntuple `ftree'. Apply a selection cut
-    based on `selection'.
+    using the `cutVar' variable and the selection `cut'.
 
     """
 
-    # Trigger:
-    # HLT2Topo4BodyTOS
-    # HLT2Topo3BodyTOS
-    # HLT2Topo2BodyTOS
-    # HLT2TopoIncPhiTOS
-    trigger = 'HLT2Topo3BodyTOS'
-    triggerVar = RooRealVar(trigger, trigger, 0, 2)
-    cut = trigger+'>0'
-    varargsetclone = varargset.clone('varargsetclone')
-    varargsetclone.add(triggerVar) # Add triggerVar to apply cut
-
-    # FIXME: change from ns to ps
-    # Dataset
-    tmpdataset = RooDataSet('dataset', 'Dataset', varargsetclone,
-                            RooFit.Import(ftree), RooFit.Cut(cut))
-    dataset = tmpdataset.reduce(varargset)
-    del tmpdataset
-    return dataset
+    objclass = TClass.GetClass(cutVar.ClassName())
+    if objclass.InheritsFrom(RooAbsReal.Class()):
+        varargsetclone = varargset.clone('varargsetclone')
+        varargsetclone.add(cutVar) # Add selVar to apply cut
+        tmpdataset = RooDataSet('dataset', 'Dataset', varargsetclone,
+                                RooFit.Import(ftree), RooFit.Cut(cut))
+        dataset = tmpdataset.reduce(varargset)
+        del tmpdataset
+        return dataset
+    else:
+        raise TypeError('cutVar should inherit from RooAbsReal.')
 
 
 def __get_key_argset(argsetdict, key):
