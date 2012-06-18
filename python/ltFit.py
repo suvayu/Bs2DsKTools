@@ -113,7 +113,7 @@ def get_dataset(argset, isToy=True, PDF=False):
         return dataset
 
 
-def main(accType='powerlaw', isToy=False):
+def main(accfn='powerlaw', isToy=False):
     """Setup RooFit variables then construct the PDF as per options.
 
     Fit the model to a dataset. If toy generation is requested,
@@ -130,22 +130,21 @@ def main(accType='powerlaw', isToy=False):
     dt.setBins(100)
 
     # Parameters
-    if accType == 'powerlaw':
+    if not accfn.find('powerlaw') < 0:
         turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
+        exponent = RooRealVar('exponent', 'exponent', 2., 1., 5.)
         offset = RooRealVar('offset', 'offset', 0., -1E-3, 1E-3)
-    elif accType == 'arctan':
+    elif accfn == 'arctan':
         # turnon has a different range as it is in the denominator
         turnon = RooRealVar('turnon', 'turnon', 1., 1E-3, 1.)
         offset = RooRealVar('offset', 'offset', 1E-3, 0, 5E-3)
-    elif accType == 'erf':
+    elif accfn == 'erf':
         # turnon has a different range as it is in the denominator
         turnon = RooRealVar('turnon', 'turnon', 1., 1E-4, 100.)
         offset = RooRealVar('offset', 'offset', 0., -1E-3, 1E-3)
     else:
         print 'Unknown acceptance type. Aborting'
         return
-
-    # exponent = RooRealVar('exponent', 'exponent', 2., 1., 5.)
 
     # Temporary RooArgSet to circumvent scoping issues for nested
     # temporary objects.
@@ -179,22 +178,33 @@ def main(accType='powerlaw', isToy=False):
     # 2. Error function - 0.5*(TMath::Erf((@1-@2)/@0)+1) with
     #    RooArgList(turnon, time, offset)
 
-    if accType == 'powerlaw':
-        # Condition to ensure acceptance function is always +ve definite.
-        # The first condition protects against the undefined nature of the
-        # function for times less than 0. Whereas the second condition
-        # ensures the 0.2 ps selection cut present in the sample is
-        # incorporated into the model.
+    # Condition to ensure acceptance function is always +ve definite.
+    # The first condition protects against the undefined nature of the
+    # function for times less than 0. Whereas the second condition
+    # ensures the 0.2 ps selection cut present in the sample is
+    # incorporated into the model.
+
+    if accfn == 'powerlaw':
         acc_cond = '((@1-@2)<0 || @1<0.0002)'
         expr = '(1.-1./(1.+(@0*(@1-@2))**3))'
         acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
                                    RooArgList(turnon, time, offset))
-    elif accType == 'arctan':
+    elif accfn == 'powerlaw2':
+        acc_cond = '(((@0*@1)**3 - @2)<0 || @1<0.0002)'
+        expr = '(1.-1./(1. + (@0*@1)**3 - @2))'
+        acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
+                                   RooArgList(turnon, time, offset))
+    elif accfn == 'powerlaw3':
+        acc_cond = '(((@0*@1)**@3 - @2)<0 || @1<0.0002)'
+        expr = '(1.-1./(1. + (@0*@1)**@3 - @2))'
+        acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
+                                   RooArgList(turnon, time, offset, exponent))
+    elif accfn == 'arctan':
         acc_cond = '(@0<0.0002)'
         expr = '(atan(@0*exp(@1*@0-@2)))'
         acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
                                    RooArgList(time, turnon, offset))
-    elif accType == 'erf':
+    elif accfn == 'erf':
         acc_cond = '(@1<0.0002)'
         expr = '(0.5*(TMath::Erf((@1-@2)/@0)+1))'
         acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
@@ -300,8 +310,8 @@ def main(accType='powerlaw', isToy=False):
     fname_suffix = datetime.strftime(datetime.today(), '%Y-%m-%d-%a-%H-%M')
 
     # Print plots
-    canvas.Print('plots/canvas-%s-%s.png' % (accType, fname_suffix))
-    # canvas.Print('plots/canvas_%s_%s.pdf' % (accType, fname_suffix))
+    canvas.Print('plots/canvas-%s-%s.png' % (accfn, fname_suffix))
+    # canvas.Print('plots/canvas_%s_%s.pdf' % (accfn, fname_suffix))
 
     # Persistify variables, PDFs and datasets
     workspace = RooWorkspace('workspace',
