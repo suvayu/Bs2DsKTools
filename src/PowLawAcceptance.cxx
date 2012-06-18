@@ -55,8 +55,8 @@ Double_t PowLawAcceptance::evaluate() const
   Double_t turnon((Double_t)_turnon), time((Double_t)_time),
     offset((Double_t)_offset), exponent((Double_t)_exponent);
 
-  if ((time - offset > 0) and time > 2E-4) {
-    Double_t denom(1 + pow(turnon*(time - offset), exponent));
+  if ((time - offset > -0.) and time > 2E-4) {
+    Double_t denom(1. + pow(turnon*(time - offset), exponent));
     return (1. - 1./denom);
   }
 
