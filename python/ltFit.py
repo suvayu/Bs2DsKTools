@@ -27,8 +27,6 @@ is read from an ntuple and fitted to the model otherwise.
 import os
 import sys
 from datetime import datetime
-# epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
-epsilon = 2E-4
 
 # FIXME: Batch running fails on importing anything but gROOT
 # ROOT global variables
@@ -45,7 +43,7 @@ from ROOT import kFullTriangleUp
 from ROOT import TTree, TFile, TCanvas, TPad, TClass
 
 # RooFit classes
-from ROOT import RooFit, RooGlobalFunc
+from ROOT import RooFit
 from ROOT import RooPlot, RooWorkspace, RooFitResult
 from ROOT import RooArgSet, RooArgList
 from ROOT import RooAbsReal, RooRealVar, RooRealConstant, RooFormulaVar
@@ -54,64 +52,12 @@ from ROOT import RooGenericPdf, RooEffProd, RooAddPdf, RooProdPdf, RooHistPdf
 from ROOT import RooDataSet, RooDataHist
 from ROOT import RooDecay, RooGaussModel
 
-# Hack around RooWorkspace.import() and python keyword import clash
-_import = getattr(RooWorkspace, 'import')
+# my stuff
+from factory import *
+set_integrator_config()
 
-# More precise integrals in RooFit
-RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-9)
-RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-9)
-# Set how intervals are determined and integrals calculated
-RooAbsReal.defaultIntegratorConfig().getConfigSection('RooAdaptiveGaussKronrodIntegrator1D').setCatLabel('method','21Points')
-RooAbsReal.defaultIntegratorConfig().getConfigSection('RooAdaptiveGaussKronrodIntegrator1D').setRealValue('maxSeg', 100000)
-
-def get_dataset(argset, isToy=True, PDF=False):
-    """Return a dataset.
-
-    If isToy is True and PDF is a RooFit Probability Distribution
-    inheriting from RooAbsPdf, generate and return a toy dataset. Read
-    from an ntuple otherwise.
-
-    """
-
-    if isToy and PDF:
-        objclass = TClass.GetClass(PDF.ClassName())
-        if objclass.InheritsFrom(RooAbsPdf.Class()):
-            dataset = PDF.generate(argset, 10000, RooFit.Name('toydataset'),
-                                   RooFit.Verbose(True))
-            print 'Toy generation completed with %s' % PDF.GetName()
-            return dataset
-        else:
-            raise TypeError('Wrong type. PDF should inherit from RooAbsPdf.')
-    elif not isToy:
-        fname = 'data/smalltree-new-MC.root'
-        if os.path.exists(fname):
-            # Get tree
-            ffile = TFile(fname, 'read')
-            ftree = ffile.Get('ftree')
-
-            # Trigger:
-            # HLT2Topo4BodyTOS
-            # HLT2Topo3BodyTOS
-            # HLT2Topo2BodyTOS
-            # HLT2TopoIncPhiTOS
-            trigger = 'HLT2Topo3BodyTOS'
-            triggerVar = RooRealVar(trigger, trigger, 0, 2)
-            cut = trigger+'>0'
-            argsetclone = argset.clone('argsetclone')
-            argsetclone.add(triggerVar) # Add triggerVar to apply cut
-
-            # FIXME: change from ns to ps
-            # Dataset
-            tmpdataset = RooDataSet('dataset', 'Dataset', argsetclone,
-                                    RooFit.Import(ftree), RooFit.Cut(cut))
-            dataset = tmpdataset.reduce(argset)
-            del tmpdataset
-            print 'Created dataset from tree in %s' % fname
-        else:
-            raise IOError('File %s does not exist!' % fname)
-
-        return dataset
-
+epsilon = 2E-4
+# epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
 
 def main(accfn='powerlaw', isToy=False):
     """Setup RooFit variables then construct the PDF as per options.
@@ -219,43 +165,47 @@ def main(accfn='powerlaw', isToy=False):
 
     # Build full 2-D PDF (t, δt)
     argset = RooArgSet(time,dt)
+    # Get tree
+    rfile = get_file('data/smalltree-new-MC.root', 'read')
+    ftree = get_object('ftree', rfile)
+
+    # Trigger:
+    # HLT2Topo4BodyTOS
+    # HLT2Topo3BodyTOS
+    # HLT2Topo2BodyTOS
+    # HLT2TopoIncPhiTOS
+    trigger = 'HLT2Topo3BodyTOS'
+    triggerVar = RooRealVar(trigger, trigger, 0, 2)
+    cut = trigger+'>0'
     try:
-        dataset = get_dataset(argset, isToy=False)
+        dataset = get_dataset(argset, ftree, triggerVar, cut)
     except TypeError, IOError:
         print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
-
     tmpdatahist = dataset.binnedClone('datahist','Binned data')
     datahist = tmpdatahist.reduce(dtargset)
     del tmpdatahist
-    if isToy:
-        del dataset
+    if isToy: del dataset
 
     errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
                            dtargset, datahist)
-
     modelargset = RooArgSet(ModelL)
     FullModelL = RooProdPdf('FullModelL', 'Acceptance model with errors B_{s,L}',
                             RooArgSet(errorPdf),
                             RooFit.Conditional(modelargset, timeargset))
-
     modelargset = RooArgSet(ModelH)
     FullModelH = RooProdPdf('FullModelH', 'Acceptance model with errors B_{s,H}',
                             RooArgSet(errorPdf),
                             RooFit.Conditional(modelargset, timeargset))
-
     PDF = RooAddPdf('FullModel', 'Acceptance model',
-                    FullModelH, FullModelL,
-                    RooRealConstant.value(0.5))
+                    FullModelH, FullModelL, RooRealConstant.value(0.5))
 
     # Generate toy if requested
     if isToy:
         try:
-            dataset = get_dataset(RooArgSet(time,dt), isToy, PDF)
+            dataset = get_toy_dataset(argset, PDF)
         except TypeError, IOError:
             print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
-    # PDF.fitTo(dataset, RooFit.ConditionalObservables(dtargset),
-    #           RooFit.NumCPU(4), RooFit.Optimize(True), RooFit.Verbose(True))
     PDF.fitTo(dataset, RooFit.NumCPU(1), RooFit.Optimize(False),
               RooFit.Verbose(True), RooFit.Strategy(2))
 
@@ -263,41 +213,24 @@ def main(accfn='powerlaw', isToy=False):
     dataset.Print('v')
     PDF.Print('v')
 
-    # # Weighted dataset
-    # wt = RooRealVar('wt', 'wt', 0, 1e5)
-    # wdataset = RooDataSet('wdataset', 'Weighted dataset',
-    #                              RooArgSet(time, wt, triggerVar),
-    #                              RooFit.WeightVar(wt), RooFit.Import(ftree),
-    #                              RooFit.Cut(cut))
-
     # RooFit.Range(0, 0.01+epsilon),
     tframe1 = time.frame(RooFit.Name('ptime'),
                          RooFit.Title('Projection on time'))
     dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
     PDF.plotOn(tframe1, RooFit.ProjWData(dtargset, dataset, True),
                RooFit.LineColor(kBlue))
-
-    # Testing
     decay.plotOn(tframe1, RooFit.LineColor(kRed))
     acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
                       RooFit.Normalization(1000, RooAbsReal.Relative))
 
     # NOTE: this range is for the RooPlot axis
-    tframe2 = time.frame(RooFit.Range(0., 1E-3), RooFit.Name('pztime'),
+    tframe2 = time.frame(RooFit.Range(0., 2E-3), RooFit.Name('pztime'),
                          RooFit.Title('Projection on time (zoomed)'))
     dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
     PDF.plotOn(tframe2, RooFit.ProjWData(dtargset, dataset, True),
                RooFit.LineColor(kBlue))
     acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
                       RooFit.Normalization(300, RooAbsReal.Relative))
-
-    # tframe2 = time.frame(RooFit.Name('pmodel'),
-    #                      RooFit.Title('a(t) = decay(t) #times acc(t)'))
-    # wdataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
-    # decay.plotOn(tframe2, RooFit.LineColor(kRed))
-    # Model.plotOn(tframe2, RooFit.LineColor(kAzure))
-    # acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
-    #                   RooFit.Normalization(1000, RooAbsReal.Relative))
 
     canvas = TCanvas('canvas', 'canvas', 1600, 600)
     canvas.Divide(2,1)
@@ -307,24 +240,17 @@ def main(accfn='powerlaw', isToy=False):
     tframe2.Draw()
 
     # Save plots and PDFs
-    fname_suffix = datetime.strftime(datetime.today(), '%Y-%m-%d-%a-%H-%M')
+    timestamp = get_timestamp()
+    plotfile = 'plots/canvas-%s-%s.png' % (accfn, timestamp)
+    rootfile = 'data/fitresult-%s-%s.root' % (accfn, timestamp)
 
     # Print plots
-    canvas.Print('plots/canvas-%s-%s.png' % (accfn, fname_suffix))
-    # canvas.Print('plots/canvas_%s_%s.pdf' % (accfn, fname_suffix))
+    canvas.Print(plotfile)
 
     # Persistify variables, PDFs and datasets
-    workspace = RooWorkspace('workspace',
-                             'Workspace with PDFs and dataset after fit')
-    supervarargset = RooArgSet(time, dt, turnon)
-    superpdfargset = RooArgSet(PDF)
-    _import(workspace, supervarargset)
-    _import(workspace, superpdfargset)
-    _import(workspace, dataset)
-    _import(workspace, tframe1)
-    workspace.writeToFile('data/fitresult-%s-%s.root' %
-                          (accType, fname_suffix), True)
+    save_in_workspace(rootfile, var=[time, dt, turnon, exponent],
+                      pdf=[PDF], data=[dataset])
 
 
 if __name__ == "__main__":
-    main('powerlaw', False)
+    main('powerlaw2', False)
