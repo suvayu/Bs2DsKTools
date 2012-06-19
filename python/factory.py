@@ -54,17 +54,21 @@ def get_object(objname, rfile, subdir=''):
 
 
 # RooFit wrappers
-def get_argset(*args):
+def get_argset(args):
     """Return and argset of the RooFit objects."""
     argset = RooArgSet()
-    for arg in args: argset.add(arg)
+    for arg in args:
+        if arg.InheritsFrom(RooAbsArg.Class()): argset.add(arg)
+        else: TypeError('%s should inherit from RooAbsArg' % arg.GetName())
     return argset
 
 
-def get_arglist(*args):
+def get_arglist(args):
     """Return and arglist of the RooFit objects."""
     arglist = RooArgList()
-    for arg in args: arglist.add(arg)
+    for arg in args:
+        if arg.InheritsFrom(RooAbsArg.Class()): arglist.add(arg)
+        else: TypeError('%s should inherit from RooAbsArg' % arg.GetName())
     return arglist
 
 
