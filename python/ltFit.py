@@ -209,7 +209,13 @@ def main(accfn='powerlaw', isToy=False):
     fitresult = PDF.fitTo(dataset, RooFit.Optimize(False),
                           RooFit.Strategy(2), RooFit.Save(True),
                           RooFit.NumCPU(2), RooFit.Verbose(True))
+
+    # Fit results
     fitresult.Print()
+    fcanvas = TCanvas('fcanvas', 'Fit canvas', 800, 600)
+    fitplot = RooPlot(offset, turnon)
+    fitresult.plotOn(fitplot, turnon, offset, 'MEA')
+    fitplot.Draw()
 
     # RooFit.Range(0, 0.01+epsilon),
     tframe1 = time.frame(RooFit.Name('ptime'),
@@ -237,12 +243,6 @@ def main(accfn='powerlaw', isToy=False):
     canvas.cd(2)
     tframe2.Draw()
 
-    fcanvas = TCanvas('fcanvas', 'Fit canvas', 800, 600)
-    tframe3 = time.frame(RooFit.Name('ftime'),
-                         RooFit.Title('Projection on time'))
-    fitresult.plotOn(tframe3, turnon, offset)
-    tframe3.Draw()
-
     # Save plots and PDFs
     timestamp = get_timestamp()
     plotfile = 'plots/canvas-%s-%s.png' % (accfn, timestamp)
@@ -254,8 +254,9 @@ def main(accfn='powerlaw', isToy=False):
     fcanvas.Print(fitfile)
 
     # Persistify variables, PDFs and datasets
-    save_in_workspace(rootfile, var=[time, dt, turnon, exponent],
-                      pdf=[PDF], data=[dataset])
+    save_in_workspace(rootfile, var=[time, dt, turnon, offset, exponent],
+                      pdf=[PDF], data=[dataset], fit=[fitresult],
+                      plots=[fitplot, tframe1, tframe2])
 
 
 if __name__ == "__main__":
