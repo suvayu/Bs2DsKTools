@@ -79,7 +79,7 @@ def main(accfn='powerlaw', isToy=False):
     if not accfn.find('powerlaw') < 0:
         turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
         exponent = RooRealVar('exponent', 'exponent', 2., 1., 5.)
-        offset = RooRealVar('offset', 'offset', 0., -1E-3, 1E-3)
+        offset = RooRealVar('offset', 'offset', 0., -0.5, -0.0)
     elif accfn == 'arctan':
         # turnon has a different range as it is in the denominator
         turnon = RooRealVar('turnon', 'turnon', 1., 1E-3, 1.)
@@ -206,12 +206,10 @@ def main(accfn='powerlaw', isToy=False):
         except TypeError, IOError:
             print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
-    PDF.fitTo(dataset, RooFit.NumCPU(1), RooFit.Optimize(False),
-              RooFit.Verbose(True), RooFit.Strategy(2))
-
-    # Debug
-    dataset.Print('v')
-    PDF.Print('v')
+    fitresult = PDF.fitTo(dataset, RooFit.Optimize(False),
+                          RooFit.Strategy(2), RooFit.Save(True),
+                          RooFit.NumCPU(2), RooFit.Verbose(True))
+    fitresult.Print()
 
     # RooFit.Range(0, 0.01+epsilon),
     tframe1 = time.frame(RooFit.Name('ptime'),
@@ -239,13 +237,21 @@ def main(accfn='powerlaw', isToy=False):
     canvas.cd(2)
     tframe2.Draw()
 
+    fcanvas = TCanvas('fcanvas', 'Fit canvas', 800, 600)
+    tframe3 = time.frame(RooFit.Name('ftime'),
+                         RooFit.Title('Projection on time'))
+    fitresult.plotOn(tframe3, turnon, offset)
+    tframe3.Draw()
+
     # Save plots and PDFs
     timestamp = get_timestamp()
     plotfile = 'plots/canvas-%s-%s.png' % (accfn, timestamp)
     rootfile = 'data/fitresult-%s-%s.root' % (accfn, timestamp)
+    fitfile = 'plots/fitcanvas-%s-%s.png' % (accfn, timestamp)
 
     # Print plots
     canvas.Print(plotfile)
+    fcanvas.Print(fitfile)
 
     # Persistify variables, PDFs and datasets
     save_in_workspace(rootfile, var=[time, dt, turnon, exponent],
