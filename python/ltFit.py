@@ -78,7 +78,7 @@ def main(accfn='powerlaw', isToy=False):
     # Parameters
     if not accfn.find('powerlaw') < 0:
         turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
-        exponent = RooRealVar('exponent', 'exponent', 2., 1., 5.)
+        exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
         offset = RooRealVar('offset', 'offset', -0.2, -0.5, 0.1)
     elif accfn == 'arctan':
         # turnon has a different range as it is in the denominator
@@ -260,4 +260,4 @@ def main(accfn='powerlaw', isToy=False):
 
 
 if __name__ == "__main__":
-    main('powerlaw2', False)
+    main('powerlaw3', False)
