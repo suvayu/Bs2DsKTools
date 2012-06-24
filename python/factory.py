@@ -24,7 +24,7 @@ from ROOT import TTree, TFile, TCanvas, TPad, TClass
 from ROOT import RooFit
 from ROOT import RooPlot, RooWorkspace
 from ROOT import RooArgSet, RooArgList
-from ROOT import RooAbsArg, RooAbsReal, RooAbsPdf
+from ROOT import RooAbsArg, RooAbsReal, RooAbsPdf, RooAbsData
 from ROOT import RooRealVar
 from ROOT import RooDataSet, RooDataHist
 
@@ -138,3 +138,10 @@ def save_in_workspace(fname, **argsets):
         print 'Importing RooFit objects in %s list.' % key
         for arg in argsets[key]: _import(workspace, arg)
     workspace.writeToFile(fname)
+
+
+def get_workspace(fname, wname):
+    """Read and return RooWorkspace from file."""
+    ffile = get_file(fname, 'read')
+    workspace = ffile.Get(wname)
+    return workspace
