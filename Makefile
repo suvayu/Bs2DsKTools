@@ -174,6 +174,7 @@ bin-clean:
 
 obj-clean:
 	rm -f $(LIBDIR)/*.o
+	rm -f $(DICTDIR)/*.o
 
 so-clean:
 	rm -f $(LIBDIR)/*.so
