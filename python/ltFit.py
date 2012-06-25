@@ -80,6 +80,7 @@ def main(accfn='powerlaw', isToy=False):
         turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
         exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
         offset = RooRealVar('offset', 'offset', -0.2, -0.5, 0.1)
+        beta = RooRealVar('beta', 'beta', 1E-2, 0., 0.1)
     elif accfn == 'arctan':
         # turnon has a different range as it is in the denominator
         turnon = RooRealVar('turnon', 'turnon', 1., 1E-3, 1.)
@@ -145,6 +146,11 @@ def main(accfn='powerlaw', isToy=False):
         expr = '(1.-1./(1. + (@0*@1)**@3 - @2))'
         acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
                                    RooArgList(turnon, time, offset, exponent))
+    elif accfn == 'powerlaw4':
+        acc_cond = '(((@0*@1)**@3 - @2)<0 || @1<0.0002)'
+        expr = '(1.-1./(1. + (@0*@1)**@3 - @2) - @4)'
+        acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
+                                   RooArgList(turnon, time, offset, exponent, beta))
     elif accfn == 'arctan':
         acc_cond = '(@0<0.0002)'
         expr = '(atan(@0*exp(@1*@0-@2)))'
@@ -260,4 +266,4 @@ def main(accfn='powerlaw', isToy=False):
 
 
 if __name__ == "__main__":
-    main('powerlaw2', False)
+    main('powerlaw4', False)
