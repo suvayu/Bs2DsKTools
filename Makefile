@@ -165,38 +165,19 @@ $(TESTDIR)/acctest:	$(TESTDIR)/acctest.cc $(LIBDIR)/libacceptance.so
 $(TESTDIR)/treetest:	$(TESTDIR)/treetest.cc
 	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) $(ROOFITLIBS) $< -o $@
 
-cleanall:	obj-clean so-clean bin-clean
+cleanall:	obj-clean so-clean dict-clean bin-clean
 
-clean:		obj-clean
+clean:		obj-clean so-clean
 
 bin-clean:
 	rm -f $(foreach FILE,$(BINS),$(BINDIR)/$(FILE))
 
 obj-clean:
 	rm -f $(LIBDIR)/*.o
+
+dict-clean:
+	rm -f $(DICTDIR)/*.cxx
 	rm -f $(DICTDIR)/*.o
 
 so-clean:
 	rm -f $(LIBDIR)/*.so
-
-
-# ###
-# Event.$(ObjSuf): Event.h
-# EventMT.$(ObjSuf): EventMT.h
-# MainEvent.$(ObjSuf): Event.h
-
-# EventDict.$(SrcSuf): Event.h EventLinkDef.h
-# 	@echo "Generating dictionary $@..."
-# 	$(ROOTCINT) -f $@ -c $^
-
-# EventMTDict.$(SrcSuf): EventMT.h EventLinkDef.h
-# 	@echo "Generating dictionary $@..."
-# 	$(ROOTCINT) -f $@ -c $^
-
-# Hello.$(ObjSuf): Hello.h
-# HelloDict.$(SrcSuf): Hello.h
-# 	@echo "Generating dictionary $@..."
-# 	$(ROOTCINT) -f $@ -c $^
-
-# .$(SrcSuf).$(ObjSuf):
-# 	$(CXX)  $(CXXFLAGS) -c $<
