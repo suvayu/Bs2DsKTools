@@ -137,7 +137,7 @@ def main(accfn='powerlaw', isToy=False):
                                    RooArgList(turnon, time, offset))
     elif accfn == 'powerlaw2':
         acc_cond = '(((@0*@1)**3 - @2)<0 || @1<0.0002)'
-        expr = '(1.-1./(1. + (@0*@1)**3 - @2))'
+        expr = '(1.-1./(1. + (@0*@1)**2.75 - @2))'
         acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
                                    RooArgList(turnon, time, offset))
     elif accfn == 'powerlaw3':
@@ -260,4 +260,4 @@ def main(accfn='powerlaw', isToy=False):
 
 
 if __name__ == "__main__":
-    main('powerlaw3', False)
+    main('powerlaw2', False)
