@@ -15,9 +15,12 @@ optparser.add_argument('--file', dest='fname',
                        help='Filename with saved fit result')
 optparser.add_argument('--print', dest='doPrint', type=bool, default=False,
                        help='Print to multi-page pdf file')
+optparser.add_argument('--logscale', type=bool, default=False,
+                       help='Print final plot in logscale')
 
 options = optparser.parse_args()
 doPrint = options.doPrint
+logscale = options.logscale
 fname = options.fname
 accfntype = fname[15:24]
 
@@ -108,32 +111,34 @@ acceptance.plotOn(tframe3, RooFit.LineColor(kGreen),
 
 # draw and print
 timestamp = str(workspace.GetTitle())[19:]
-plotfile = 'plots/savedcanvas_%s_%s.pdf' % (accfntype, timestamp)
+if logscale: plotfile = 'plots/savedcanvas_%s_%s_%s.pdf' % ('log', accfntype, timestamp)
+else: plotfile = 'plots/savedcanvas_%s_%s.pdf' % (accfntype, timestamp)
 canvas = TCanvas('canvas', 'canvas', 800, 600)
 if doPrint: canvas.Print(plotfile + '[')
 tframe1.Draw()
 if doPrint: canvas.Print(plotfile)
 tframe2.Draw()
 if doPrint: canvas.Print(plotfile)
+if logscale: gPad.SetLogy(1)
 tframe3.Draw()
 
-# χ² comparison for offset and turnon
-ilist = gPad.GetListOfPrimitives()
-for obj in ilist:
-    if obj.InheritsFrom(RooCurve.Class()):
-        if -1 < str(obj.GetName()).find('FullModel'):
-            pdfname = obj.GetName()
-    if obj.InheritsFrom(RooHist.Class()):
-        dstname = obj.GetName()
-if len(pdfname) and len(dstname):
-    chi2 = tframe3.chiSquare(pdfname, dstname, 2)
-print 'Fit χ² b/w %s and %s: %G' % (pdfname, dstname, chi2)
+# # χ² comparison for offset and turnon
+# ilist = gPad.GetListOfPrimitives()
+# for obj in ilist:
+#     if obj.InheritsFrom(RooCurve.Class()):
+#         if -1 < str(obj.GetName()).find('FullModel'):
+#             pdfname = obj.GetName()
+#     if obj.InheritsFrom(RooHist.Class()):
+#         dstname = obj.GetName()
+# if len(pdfname) and len(dstname):
+#     chi2 = tframe3.chiSquare(pdfname, dstname, 2)
+# print 'Fit χ² b/w %s and %s: %G' % (pdfname, dstname, chi2)
 
-# label on final plot
-chi2label = TLatex()
-chi2label.SetNDC(True)
-chi2label.DrawLatex(0.6, 0.7, '#chi^{2} = %G' % chi2)
-gPad.Modified()
-gPad.Update()
+# # label on final plot
+# chi2label = TLatex()
+# chi2label.SetNDC(True)
+# chi2label.DrawLatex(0.6, 0.7, '#chi^{2} = %G' % chi2)
+# gPad.Modified()
+# gPad.Update()
 if doPrint: canvas.Print(plotfile)
 if doPrint: canvas.Print(plotfile + ']')
