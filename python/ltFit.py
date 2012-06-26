@@ -148,7 +148,7 @@ def main(accfn='powerlaw', isToy=False):
                                    RooArgList(turnon, time, offset, exponent))
     elif accfn == 'powerlaw4':
         acc_cond = '(((@0*@1)**@3 - @2)<0 || @1<0.0002)'
-        expr = '(1.-1./(1. + (@0*@1)**@3 - @2) - @4)'
+        expr = '((1.-1./(1. + (@0*@1)**@3 - @2))*(1 - @4*@1))'
         acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
                                    RooArgList(turnon, time, offset, exponent, beta))
     elif accfn == 'arctan':
