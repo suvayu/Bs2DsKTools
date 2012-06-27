@@ -67,6 +67,7 @@ dt = workspace.var('dt')
 turnon = workspace.var('turnon')
 offset = workspace.var('offset')
 exponent = workspace.var('exponent')
+if -1 < accfntype.find('powerlaw4'): beta = workspace.var('beta')
 # PDFs
 PDF = workspace.pdf('FullModel')
 acceptance = workspace.function('acceptance')
