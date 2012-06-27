@@ -121,9 +121,10 @@ tframe2.Draw()
 if doPrint: canvas.Print(plotfile)
 tframe3.Draw()
 if doPrint: canvas.Print(plotfile)
-if logscale: gPad.SetLogy(1)
-tframe3.Draw()
-if doPrint: canvas.Print(plotfile)
+if logscale:
+    gPad.SetLogy(1)
+    tframe3.Draw()
+    if doPrint: canvas.Print(plotfile)
 if doPrint: canvas.Print(plotfile + ']')
 
 # # χ² comparison for offset and turnon
