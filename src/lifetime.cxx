@@ -180,15 +180,16 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
    Long64_t nentries = fChain->GetEntries();
    std::cout << nentries << " entries!" << std::endl;
 
-   TLorentzVector BsMom(0,0,0,0);
-   TVector3 OWNPV(0,0,0), ENDVX(0,0,0);
-   double wt(0), truewt(0);
+   TLorentzVector BsMom(0.0,0.0,0.0,0.0);
+   TVector3 OWNPV(0.0,0.0,0.0), ENDVX(0.0,0.0,0.0);
+   double wt(0.0), truewt(0.0);
+   double time(0.0), dt(0.0);
 
    ftree.Branch("Bsmass" , &lab0_MM);
    ftree.Branch("BsMom"  , &BsMom);
    ftree.Branch("hID"    , &lab1_TRUEID);
-   ftree.Branch("time"   , &lab0_TAU);
-   ftree.Branch("dt"     , &lab0_TAUERR);
+   ftree.Branch("time"   , &time);
+   ftree.Branch("dt"     , &dt);
    ftree.Branch("tchi2"  , &lab0_TAUCHI2);
    ftree.Branch("truetime", &lab0_TRUETAU);
    ftree.Branch("wt"     , &wt);
@@ -217,10 +218,14 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
        else if (std::abs(lab1_TRUEID) == 211) rdspicount++;
 
        // if (( UnbiasedSelection() == false ) or ( lab1_PIDK < 5 )) continue;
-       if (( CommonSelection() == false ) or ( lab1_PIDK < 5 )) continue;
+       if ((CommonSelection() == false) or (lab1_PIDK < 5)) continue;
        // if ( pPIDcut != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
        if (lab0_TAUERR <= 0 or lab0_TAUERR >= 0.0002 or
 	   lab0_TAUERR != lab0_TAUERR) continue;
+
+       // nanoseconds to picoseconds
+       time = lab0_TAU * 1E3;
+       dt = lab0_TAUERR * 1E3;
 
        wt       = TMath::Exp(lab0_TAU*1e3/1.472);
        truewt   = TMath::Exp(lab0_TRUETAU*1e3/1.472);
