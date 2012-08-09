@@ -59,7 +59,7 @@ set_integrator_config()
 epsilon = 2E-4
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
 
-def main(accfn='powerlaw', isToy=False):
+def main(accfn='powerlaw', mode='all', isToy=False):
     """Setup RooFit variables then construct the PDF as per options.
 
     Fit the model to a dataset. If toy generation is requested,
@@ -183,8 +183,15 @@ def main(accfn='powerlaw', isToy=False):
     trigger = 'HLT2Topo3BodyTOS'
     triggerVar = RooRealVar(trigger, trigger, 0, 2)
     cut = trigger+'>0'
+
+    modeVar = RooRealVar('hID', 'Decay mode %s' % mode, -350, 350)
+    if mode == 'DsK':
+        cut += '&& abs(hID) == 321'
+    elif mode == 'DsPi':
+        cut += '&& abs(hID) == 211'
+
     try:
-        dataset = get_dataset(argset, ftree, triggerVar, cut)
+        dataset = get_dataset(argset, ftree, cut, triggerVar, modeVar)
     except TypeError, IOError:
         print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
     tmpdatahist = dataset.binnedClone('datahist','Binned data')
@@ -245,8 +252,8 @@ def main(accfn='powerlaw', isToy=False):
 
     # Save plots and PDFs
     timestamp = get_timestamp()
-    plotfile = 'plots/canvas-%s-%s.png' % (accfn, timestamp)
-    rootfile = 'data/fitresult-%s-%s.root' % (accfn, timestamp)
+    plotfile = 'plots/canvas-%s-%s-%s.png' % (mode, accfn, timestamp)
+    rootfile = 'data/fitresult-%s-%s-%s.root' % (mode, accfn, timestamp)
 
     # Print plots
     canvas.Print(plotfile)
@@ -258,4 +265,10 @@ def main(accfn='powerlaw', isToy=False):
 
 
 if __name__ == "__main__":
-    main('powerlaw4', False)
+
+    if len(sys.argv) > 1:
+        mode = sys.argv[1]
+    else:
+        mode = 'all'
+
+    main('powerlaw4', mode, False)
