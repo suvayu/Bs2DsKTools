@@ -82,7 +82,7 @@ dtargset = RooArgSet(dt)
 time.setRange('zoom1', 0., 2E-3)
 # NOTE: this range is for the RooPlot axis
 tframe1 = time.frame(RooFit.Range('zoom1'), RooFit.Name('pztime1'),
-                     RooFit.Title('Projection on time (0 - 2 ps) with %s' % accfntype))
+                     RooFit.Title('Projection on time (0 - 2 ps) with %s' % accfntype.rstrip('1234')))
 # tframe1.SetAxisRange(0, 1E-3) # probably same as 2nd RooFit.Range()
 dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp),
                RooFit.CutRange('zoom'))
@@ -93,7 +93,7 @@ acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
 
 time.setRange('zoom2', 2E-3, 1E-2)
 tframe2 = time.frame(RooFit.Range('zoom2'), RooFit.Name('pztime2'),
-                     RooFit.Title('Projection on time (2 - 10 ps) with %s' % accfntype))
+                     RooFit.Title('Projection on time (2 - 10 ps) with %s' % accfntype.rstrip('1234')))
 dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp),
                RooFit.CutRange('zoom2'))
 PDF.plotOn(tframe2, RooFit.ProjWData(dtargset, dataset, True),
@@ -103,7 +103,7 @@ acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
 
 time.setRange('fullrange', epsilon, 1E-2 + epsilon)
 tframe3 = time.frame(RooFit.Range('fullrange'), RooFit.Name('ptime3'),
-                     RooFit.Title('Projection on time (0.2 - 10 ps) with %s' % accfntype))
+                     RooFit.Title('Projection on time (0.2 - 10 ps) with %s' % accfntype.rstrip('1234')))
 dataset.plotOn(tframe3, RooFit.MarkerStyle(kFullTriangleUp))
 PDF.plotOn(tframe3, RooFit.ProjWData(dtargset, dataset, True),
            RooFit.LineColor(kBlue))
