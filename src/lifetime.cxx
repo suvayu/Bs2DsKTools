@@ -202,6 +202,9 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
    ftree.Branch("HLT2Topo2BodyTOS" , &lab0Hlt2Topo2BodyBBDTDecision_TOS);
    ftree.Branch("HLT2TopoIncPhiTOS", &lab0Hlt2IncPhiDecision_TOS);
 
+   unsigned long rdskcount(0), rdspicount(0);
+   unsigned long dskcount(0), dspicount(0);
+
    Long64_t nbytes = 0, nb = 0;
    // for (Long64_t jentry=0; jentry<nentries;jentry+=10) // for testing
    for (Long64_t jentry=0; jentry<nentries;jentry++)
@@ -209,6 +212,9 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
        Long64_t ientry = LoadTree(jentry);
        if (ientry < 0) break;
        nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+       if (std::abs(lab1_TRUEID) == 321) rdskcount++;
+       else if (std::abs(lab1_TRUEID) == 211) rdspicount++;
 
        // if (( UnbiasedSelection() == false ) or ( lab1_PIDK < 5 )) continue;
        if (( CommonSelection() == false ) or ( lab1_PIDK < 5 )) continue;
@@ -223,8 +229,13 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
        ENDVX.SetXYZ(lab0_ENDVERTEX_X, lab0_ENDVERTEX_Y, lab0_ENDVERTEX_Z);
        ftree.Fill();
        felist.Enter(jentry, fChain);
+       if (std::abs(lab1_TRUEID) == 321) dskcount++;
+       else if (std::abs(lab1_TRUEID) == 211) dspicount++;
      }
-   std::cout << "Entry list: " << felist.GetN() << std::endl;
+   std::cout << "Entry list: " << felist.GetN() << " DsK: " << dskcount
+	     << " DsPi: " << dspicount << std::endl;
+   std::cout << "Rejected DsK: " << rdskcount - dskcount
+	     << " DsPi: " << rdspicount - dspicount << std::endl;
    std::cout << "lifetime::Loop(TTree&,TEntryList&): Read " << nbytes << " bytes." << std::endl;
 }
 
