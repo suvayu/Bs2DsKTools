@@ -59,7 +59,7 @@ set_integrator_config()
 epsilon = 2E-4
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
 
-def main(accfn='powerlaw', mode='all', isToy=False):
+def main(accfn='powerlaw', mode='all', fsuffix='', isToy=False):
     """Setup RooFit variables then construct the PDF as per options.
 
     Fit the model to a dataset. If toy generation is requested,
@@ -172,7 +172,7 @@ def main(accfn='powerlaw', mode='all', isToy=False):
     # Build full 2-D PDF (t, δt)
     argset = RooArgSet(time,dt)
     # Get tree
-    rfile = get_file('data/smalltree-new-MC.root', 'read')
+    rfile = get_file('data/smalltree-new-MC%s.root' % fsuffix, 'read')
     ftree = get_object('ftree', rfile)
 
     # Trigger:
@@ -268,7 +268,9 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         mode = sys.argv[1]
+        fsuffix = sys.argv[2]
     else:
         mode = 'all'
+        fsuffix = ''
 
-    main('powerlaw4', mode, False)
+    main('powerlaw4', mode, fsuffix, False)
