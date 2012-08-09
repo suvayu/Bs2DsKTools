@@ -56,10 +56,10 @@ from ROOT import RooDecay, RooGaussModel
 from factory import *
 set_integrator_config()
 
-epsilon = 2E-4
+epsilon = 0.2
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
 
-def main(accfn='powerlaw', mode='all', isToy=False):
+def main(accfn='powerlaw', mode='all', fsuffix='', isToy=False):
     """Setup RooFit variables then construct the PDF as per options.
 
     Fit the model to a dataset. If toy generation is requested,
@@ -69,26 +69,26 @@ def main(accfn='powerlaw', mode='all', isToy=False):
     """
 
     # Observables
-    time = RooRealVar('time', 'B_{s} lifetime in ns', epsilon, 0.01+epsilon)
-    time.setRange('fullrange', epsilon, 0.01+epsilon)
+    time = RooRealVar('time', 'B_{s} lifetime in ns', epsilon, 10+epsilon)
+    time.setRange('fullrange', epsilon, 10+epsilon)
     # Limits determined from tree
-    dt = RooRealVar('dt', 'Error in lifetime measurement (ns)', 1E-5, 9E-5)
+    dt = RooRealVar('dt', 'Error in lifetime measurement (ns)', 1E-2, 9E-2)
     dt.setBins(100)
 
     # Parameters
     if not accfn.find('powerlaw') < 0:
-        turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
+        turnon = RooRealVar('turnon', 'turnon', 1.5, 0.5, 5.0)
         exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
         offset = RooRealVar('offset', 'offset', -0.2, -0.5, 0.1)
-        beta = RooRealVar('beta', 'beta', 50, 0.0, 100)
+        beta = RooRealVar('beta', 'beta', 5E-2, 0.0, 0.1)
     elif accfn == 'arctan':
         # turnon has a different range as it is in the denominator
-        turnon = RooRealVar('turnon', 'turnon', 1., 1E-3, 1.)
+        turnon = RooRealVar('turnon', 'turnon', 1E-3, 1E-6, 1E-3)
         offset = RooRealVar('offset', 'offset', 1E-3, 0, 5E-3)
     elif accfn == 'erf':
         # turnon has a different range as it is in the denominator
-        turnon = RooRealVar('turnon', 'turnon', 1., 1E-4, 100.)
-        offset = RooRealVar('offset', 'offset', 0., -1E-3, 1E-3)
+        turnon = RooRealVar('turnon', 'turnon', 1E3, 1E-1, 1E5)
+        offset = RooRealVar('offset', 'offset', 0., -1.0, 1.0)
     else:
         print 'Unknown acceptance type. Aborting'
         return
@@ -172,7 +172,7 @@ def main(accfn='powerlaw', mode='all', isToy=False):
     # Build full 2-D PDF (t, δt)
     argset = RooArgSet(time,dt)
     # Get tree
-    rfile = get_file('data/smalltree-new-MC.root', 'read')
+    rfile = get_file('data/smalltree-new-MC%s.root' % fsuffix, 'read')
     ftree = get_object('ftree', rfile)
 
     # Trigger:
@@ -224,7 +224,7 @@ def main(accfn='powerlaw', mode='all', isToy=False):
                           RooFit.NumCPU(2), RooFit.Verbose(True))
     fitresult.Print()
 
-    # RooFit.Range(0, 0.01+epsilon),
+    # RooFit.Range(0, 10+epsilon),
     tframe1 = time.frame(RooFit.Name('ptime'),
                          RooFit.Title('Projection on time'))
     dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
@@ -235,7 +235,7 @@ def main(accfn='powerlaw', mode='all', isToy=False):
                       RooFit.Normalization(1000, RooAbsReal.Relative))
 
     # NOTE: this range is for the RooPlot axis
-    tframe2 = time.frame(RooFit.Range(0., 2E-3), RooFit.Name('pztime'),
+    tframe2 = time.frame(RooFit.Range(0.0, 2.0), RooFit.Name('pztime'),
                          RooFit.Title('Projection on time (zoomed)'))
     dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
     PDF.plotOn(tframe2, RooFit.ProjWData(dtargset, dataset, True),
@@ -268,7 +268,9 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         mode = sys.argv[1]
+        fsuffix = sys.argv[2]
     else:
         mode = 'all'
+        fsuffix = ''
 
-    main('powerlaw4', mode, False)
+    main('powerlaw4', mode, fsuffix, False)
