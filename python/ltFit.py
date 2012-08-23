@@ -59,7 +59,7 @@ set_integrator_config()
 epsilon = 2E-4
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
 
-def main(accfn='powerlaw', mode='all', fsuffix='', isToy=False):
+def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     """Setup RooFit variables then construct the PDF as per options.
 
     Fit the model to a dataset. If toy generation is requested,
@@ -180,18 +180,27 @@ def main(accfn='powerlaw', mode='all', fsuffix='', isToy=False):
     # HLT2Topo3BodyTOS
     # HLT2Topo2BodyTOS
     # HLT2TopoIncPhiTOS
-    trigger = 'HLT2Topo3BodyTOS'
-    triggerVar = RooRealVar(trigger, trigger, 0, 2)
-    cut = trigger+'>0'
+    trigger2 = 'HLT2Topo2BodyTOS'
+    trigger2Var = RooRealVar(trigger2, trigger2, 0, 2)
+    trigger3 = 'HLT2Topo3BodyTOS'
+    trigger3Var = RooRealVar(trigger3, trigger3, 0, 2)
+    trigger4 = 'HLT2Topo4BodyTOS'
+    trigger4Var = RooRealVar(trigger4, trigger4, 0, 2)
+
+    cut = '%s > 0 || %s > 0 || %s > 0' % (trigger2, trigger3, trigger4)
 
     modeVar = RooRealVar('hID', 'Decay mode %s' % mode, -350, 350)
     if mode == 'DsK':
         cut += '&& abs(hID) == 321'
     elif mode == 'DsPi':
         cut += '&& abs(hID) == 211'
+    else:                       # don't mix modes anymore
+        print 'Unrecognised mode: %s. Aborting.' % mode
+        return
 
     try:
-        dataset = get_dataset(argset, ftree, cut, triggerVar, modeVar)
+        dataset = get_dataset(argset, ftree, cut, modeVar, trigger2Var,
+                              trigger3Var, trigger4Var)
     except TypeError, IOError:
         print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
     tmpdatahist = dataset.binnedClone('datahist','Binned data')
@@ -270,7 +279,7 @@ if __name__ == "__main__":
         mode = sys.argv[1]
         fsuffix = sys.argv[2]
     else:
-        mode = 'all'
+        mode = 'DsK'
         fsuffix = ''
 
     main('powerlaw4', mode, fsuffix, False)
