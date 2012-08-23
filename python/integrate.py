@@ -15,78 +15,49 @@ inthi = 10
 norm_num = lambda d, dbar: 4*gamma + (d + dbar)*dgamma
 norm_den = 4*gamma*gamma - dgamma*dgamma
 
-# basic forms
-cDsform = 'cosh(%E*x/2) + %E*sinh(%E*x/2)'  % (dgamma, CPd, dgamma)
-cDbsform = 'cosh(%E*x/2) + %E*sinh(%E*x/2)'  % (dgamma, CPdbar, dgamma)
-expform = 'exp(%E*x)' % -gamma
-sinhform = 'sinh(%E*x/2)' % dgamma
-Gtform = '%E*x' % gamma
-
-## Integrals
-# final integral forms
-xlnxform = '%s*(%s)*log(%s)'
-sinhlnform = '%s*%s*(1 + log(%s))'
-sinh2form = '%s*%s*%s'
-
-# coefficients
+# common constants
 num = norm_num(CPd, CPdbar)
 den = norm_den
-coef1 = den * dgamma * dgamma / (num * num * num)
-coef2 = - den * dgamma / (num * num)
+
+# basic forms
+cDsform = 'cosh(%E * x/2) + %E * sinh(%E * x/2)'  % (dgamma, CPd, dgamma)
+cDbsform = 'cosh(%E * x/2) + %E * sinh(%E * x/2)'  % (dgamma, CPdbar, dgamma)
+expform = 'exp(%E * x)' % -gamma
+sinhform = 'sinh(%E * x/2)' % dgamma
+
+commonform1 = '(%E * x + log(%s) + log(%E))' % (-gamma, cDsform, den/num + 1)
+
+## Integrals
+# final integral forms (assuming D and Dbar are equal)
+term1 = '%s * %s * (%s)' % (commonform1, expform, cDsform)
+term2 = '%s * %s * %s' % (commonform1, expform, sinhform)
+term3 = '%s/%s * (%s - %E * %s)**2' % (expform, cDsform, sinhform, dgamma/num, cDsform)
+
+coef1 = 2 * dgamma * dgamma * den / (num * num * num)
+coef2 = 2 * dgamma * den / (num * num)
 coef3 = den / num
 
 # ∂²/∂D²(LL)
-DDint1 = TF1('DDint1', xlnxform % (expform, cDsform, cDsform), 0, 100)
-DDint2 = TF1('DDint2', sinhlnform % (expform, sinhform, cDsform), 0, 100)
-DDint3 = TF1('DDint3', sinh2form % (expform, sinhform, sinhform), 0, 100)
+DDint1 = TF1('DDint1', term1, 0, 100)
+DDint2 = TF1('DDint2', term2, 0, 100)
+DDint3 = TF1('DDint3', term3, 0, 100)
 
-# These assume D and Dbar are equal
-DDintegral = 4 * coef1 * DDint1.Integral(intlo, inthi) # 2 + 2 because of Dbar terms
-DDintegral += -2 * coef2 * DDint2.Integral(intlo, inthi)
+DDintegral = 2 * coef1 * DDint1.Integral(intlo, inthi)
+DDintegral -= coef2 * DDint2.Integral(intlo, inthi)
 DDintegral += coef3 * DDint3.Integral(intlo, inthi)
 
 # ∂²/∂D̄∂D(LL)
-DDbarintegral = 4 * coef1 * DDint1.Integral(intlo, inthi) # 2 + 2 because of Dbar terms
-DDbarintegral += -2 * coef2 * DDint2.Integral(intlo, inthi) # 1 + 1 because of Dbar terms
+commonform2 = '(%E * x + log(%s) + log(%E))' % (-gamma, cDsform, den/num + 2)
 
-# integral forms
-Gtxform = '%s*%s*(%s)'
-Gtsinhform = '%s*%s*%s'
-xform = '%s*(%s)'
-sinhintform = '%s*%s'
+term4 = '%s * %s * (%s)' % (commonform2, expform, cDsform)
+term5 = '%s * %s * %s' % (commonform2, expform, sinhform)
 
-# coefficients
-coef4 = 2 * den * dgamma * dgamma / (num * num * num)
-coef5 = 2 * den * dgamma / (num * num)
+DDbarint1 = TF1('DDbarint1', term4, 0, 100)
+DDbarint2 = TF1('DDbarint2', term5, 0, 100)
 
-# ∂²/∂D²(PDF·Γt)
-DDint4 = TF1('DDint4', Gtxform % (expform, Gtform, cDsform), 0, 100)
-DDint5 = TF1('DDint5', Gtsinhform % (expform, Gtform, sinhform), 0, 100)
-
-# one extra 2 because of equal contribution from D and D̄
-DDintegral += -2 * coef4 * DDint4.Integral(intlo, inthi)
-DDintegral += 2 * coef5 * DDint5.Integral(intlo, inthi)
-
-# ∂²/∂D̄∂D(PDF·Γt)
-DDbarintegral += -2 * coef4 * DDint4.Integral(intlo, inthi)
-
-# ∂²/∂D²(PDF·ln[Norm])
-DDint6 = TF1('DDint6', xform % (expform, cDsform), 0, 100)
-DDint7 = TF1('DDint7', sinhintform % (expform, sinhform), 0, 100)
-
-coef6 = 2 * den * den * dgamma * dgamma / (num * num * num)
-coef7 = -2 * 2 * den * den * dgamma / (num * num)
-coef8 = 2 * (dgamma - 1) * den / (num * num) * log(num/den)
-
-# one extra 2 because of equal contribution from D and D̄
-DDintegral += coef6 * DDint6.Integral(intlo, inthi)
-DDintegral += (coef7 + coef8) * DDint7.Integral(intlo, inthi)
-
-# ∂²/∂D̄∂D(PDF·ln[Norm])
-coef9 = 2 * dgamma * den / (num * num) * log(num/den)
-
-DDbarintegral += 2 * coef6 * DDint6.Integral(intlo, inthi)
-DDbarintegral += (coef7 / 2 + coef9) * DDint7.Integral(intlo, inthi)
+DDbarintegral = 2 * coef1 * DDbarint1.Integral(intlo, inthi) # 2 + 2 because of Dbar terms
+DDbarintegral -= coef2 * DDbarint2.Integral(intlo, inthi) # 1 + 1 because of Dbar terms
+DDbarintegral *= 2
 
 # since CPd and CPdbar are equal, no need to recalculate integrals
 mat = [
