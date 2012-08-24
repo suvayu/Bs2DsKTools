@@ -187,7 +187,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     trigger4 = 'HLT2Topo4BodyTOS'
     trigger4Var = RooRealVar(trigger4, trigger4, 0, 2)
 
-    cut = '%s > 0 || %s > 0 || %s > 0' % (trigger2, trigger3, trigger4)
+    cut = '(%s > 0 || %s > 0 || %s > 0)' % (trigger2, trigger3, trigger4)
 
     modeVar = RooRealVar('hID', 'Decay mode %s' % mode, -350, 350)
     if mode == 'DsK':
