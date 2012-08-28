@@ -284,8 +284,8 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
 
     # Save plots and PDFs
     timestamp = get_timestamp()
-    plotfile = 'plots/canvas-%s-%s-%s.png' % (mode, accfn, timestamp)
-    rootfile = 'data/fitresult-%s-%s-%s.root' % (mode, accfn, timestamp)
+    plotfile = 'plots/canvas-%s-%s-%s.png' % (accfn, mode, timestamp)
+    rootfile = 'data/fitresult-%s-%s-%s.root' % (accfn, mode, timestamp)
 
     # Print plots
     canvas.Print(plotfile)
