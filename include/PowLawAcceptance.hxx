@@ -28,7 +28,8 @@ public:
   PowLawAcceptance() {};
   PowLawAcceptance(const char *name, const char *title,
 		   RooAbsReal& turnon, RooAbsReal& time,
-		   RooAbsReal& offset, RooAbsReal& exponent);
+		   RooAbsReal& offset, RooAbsReal& exponent,
+		   RooAbsReal& beta);
   PowLawAcceptance(const PowLawAcceptance& other, const char* name=0);
   virtual ~PowLawAcceptance();
   virtual TObject* clone(const char* newname) const;
@@ -47,6 +48,7 @@ protected:
   RooRealProxy _time;
   RooRealProxy _offset;
   RooRealProxy _exponent;
+  RooRealProxy _beta;
 
 private:
 

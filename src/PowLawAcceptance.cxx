@@ -21,12 +21,14 @@
 
 PowLawAcceptance::PowLawAcceptance(const char *name, const char *title,
 				   RooAbsReal& turnon, RooAbsReal& time,
-				   RooAbsReal& offset, RooAbsReal& exponent) :
+				   RooAbsReal& offset, RooAbsReal& exponent,
+				   RooAbsReal& beta) :
   RooAbsReal(name, title),
   _turnon("turnon", "turnon", this, turnon),
   _time("time", "time", this, time),
   _offset("offset", "offset", this, offset),
-  _exponent("exponent", "exponent", this, exponent)
+  _exponent("exponent", "exponent", this, exponent),
+  _beta("beta", "beta", this, beta)
 {
 }
 
@@ -36,7 +38,8 @@ PowLawAcceptance::PowLawAcceptance(const PowLawAcceptance& other, const char* na
   _turnon("turnon", this, other._turnon),
   _time("time", this, other._time),
   _offset("offset", this, other._offset),
-  _exponent("exponent", this, other._exponent)
+  _exponent("exponent", this, other._exponent),
+  _beta("beta", this, other._beta)
 {
 }
 
@@ -53,14 +56,17 @@ TObject* PowLawAcceptance::clone(const char* newname) const
 Double_t PowLawAcceptance::evaluate() const
 {
   Double_t turnon((Double_t)_turnon), time((Double_t)_time),
-    offset((Double_t)_offset), exponent((Double_t)_exponent);
+    offset((Double_t)_offset), exponent((Double_t)_exponent),
+    beta((Double_t)_beta);
 
-  if ((time - offset > -0.) and time > 2E-4) {
-    Double_t denom(1. + pow(turnon*(time - offset), exponent));
-    return (1. - 1./denom);
+  Double_t expnoff = std::pow(turnon*time, exponent) - offset;
+
+  if (time < 2E-4 or expnoff < -0.0) {
+    return 0.0;
+  } else {
+    Double_t denominator(1.0 + expnoff);
+    return ((1.0 - 1.0/denominator) * (1.0 - beta*time));
   }
-
-  return 0.;
 }
 
 
