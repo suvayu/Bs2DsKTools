@@ -65,8 +65,7 @@ loadstatus = { 0: 'loaded',
 
 library = 'libacceptance.so'
 status = gSystem.Load(library)
-print '%s %s' % (library, loadstatus[status])
-if status < 0: sys.exit('Problem loading %s' % library)
+if status < 0: sys.exit('Problem loading %s, %s' % (library, loadstatus[status]) )
 from ROOT import PowLawAcceptance, BdPTAcceptance #, ErfAcceptance
 
 epsilon = 2E-4
