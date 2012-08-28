@@ -299,10 +299,12 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
 if __name__ == "__main__":
 
     if len(sys.argv) > 1:
-        mode = sys.argv[1]
-        fsuffix = sys.argv[2]
+        fn = sys.argv[1]
+        mode = sys.argv[2]
+        fsuffix = sys.argv[3]
     else:
+        fn = 'cpowerlaw'
         mode = 'DsK'
         fsuffix = ''
 
-    main('cpowerlaw', mode, fsuffix, False)
+    main(fn, mode, fsuffix, False)
