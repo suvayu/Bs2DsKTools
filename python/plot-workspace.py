@@ -22,7 +22,8 @@ options = optparser.parse_args()
 doPrint = options.doPrint
 logscale = options.logscale
 fname = options.fname
-accfntype = fname[15:24]
+# sample filename fitresult-DsK-powerlaw4-2012-08-25-Sat-13-24.root
+accfntype = fname.split('-')[2]
 
 # FIXME: Batch running fails on importing anything but gROOT
 # ROOT global variables
