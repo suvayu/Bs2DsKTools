@@ -56,6 +56,19 @@ from ROOT import RooDecay, RooGaussModel
 from factory import *
 set_integrator_config()
 
+# execfile('rootlogon.py')
+# Load custom ROOT classes
+loadstatus = { 0: 'loaded',
+               1: 'already loaded',
+               -1: 'does not exist',
+               -2: 'version mismatch' }
+
+library = 'libacceptance.so'
+status = gSystem.Load(library)
+print '%s %s' % (library, loadstatus[status])
+if status < 0: sys.exit('Problem loading %s' % library)
+from ROOT import PowLawAcceptance, BdPTAcceptance #, ErfAcceptance
+
 epsilon = 2E-4
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
 
@@ -81,6 +94,10 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
         exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
         offset = RooRealVar('offset', 'offset', 0.0, -0.2, 0.1)
         beta = RooRealVar('beta', 'beta', 50, 0.0, 100)
+    elif accfn == 'bdpt':
+        beta = RooRealVar('beta', 'beta', 50, 0.0, 100)
+        slope = RooRealVar('slope', 'slope', 1.1, 0.1, 2.0)
+        offset = RooRealVar('offset', 'offset', 1.86E-4, 0.0, 1E-3)
     elif accfn == 'arctan':
         # turnon has a different range as it is in the denominator
         turnon = RooRealVar('turnon', 'turnon', 1., 1E-3, 1.)
@@ -161,6 +178,12 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
         expr = '(0.5*(TMath::Erf((@1-@2)/@0)+1))'
         acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
                                    RooArgList(turnon, time, offset))
+    elif accfn == 'cpowerlaw':
+        acceptance = PowLawAcceptance('acceptance',  'Power law acceptance',
+                                      turnon, time, offset, exponent, beta)
+    elif accfn == 'bdpt':
+        acceptance = BdPTAcceptance('acceptance',  'Bd PT acceptance',
+                                    time, beta, slope, offset)
     else:
         print 'Unknown acceptance type. Aborting'
         return
@@ -282,4 +305,4 @@ if __name__ == "__main__":
         mode = 'DsK'
         fsuffix = ''
 
-    main('powerlaw4', mode, fsuffix, False)
+    main('cpowerlaw', mode, fsuffix, False)
