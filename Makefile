@@ -39,7 +39,7 @@ ROOTGLIBS    := $(shell $(ROOTCONFIG) --glibs)
 # others
 HASTHREAD    := $(shell $(ROOTCONFIG) --has-thread)
 ROOTDICTTYPE := $(shell $(ROOTCONFIG) --dicttype)
-ROOTCINT     := rootcint
+ROOTCINT     := $(shell $(ROOTCONFIG) --bindir)/rootcint
 
 #-----------------------------------------------------
 # directories
