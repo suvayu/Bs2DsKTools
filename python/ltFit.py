@@ -80,6 +80,9 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
 
     """
 
+    # for persistency
+    varlist = []
+
     # Observables
     time = RooRealVar('time', 'B_{s} lifetime in ns', epsilon, 0.01+epsilon)
     time.setRange('fullrange', epsilon, 0.01+epsilon)
@@ -87,24 +90,30 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     dt = RooRealVar('dt', 'Error in lifetime measurement (ns)', 1E-5, 9E-5)
     dt.setBins(100)
 
+    varlist += [ time, dt ]
+
     # Parameters
     if not accfn.find('powerlaw') < 0:
         turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
         exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
         offset = RooRealVar('offset', 'offset', 0.0, -0.2, 0.1)
         beta = RooRealVar('beta', 'beta', 50, 0.0, 100)
+        varlist += [ turnon, exponent, offset, beta ]
     elif accfn == 'bdpt':
         beta = RooRealVar('beta', 'beta', 40.0, 10.0, 70.0)
         slope = RooRealVar('slope', 'slope', 1100, 100.0, 2000.0)
         offset = RooRealVar('offset', 'offset', 1.5E-4, 0.0, 3E-4)
+        varlist += [ beta, slope, offset ]
     elif accfn == 'arctan':
         # turnon has a different range as it is in the denominator
         turnon = RooRealVar('turnon', 'turnon', 1., 1E-3, 1.)
         offset = RooRealVar('offset', 'offset', 1E-3, 0, 5E-3)
+        varlist += [ turnon, offset ]
     elif accfn == 'erf':
         # turnon has a different range as it is in the denominator
         turnon = RooRealVar('turnon', 'turnon', 1., 1E-4, 100.)
         offset = RooRealVar('offset', 'offset', 0., -1E-3, 1E-3)
+        varlist += [ turnon, offset ]
     else:
         print 'Unknown acceptance type. Aborting'
         return
@@ -290,9 +299,8 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     canvas.Print(plotfile)
 
     # Persistify variables, PDFs and datasets
-    save_in_workspace(rootfile, var=[time, dt, turnon, offset, exponent],
-                      pdf=[PDF], data=[dataset], fit=[fitresult],
-                      plots=[tframe1, tframe2])
+    save_in_workspace(rootfile, var=varlist, pdf=[PDF], data=[dataset],
+                      fit=[fitresult], plots=[tframe1, tframe2])
 
 
 if __name__ == "__main__":
