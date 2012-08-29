@@ -94,8 +94,8 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
         offset = RooRealVar('offset', 'offset', 0.0, -0.2, 0.1)
         beta = RooRealVar('beta', 'beta', 50, 0.0, 100)
     elif accfn == 'bdpt':
-        beta = RooRealVar('beta', 'beta', 50, 0.0, 100)
-        slope = RooRealVar('slope', 'slope', 1.1, 0.1, 2.0)
+        beta = RooRealVar('beta', 'beta', 40.0, 10.0, 70.0)
+        slope = RooRealVar('slope', 'slope', 1100, 100.0, 2000.0)
         offset = RooRealVar('offset', 'offset', 1.86E-4, 0.0, 1E-3)
     elif accfn == 'arctan':
         # turnon has a different range as it is in the denominator
