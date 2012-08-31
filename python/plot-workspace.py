@@ -7,6 +7,7 @@
 # Python modules
 import os
 import sys
+import re
 
 # option parsing
 import argparse
@@ -23,7 +24,9 @@ doPrint = options.doPrint
 logscale = options.logscale
 fname = options.fname
 # sample filename fitresult-DsK-powerlaw4-2012-08-25-Sat-13-24.root
-accfntype = fname.split('-')[2]
+fnametokens = fname.split('-')
+accfntype = fnametokens[2]
+mode = fnametokens[1]
 
 # FIXME: Batch running fails on importing anything but gROOT
 # ROOT global variables
@@ -50,6 +53,17 @@ from ROOT import RooAbsData, RooDataSet, RooDataHist
 from ROOT import RooDecay, RooGaussModel
 from ROOT import RooList, RooCurve, RooHist
 
+# Load custom ROOT classes
+loadstatus = { 0: 'loaded',
+               1: 'already loaded',
+               -1: 'does not exist',
+               -2: 'version mismatch' }
+
+library = 'libacceptance.so'
+status = gSystem.Load(library)
+if status < 0: sys.exit('Problem loading %s, %s' % (library, loadstatus[status]) )
+from ROOT import PowLawAcceptance, BdPTAcceptance #, ErfAcceptance
+
 # my stuff
 from factory import *
 
@@ -65,10 +79,17 @@ workspace = get_workspace(fname, 'workspace')
 # variables
 time = workspace.var('time')
 dt = workspace.var('dt')
-turnon = workspace.var('turnon')
 offset = workspace.var('offset')
-exponent = workspace.var('exponent')
-if -1 < accfntype.find('powerlaw4'): beta = workspace.var('beta')
+
+if -1 < accfntype.find('powerlaw'):
+    turnon = workspace.var('turnon')
+    exponent = workspace.var('exponent')
+elif -1 < accfntype.find('bdpt'):
+    slope = workspace.var('slope')
+
+patt = re.compile('powerlaw4|cpowerlaw|bdpt')
+if re.search(patt, accfntype): beta = workspace.var('beta')
+
 # PDFs
 PDF = workspace.pdf('FullModel')
 acceptance = workspace.function('acceptance')
@@ -83,7 +104,8 @@ dtargset = RooArgSet(dt)
 time.setRange('zoom1', 0., 2E-3)
 # NOTE: this range is for the RooPlot axis
 tframe1 = time.frame(RooFit.Range('zoom1'), RooFit.Name('pztime1'),
-                     RooFit.Title('Projection on time (0 - 2 ps) with %s' % accfntype.rstrip('1234')))
+                     RooFit.Title('Projection on time (0 - 2 ps) with %s (%s)' %
+                                  (accfntype.rstrip('1234'), mode)))
 # tframe1.SetAxisRange(0, 1E-3) # probably same as 2nd RooFit.Range()
 dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp),
                RooFit.CutRange('zoom'))
@@ -94,7 +116,8 @@ acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
 
 time.setRange('zoom2', 2E-3, 1E-2)
 tframe2 = time.frame(RooFit.Range('zoom2'), RooFit.Name('pztime2'),
-                     RooFit.Title('Projection on time (2 - 10 ps) with %s' % accfntype.rstrip('1234')))
+                     RooFit.Title('Projection on time (2 - 10 ps) with %s (%s)' %
+                                  (accfntype.rstrip('1234'), mode)))
 dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp),
                RooFit.CutRange('zoom2'))
 PDF.plotOn(tframe2, RooFit.ProjWData(dtargset, dataset, True),
@@ -104,7 +127,8 @@ acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
 
 time.setRange('fullrange', epsilon, 1E-2 + epsilon)
 tframe3 = time.frame(RooFit.Range('fullrange'), RooFit.Name('ptime3'),
-                     RooFit.Title('Projection on time (0.2 - 10 ps) with %s' % accfntype.rstrip('1234')))
+                     RooFit.Title('Projection on time (0.2 - 10 ps) with %s (%s)' %
+                                  (accfntype.rstrip('1234'), mode)))
 dataset.plotOn(tframe3, RooFit.MarkerStyle(kFullTriangleUp))
 PDF.plotOn(tframe3, RooFit.ProjWData(dtargset, dataset, True),
            RooFit.LineColor(kBlue))
@@ -113,8 +137,8 @@ acceptance.plotOn(tframe3, RooFit.LineColor(kGreen),
 
 # draw and print
 timestamp = str(workspace.GetTitle())[19:]
-if logscale: plotfile = 'plots/savedcanvas_%s_%s_%s.pdf' % ('log', accfntype, timestamp)
-else: plotfile = 'plots/savedcanvas_%s_%s.pdf' % (accfntype, timestamp)
+if logscale: plotfile = 'plots/savedcanvas_%s_%s_%s_%s.pdf' % ('log', mode, accfntype, timestamp)
+else: plotfile = 'plots/savedcanvas_%s_%s_%s.pdf' % (mode, accfntype, timestamp)
 canvas = TCanvas('canvas', 'canvas', 800, 600)
 if doPrint: canvas.Print(plotfile + '[')
 tframe1.Draw()
