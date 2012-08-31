@@ -165,7 +165,7 @@ for ibin in range(bins):
     for fn in fns:
         ravg.fill(fn.Eval(xbincs[ibin]))
     means[ibin] = ravg.mean()
-    varis[ibin] = ravg.var()
+    varis[ibin] = math.sqrt(ravg.var())
 
 #     if 0 == (ibin % 30):
 #         hratiodist += [ TH1D('hratiodist_%d' % ibin, 'Distribution of acceptance ratio',
