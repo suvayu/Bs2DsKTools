@@ -135,11 +135,24 @@ PDF.plotOn(tframe3, RooFit.ProjWData(dtargset, dataset, True),
 acceptance.plotOn(tframe3, RooFit.LineColor(kGreen),
                   RooFit.Normalization(1000, RooAbsReal.Relative))
 
+print
+tframe3.Print('v')
+
+# FIXME: hard coded RooCurve and RooHist name strings
+pullhist = tframe3.residHist('h_dataset', 'FullModel_Norm[time]_DataAvg[dt]', True)
+print 'Y Mean: %E' % pullhist.GetMean(2)
+print 'Y RMS:  %E' % pullhist.GetRMS(2)
+
+tframe4 = time.frame(RooFit.Range('fullrange'), RooFit.Name('fitpulls'),
+                     RooFit.Title('Fit pulls w.r.t. PDF (%s %s)' % (mode, accfntype)))
+tframe4.addPlotable(pullhist, 'P')
+
 # draw and print
 timestamp = str(workspace.GetTitle())[19:]
 if logscale: plotfile = 'plots/savedcanvas_%s_%s_%s_%s.pdf' % ('log', mode, accfntype, timestamp)
 else: plotfile = 'plots/savedcanvas_%s_%s_%s.pdf' % (mode, accfntype, timestamp)
 canvas = TCanvas('canvas', 'canvas', 800, 600)
+
 if doPrint: canvas.Print(plotfile + '[')
 tframe1.Draw()
 if doPrint: canvas.Print(plotfile)
@@ -151,6 +164,9 @@ if logscale:
     gPad.SetLogy(1)
     tframe3.Draw()
     if doPrint: canvas.Print(plotfile)
+gPad.SetLogy(0)
+tframe4.Draw()
+if doPrint: canvas.Print(plotfile)
 if doPrint: canvas.Print(plotfile + ']')
 
 # # χ² comparison for offset and turnon
