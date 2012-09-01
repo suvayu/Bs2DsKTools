@@ -188,7 +188,7 @@ plt.figure()
 plt.title('%s/%s %s acceptance ratio' % (mode1, mode2, accfntype1))
 plt.errorbar(xbincs, means, varis)
 axes = plt.axes()
-axes.set_xlabel('B decay time')
+axes.set_xlabel('B decay time (ns)')
 axes.set_ylabel('%s/%s acceptance ratio mean\n(variance shown as error bars)' % (mode1, mode2))
 axes.set_xlim(2E-4, 1E-2)
 axes.set_ylim(0.8, 1.2)
@@ -199,10 +199,29 @@ plt.savefig('plots/acceptance-ratio-%s-mean-rms.pdf' % accfntype1)
 # else:
 #     plt.show()
 
+
+# save acceptance ratio as ROOT histogram
+rfile = TFile('rfile.root', 'update')
+
+xbins = numpy.arange(2E-4, 1E-2 + 1E-4, 1E-4)
+haccratio = TH1D('haccratio_%s' % accfntype1, 'Acceptance ratio %s' % accfntype1,
+                 len(means), xbins)
+haccratio.SetXTitle('B decay time (ns)')
+haccratio.SetYTitle('%s/%s acceptance ratio mean' % (mode1, mode2))
+
+for i, mean in enumerate(means):
+    haccratio.SetBinContent(i+1, mean)
+    haccratio.SetBinError(i+1, varis[i])
+
+rfile.Write('', TFile.kOverwrite)
+rfile.Close()
+
+
+# # 2-D distribution of acceptance ratio as
 # xbins = numpy.arange(2E-4, 1E-2 + 1E-4, 1E-4)
 # ybins = numpy.arange(0.5, 1.5 + 0.01, 0.01)
 # hratiodist = TH2D('hratiodist', 'Distribution of acceptance ratio',
-#                   len(xbins), xbins, len(ybins), ybins)
+#                   len(xbins)-1, xbins, len(ybins)-1, ybins)
 
 # for i, xb in enumerate(xbins):
 #     if i > 97: continue
@@ -215,7 +234,7 @@ plt.savefig('plots/acceptance-ratio-%s-mean-rms.pdf' % accfntype1)
 # canvas.Divide(5,2)
 
 # for i in range(10):
-#     hratiox += hratiodist.ProjectionX("_px", 0 + i, 9 + i)
+#     hratiox += hratiodist.ProjectionX('_px', 0 + i, 9 + i)
 #     canvas.cd(i + 1)
 #     hratiox[i].Draw('hist')
 
