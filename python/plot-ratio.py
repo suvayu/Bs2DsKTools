@@ -10,17 +10,19 @@ import sys
 import math
 import numpy
 
-# # option parsing
-# import argparse
-# optparser = argparse.ArgumentParser(description='Lifetime acceptance plots')
-# optparser.add_argument('--print', dest='doPrint', type=bool, default=False,
-#                        help='Print to multi-page pdf file')
+# option parsing
+import argparse
+optparser = argparse.ArgumentParser(description=__doc__)
+optparser.add_argument('file1', help='ROOT file with DsK fit result')
+optparser.add_argument('file2', help='ROOT file with Dsπ fit result')
+optparser.add_argument('--print', dest='doPrint', action='store_true',
+                       help='Print to multi-page pdf file')
 
-# options = optparser.parse_args()
-# doPrint = options.doPrint
+options = optparser.parse_args()
+doPrint = options.doPrint
 
-fname1 = sys.argv[1]
-fname2 = sys.argv[2]
+fname1 = options.file1
+fname2 = options.file2
 
 fname1tokens = fname1.split('-')
 accfntype1 = fname1tokens[2]
@@ -33,7 +35,7 @@ mode2 = fname2tokens[1]
 # FIXME: Batch running fails on importing anything but gROOT
 # ROOT global variables
 from ROOT import gROOT
-# if doPrint: gROOT.SetBatch(True)
+if doPrint: gROOT.SetBatch(True)
 
 from ROOT import gStyle, gPad, gSystem
 
@@ -148,9 +150,9 @@ fns += [ratio.Clone('%s_%d' % (ratio.GetName(), entry+1))]
 # ratio.GetXaxis().SetTitle('B decay time (ns)')
 # ratio.GetYaxis().SetTitle('Acceptance ratio (DsK/Ds#pi)')
 
-# if doPrint:
-gPad.Print('plots/acceptance-ratio-%s.png' % accfntype1)
-gPad.Print('plots/acceptance-ratio-%s.pdf' % accfntype1)
+if doPrint:
+    gPad.Print('plots/acceptance-ratio-%s.png' % accfntype1)
+    gPad.Print('plots/acceptance-ratio-%s.pdf' % accfntype1)
 
 bins = 98
 
@@ -193,28 +195,27 @@ axes.set_ylabel('%s/%s acceptance ratio mean\n(variance shown as error bars)' % 
 axes.set_xlim(2E-4, 1E-2)
 axes.set_ylim(0.8, 1.2)
 
-# if doPrint:
-plt.savefig('plots/acceptance-ratio-%s-mean-rms.png' % accfntype1)
-plt.savefig('plots/acceptance-ratio-%s-mean-rms.pdf' % accfntype1)
-# else:
-#     plt.show()
+if doPrint:
+    plt.savefig('plots/acceptance-ratio-%s-mean-rms.png' % accfntype1)
+    plt.savefig('plots/acceptance-ratio-%s-mean-rms.pdf' % accfntype1)
 
+    # save acceptance ratio as ROOT histogram
+    rfile = TFile('data/acceptance-ratio-hists.root', 'update')
 
-# save acceptance ratio as ROOT histogram
-rfile = TFile('rfile.root', 'update')
+    xbins = numpy.arange(2E-4, 1E-2 + 1E-4, 1E-4)
+    haccratio = TH1D('haccratio_%s' % accfntype1, 'Acceptance ratio %s' % accfntype1,
+                     len(means), xbins)
+    haccratio.SetXTitle('B decay time (ns)')
+    haccratio.SetYTitle('%s/%s acceptance ratio mean' % (mode1, mode2))
 
-xbins = numpy.arange(2E-4, 1E-2 + 1E-4, 1E-4)
-haccratio = TH1D('haccratio_%s' % accfntype1, 'Acceptance ratio %s' % accfntype1,
-                 len(means), xbins)
-haccratio.SetXTitle('B decay time (ns)')
-haccratio.SetYTitle('%s/%s acceptance ratio mean' % (mode1, mode2))
+    for i, mean in enumerate(means):
+        haccratio.SetBinContent(i+1, mean)
+        haccratio.SetBinError(i+1, varis[i])
 
-for i, mean in enumerate(means):
-    haccratio.SetBinContent(i+1, mean)
-    haccratio.SetBinError(i+1, varis[i])
-
-rfile.Write('', TFile.kOverwrite)
-rfile.Close()
+    rfile.Write('', TFile.kOverwrite)
+    rfile.Close()
+else:
+    plt.show()
 
 
 # # 2-D distribution of acceptance ratio as
