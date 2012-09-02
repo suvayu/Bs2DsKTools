@@ -11,18 +11,18 @@ import re
 
 # option parsing
 import argparse
-optparser = argparse.ArgumentParser(description='Lifetime acceptance plots')
-optparser.add_argument('--file', dest='fname',
-                       help='Filename with saved fit result')
-optparser.add_argument('--print', dest='doPrint', type=bool, default=False,
+optparser = argparse.ArgumentParser(description=__doc__)
+optparser.add_argument('filename', help='ROOT file with saved fit result')
+optparser.add_argument('--print', dest='doPrint', action='store_true',
                        help='Print to multi-page pdf file')
-optparser.add_argument('--logscale', type=bool, default=False,
+optparser.add_argument('--log', action='store_true',
                        help='Print final plot in logscale')
 
 options = optparser.parse_args()
 doPrint = options.doPrint
-logscale = options.logscale
-fname = options.fname
+logscale = options.log
+fname = options.filename
+
 # sample filename fitresult-DsK-powerlaw4-2012-08-25-Sat-13-24.root
 fnametokens = fname.split('-')
 accfntype = fnametokens[2]
@@ -99,7 +99,8 @@ dataset = workspace.data('dataset')
 timeargset = RooArgSet(time)
 dtargset = RooArgSet(dt)
 
-# plot
+
+# plots
 # NOTE: this range is for the dataset binning
 time.setRange('zoom1', 0., 2E-3)
 # NOTE: this range is for the RooPlot axis
@@ -114,6 +115,7 @@ PDF.plotOn(tframe1, RooFit.ProjWData(dtargset, dataset, True),
 acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
                   RooFit.Normalization(200, RooAbsReal.Relative))
 
+
 time.setRange('zoom2', 2E-3, 1E-2)
 tframe2 = time.frame(RooFit.Range('zoom2'), RooFit.Name('pztime2'),
                      RooFit.Title('Projection on time (2 - 10 ps) with %s (%s)' %
@@ -125,6 +127,7 @@ PDF.plotOn(tframe2, RooFit.ProjWData(dtargset, dataset, True),
 acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
                   RooFit.Normalization(800, RooAbsReal.Relative))
 
+
 time.setRange('fullrange', epsilon, 1E-2 + epsilon)
 tframe3 = time.frame(RooFit.Range('fullrange'), RooFit.Name('ptime3'),
                      RooFit.Title('Projection on time (0.2 - 10 ps) with %s (%s)' %
@@ -134,6 +137,7 @@ PDF.plotOn(tframe3, RooFit.ProjWData(dtargset, dataset, True),
            RooFit.LineColor(kBlue))
 acceptance.plotOn(tframe3, RooFit.LineColor(kGreen),
                   RooFit.Normalization(1000, RooAbsReal.Relative))
+
 
 print
 tframe3.Print('v')
@@ -147,6 +151,7 @@ tframe4 = time.frame(RooFit.Range('fullrange'), RooFit.Name('fitpulls'),
                      RooFit.Title('Fit pulls w.r.t. PDF (%s %s)' % (mode, accfntype)))
 tframe4.addPlotable(pullhist, 'P')
 
+
 # draw and print
 timestamp = str(workspace.GetTitle())[19:]
 if logscale: plotfile = 'plots/savedcanvas_%s_%s_%s_%s.pdf' % ('log', mode, accfntype, timestamp)
@@ -154,20 +159,27 @@ else: plotfile = 'plots/savedcanvas_%s_%s_%s.pdf' % (mode, accfntype, timestamp)
 canvas = TCanvas('canvas', 'canvas', 800, 600)
 
 if doPrint: canvas.Print(plotfile + '[')
+
 tframe1.Draw()
 if doPrint: canvas.Print(plotfile)
+
 tframe2.Draw()
 if doPrint: canvas.Print(plotfile)
+
 tframe3.Draw()
 if doPrint: canvas.Print(plotfile)
+
 if logscale:
     gPad.SetLogy(1)
     tframe3.Draw()
     if doPrint: canvas.Print(plotfile)
-gPad.SetLogy(0)
+    gPad.SetLogy(0)
+
 tframe4.Draw()
-if doPrint: canvas.Print(plotfile)
-if doPrint: canvas.Print(plotfile + ']')
+if doPrint:
+    canvas.Print(plotfile)
+    canvas.Print(plotfile + ']')
+
 
 # # χ² comparison for offset and turnon
 # ilist = gPad.GetListOfPrimitives()
