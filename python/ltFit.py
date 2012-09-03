@@ -259,7 +259,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
         except TypeError, IOError:
             print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
-    fitresult = PDF.fitTo(dataset, RooFit.Optimize(False),
+    fitresult = PDF.fitTo(dataset, RooFit.Optimize(1),
                           RooFit.Strategy(2), RooFit.Save(True),
                           RooFit.NumCPU(2), RooFit.Verbose(True))
     fitresult.Print()
