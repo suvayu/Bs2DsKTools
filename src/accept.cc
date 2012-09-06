@@ -22,7 +22,7 @@ int main()
   TEntryList *felist = NULL;
 
   string fileaccess((doSelect) ? "recreate" : "read");
-  TFile rfile("data/smalltree-new-MC.root", fileaccess.c_str());
+  TFile rfile("data/smalltree-new-MC-pico.root", fileaccess.c_str());
 
   // select
   if (doSelect) {

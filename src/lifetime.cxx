@@ -182,15 +182,15 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
 
    TLorentzVector BsMom(0,0,0,0);
    TVector3 OWNPV(0,0,0), ENDVX(0,0,0);
-   double wt(0), truewt(0);
+   double wt(0.0), truewt(0.0), time(0.0), dt(0.0), truetime(0.0);
 
    ftree.Branch("Bsmass" , &lab0_MM);
    ftree.Branch("BsMom"  , &BsMom);
    ftree.Branch("hID"    , &lab1_TRUEID);
-   ftree.Branch("time"   , &lab0_TAU);
-   ftree.Branch("dt"     , &lab0_TAUERR);
+   ftree.Branch("time"   , &time);
+   ftree.Branch("dt"     , &dt);
    ftree.Branch("tchi2"  , &lab0_TAUCHI2);
-   ftree.Branch("truetime", &lab0_TRUETAU);
+   ftree.Branch("truetime", &truetime);
    ftree.Branch("wt"     , &wt);
    ftree.Branch("truewt" , &truewt);
    ftree.Branch("oscil"  , &lab0_OSCIL);
@@ -223,6 +223,9 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
        if (lab0_TAUERR <= 0 or lab0_TAUERR >= 0.0002 or
 	   lab0_TAUERR != lab0_TAUERR) continue;
 
+       time     = lab0_TAU * 1E3;
+       dt       = lab0_TAUERR * 1E3;
+       truetime = lab0_TRUETAU * 1E3;
        wt       = TMath::Exp(lab0_TAU*1e3/1.472);
        truewt   = TMath::Exp(lab0_TRUETAU*1e3/1.472);
        BsMom.SetPxPyPzE(lab0_PX, lab0_PY, lab0_PZ, lab0_MM);
