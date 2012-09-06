@@ -2,7 +2,7 @@
  * @file   PowLawAcceptance.cxx
  * @author Suvayu Ali <Suvayu.Ali@cern.ch>
  * @date   Thu May 17 21:46:42 2012
- * 
+ *
  * @brief  This class implements a power law acceptance function.
  *
  */
@@ -16,30 +16,73 @@
 #include "TMath.h"
 
 
-// ClassImp(PowLawAcceptance)
+/**
+ * Static data member for acceptance with no correction
+ *
+ */
+RooConstVar PowLawAcceptance::_one(
+    "PowLawAcceptance::_one", "PowLawAcceptance::_one", 1.0);
+
+
+/**
+ * Default constructor, used during ROOT I/O.  Ensures objects are
+ * consistent when reading instances of older version of the class.
+ *
+ */
+PowLawAcceptance::PowLawAcceptance() :
+  _correction("correction", "correction", this, _one)
+{
+}
 
 
 PowLawAcceptance::PowLawAcceptance(const char *name, const char *title,
 				   RooAbsReal& turnon, RooAbsReal& time,
 				   RooAbsReal& offset, RooAbsReal& exponent,
-				   RooAbsReal& beta) :
+				   RooAbsReal& beta, RooAbsReal* correction) :
   RooAbsReal(name, title),
   _turnon("turnon", "turnon", this, turnon),
   _time("time", "time", this, time),
   _offset("offset", "offset", this, offset),
   _exponent("exponent", "exponent", this, exponent),
-  _beta("beta", "beta", this, beta)
+  _beta("beta", "beta", this, beta),
+  _correction("correction", "correction", this,
+	      correction ? *correction : _one)
 {
 }
 
 
-PowLawAcceptance::PowLawAcceptance(const PowLawAcceptance& other, const char* name) :
+PowLawAcceptance::PowLawAcceptance(const PowLawAcceptance& other,
+				   const char* name) :
   RooAbsReal(other, name),
   _turnon("turnon", this, other._turnon),
   _time("time", this, other._time),
   _offset("offset", this, other._offset),
   _exponent("exponent", this, other._exponent),
-  _beta("beta", this, other._beta)
+  _beta("beta", this, other._beta),
+  _correction("correction", this, other._correction)
+{
+}
+
+
+/**
+ * This version of the copy constructor allows you to change the
+ * acceptance correction to something new or back to unity.
+ *
+ * @param other PowLawAcceptance instance copied from
+ * @param name New name
+ * @param correction New correction factor
+ */
+PowLawAcceptance::PowLawAcceptance(const PowLawAcceptance& other,
+				   const char* name,
+				   RooAbsReal* correction) :
+  RooAbsReal(other, name),
+  _turnon("turnon", this, other._turnon),
+  _time("time", this, other._time),
+  _offset("offset", this, other._offset),
+  _exponent("exponent", this, other._exponent),
+  _beta("beta", this, other._beta),
+  _correction("correction", "correction", this,
+	      correction ? *correction : _one)
 {
 }
 
@@ -53,19 +96,39 @@ TObject* PowLawAcceptance::clone(const char* newname) const
 }
 
 
+PowLawAcceptance& PowLawAcceptance::operator=(const PowLawAcceptance& other)
+{
+  if (&other == this)
+    return *this;
+
+  RooAbsReal::operator=(other);
+  _turnon = RooRealProxy("turnon", this, other._turnon);
+  _time = RooRealProxy("time", this, other._time);
+  _offset = RooRealProxy("offset", this, other._offset);
+  _exponent = RooRealProxy("exponent", this, other._exponent);
+  _beta = RooRealProxy("beta", this, other._beta);
+  _correction = RooRealProxy("correction", this, other._correction);
+
+  return *this;
+}
+
+
 Double_t PowLawAcceptance::evaluate() const
 {
   Double_t turnon((Double_t)_turnon), time((Double_t)_time),
     offset((Double_t)_offset), exponent((Double_t)_exponent),
-    beta((Double_t)_beta);
+    beta((Double_t)_beta), ratio(1.0);
+
+  // check if underlying data type is valid
+  if (_correction.absArg()) ratio = (Double_t)_correction;
 
   Double_t expnoff = std::pow(turnon*time, exponent) - offset;
 
-  if (time < 2E-4 or expnoff < -0.0) {
+  if (time < 0.2 or expnoff < -0.0) {
     return 0.0;
   } else {
     Double_t denominator(1.0 + expnoff);
-    return ((1.0 - 1.0/denominator) * (1.0 - beta*time));
+    return (ratio * (1.0 - 1.0/denominator) * (1.0 - beta*time));
   }
 }
 
