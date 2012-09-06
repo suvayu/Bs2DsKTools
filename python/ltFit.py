@@ -68,7 +68,7 @@ status = gSystem.Load(library)
 if status < 0: sys.exit('Problem loading %s, %s' % (library, loadstatus[status]) )
 from ROOT import PowLawAcceptance, BdPTAcceptance #, ErfAcceptance
 
-epsilon = 2E-4
+epsilon = 0.2
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
 
 def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
@@ -84,27 +84,28 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     varlist = []
 
     # Observables
-    time = RooRealVar('time', 'B_{s} lifetime in ns', epsilon, 0.01+epsilon)
-    time.setRange('fullrange', epsilon, 0.01+epsilon)
+    time = RooRealVar('time', 'B_{s} lifetime in ns', epsilon, 10.0+epsilon)
+    time.setRange('fullrange', epsilon, 10.0+epsilon)
     # Limits determined from tree
-    dt = RooRealVar('dt', 'Error in lifetime measurement (ns)', 1E-5, 9E-5)
+    dt = RooRealVar('dt', 'Error in lifetime measurement (ns)', 1E-2, 9E-2)
     dt.setBins(100)
 
     varlist += [ time, dt ]
 
     # Parameters
     if not accfn.find('powerlaw') < 0:
-        turnon = RooRealVar('turnon', 'turnon', 1500., 500., 5000.)
+        turnon = RooRealVar('turnon', 'turnon', 1.5, 0.5, 5.0)
         exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
         offset = RooRealVar('offset', 'offset', 0.0, -0.2, 0.1)
-        beta = RooRealVar('beta', 'beta', 50, 0.0, 100)
+        beta = RooRealVar('beta', 'beta', 0.04, 0.0, 0.1)
         varlist += [ turnon, exponent, offset, beta ]
     elif accfn == 'bdpt':
-        beta = RooRealVar('beta', 'beta', 40.0, 10.0, 70.0)
-        slope = RooRealVar('slope', 'slope', 1100, 100.0, 2000.0)
-        offset = RooRealVar('offset', 'offset', 1.5E-4, 0.0, 3E-4)
+        beta = RooRealVar('beta', 'beta', 0.04, 0.01, 0.07)
+        slope = RooRealVar('slope', 'slope', 1.1, 0.1, 2.0)
+        offset = RooRealVar('offset', 'offset', 0.15, 0.0, 0.3)
         varlist += [ beta, slope, offset ]
     elif accfn == 'arctan':
+        # here onwards, param ranges are such that time is in ns
         # turnon has a different range as it is in the denominator
         turnon = RooRealVar('turnon', 'turnon', 1., 1E-3, 1.)
         offset = RooRealVar('offset', 'offset', 1E-3, 0, 5E-3)
@@ -134,10 +135,10 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
 
     # Decay model
     decayH = RooDecay('decayH', 'Decay function for the B_{s,H}',
-                      time, RooRealConstant.value(1.536875/1E3),
+                      time, RooRealConstant.value(1.536875),
                       resmodel, RooDecay.SingleSided)
     decayL = RooDecay('decayL', 'Decay function for the B_{s,L}',
-                      time, RooRealConstant.value(1.407125/1E3),
+                      time, RooRealConstant.value(1.407125),
                       resmodel, RooDecay.SingleSided)
     decay = RooAddPdf('decay', 'Decay function for the B_{s}',
                       decayH, decayL, RooRealConstant.value(0.5))
@@ -275,7 +276,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
                       RooFit.Normalization(1000, RooAbsReal.Relative))
 
     # NOTE: this range is for the RooPlot axis
-    tframe2 = time.frame(RooFit.Range(0., 2E-3), RooFit.Name('pztime'),
+    tframe2 = time.frame(RooFit.Range(0., 2), RooFit.Name('pztime'),
                          RooFit.Title('Projection on time (zoomed)'))
     dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
     PDF.plotOn(tframe2, RooFit.ProjWData(dtargset, dataset, True),
