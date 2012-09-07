@@ -15,8 +15,8 @@ import argparse
 optparser = argparse.ArgumentParser(description=__doc__)
 optparser.add_argument('file1', help='ROOT file with DsK fit result')
 optparser.add_argument('file2', help='ROOT file with Dsπ fit result')
-optparser.add_argument('--print', dest='doPrint', action='store_true',
-                       help='Print to multi-page pdf file')
+optparser.add_argument('-p', '--print', dest='doPrint', action='store_true',
+                       help='Print plots to png/pdf files')
 
 options = optparser.parse_args()
 doPrint = options.doPrint
@@ -52,16 +52,16 @@ from ROOT import RooPlot, RooWorkspace, RooFitResult, RooFit
 from ROOT import RooArgSet, RooArgList
 from ROOT import RooDataSet, RooMultiVarGaussian
 
-# Load custom ROOT classes
-loadstatus = { 0: 'loaded',
-               1: 'already loaded',
-               -1: 'does not exist',
-               -2: 'version mismatch' }
+# # Load custom ROOT classes
+# loadstatus = { 0: 'loaded',
+#                1: 'already loaded',
+#                -1: 'does not exist',
+#                -2: 'version mismatch' }
 
-library = 'libacceptance.so'
-status = gSystem.Load(library)
-if status < 0: sys.exit('Problem loading %s, %s' % (library, loadstatus[status]) )
-from ROOT import PowLawAcceptance, BdPTAcceptance #, ErfAcceptance
+# library = 'libacceptance.so'
+# status = gSystem.Load(library)
+# if status < 0: sys.exit('Problem loading %s, %s' % (library, loadstatus[status]) )
+# from ROOT import PowLawAcceptance
 
 # my stuff
 from factory import get_workspace
@@ -78,9 +78,11 @@ workspace2 = get_workspace(fname2, 'workspace')
 workspace2.SetName('workspace2')
 
 fitresult1 = workspace1.obj('fitresult_FullModel_dataset')
-fitresult1.SetNameTitle('fitresult_FullModel_dataset1', '%s decay time acceptance' % mode1)
+fitresult1.SetNameTitle('fitresult_FullModel_dataset1',
+                        '%s decay time acceptance' % mode1)
 fitresult2 = workspace2.obj('fitresult_FullModel_dataset')
-fitresult2.SetNameTitle('fitresult_FullModel_dataset2', '%s decay time acceptance' % mode2)
+fitresult2.SetNameTitle('fitresult_FullModel_dataset2',
+                        '%s decay time acceptance' % mode2)
 
 # order of parameters:
 # - beta
@@ -154,14 +156,13 @@ if doPrint:
     gPad.Print('plots/acceptance-ratio-%s.png' % accfntype1)
     gPad.Print('plots/acceptance-ratio-%s.pdf' % accfntype1)
 
-bins = 98
-
+bins = 101
+nbins = bins - 1
 means = numpy.zeros(bins, dtype=float)
 varis = numpy.zeros(bins, dtype=float)
-xbincs = numpy.arange(2.5E-4, 1E-2, 1E-4)
+xbincs = numpy.linspace(2E-4 + 5E-5, 1E-2 + 5E-5, bins)
 
 hratiodist = []
-
 for ibin in range(bins):
     ravg = RunningAverage()
     for fn in fns:
@@ -202,15 +203,16 @@ if doPrint:
     # save acceptance ratio as ROOT histogram
     rfile = TFile('data/acceptance-ratio-hists.root', 'update')
 
-    xbins = numpy.arange(2E-4, 1E-2 + 1E-4, 1E-4)
+    xbins = numpy.linspace(2E-4, 1E-2, bins)
     haccratio = TH1D('haccratio_%s' % accfntype1, 'Acceptance ratio %s' % accfntype1,
-                     len(means), xbins)
+                     nbins, xbins)
     haccratio.SetXTitle('B decay time (ns)')
     haccratio.SetYTitle('%s/%s acceptance ratio mean' % (mode1, mode2))
 
     for i, mean in enumerate(means):
-        haccratio.SetBinContent(i+1, mean)
-        haccratio.SetBinError(i+1, varis[i])
+        if i < nbins:
+            haccratio.SetBinContent(i+1, mean)
+            haccratio.SetBinError(i+1, varis[i])
 
     rfile.Write('', TFile.kOverwrite)
     rfile.Close()
