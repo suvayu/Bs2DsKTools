@@ -29,8 +29,7 @@ RooConstVar PowLawAcceptance::_one(
  * consistent when reading instances of older version of the class.
  *
  */
-PowLawAcceptance::PowLawAcceptance() :
-  _correction("correction", "correction", this, _one)
+PowLawAcceptance::PowLawAcceptance()
 {
 }
 
