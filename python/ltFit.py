@@ -264,9 +264,10 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
         except TypeError, IOError:
             print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
-    fitresult = PDF.fitTo(dataset, RooFit.Optimize(1),
+    fitresult = PDF.fitTo(dataset, RooFit.Optimize(0),
                           RooFit.Strategy(2), RooFit.Save(True),
-                          RooFit.NumCPU(2), RooFit.Verbose(True))
+                          #RooFit.NumCPU(1),
+                          RooFit.Verbose(True))
     fitresult.Print()
 
     # RooFit.Range(0, 0.01+epsilon),
