@@ -198,8 +198,8 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
         return
 
     # Define PDF and fit
-    ModelL = RooEffProd('ModelL', 'Acceptance model B_{s,L}', decayL, acceptance)
-    ModelH = RooEffProd('ModelH', 'Acceptance model B_{s,H}', decayH, acceptance)
+    ModelL = decayL #RooEffProd('ModelL', 'Acceptance model B_{s,L}', decayL, acceptance)
+    ModelH = decayH #RooEffProd('ModelH', 'Acceptance model B_{s,H}', decayH, acceptance)
 
     # Build full 2-D PDF (t, δt)
     argset = RooArgSet(time,dt)
@@ -235,9 +235,8 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
                               trigger3Var, trigger4Var)
     except TypeError, IOError:
         print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
-    tmpdatahist = dataset.binnedClone('datahist','Binned data')
-    datahist = tmpdatahist.reduce(dtargset)
-    del tmpdatahist
+    tmpdata = dataset.reduce(dtargset)
+    datahist = tmpdata.binnedClone('datahist','Binned data')
     if isToy: del dataset
 
     errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
@@ -250,8 +249,13 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     FullModelH = RooProdPdf('FullModelH', 'Acceptance model with errors B_{s,H}',
                             RooArgSet(errorPdf),
                             RooFit.Conditional(modelargset, timeargset))
+    FullModelL2 = RooEffProd('FullModelL2', 'Full model with acceptance',
+                             FullModelL, acceptance)
+    FullModelH2 = RooEffProd('FullModelH2', 'Full model with acceptance',
+                             FullModelH, acceptance)
+
     PDF = RooAddPdf('FullModel', 'Acceptance model',
-                    FullModelH, FullModelL, RooRealConstant.value(0.5))
+                    FullModelH2, FullModelL2, RooRealConstant.value(0.5))
 
     # Generate toy if requested
     if isToy:
