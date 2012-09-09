@@ -34,6 +34,7 @@ from ROOT import gROOT
 gROOT.SetBatch(True)
 
 from ROOT import gStyle, gPad, gSystem
+gSystem.Load('libRooFit')
 
 # ROOT colours and styles
 from ROOT import kGreen, kRed, kBlack, kBlue, kAzure, kYellow
@@ -50,7 +51,7 @@ from ROOT import RooAbsReal, RooRealVar, RooRealConstant, RooFormulaVar
 from ROOT import RooAbsPdf, RooGaussian
 from ROOT import RooGenericPdf, RooEffProd, RooAddPdf, RooProdPdf, RooHistPdf
 from ROOT import RooDataSet, RooDataHist
-from ROOT import RooDecay, RooGaussModel
+from ROOT import RooDecay, RooGaussModel, RooUniformBinning
 
 # my stuff
 from factory import *
@@ -89,6 +90,8 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     # Limits determined from tree
     dt = RooRealVar('dt', 'Error in lifetime measurement (ps)', 1E-2, 9E-2)
     dt.setBins(100)             # default binning (since empty name)
+    # cache binning
+    dt.setBinning(RooUniformBinning(dt.getMin(), dt.getMax(), 100, 'cache'), 'cache')
 
     varlist += [ time, dt ]
 
@@ -119,29 +122,6 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
         print 'Unknown acceptance type. Aborting'
         return
 
-    # Temporary RooArgSet to circumvent scoping issues for nested
-    # temporary objects.
-    timeargset = RooArgSet(time)
-    dtargset = RooArgSet(dt)
-
-    # Resolution model
-    mean = RooRealVar('mean', 'Mean', 0.)
-    scale = RooRealVar('scale', 'Per-event time error scale factor', 1.)
-    resmodel = RooGaussModel('resmodel', 'Time resolution model', time,
-                             mean, scale, dt)
-                             # RooRealConstant::value(0), scale, dt)
-                             # RooRealConstant::value(0), scale,
-                             # RooRealConstant::value(0.00004))
-
-    # Decay model
-    decayH = RooDecay('decayH', 'Decay function for the B_{s,H}',
-                      time, RooRealConstant.value(1.536875),
-                      resmodel, RooDecay.SingleSided)
-    decayL = RooDecay('decayL', 'Decay function for the B_{s,L}',
-                      time, RooRealConstant.value(1.407125),
-                      resmodel, RooDecay.SingleSided)
-    decay = RooAddPdf('decay', 'Decay function for the B_{s}',
-                      decayH, decayL, RooRealConstant.value(0.5))
 
     # Acceptance model: 1-1/(1+(a*(t-t₀)³)
     # NB: Acceptance is not a PDF by nature
@@ -197,10 +177,6 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
         print 'Unknown acceptance type. Aborting'
         return
 
-    # Define PDF and fit
-    ModelL = decayL #RooEffProd('ModelL', 'Acceptance model B_{s,L}', decayL, acceptance)
-    ModelH = decayH #RooEffProd('ModelH', 'Acceptance model B_{s,H}', decayH, acceptance)
-
     # Build full 2-D PDF (t, δt)
     argset = RooArgSet(time,dt)
     # Get tree
@@ -235,27 +211,47 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
                               trigger3Var, trigger4Var)
     except TypeError, IOError:
         print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
-    tmpdata = dataset.reduce(dtargset)
+    tmpdata = dataset.reduce(RooArgSet(dt))
     datahist = tmpdata.binnedClone('datahist','Binned data')
     if isToy: del dataset
 
+    # Resolution model
+    mean = RooRealVar('mean', 'Mean', 0.)
+    scale = RooRealVar('scale', 'Per-event time error scale factor', 1.)
+    resmodel = RooGaussModel('resmodel', 'Time resolution model', time,
+                             mean, dt, RooRealConstant.value(1.0), scale)
+                             # RooRealConstant::value(0), scale, dt)
+                             # RooRealConstant::value(0), scale,
+                             # RooRealConstant::value(0.00004))
+    # Decay model
+    decayH = RooDecay('decayH', 'Decay function for the B_{s,H}',
+                      time, RooRealConstant.value(1.536875),
+                      resmodel, RooDecay.SingleSided)
+    decayL = RooDecay('decayL', 'Decay function for the B_{s,L}',
+                      time, RooRealConstant.value(1.407125),
+                      resmodel, RooDecay.SingleSided)
+    decay = RooAddPdf('decay', 'Decay function for the B_{s}',
+                      decayH, decayL, RooRealConstant.value(0.5))
+
+    # Define PDF and fit
+    ModelL = RooEffProd('ModelL', 'Acceptance model B_{s,L}', decayL, acceptance)
+    ModelH = RooEffProd('ModelH', 'Acceptance model B_{s,H}', decayH, acceptance)
+
+    # enable caching for dt integral
+    ModelL.setParameterizeIntegral(RooArgSet(dt))
+    ModelH.setParameterizeIntegral(RooArgSet(dt))
+
     errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
-                           dtargset, datahist)
-    modelargset = RooArgSet(ModelL)
+                           RooArgSet(dt), datahist)
     FullModelL = RooProdPdf('FullModelL', 'Acceptance model with errors B_{s,L}',
                             RooArgSet(errorPdf),
-                            RooFit.Conditional(modelargset, timeargset))
-    modelargset = RooArgSet(ModelH)
+                            RooFit.Conditional(RooArgSet(ModelL), RooArgSet(time)))
     FullModelH = RooProdPdf('FullModelH', 'Acceptance model with errors B_{s,H}',
                             RooArgSet(errorPdf),
-                            RooFit.Conditional(modelargset, timeargset))
-    FullModelL2 = RooEffProd('FullModelL2', 'Full model with acceptance',
-                             FullModelL, acceptance)
-    FullModelH2 = RooEffProd('FullModelH2', 'Full model with acceptance',
-                             FullModelH, acceptance)
+                            RooFit.Conditional(RooArgSet(ModelH), RooArgSet(time)))
+    PDF = RooAddPdf('FullModel', 'Full acceptance model',
+                    FullModelH, FullModelL, RooRealConstant.value(0.5))
 
-    PDF = RooAddPdf('FullModel', 'Acceptance model',
-                    FullModelH2, FullModelL2, RooRealConstant.value(0.5))
 
     # Generate toy if requested
     if isToy:
@@ -264,17 +260,38 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
         except TypeError, IOError:
             print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
-    fitresult = PDF.fitTo(dataset, RooFit.Optimize(0),
+
+    # # Call Minuit by hand, good for debugging
+    # from ROOT import RooMinuit
+    # nll = PDF.createNLL(dataset, RooFit.Optimize(0), RooFit.NumCPU(4))
+    # minuit = RooMinuit(nll)
+    # minuit.setEps(1e-7)
+    # minuit.setStrategy(2)
+    # minuit.setVerbose(True)
+    # minuit.hesse()
+    # # minuit.seek()
+    # minuit.hesse()
+    # minuit.migrad()
+    # minuit.hesse()
+    # fitresult = minuit.save()
+
+    # exponent.setConstant(True)
+    # beta.setConstant(True)
+    fitresult = PDF.fitTo(dataset, RooFit.Optimize(1),
                           RooFit.Strategy(2), RooFit.Save(True),
-                          #RooFit.NumCPU(1),
+                          RooFit.NumCPU(4),
                           RooFit.Verbose(True))
     fitresult.Print()
+
+    # reduce precision otherwise plotting doesn't work
+    RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-5)
+    RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-5)
 
     # RooFit.Range(0, 0.01+epsilon),
     tframe1 = time.frame(RooFit.Name('ptime'),
                          RooFit.Title('Projection on time'))
     dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
-    PDF.plotOn(tframe1, RooFit.ProjWData(dtargset, dataset, True),
+    PDF.plotOn(tframe1, RooFit.ProjWData(RooArgSet(dt), dataset, True),
                RooFit.LineColor(kBlue))
     decay.plotOn(tframe1, RooFit.LineColor(kRed))
     acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
@@ -284,7 +301,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     tframe2 = time.frame(RooFit.Range(0., 2), RooFit.Name('pztime'),
                          RooFit.Title('Projection on time (zoomed)'))
     dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
-    PDF.plotOn(tframe2, RooFit.ProjWData(dtargset, dataset, True),
+    PDF.plotOn(tframe2, RooFit.ProjWData(RooArgSet(dt), dataset, True),
                RooFit.LineColor(kBlue))
     acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
                       RooFit.Normalization(300, RooAbsReal.Relative))
