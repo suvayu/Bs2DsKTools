@@ -85,8 +85,8 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     varlist = []
 
     # Observables
-    time = RooRealVar('time', 'B_{s} lifetime in ps', epsilon, 10.0+epsilon)
-    time.setRange('fullrange', epsilon, 10.0+epsilon)
+    time = RooRealVar('time', 'B_{s} lifetime in ps', epsilon, 15.0)
+    time.setRange('fullrange', epsilon, 15.0)
     # Limits determined from tree
     dt = RooRealVar('dt', 'Error in lifetime measurement (ps)', 1E-2, 9E-2)
     dt.setBins(100)             # default binning (since empty name)
