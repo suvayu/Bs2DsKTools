@@ -237,9 +237,9 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     ModelL = RooEffProd('ModelL', 'Acceptance model B_{s,L}', decayL, acceptance)
     ModelH = RooEffProd('ModelH', 'Acceptance model B_{s,H}', decayH, acceptance)
 
-    # enable caching for dt integral
-    ModelL.setParameterizeIntegral(RooArgSet(dt))
-    ModelH.setParameterizeIntegral(RooArgSet(dt))
+    # # enable caching for dt integral
+    # ModelL.setParameterizeIntegral(RooArgSet(dt))
+    # ModelH.setParameterizeIntegral(RooArgSet(dt))
 
     errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
                            RooArgSet(dt), datahist)
@@ -279,7 +279,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     # beta.setConstant(True)
     fitresult = PDF.fitTo(dataset, RooFit.Optimize(1),
                           RooFit.Strategy(2), RooFit.Save(True),
-                          RooFit.NumCPU(4),
+                          RooFit.NumCPU(2),
                           RooFit.Verbose(True))
     fitresult.Print()
 
