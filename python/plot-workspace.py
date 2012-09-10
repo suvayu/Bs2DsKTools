@@ -68,7 +68,8 @@ from ROOT import PowLawAcceptance, BdPTAcceptance #, ErfAcceptance
 from factory import *
 
 set_integrator_config()
-epsilon = 2E-4
+epsilon = 0.2
+tmax = 15.0
 
 # Files with fitresults:
 # data/fitresult-powerlaw2-2012-06-22-Fri-15-47.root
@@ -102,7 +103,7 @@ dtargset = RooArgSet(dt)
 
 # plots
 # NOTE: this range is for the dataset binning
-time.setRange('zoom1', 0., 2E-3)
+time.setRange('zoom1', 0., 2.0)
 # NOTE: this range is for the RooPlot axis
 tframe1 = time.frame(RooFit.Range('zoom1'), RooFit.Name('pztime1'),
                      RooFit.Title('Projection on time (0 - 2 ps) with %s (%s)' %
@@ -116,10 +117,10 @@ acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
                   RooFit.Normalization(200, RooAbsReal.Relative))
 
 
-time.setRange('zoom2', 2E-3, 1E-2)
+time.setRange('zoom2', 2.0, tmax)
 tframe2 = time.frame(RooFit.Range('zoom2'), RooFit.Name('pztime2'),
-                     RooFit.Title('Projection on time (2 - 10 ps) with %s (%s)' %
-                                  (accfntype.rstrip('1234'), mode)))
+                     RooFit.Title('Projection on time (2 - %d ps) with %s (%s)' %
+                                  (accfntype.rstrip('1234'), mode, tmax)))
 dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp),
                RooFit.CutRange('zoom2'))
 PDF.plotOn(tframe2, RooFit.ProjWData(dtargset, dataset, True),
@@ -128,10 +129,10 @@ acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
                   RooFit.Normalization(800, RooAbsReal.Relative))
 
 
-time.setRange('fullrange', epsilon, 1E-2 + epsilon)
+time.setRange('fullrange', epsilon, tmax)
 tframe3 = time.frame(RooFit.Range('fullrange'), RooFit.Name('ptime3'),
-                     RooFit.Title('Projection on time (0.2 - 10 ps) with %s (%s)' %
-                                  (accfntype.rstrip('1234'), mode)))
+                     RooFit.Title('Projection on time (0.2 - %d ps) with %s (%s)' %
+                                  (accfntype.rstrip('1234'), mode, tmax)))
 dataset.plotOn(tframe3, RooFit.MarkerStyle(kFullTriangleUp))
 PDF.plotOn(tframe3, RooFit.ProjWData(dtargset, dataset, True),
            RooFit.LineColor(kBlue))
