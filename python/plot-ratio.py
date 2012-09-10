@@ -201,6 +201,23 @@ axes.set_ylabel('%s/%s acceptance ratio mean\n(variance shown as error bars)' % 
 axes.set_xlim(tfloor, tceil)
 axes.set_ylim(0.5, 1.5)
 
+# Dump ratio histogram to ROOT file
+xbins = numpy.linspace(tfloor, tceil, nbins + 1)
+haccratio = TH1D('haccratio_%s' % accfntype1, 'Acceptance ratio %s' % accfntype1,
+                 nbins, xbins)
+haccratio.SetXTitle('B decay time (ps)')
+haccratio.SetYTitle('%s/%s acceptance ratio mean' % (mode1, mode2))
+
+# for i, mean in enumerate(means):
+#     if i < nbins:
+#         haccratio.SetBinContent(i+1, mean)
+#         haccratio.SetBinError(i+1, varis[i])
+
+for i in range(nbins):
+    # fns[-1] point to the best fit value ratio
+    val = fns[-1].Eval(haccratio.GetBinCenter(i+1))
+    haccratio.SetBinContent(i+1, val)
+
 if doPrint:
     plt.savefig('plots/acceptance-ratio-%s-mean-rms.png' % accfntype1)
     plt.savefig('plots/acceptance-ratio-%s-mean-rms.pdf' % accfntype1)
@@ -208,18 +225,7 @@ if doPrint:
 
     # save acceptance ratio as ROOT histogram
     rfile = TFile('data/acceptance-ratio-hists.root', 'update')
-
-    xbins = numpy.linspace(2E-4, 1E-2, bins)
-    haccratio = TH1D('haccratio_%s' % accfntype1, 'Acceptance ratio %s' % accfntype1,
-                     nbins, xbins)
-    haccratio.SetXTitle('B decay time (ns)')
-    haccratio.SetYTitle('%s/%s acceptance ratio mean' % (mode1, mode2))
-
-    for i, mean in enumerate(means):
-        if i < nbins:
-            haccratio.SetBinContent(i+1, mean)
-            haccratio.SetBinError(i+1, varis[i])
-
+    haccratio.SetDirectory(rfile)
     rfile.Write('', TFile.kOverwrite)
     rfile.Close()
     print 'Wrote ROOT file: data/acceptance-ratio-hists.root'
