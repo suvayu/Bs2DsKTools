@@ -94,19 +94,14 @@ BINFILES      = $(BINSRC:%.cc=$(BINDIR)/%)
 #-----------------------------------------------------
 # canned recipes
 #-----------------------------------------------------
-define LINK-LIBS =
-$(LD) $(LDFLAGS) $(SOFLAGS) $(ROOTLIBS)
-endef
+LINKLIBS = $(LD) $(LDFLAGS) $(SOFLAGS) $(ROOTLIBS)
 
 define DICTNAMES =
 $(foreach NAME,$(LIBS),$(NAME:lib%.so=$(DICTDIR)/%Dict.cxx))
 endef
 
 # getting linkdef name $(patsubst %Dict.cxx,%LinkDef.h,$@)
-define MAKE-DICT =
-	$(ROOTCINT) -f $@ -c -p $^
-	@echo "Generated $@ from $^"
-endef
+MAKEDICT = $(ROOTCINT) -f $@ -c -p $^
 
 #------------------------------------------------------------------------------
 # Rules
@@ -122,13 +117,13 @@ $(LIBS): %:	$(LIBDIR)/%
 	@echo "$@ done"
 
 $(LIBDIR)/libreadTree.so:	$(TREESRC:%.cxx=$(LIBDIR)/%.o) $(DICTDIR)/readTreeDict.o | $(LIBDIR)
-	$(LINK-LIBS) $^ -o $@
+	$(LINKLIBS) $^ -o $@
 
 $(LIBDIR)/libutils.so:		$(LIBDIR)/utils.o | $(LIBDIR)
-	$(LINK-LIBS) $^ -o $@
+	$(LINKLIBS) $^ -o $@
 
 $(LIBDIR)/libacceptance.so:	$(ACCSRC:%.cxx=$(LIBDIR)/%.o) $(DICTDIR)/acceptanceDict.o | $(LIBDIR)
-	$(LINK-LIBS) $(ROOFITLIBS) $^ -o $@
+	$(LINKLIBS) $(ROOFITLIBS) $^ -o $@
 
 $(LIBDIR)/%.o:	$(SRCDIR)/%.cxx | $(LIBDIR)
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -I$(INCDIR) $< -o $@
@@ -138,13 +133,13 @@ $(LIBDIR):
 
 # Dictionaries
 $(DICTDIR)/readTreeDict.cxx:	$(TREESRC:%.cxx=$(INCDIR)/%.hxx) $(DICTDIR)/readTreeLinkDef.h
-	$(MAKE-DICT)
+	$(MAKEDICT)
 
 $(DICTDIR)/acceptanceDict.cxx:	$(ACCSRC:%.cxx=$(INCDIR)/%.hxx) $(DICTDIR)/acceptanceLinkDef.h
-	$(MAKE-DICT)
+	$(MAKEDICT)
 
 # $(DICTDIR)/utilsDict.cxx:	$(INCDIR)/utils.hxx $(DICTDIR)/utilsLinkDef.h
-# 	$(MAKE-DICT)
+# 	$(MAKEDICT)
 
 $(DICTDIR)/%.o:	$(DICTDIR)/%.cxx
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -I$(PROJROOT) $< -o $@
