@@ -52,20 +52,25 @@ from ROOT import RooPlot, RooWorkspace, RooFitResult, RooFit
 from ROOT import RooArgSet, RooArgList
 from ROOT import RooDataSet, RooMultiVarGaussian
 
-# # Load custom ROOT classes
-# loadstatus = { 0: 'loaded',
-#                1: 'already loaded',
-#                -1: 'does not exist',
-#                -2: 'version mismatch' }
+# Load custom ROOT classes
+loadstatus = { 0: 'loaded',
+               1: 'already loaded',
+               -1: 'does not exist',
+               -2: 'version mismatch' }
 
-# library = 'libacceptance.so'
-# status = gSystem.Load(library)
-# if status < 0: sys.exit('Problem loading %s, %s' % (library, loadstatus[status]) )
-# from ROOT import PowLawAcceptance
+library = 'libacceptance.so'
+status = gSystem.Load(library)
+if status < 0: sys.exit('Problem loading %s, %s' % (library, loadstatus[status]) )
+from ROOT import PowLawAcceptance
 
 # my stuff
 from factory import get_workspace
 from utilities import RunningAverage
+
+# time range and bins for ratio plots
+tfloor = 0.2
+tceil = 15.0
+nbins = 150
 
 # Files with fitresults:
 # data/fitresult-DsPi-powerlaw4-2012-08-10-Fri-05-30.root
@@ -78,10 +83,10 @@ workspace2 = get_workspace(fname2, 'workspace')
 workspace2.SetName('workspace2')
 
 fitresult1 = workspace1.obj('fitresult_FullModel_dataset')
-fitresult1.SetNameTitle('fitresult_FullModel_dataset1',
+fitresult1.SetNameTitle('fitresult_FullModel_dataset_%s' % mode1,
                         '%s decay time acceptance' % mode1)
 fitresult2 = workspace2.obj('fitresult_FullModel_dataset')
-fitresult2.SetNameTitle('fitresult_FullModel_dataset2',
+fitresult2.SetNameTitle('fitresult_FullModel_dataset_%s' % mode2,
                         '%s decay time acceptance' % mode2)
 
 # order of parameters:
@@ -114,9 +119,9 @@ dset2 = multigauss2.generate(RooArgSet(veclist2), 1000)
 # (1) DsK, (2) DsPi
 formula1 = '((1.-1./(1. + ([3]*x)**[1] - [2]))*(1 - [0]*x))'
 formula2 = '((1.-1./(1. + ([7]*x)**[5] - [6]))*(1 - [4]*x))'
-ratio = TF1('ratio', '(%s)/(%s)' % (formula1, formula2), 2E-4, 1.02E-2)
-ratio.SetMinimum(0.8)
-ratio.SetMaximum(1.2)
+ratio = TF1('ratio', '(%s)/(%s)' % (formula1, formula2), tfloor, tceil)
+ratio.SetMinimum(0.5)
+ratio.SetMaximum(1.5)
 
 ratio.SetLineColor(kBlack)
 ratio.SetLineStyle(3)
@@ -149,21 +154,21 @@ ratio.DrawCopy('lsame')
 fns += [ratio.Clone('%s_%d' % (ratio.GetName(), entry+1))]
 
 # # labels
-# ratio.GetXaxis().SetTitle('B decay time (ns)')
+# ratio.GetXaxis().SetTitle('B decay time (ps)')
 # ratio.GetYaxis().SetTitle('Acceptance ratio (DsK/Ds#pi)')
 
 if doPrint:
     gPad.Print('plots/acceptance-ratio-%s.png' % accfntype1)
     gPad.Print('plots/acceptance-ratio-%s.pdf' % accfntype1)
 
-bins = 101
-nbins = bins - 1
-means = numpy.zeros(bins, dtype=float)
-varis = numpy.zeros(bins, dtype=float)
-xbincs = numpy.linspace(2E-4 + 5E-5, 1E-2 + 5E-5, bins)
+
+# get the ratio from the ensemble of generated parameter sets
+means = numpy.zeros(nbins, dtype=float)
+varis = numpy.zeros(nbins, dtype=float)
+xbincs = numpy.linspace(tfloor + 0.05, tceil - 0.05, nbins)
 
 hratiodist = []
-for ibin in range(bins):
+for ibin in range(nbins):
     ravg = RunningAverage()
     for fn in fns:
         ravg.fill(fn.Eval(xbincs[ibin]))
@@ -182,8 +187,8 @@ for ibin in range(bins):
 #     gPad.Print('plots/acceptance-ratio-projection-%s.pdf' % accfntype1)
 # gPad.Print('plots/acceptance-ratio-projection-%s.pdf]' % accfntype1)
 
-print 'Mean: ', means
-print 'Vars: ', varis
+# print 'Mean: ', means
+# print 'Vars: ', varis
 
 import matplotlib.pyplot as plt
 
@@ -191,14 +196,15 @@ plt.figure()
 plt.title('%s/%s %s acceptance ratio' % (mode1, mode2, accfntype1))
 plt.errorbar(xbincs, means, varis)
 axes = plt.axes()
-axes.set_xlabel('B decay time (ns)')
+axes.set_xlabel('B decay time (ps)')
 axes.set_ylabel('%s/%s acceptance ratio mean\n(variance shown as error bars)' % (mode1, mode2))
-axes.set_xlim(2E-4, 1E-2)
-axes.set_ylim(0.8, 1.2)
+axes.set_xlim(tfloor, tceil)
+axes.set_ylim(0.5, 1.5)
 
 if doPrint:
     plt.savefig('plots/acceptance-ratio-%s-mean-rms.png' % accfntype1)
     plt.savefig('plots/acceptance-ratio-%s-mean-rms.pdf' % accfntype1)
+    print 'Printed: plots/acceptance-ratio-%s-mean-rms.{png,pdf}' % accfntype1
 
     # save acceptance ratio as ROOT histogram
     rfile = TFile('data/acceptance-ratio-hists.root', 'update')
@@ -216,22 +222,26 @@ if doPrint:
 
     rfile.Write('', TFile.kOverwrite)
     rfile.Close()
+    print 'Wrote ROOT file: data/acceptance-ratio-hists.root'
 else:
     plt.show()
 
 
 # # 2-D distribution of acceptance ratio as
-# xbins = numpy.arange(2E-4, 1E-2 + 1E-4, 1E-4)
-# ybins = numpy.arange(0.5, 1.5 + 0.01, 0.01)
+# xbins = numpy.linspace(2E-4, 1E-2, bins)
+# ybins = numpy.linspace(0.5, 1.5, 101)
 # hratiodist = TH2D('hratiodist', 'Distribution of acceptance ratio',
-#                   len(xbins)-1, xbins, len(ybins)-1, ybins)
+#                   nbins, xbins, 100, ybins)
 
 # for i, xb in enumerate(xbins):
-#     if i > 97: continue
+#     if i >= 100: continue
 #     for fn in fns:
-#         r = fn.Eval(xb + 5E-5)
-#         hratiodist.Fill(xb + 5E-5, r)
+#         binc = (xbins[i] + xbins[i+1]) / 2
+#         hratiodist.Fill(binc, fn.Eval(binc))
 
+# hratiodist.Print()
+
+# # bug is below
 # hratiox = []
 # canvas = TCanvas('canvas', 'canvas', 1500, 600)
 # canvas.Divide(5,2)
@@ -241,4 +251,5 @@ else:
 #     canvas.cd(i + 1)
 #     hratiox[i].Draw('hist')
 
-# canvas.Print('plots/acceptance-ratio-projection-%s.png' % accfntype1)
+# if doPrint:
+#     canvas.Print('plots/acceptance-ratio-projection-%s.png' % accfntype1)
