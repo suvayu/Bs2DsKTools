@@ -90,8 +90,8 @@ def set_integrator_config():
     """
 
     # More precise integrals in RooFit
-    RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-7)
-    RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-7)
+    RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-5)
+    RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-5)
     # Set how intervals are determined and integrals calculated
     RooAbsReal.defaultIntegratorConfig().getConfigSection('RooAdaptiveGaussKronrodIntegrator1D').setCatLabel('method','21Points')
     RooAbsReal.defaultIntegratorConfig().getConfigSection('RooAdaptiveGaussKronrodIntegrator1D').setRealValue('maxSeg', 1000)
