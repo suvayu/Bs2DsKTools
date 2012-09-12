@@ -15,6 +15,8 @@
 #include <cmath>
 #include "TMath.h"
 
+#include <gsl/gsl_sf_hyperg.h>
+
 
 /**
  * Static data member for acceptance with no correction
@@ -135,18 +137,17 @@ Double_t PowLawAcceptance::evaluate() const
 }
 
 
-/* // disable analytical integral
 Int_t PowLawAcceptance::getAnalyticalIntegral(RooArgSet& allVars,
 					      RooArgSet& analVars,
 					      const char* rangeName) const
 {
-  // LIST HERE OVER WHICH VARIABLES ANALYTICAL INTEGRATION IS
-  // SUPPORTED, ASSIGN A NUMERIC CODE FOR EACH SUPPORTED (SET OF)
-  // PARAMETERS THE EXAMPLE BELOW ASSIGNS CODE 1 TO INTEGRATION OVER
-  // VARIABLE X YOU CAN ALSO IMPLEMENT MORE THAN ONE ANALYTICAL
-  // INTEGRAL BY REPEATING THE matchArgs EXPRESSION MULTIPLE TIMES
+  // List here over which variables analytical integration is
+  // supported, assign a numeric code for each supported (set of)
+  // parameters the example below assigns code 1 to integration over
+  // variable x you can also implement more than one analytical
+  // integral by repeating the matchArgs(..) expression multiple times
 
-  // if (matchArgs(allVars,analVars,x)) return 1;
+  if (matchArgs(allVars, analVars, _time)) return 1;
   return 0;
 }
 
@@ -154,13 +155,52 @@ Int_t PowLawAcceptance::getAnalyticalIntegral(RooArgSet& allVars,
 Double_t PowLawAcceptance::analyticalIntegral(Int_t code,
 					      const char* rangeName) const
 {
-  // RETURN ANALYTICAL INTEGRAL DEFINED BY RETURN CODE ASSIGNED BY
-  // getAnalyticalIntegral THE MEMBER FUNCTION x.min(rangeName) AND
-  // x.max(rangeName) WILL RETURN THE INTEGRATION BOUNDARIES FOR EACH
-  // OBSERVABLE x
+  // return analytical integral defined by return code assigned by
+  // getAnalyticalIntegral(..) the member function x.min(rangename)
+  // and x.max(rangename) will return the integration boundaries for
+  // each observable x
 
-  // assert(code==1);
-  // return (x.max(rangeName)-x.min(rangeName));
-  return 0;
+  assert(code==1);
+
+  Double_t tmax(_time.max(rangeName)), tmin(_time.min(rangeName)),
+    turnon((Double_t)_turnon), offset((Double_t)_offset),
+    exponent((Double_t)_exponent), beta((Double_t)_beta), ratio(1.0);
+
+  if (tmin < 0.2) return 0.;
+  if (beta < -0.0) return 0.0;
+  if (beta*tmin > 1.0) return 0.0;
+
+  // check if underlying data type is valid
+  if (_correction.absArg()) ratio = (Double_t)_correction;
+
+  double imin(0.0), imax(0.0), prefactor(1 / (2 * (offset - 1))),
+    a_2F1(0.0), b_2F1(0.0), c_2F1(0.0), x_2F1(0.0),
+    term1(0.0), term2(0.0), term3(0.0);
+
+  a_2F1 = 1.0;
+  b_2F1 = 2 / exponent;
+  c_2F1 = 1 + 2/exponent;
+  x_2F1 = std::pow(turnon * tmax, exponent) / (offset - 1);
+  term1 = beta * tmax * gsl_sf_hyperg_2F1(a_2F1, b_2F1, c_2F1, x_2F1);
+
+  b_2F1 /= 2;
+  c_2F1 -= 1/exponent;
+  term2 = 2 * gsl_sf_hyperg_2F1(a_2F1, b_2F1, c_2F1, x_2F1);
+
+  term3 = (offset - 1) * (beta * tmax - 2);
+  imax = -prefactor * tmax * (term1 - term2 + term3);
+
+  b_2F1 = 2 / exponent;
+  c_2F1 = 1 + 2/exponent;
+  x_2F1 = std::pow(turnon * tmin, exponent) / (offset - 1);
+  term1 = beta * tmin * gsl_sf_hyperg_2F1(a_2F1, b_2F1, c_2F1, x_2F1);
+
+  b_2F1 /= 2;
+  c_2F1 -= 1/exponent;
+  term2 = 2 * gsl_sf_hyperg_2F1(a_2F1, b_2F1, c_2F1, x_2F1);
+
+  term3 = (offset - 1) * (beta * tmin - 2);
+  imin = -prefactor * tmin * (term1 - term2 + term3);
+
+  return (ratio * (imax - imin));
 }
-*/
