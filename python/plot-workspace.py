@@ -13,9 +13,9 @@ import re
 import argparse
 optparser = argparse.ArgumentParser(description=__doc__)
 optparser.add_argument('filename', help='ROOT file with saved fit result')
-optparser.add_argument('--print', dest='doPrint', action='store_true',
+optparser.add_argument('-p', '--print', dest='doPrint', action='store_true',
                        help='Print to multi-page pdf file')
-optparser.add_argument('--log', action='store_true',
+optparser.add_argument( '-l','--log', action='store_true',
                        help='Print final plot in logscale')
 
 options = optparser.parse_args()
@@ -120,7 +120,7 @@ acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
 time.setRange('zoom2', 2.0, tmax)
 tframe2 = time.frame(RooFit.Range('zoom2'), RooFit.Name('pztime2'),
                      RooFit.Title('Projection on time (2 - %d ps) with %s (%s)' %
-                                  (accfntype.rstrip('1234'), mode, tmax)))
+                                  (tmax, accfntype.rstrip('1234'), mode)))
 dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp),
                RooFit.CutRange('zoom2'))
 PDF.plotOn(tframe2, RooFit.ProjWData(dtargset, dataset, True),
@@ -132,7 +132,7 @@ acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
 time.setRange('fullrange', epsilon, tmax)
 tframe3 = time.frame(RooFit.Range('fullrange'), RooFit.Name('ptime3'),
                      RooFit.Title('Projection on time (0.2 - %d ps) with %s (%s)' %
-                                  (accfntype.rstrip('1234'), mode, tmax)))
+                                  (tmax, accfntype.rstrip('1234'), mode)))
 dataset.plotOn(tframe3, RooFit.MarkerStyle(kFullTriangleUp))
 PDF.plotOn(tframe3, RooFit.ProjWData(dtargset, dataset, True),
            RooFit.LineColor(kBlue))
