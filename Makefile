@@ -28,6 +28,9 @@ LDFLAGS      := $(shell $(ROOTCONFIG) --ldflags) $(OPT)
 SOFLAGS       = -shared
 # SOFLAGS       = -shared -Wl,-soname,$@ # not needed, default is fine
 
+# GSL linking options
+GSLLIBS      := $(shell $(PKGCONFIG) --libs gsl)
+
 # ROOT compile flags
 ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
 
@@ -124,7 +127,7 @@ $(LIBDIR)/libutils.so:		$(LIBDIR)/utils.o | $(LIBDIR)
 	$(LINKLIBS) $^ -o $@
 
 $(LIBDIR)/libacceptance.so:	$(ACCSRC:%.cxx=$(LIBDIR)/%.o) $(DICTDIR)/acceptanceDict.o | $(LIBDIR)
-	$(LINKLIBS) $(ROOFITLIBS) $^ -o $@
+	$(LINKLIBS) $(ROOFITLIBS) $(GSLLIBS) $^ -o $@
 
 $(LIBDIR)/%.o:	$(SRCDIR)/%.cxx | $(LIBDIR)
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -I$(INCDIR) $< -o $@
