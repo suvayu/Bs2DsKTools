@@ -29,6 +29,7 @@ SOFLAGS       = -shared
 # SOFLAGS       = -shared -Wl,-soname,$@ # not needed, default is fine
 
 # GSL linking options
+GSLCFLAGS    := $(shell $(PKGCONFIG) --cflags gsl)
 GSLLIBS      := $(shell $(PKGCONFIG) --libs gsl)
 
 # ROOT compile flags
@@ -130,7 +131,7 @@ $(LIBDIR)/libacceptance.so:	$(ACCSRC:%.cxx=$(LIBDIR)/%.o) $(DICTDIR)/acceptanceD
 	$(LINKLIBS) $(ROOFITLIBS) $(GSLLIBS) $^ -o $@
 
 $(LIBDIR)/%.o:	$(SRCDIR)/%.cxx | $(LIBDIR)
-	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -I$(INCDIR) $< -o $@
+	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(GSLCFLAGS) -I$(INCDIR) $< -o $@
 
 $(LIBDIR):
 	mkdir -p $(LIBDIR)
