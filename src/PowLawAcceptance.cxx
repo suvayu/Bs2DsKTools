@@ -7,10 +7,15 @@
  *
  */
 
+#include <iostream>
+#include <list>
+
 #include "Riostream.h"
 
 #include "PowLawAcceptance.hxx"
+#include "RooCustomizer.h"
 #include "RooAbsReal.h"
+#include "RooRealVar.h"
 #include "RooAbsCategory.h"
 #include <cmath>
 #include "TMath.h"
@@ -147,7 +152,21 @@ Int_t PowLawAcceptance::getAnalyticalIntegral(RooArgSet& allVars,
   // variable x you can also implement more than one analytical
   // integral by repeating the matchArgs(..) expression multiple times
 
-  if (matchArgs(allVars, analVars, _time)) return 1;
+  // check if underlying data type is valid and is binned
+
+  if (_correction.absArg()) {
+    const RooAbsReal *correction = &_correction.arg();
+    std::cout << __func__ << ": isBinnedDistribution = "
+	      << correction->isBinnedDistribution(RooArgSet())
+              << ", allVars = " << allVars << ", analVars = " << analVars
+	      << std::endl;
+    if (correction->isBinnedDistribution(RooArgSet()) and
+	matchArgs(allVars, analVars, _time)) {
+      std::cout << __func__ << ": PowLawAcceptance analytical integral supported" << std::endl;
+      return 1;
+    }
+  }
+
   return 0;
 }
 
@@ -160,47 +179,73 @@ Double_t PowLawAcceptance::analyticalIntegral(Int_t code,
   // and x.max(rangename) will return the integration boundaries for
   // each observable x
 
+  std::cout << __func__ << ": Calculating PowLawAcceptance analytical integral" << std::endl;
+
   assert(code==1);
 
-  Double_t tmax(_time.max(rangeName)), tmin(_time.min(rangeName)),
-    turnon((Double_t)_turnon), offset((Double_t)_offset),
+  double turnon((Double_t)_turnon), offset((Double_t)_offset),
     exponent((Double_t)_exponent), beta((Double_t)_beta), ratio(1.0);
+
+  std::string name(_time.GetName());
+  name += "_tmp";
+  RooRealVar *time =
+    dynamic_cast<RooRealVar*>(_time.absArg()->clone(name.c_str()));
+  RooCustomizer custom(_correction.arg(), "_tmp");
+  custom.replaceArg(*(_time.absArg()), *time);
+  RooAbsReal *correction = dynamic_cast<RooAbsReal*>(custom.build(true));
+  correction->addOwnedComponents(*time);
+
+  double tmax(_time.max(rangeName)), tmin(_time.min(rangeName));
+  std::list<double> *binedges(correction->binBoundaries(*time, tmin, tmax));
+
+  double imin(0.0), imax(0.0), prefactor(1 / (2 * (offset - 1))),
+    a_2F1(0.0), b_2F1(0.0), c_2F1(0.0), x_2F1(0.0),
+    term1(0.0), term2(0.0), term3(0.0), integral(0.0);
 
   if (tmin < 0.2) return 0.;
   if (beta < -0.0) return 0.0;
   if (beta*tmin > 1.0) return 0.0;
 
-  // check if underlying data type is valid
-  if (_correction.absArg()) ratio = (Double_t)_correction;
+  std::list<double>::const_iterator bitrE(binedges->end());
+  for (std::list<double>::const_iterator bitr = binedges->begin();
+       bitr != bitrE; ++bitr) {
+    // bin low edges - binedges[i]
+    // bin high edges - binedges[i+1]
 
-  double imin(0.0), imax(0.0), prefactor(1 / (2 * (offset - 1))),
-    a_2F1(0.0), b_2F1(0.0), c_2F1(0.0), x_2F1(0.0),
-    term1(0.0), term2(0.0), term3(0.0);
+    std::list<double>::const_iterator bitrcopy = bitr;
+    ++bitrcopy;
+    double tlo(*bitr), thi(*bitrcopy);
 
-  a_2F1 = 1.0;
-  b_2F1 = 2 / exponent;
-  c_2F1 = 1 + 2/exponent;
-  x_2F1 = std::pow(turnon * tmax, exponent) / (offset - 1);
-  term1 = beta * tmax * gsl_sf_hyperg_2F1(a_2F1, b_2F1, c_2F1, x_2F1);
+    time->setVal((tlo + thi) / 2.0);
+    ratio = correction->getVal();
 
-  b_2F1 /= 2;
-  c_2F1 -= 1/exponent;
-  term2 = 2 * gsl_sf_hyperg_2F1(a_2F1, b_2F1, c_2F1, x_2F1);
+    a_2F1 = 1.0;
+    b_2F1 = 2 / exponent;
+    c_2F1 = 1 + 2/exponent;
+    x_2F1 = std::pow(turnon * thi, exponent) / (offset - 1);
+    term1 = beta * thi * gsl_sf_hyperg_2F1(a_2F1, b_2F1, c_2F1, x_2F1);
 
-  term3 = (offset - 1) * (beta * tmax - 2);
-  imax = -prefactor * tmax * (term1 - term2 + term3);
+    b_2F1 /= 2;
+    c_2F1 -= 1/exponent;
+    term2 = 2 * gsl_sf_hyperg_2F1(a_2F1, b_2F1, c_2F1, x_2F1);
 
-  b_2F1 = 2 / exponent;
-  c_2F1 = 1 + 2/exponent;
-  x_2F1 = std::pow(turnon * tmin, exponent) / (offset - 1);
-  term1 = beta * tmin * gsl_sf_hyperg_2F1(a_2F1, b_2F1, c_2F1, x_2F1);
+    term3 = (offset - 1) * (beta * thi - 2);
+    imax = -prefactor * thi * (term1 - term2 + term3);
 
-  b_2F1 /= 2;
-  c_2F1 -= 1/exponent;
-  term2 = 2 * gsl_sf_hyperg_2F1(a_2F1, b_2F1, c_2F1, x_2F1);
+    b_2F1 = 2 / exponent;
+    c_2F1 = 1 + 2/exponent;
+    x_2F1 = std::pow(turnon * tlo, exponent) / (offset - 1);
+    term1 = beta * tlo * gsl_sf_hyperg_2F1(a_2F1, b_2F1, c_2F1, x_2F1);
 
-  term3 = (offset - 1) * (beta * tmin - 2);
-  imin = -prefactor * tmin * (term1 - term2 + term3);
+    b_2F1 /= 2;
+    c_2F1 -= 1/exponent;
+    term2 = 2 * gsl_sf_hyperg_2F1(a_2F1, b_2F1, c_2F1, x_2F1);
 
-  return (ratio * (imax - imin));
+    term3 = (offset - 1) * (beta * tlo - 2);
+    imin = -prefactor * tlo * (term1 - term2 + term3);
+
+    integral += ratio * (imax - imin);
+  }
+
+  return integral;
 }
