@@ -98,6 +98,17 @@ protected:
   Float_t         lab0_M;
   Int_t           lab0_BKGCAT;
 
+  // BDTG variables
+  Int_t           lab0_MassFitConsD_nPV;
+  Float_t         lab0_MassFitConsD_M[10];   //[lab0_MassFitConsD_nPV]
+  Float_t         lab0_MassFitConsD_MERR[10];   //[lab0_MassFitConsD_nPV]
+  Float_t         lab0_MassFitConsD_P[10];   //[lab0_MassFitConsD_nPV]
+  Float_t         lab0_MassFitConsD_PERR[10];   //[lab0_MassFitConsD_nPV]
+  Float_t         lab0_MassFitConsD_chi2_B[10];   //[lab0_MassFitConsD_nPV]
+  Float_t         lab0_MassFitConsD_nDOF[10];   //[lab0_MassFitConsD_nPV]
+  Float_t         lab0_MassFitConsD_nIter[10];   //[lab0_MassFitConsD_nPV]
+  Float_t         lab0_MassFitConsD_status[10];   //[lab0_MassFitConsD_nPV]
+
   // MC truth
   Int_t           lab0_TRUEID;
   Float_t         lab0_TRUEP_E;
@@ -667,6 +678,17 @@ protected:
   TBranch         *b_lab0_MMERR;
   TBranch         *b_lab0_M;
   TBranch         *b_lab0_BKGCAT;
+
+  // BDTG variables
+  TBranch        *b_lab0_MassFitConsD_nPV;   //!
+  TBranch        *b_lab0_MassFitConsD_M;   //!
+  TBranch        *b_lab0_MassFitConsD_MERR;   //!
+  TBranch        *b_lab0_MassFitConsD_P;   //!
+  TBranch        *b_lab0_MassFitConsD_PERR;   //!
+  TBranch        *b_lab0_MassFitConsD_chi2_B;   //!
+  TBranch        *b_lab0_MassFitConsD_nDOF;   //!
+  TBranch        *b_lab0_MassFitConsD_nIter;   //!
+  TBranch        *b_lab0_MassFitConsD_status;   //!
 
   // MC truth
   TBranch         *b_lab0_TRUEID;

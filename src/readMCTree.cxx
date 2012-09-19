@@ -124,6 +124,17 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab0_M", &lab0_M, &b_lab0_M);
   fChain->SetBranchAddress("lab0_BKGCAT", &lab0_BKGCAT, &b_lab0_BKGCAT);
 
+  // BDTG variables
+  fChain->SetBranchAddress("lab0_MassFitConsD_nPV", &lab0_MassFitConsD_nPV, &b_lab0_MassFitConsD_nPV);
+  fChain->SetBranchAddress("lab0_MassFitConsD_M", lab0_MassFitConsD_M, &b_lab0_MassFitConsD_M);
+  fChain->SetBranchAddress("lab0_MassFitConsD_MERR", lab0_MassFitConsD_MERR, &b_lab0_MassFitConsD_MERR);
+  fChain->SetBranchAddress("lab0_MassFitConsD_P", lab0_MassFitConsD_P, &b_lab0_MassFitConsD_P);
+  fChain->SetBranchAddress("lab0_MassFitConsD_PERR", lab0_MassFitConsD_PERR, &b_lab0_MassFitConsD_PERR);
+  fChain->SetBranchAddress("lab0_MassFitConsD_chi2_B", lab0_MassFitConsD_chi2_B, &b_lab0_MassFitConsD_chi2_B);
+  fChain->SetBranchAddress("lab0_MassFitConsD_nDOF", lab0_MassFitConsD_nDOF, &b_lab0_MassFitConsD_nDOF);
+  fChain->SetBranchAddress("lab0_MassFitConsD_nIter", lab0_MassFitConsD_nIter, &b_lab0_MassFitConsD_nIter);
+  fChain->SetBranchAddress("lab0_MassFitConsD_status", lab0_MassFitConsD_status, &b_lab0_MassFitConsD_status);
+
   // MC truth
   fChain->SetBranchAddress("lab0_TRUEID", &lab0_TRUEID, &b_lab0_TRUEID);
   fChain->SetBranchAddress("lab0_TRUEP_E", &lab0_TRUEP_E, &b_lab0_TRUEP_E);
