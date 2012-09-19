@@ -51,7 +51,7 @@ from ROOT import RooAbsReal, RooRealVar, RooRealConstant, RooFormulaVar
 from ROOT import RooAbsPdf, RooGaussian
 from ROOT import RooGenericPdf, RooEffProd, RooAddPdf, RooProdPdf, RooHistPdf
 from ROOT import RooDataSet, RooDataHist
-from ROOT import RooDecay, RooGaussModel, RooUniformBinning
+from ROOT import RooDecay, RooBDecay, RooGaussModel, RooUniformBinning
 
 # my stuff
 from factory import *
@@ -71,6 +71,19 @@ from ROOT import PowLawAcceptance, BdPTAcceptance #, ErfAcceptance
 
 epsilon = 0.2
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
+
+
+# Physics constants
+# FIXME: check if the definitions are correct.  For now does not
+# matter as symmetric
+tauH = 1.536875
+tauL = 1.407125
+gammaH = 1.0/tauH
+gammaL = 1.0/tauL
+gamma = (gammaH + gammaL) / 2.0
+tau = 1.0 / gamma
+dgamma = gammaH - gammaL
+
 
 def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     """Setup RooFit variables then construct the PDF as per options.
@@ -227,18 +240,18 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
                              # RooRealConstant::value(0), scale,
                              # RooRealConstant::value(0.00004))
     # Decay model
-    decayH = RooDecay('decayH', 'Decay function for the B_{s,H}',
-                      time, RooRealConstant.value(1.536875),
-                      resmodel, RooDecay.SingleSided)
-    decayL = RooDecay('decayL', 'Decay function for the B_{s,L}',
-                      time, RooRealConstant.value(1.407125),
-                      resmodel, RooDecay.SingleSided)
-    decay = RooAddPdf('decay', 'Decay function for the B_{s}',
-                      decayH, decayL, RooRealConstant.value(0.5))
+    Bdecay = RooBDecay('Bdecay', 'Decay function for the B_{s} (heavy + light)',
+                       time, RooRealConstant.value(tau), # t, τ
+                       RooRealConstant.value(dgamma),    # ΔΓ
+                       RooRealConstant.value(1.0),       # f0 - cosh
+                       RooRealConstant.value(0.0),       # f1 - sinh
+                       RooRealConstant.value(0.0),       # f2 - cos
+                       RooRealConstant.value(0.0),       # f3 - sin
+                       RooRealConstant.value(0.0),       # Δm
+                       resmodel, RooBDecay.SingleSided)
 
     # Define PDF and fit
-    ModelL = RooEffProd('ModelL', 'Acceptance model B_{s,L}', decayL, acceptance)
-    ModelH = RooEffProd('ModelH', 'Acceptance model B_{s,H}', decayH, acceptance)
+    Model = RooEffProd('Model', 'Acceptance model B_{s}', Bdecay, acceptance)
 
     # # enable caching for dt integral
     # ModelL.setParameterizeIntegral(RooArgSet(dt))
@@ -246,14 +259,10 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
 
     errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
                            RooArgSet(dt), datahist)
-    FullModelL = RooProdPdf('FullModelL', 'Acceptance model with errors B_{s,L}',
-                            RooArgSet(errorPdf),
-                            RooFit.Conditional(RooArgSet(ModelL), RooArgSet(time)))
-    FullModelH = RooProdPdf('FullModelH', 'Acceptance model with errors B_{s,H}',
-                            RooArgSet(errorPdf),
-                            RooFit.Conditional(RooArgSet(ModelH), RooArgSet(time)))
-    PDF = RooAddPdf('FullModel', 'Full acceptance model',
-                    FullModelH, FullModelL, RooRealConstant.value(0.5))
+    PDF = RooProdPdf('FullModel', 'Acceptance model with errors B_{s}',
+                     RooArgSet(errorPdf),
+                     RooFit.Conditional(RooArgSet(Model), RooArgSet(time)))
+    PDF.setParameterizeIntegral(RooArgSet(dt))
 
 
     # Generate toy if requested
