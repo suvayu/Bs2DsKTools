@@ -238,6 +238,14 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
        if (std::abs(lab1_TRUEID) == 321) dskcount++;
        else if (std::abs(lab1_TRUEID) == 211) dspicount++;
      }
+
+   std::cout << "Cutflow: ";
+   for (std::map<unsigned int,long>::const_iterator itr = _cutflow.begin();
+	itr != _cutflow.end(); ++itr) {
+     std::cout << itr->second << ",";
+   }
+   std::cout << std::endl;
+
    std::cout << "Entry list: " << felist.GetN() << " DsK: " << dskcount
 	     << " DsPi: " << dspicount << std::endl;
    std::cout << "Rejected DsK: " << rdskcount - dskcount
@@ -248,18 +256,44 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
 
 bool lifetime::OfflineSelection()
 {
-  if (lab1_P > 0.0 and lab1_P < 1.0E11 and
-      BDTGResponse_1 > 0.5 and	// BDT selection
-      lab2_FDCHI2_ORIVX > 2.0 and
-      ((lab1_TRUEID*lab1_TRUEID == 321*321 and lab1_M > 200.0) or
-       (lab1_TRUEID*lab1_TRUEID == 211*211 and lab1_M < 200.0)) and // bachelor hypothesis
-      (lab3_M < 200.0 and lab4_M > 200.0 and lab5_M > 200.0) and // KKπ hypothesis
-      (lab4_PIDK > 5.0 and lab3_PIDK < 0.0 and lab5_PIDK > 5.0) and // PID
-      (5000.0 < lab0_MassFitConsD_M[0] and lab0_MassFitConsD_M[0] < 5500.0) and // Bs mass
-      (1948.0 < lab2_MM and lab2_MM < 1990.0) and // Ds mass
-      lab0_BKGCAT < 60 and lab2_BKGCAT == 30)
-    return true;
-  else return false;
+  if (not (lab1_P > 0.0 and lab1_P < 1.0E11)) {
+    _cutflow[0]++;
+    return false;
+  }
+  if (not (BDTGResponse_1 > 0.5)) {
+    _cutflow[1]++;
+    return false;
+  }
+  if (not (lab2_FDCHI2_ORIVX > 2.0)) {
+    _cutflow[2]++;
+    return false;
+  }
+  if (not ((lab1_TRUEID*lab1_TRUEID == 321*321 and lab1_M > 200.0) or
+	   (lab1_TRUEID*lab1_TRUEID == 211*211 and lab1_M < 200.0))) {
+    _cutflow[3]++;
+    return false;
+  }
+  if (not (lab3_M < 200.0 and lab4_M > 200.0 and lab5_M > 200.0)) {
+    _cutflow[4]++;
+    return false;
+  }
+  if (not (lab4_PIDK > 5.0 and lab3_PIDK < 0.0 and lab5_PIDK > 5.0)) {
+    _cutflow[5]++;
+    return false;
+  }
+  if (not (5000.0 < lab0_MassFitConsD_M[0] and lab0_MassFitConsD_M[0] < 5500.0)) {
+    _cutflow[6]++;
+    return false;
+  }
+  if (not (1948.0 < lab2_MM and lab2_MM < 1990.0)) {
+    _cutflow[7]++;
+    return false;
+  }
+  if (not (lab0_BKGCAT < 60)) {
+    _cutflow[8]++;
+    return false;
+  }
+  return true;
 }
 
 

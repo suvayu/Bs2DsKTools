@@ -12,6 +12,7 @@
 #define __LIFETIME_HXX
 
 #include <vector>
+#include <map>
 
 #include <TEntryList.h>
 
@@ -20,6 +21,10 @@
 using namespace std;
 
 class lifetime : public readMCTree {
+
+private:
+
+  std::map<unsigned int, long> _cutflow;
 
 public :
 
