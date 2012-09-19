@@ -23,19 +23,6 @@ is read from an ntuple and fitted to the model otherwise.
 
 """
 
-# option parsing
-import argparse
-optparser = argparse.ArgumentParser(description=__doc__)
-optparser.add_argument('accfn', help='Acceptance function type')
-optparser.add_argument('mode', help='B decay mode')
-optparser.add_argument('fsuffix', default='',
-                       help='ROOT file suffix (data/smalltree-new-MC<fsuf>.root)')
-
-options = optparser.parse_args()
-fn = options.accfn
-mode = options.mode
-fsuffix = options.fsuffix
-
 # Python modules
 import os
 import sys
@@ -193,7 +180,6 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     # Build full 2-D PDF (t, δt)
     argset = RooArgSet(time,dt)
     # Get tree
-    if len(fsuffix): fsuffix = '-%s' % fsuffix
     rfile = get_file('data/smalltree-new-MC%s.root' % fsuffix, 'read')
     ftree = get_object('ftree', rfile)
 
@@ -226,7 +212,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     except TypeError, IOError:
         print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
     tmpdata = dataset.reduce(RooArgSet(dt))
-    dtdatahist = tmpdata.binnedClone('dtdatahist','Binned dt data')
+    datahist = tmpdata.binnedClone('datahist','Binned data')
     if isToy: del dataset
 
     # Resolution model
@@ -256,7 +242,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     # ModelH.setParameterizeIntegral(RooArgSet(dt))
 
     errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
-                           RooArgSet(dt), dtdatahist)
+                           RooArgSet(dt), datahist)
     FullModelL = RooProdPdf('FullModelL', 'Acceptance model with errors B_{s,L}',
                             RooArgSet(errorPdf),
                             RooFit.Conditional(RooArgSet(ModelL), RooArgSet(time)))
@@ -341,4 +327,14 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
 
 
 if __name__ == "__main__":
+
+    if len(sys.argv) > 1:
+        fn = sys.argv[1]
+        mode = sys.argv[2]
+        fsuffix = sys.argv[3]
+    else:
+        fn = 'cpowerlaw'
+        mode = 'DsK'
+        fsuffix = ''
+
     main(fn, mode, fsuffix, False)
