@@ -99,12 +99,11 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
 
     # Observables
     time = RooRealVar('time', 'B_{s} lifetime in ps', epsilon, 15.0)
-    time.setRange('fullrange', epsilon, 15.0)
     # Limits determined from tree
     dt = RooRealVar('dt', 'Error in lifetime measurement (ps)', 1E-2, 9E-2)
     dt.setBins(100)             # default binning (since empty name)
     # cache binning
-    dt.setBinning(RooUniformBinning(dt.getMin(), dt.getMax(), 100, 'cache'), 'cache')
+    dt.setBins(100, 'cache')
 
     varlist += [ time, dt ]
 
@@ -293,7 +292,11 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
                           RooFit.Verbose(True))
     fitresult.Print()
 
+    # # Use when debugging plots
+    # dataset = dataset.reduce(RooFit.EventRange(0, 100))
+
     # reduce precision otherwise plotting doesn't work
+    time.setRange('fullrange', epsilon, 15.0)
     RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-5)
     RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-5)
 
