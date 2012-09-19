@@ -50,7 +50,7 @@ from ROOT import RooArgSet, RooArgList
 from ROOT import RooAbsReal, RooRealVar, RooRealConstant, RooFormulaVar
 from ROOT import RooAbsPdf, RooGaussian
 from ROOT import RooGenericPdf, RooEffProd, RooAddPdf, RooProdPdf, RooHistPdf
-from ROOT import RooDataSet, RooDataHist
+from ROOT import RooDataSet, RooDataHist, RooKeysPdf
 from ROOT import RooDecay, RooBDecay, RooGaussModel, RooUniformBinning
 
 # my stuff
@@ -249,17 +249,18 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
                        RooRealConstant.value(0.0),       # f3 - sin
                        RooRealConstant.value(0.0),       # Δm
                        resmodel, RooBDecay.SingleSided)
+    Model = RooEffProd('Model', 'Acceptance model B_{s}', Bdecay, acceptance)
 
-    errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
-                           RooArgSet(dt), datahist)
-    Model = RooProdPdf('Model', 'Acceptance model with errors B_{s}',
+
+    #errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
+    #                       RooArgSet(dt), datahist)
+    errorPdf = RooKeysPdf('errorPdf', 'errorPdf', dt, tmpdata)
+
+    PDF = RooProdPdf('PDF', 'Acceptance model with errors B_{s}',
                        RooArgSet(errorPdf),
-                       RooFit.Conditional(RooArgSet(Bdecay), RooArgSet(time)))
-
+                       RooFit.Conditional(RooArgSet(Model), RooArgSet(time)))
     # enable caching for dt integral
-    Model.setParameterizeIntegral(RooArgSet(dt))
-
-    PDF = RooEffProd('FullModel', 'Acceptance model B_{s}', Model, acceptance)
+    PDF.setParameterizeIntegral(RooArgSet(dt))
 
 
     # Generate toy if requested
@@ -302,9 +303,9 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
     PDF.plotOn(tframe1, RooFit.ProjWData(RooArgSet(dt), dataset, True),
                RooFit.LineColor(kBlue))
-    decay.plotOn(tframe1, RooFit.LineColor(kRed))
+    Bdecay.plotOn(tframe1, RooFit.LineColor(kRed))
     acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
-                      RooFit.Normalization(1000, RooAbsReal.Relative))
+                      RooFit.Normalization(500, RooAbsReal.Relative))
 
     # NOTE: this range is for the RooPlot axis
     tframe2 = time.frame(RooFit.Range(0., 2), RooFit.Name('pztime'),
@@ -313,7 +314,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     PDF.plotOn(tframe2, RooFit.ProjWData(RooArgSet(dt), dataset, True),
                RooFit.LineColor(kBlue))
     acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
-                      RooFit.Normalization(300, RooAbsReal.Relative))
+                      RooFit.Normalization(100, RooAbsReal.Relative))
 
     canvas = TCanvas('canvas', 'canvas', 1600, 600)
     canvas.Divide(2,1)
