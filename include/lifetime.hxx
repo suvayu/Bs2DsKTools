@@ -36,6 +36,7 @@ public :
   // overloaded non-virtual methods
   bool  CommonSelection();
   bool  UnbiasedSelection();
+  bool  OfflineSelection();
 };
 
 #endif // #ifndef __LIFETIME_HXX

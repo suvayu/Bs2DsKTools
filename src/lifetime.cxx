@@ -2,10 +2,10 @@
  * @file   lifetime.cxx
  * @author Suvayu Ali <Suvayu.Ali@cern.ch>
  * @date   Sun Dec 11 01:27:13 2011
- * 
- * @brief  
- * 
- * 
+ *
+ * @brief
+ *
+ *
  */
 
 #include <iostream>
@@ -145,6 +145,7 @@ void lifetime::Loop(TTree &ftree)
    ftree.Branch("OWNPV"  , &OWNPV);
    ftree.Branch("ENDVX"  , &ENDVX);
 
+   ftree.Branch("HLT1TrackAllL0TOS", &lab0Hlt1TrackAllL0Decision_TOS);
    ftree.Branch("HLT2Topo4BodyTOS" , &lab0Hlt2Topo4BodyBBDTDecision_TOS);
    ftree.Branch("HLT2Topo3BodyTOS" , &lab0Hlt2Topo3BodyBBDTDecision_TOS);
    ftree.Branch("HLT2Topo2BodyTOS" , &lab0Hlt2Topo2BodyBBDTDecision_TOS);
@@ -159,7 +160,7 @@ void lifetime::Loop(TTree &ftree)
        nb = fChain->GetEntry(jentry);   nbytes += nb;
 
        // if (( UnbiasedSelection() == false ) or ( lab1_PIDK < 5 )) continue;
-       if (( CommonSelection() == false ) or ( lab1_PIDK < 5 )) continue;
+       if (CommonSelection() == false) continue;
        // if ( pPIDcut != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
 
        wt       = TMath::Exp(lab0_TAU*1e3/1.472);
@@ -197,6 +198,7 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
    ftree.Branch("OWNPV"  , &OWNPV);
    ftree.Branch("ENDVX"  , &ENDVX);
 
+   ftree.Branch("HLT1TrackAllL0TOS", &lab0Hlt1TrackAllL0Decision_TOS);
    ftree.Branch("HLT2Topo4BodyTOS" , &lab0Hlt2Topo4BodyBBDTDecision_TOS);
    ftree.Branch("HLT2Topo3BodyTOS" , &lab0Hlt2Topo3BodyBBDTDecision_TOS);
    ftree.Branch("HLT2Topo2BodyTOS" , &lab0Hlt2Topo2BodyBBDTDecision_TOS);
@@ -217,8 +219,8 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
        else if (std::abs(lab1_TRUEID) == 211) rdspicount++;
 
        // if (( UnbiasedSelection() == false ) or ( lab1_PIDK < 5 )) continue;
-       if (( CommonSelection() == false ) // or ( lab1_PIDK < 5 )
-	   ) continue;
+       if (CommonSelection() == false and OfflineSelection() == false)
+	 continue;
        // if ( pPIDcut != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
        if (lab0_TAUERR <= 0 or lab0_TAUERR >= 0.0002 or
 	   lab0_TAUERR != lab0_TAUERR) continue;
@@ -244,16 +246,31 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
 }
 
 
+bool lifetime::OfflineSelection()
+{
+  if (lab1_P > 0.0 and lab1_P < 1.0E11 and
+      BDTGResponse_1 > 0.5 and	// BDT selection
+      lab2_FDCHI2_ORIVX > 2.0 and
+      ((lab1_TRUEID*lab1_TRUEID == 321*321 and lab1_M > 200.0) or
+       (lab1_TRUEID*lab1_TRUEID == 211*211 and lab1_M < 200.0)) and // bachelor hypothesis
+      (lab3_M < 200.0 and lab4_M > 200.0 and lab5_M > 200.0) and // KKπ hypothesis
+      (lab4_PIDK > 5.0 and lab3_PIDK < 0.0 and lab5_PIDK > 5.0) and // PID
+      (5000.0 < lab0_MassFitConsD_M[0] and lab0_MassFitConsD_M[0] < 5500.0) and // Bs mass
+      (1948.0 < lab2_MM and lab2_MM < 1990.0) and // Ds mass
+      lab0_BKGCAT < 60 and lab2_BKGCAT == 30)
+    return true;
+  else return false;
+}
+
+
 bool lifetime::CommonSelection()
 {
   // selecting only "true" Bs2DsK and Bs2Dsπ events
   if (lab0_TRUEID*lab0_TRUEID == 531*531 and
       lab2_TRUEID*lab2_TRUEID == 431*431 and
       (lab1_TRUEID*lab1_TRUEID == 321*321 or
-       lab1_TRUEID*lab1_TRUEID == 211*211) and
-       (5000. < lab0_MM and lab0_MM < 5800.) and // Bs mass
-       (1944. < lab2_MM and lab2_MM < 1990.) and // Ds mass
-       (lab1_P < 100000.)) return true;
+       lab1_TRUEID*lab1_TRUEID == 211*211))
+    return true;
   else return false;
 }
 
