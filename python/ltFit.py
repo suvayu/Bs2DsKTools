@@ -188,6 +188,8 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     # HLT2Topo3BodyTOS
     # HLT2Topo2BodyTOS
     # HLT2TopoIncPhiTOS
+    trigger1 = 'HLT1TrackAllL0TOS'
+    trigger1Var = RooRealVar(trigger1, trigger1, 0, 2)
     trigger2 = 'HLT2Topo2BodyTOS'
     trigger2Var = RooRealVar(trigger2, trigger2, 0, 2)
     trigger3 = 'HLT2Topo3BodyTOS'
@@ -195,7 +197,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     trigger4 = 'HLT2Topo4BodyTOS'
     trigger4Var = RooRealVar(trigger4, trigger4, 0, 2)
 
-    cut = '(%s > 0 || %s > 0 || %s > 0)' % (trigger2, trigger3, trigger4)
+    cut = '%s && (%s > 0 || %s > 0 || %s > 0)' % (trigger1, trigger2, trigger3, trigger4)
 
     modeVar = RooRealVar('hID', 'Decay mode %s' % mode, -350, 350)
     if mode == 'DsK':
@@ -207,8 +209,8 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
         return
 
     try:
-        dataset = get_dataset(argset, ftree, cut, modeVar, trigger2Var,
-                              trigger3Var, trigger4Var)
+        dataset = get_dataset(argset, ftree, cut, modeVar, trigger1Var,
+                              trigger2Var, trigger3Var, trigger4Var)
     except TypeError, IOError:
         print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
     tmpdata = dataset.reduce(RooArgSet(dt))
