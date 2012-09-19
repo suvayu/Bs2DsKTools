@@ -250,19 +250,16 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
                        RooRealConstant.value(0.0),       # Δm
                        resmodel, RooBDecay.SingleSided)
 
-    # Define PDF and fit
-    Model = RooEffProd('Model', 'Acceptance model B_{s}', Bdecay, acceptance)
-
-    # # enable caching for dt integral
-    # ModelL.setParameterizeIntegral(RooArgSet(dt))
-    # ModelH.setParameterizeIntegral(RooArgSet(dt))
-
     errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
                            RooArgSet(dt), datahist)
-    PDF = RooProdPdf('FullModel', 'Acceptance model with errors B_{s}',
-                     RooArgSet(errorPdf),
-                     RooFit.Conditional(RooArgSet(Model), RooArgSet(time)))
-    PDF.setParameterizeIntegral(RooArgSet(dt))
+    Model = RooProdPdf('Model', 'Acceptance model with errors B_{s}',
+                       RooArgSet(errorPdf),
+                       RooFit.Conditional(RooArgSet(Bdecay), RooArgSet(time)))
+
+    # enable caching for dt integral
+    Model.setParameterizeIntegral(RooArgSet(dt))
+
+    PDF = RooEffProd('FullModel', 'Acceptance model B_{s}', Model, acceptance)
 
 
     # Generate toy if requested
@@ -289,9 +286,9 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
 
     # exponent.setConstant(True)
     # beta.setConstant(True)
-    fitresult = PDF.fitTo(dataset, RooFit.Optimize(1),
+    fitresult = PDF.fitTo(dataset, RooFit.Optimize(0),
                           RooFit.Strategy(2), RooFit.Save(True),
-                          RooFit.NumCPU(2),
+                          RooFit.NumCPU(1),
                           RooFit.Verbose(True))
     fitresult.Print()
 
