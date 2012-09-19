@@ -13,7 +13,6 @@ import numpy
 # option parsing
 import argparse
 optparser = argparse.ArgumentParser(description=__doc__)
-optparser.formatter_class = argparse.RawDescriptionHelpFormatter
 optparser.add_argument('file1', help='ROOT file with DsK fit result')
 optparser.add_argument('file2', help='ROOT file with Dsπ fit result')
 optparser.add_argument('-p', '--print', dest='doPrint', action='store_true',

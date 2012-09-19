@@ -12,7 +12,6 @@ import re
 # option parsing
 import argparse
 optparser = argparse.ArgumentParser(description=__doc__)
-optparser.formatter_class = argparse.RawDescriptionHelpFormatter
 optparser.add_argument('filename', help='ROOT file with saved fit result')
 optparser.add_argument('--print', dest='doPrint', action='store_true',
                        help='Print to multi-page pdf file')

@@ -26,7 +26,6 @@ is read from an ntuple and fitted to the model otherwise.
 # option parsing
 import argparse
 optparser = argparse.ArgumentParser(description=__doc__)
-optparser.formatter_class = argparse.RawDescriptionHelpFormatter
 optparser.add_argument('accfn', help='Acceptance function type')
 optparser.add_argument('mode', help='B decay mode')
 optparser.add_argument('fsuffix', default='',
