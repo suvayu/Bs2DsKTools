@@ -94,8 +94,9 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
 
     """
 
-    # for persistency
+    # for persistency/logging
     varlist = []
+    pdflist = []
 
     # Observables
     time = RooRealVar('time', 'B_{s} lifetime in ps', epsilon, 15.0)
@@ -189,6 +190,8 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
         print 'Unknown acceptance type. Aborting'
         return
 
+    pdflist += [acceptance]
+
     # Build full 2-D PDF (t, δt)
     argset = RooArgSet(time,dt)
     # Get tree
@@ -250,6 +253,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
                        resmodel, RooBDecay.SingleSided)
     Model = RooEffProd('Model', 'Acceptance model B_{s}', Bdecay, acceptance)
 
+    pdflist += [Bdecay, Model]
 
     #errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
     #                       RooArgSet(dt), datahist)
@@ -261,6 +265,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     # enable caching for dt integral
     PDF.setParameterizeIntegral(RooArgSet(dt))
 
+    pdflist += [errorPdf, PDF]
 
     # Generate toy if requested
     if isToy:
@@ -269,6 +274,12 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
         except TypeError, IOError:
             print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
+    # Logging
+    for var in varlist:
+        var.Print('v')
+    for pdf in pdflist:
+        pdf.Print('v')
+    dataset.Print('v')
 
     # # Call Minuit by hand, good for debugging
     # from ROOT import RooMinuit
