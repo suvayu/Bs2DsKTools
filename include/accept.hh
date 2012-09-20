@@ -33,7 +33,7 @@ TChain* initChain(std::string name, std::string fileglob);
  *
  * @return Total events selected
  */
-int selAccTree(readTree &sample, TTree *& ftree, TEntryList *& felist);
+int selAccTree(readTree &sample, TTree *& ftree, TEntryList *& felist, bool DsK);
 
 
 void plotHistos(TEntryList* felist);

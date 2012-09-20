@@ -175,7 +175,7 @@ void lifetime::Loop(TTree &ftree)
 }
 
 
-void lifetime::Loop(TTree &ftree, TEntryList &felist)
+void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
 {
    if (fChain == 0) return;
    Long64_t nentries = fChain->GetEntries();
@@ -219,8 +219,8 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
        else if (std::abs(lab1_TRUEID) == 211) rdspicount++;
 
        // if (( UnbiasedSelection() == false ) or ( lab1_PIDK < 5 )) continue;
-       if (CommonSelection() == false) continue;
-       if (OfflineSelection() == false) continue;
+       if (CommonSelection(DsK) == false) continue;
+       if (OfflineSelection(DsK) == false) continue;
 
        if (lab0_TAUERR <= 0 or lab0_TAUERR >= 0.0002 or
 	   lab0_TAUERR != lab0_TAUERR) continue;
@@ -254,7 +254,7 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist)
 }
 
 
-bool lifetime::OfflineSelection()
+bool lifetime::OfflineSelection(bool DsK)
 {
   if (not (lab1_P > 0.0 and lab1_P < 1.0E11)) {
     _cutflow[0]++;
@@ -268,8 +268,8 @@ bool lifetime::OfflineSelection()
     _cutflow[2]++;
     return false;
   }
-  if (not ((lab1_TRUEID*lab1_TRUEID == 321*321 and lab1_M > 200.0) or
-	   (lab1_TRUEID*lab1_TRUEID == 211*211 and lab1_M < 200.0))) {
+  if (not ((DsK and lab1_M > 200.0) or
+	   ((not DsK) and lab1_M < 200.0))) {
     _cutflow[3]++;
     return false;
   }
@@ -293,17 +293,29 @@ bool lifetime::OfflineSelection()
     _cutflow[8]++;
     return false;
   }
+  if (not (lab2_BKGCAT == 30)) {
+    _cutflow[9]++;
+    return false;
+  }
+  if (not ((DsK and lab1_PIDK > 10.0) or 
+	   ((not DsK) and lab1_PIDK < 10.0))) {
+    _cutflow[10]++;
+    return false;
+  }
   return true;
 }
 
 
-bool lifetime::CommonSelection()
+bool lifetime::CommonSelection(bool DsK)
 {
   // selecting only "true" Bs2DsK and Bs2Dsπ events
   if (lab0_TRUEID*lab0_TRUEID == 531*531 and
       lab2_TRUEID*lab2_TRUEID == 431*431 and
-      (lab1_TRUEID*lab1_TRUEID == 321*321 or
-       lab1_TRUEID*lab1_TRUEID == 211*211))
+      lab3_TRUEID*lab3_TRUEID == 211*211 and
+      lab4_TRUEID*lab4_TRUEID == 321*321 and
+      lab5_TRUEID*lab5_TRUEID == 321*321 and
+      ((DsK and lab1_TRUEID*lab1_TRUEID == 321*321) or
+       ((not DsK) and lab1_TRUEID*lab1_TRUEID == 211*211)))
     return true;
   else return false;
 }

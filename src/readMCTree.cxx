@@ -820,7 +820,7 @@ void readMCTree::Loop(TNtuple &noangle)
 }
 
 
-void readMCTree::Loop(TTree &, TEntryList &) {}
+void readMCTree::Loop(TTree &, TEntryList &, bool) {}
 
 
 bool readMCTree::CommonSelection()

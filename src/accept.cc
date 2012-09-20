@@ -22,14 +22,16 @@ int main()
   TEntryList *felist = NULL;
 
   string fileaccess((doSelect) ? "recreate" : "read");
-  TFile rfile("data/smalltree-new-MC-pico-offline.root", fileaccess.c_str());
+  TFile rfile("data/smalltree-new-MC-pico-offline-DsK.root", fileaccess.c_str());
   // TFile rfile("data/smalltree-new-MC-pico-stripping.root", fileaccess.c_str());
 
   // select
   if (doSelect) {
-    TChain * MCChain = initChain("MCChain", "../ntuples/MC/Dsh-MC11/Merged_Bs2Ds*BsHypo_BDTG.root/DecayTree");
+    bool DsK(true);
+    TChain * MCChain = initChain("MCChain", "../ntuples/MC/Dsh-MC11/Merged_Bs2DsK*BsHypo_BDTG.root/DecayTree");
+    // TChain * MCChain = initChain("MCChain", "../ntuples/MC/Dsh-MC11/Merged_Bs2DsPi*BsHypo_BDTG.root/DecayTree");
     lifetime MCsample(MCChain);
-    selAccTree(MCsample, ftree, felist); // remember to delete ftree and felist
+    selAccTree(MCsample, ftree, felist, DsK); // remember to delete ftree and felist
   } else {
     ftree  = (TTree*)      rfile.Get("ftree");
     felist = (TEntryList*) rfile.Get("felist");
@@ -120,11 +122,11 @@ void plotHistos(TTree* ftree)
 }
 
 
-int selAccTree(readTree &sample, TTree *& ftree, TEntryList *& felist)
+int selAccTree(readTree &sample, TTree *& ftree, TEntryList *& felist, bool DsK)
 {
   ftree  = new TTree("ftree", "Selected events for lifetime acceptance");
   felist = new TEntryList("felist", "Pre trigger"); // , "DecayTree", "../../ntuples/MC/Merged_Bs2Ds*.root"
-  sample.Loop(*ftree, *felist);
+  sample.Loop(*ftree, *felist, DsK);
   return felist->GetN();
 }
 

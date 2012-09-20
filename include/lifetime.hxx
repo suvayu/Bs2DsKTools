@@ -36,12 +36,12 @@ public :
   virtual void  Loop();
   virtual void  Loop(TNtuple &) {}
   virtual void  Loop(TTree &);
-  virtual void  Loop(TTree &, TEntryList &);
+  virtual void  Loop(TTree &, TEntryList &, bool DsK);
 
   // overloaded non-virtual methods
-  bool  CommonSelection();
+  bool  CommonSelection(bool DsK=true);
   bool  UnbiasedSelection();
-  bool  OfflineSelection();
+  bool  OfflineSelection(bool DsK=true);
 };
 
 #endif // #ifndef __LIFETIME_HXX
