@@ -242,7 +242,7 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
    std::cout << "Cutflow: ";
    for (std::map<unsigned int,long>::const_iterator itr = _cutflow.begin();
 	itr != _cutflow.end(); ++itr) {
-     std::cout << itr->second << ",";
+     std::cout << "(" << itr->first << "," << itr->second << "), ";
    }
    std::cout << std::endl;
 
@@ -293,7 +293,7 @@ bool lifetime::OfflineSelection(bool DsK)
     _cutflow[8]++;
     return false;
   }
-  if (not (lab2_BKGCAT == 30)) {
+  if (not (lab2_BKGCAT < 30. or std::abs(lab2_BKGCAT -50.) < 1e-4)) {
     _cutflow[9]++;
     return false;
   }

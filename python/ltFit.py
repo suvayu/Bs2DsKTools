@@ -100,13 +100,13 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
 
     # Observables
     time = RooRealVar('time', 'B_{s} lifetime in ps', epsilon, 15.0)
-    # Limits determined from tree
-    dt = RooRealVar('dt', 'Error in lifetime measurement (ps)', 1E-2, 9E-2)
-    dt.setBins(100)             # default binning (since empty name)
-    # cache binning
-    dt.setBins(100, 'cache')
+    # # Limits determined from tree
+    # dt = RooRealVar('dt', 'Error in lifetime measurement (ps)', 1E-2, 9E-2)
+    # dt.setBins(100)             # default binning (since empty name)
+    # # cache binning
+    # dt.setBins(100, 'cache')
 
-    varlist += [ time, dt ]
+    varlist += [ time ]
 
     # Parameters
     if not accfn.find('powerlaw') < 0:
@@ -193,7 +193,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     pdflist += [acceptance]
 
     # Build full 2-D PDF (t, δt)
-    argset = RooArgSet(time,dt)
+    argset = RooArgSet(time)
     # Get tree
     rfile = get_file('data/smalltree-new-MC%s.root' % fsuffix, 'read')
     ftree = get_object('ftree', rfile)
@@ -225,19 +225,18 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
         return
 
     try:
-        dataset = get_dataset(argset, ftree, cut, modeVar, trigger1Var,
+        dataset = get_dataset(RooArgSet(time), ftree, cut, modeVar, trigger1Var,
                               trigger2Var, trigger3Var, trigger4Var)
     except TypeError, IOError:
         print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
-    tmpdata = dataset.reduce(RooArgSet(dt))
-    datahist = tmpdata.binnedClone('datahist','Binned data')
     if isToy: del dataset
 
     # Resolution model
     mean = RooRealVar('mean', 'Mean', 0.)
     scale = RooRealVar('scale', 'Per-event time error scale factor', 1.19)
     resmodel = RooGaussModel('resmodel', 'Time resolution model', time,
-                             mean, dt, RooRealConstant.value(1.0), scale)
+                             mean, RooRealConstant.value(0.44),
+                             RooRealConstant.value(1.0), scale)
                              # RooRealConstant::value(0), scale, dt)
                              # RooRealConstant::value(0), scale,
                              # RooRealConstant::value(0.00004))
@@ -252,20 +251,19 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
                        RooRealConstant.value(0.0),       # Δm
                        resmodel, RooBDecay.SingleSided)
     Model = RooEffProd('Model', 'Acceptance model B_{s}', Bdecay, acceptance)
+    PDF = Model
 
     pdflist += [Bdecay, Model]
 
-    #errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
-    #                       RooArgSet(dt), datahist)
-    errorPdf = RooKeysPdf('errorPdf', 'errorPdf', dt, tmpdata)
+    # #errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
+    # #                       RooArgSet(dt), datahist)
+    # errorPdf = RooKeysPdf('errorPdf', 'errorPdf', dt, tmpdata)
 
-    PDF = RooProdPdf('PDF', 'Acceptance model with errors B_{s}',
-                       RooArgSet(errorPdf),
-                       RooFit.Conditional(RooArgSet(Model), RooArgSet(time)))
-    # enable caching for dt integral
-    PDF.setParameterizeIntegral(RooArgSet(dt))
-
-    pdflist += [errorPdf, PDF]
+    # PDF = RooProdPdf('PDF', 'Acceptance model with errors B_{s}',
+    #                    RooArgSet(errorPdf),
+    #                    RooFit.Conditional(RooArgSet(Model), RooArgSet(time)))
+    # # enable caching for dt integral
+    # PDF.setParameterizeIntegral(RooArgSet(dt))
 
     # Generate toy if requested
     if isToy:
@@ -315,7 +313,8 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     tframe1 = time.frame(RooFit.Name('ptime'),
                          RooFit.Title('Projection on time'))
     dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
-    PDF.plotOn(tframe1, RooFit.ProjWData(RooArgSet(dt), dataset, True),
+    PDF.plotOn(tframe1,
+               # RooFit.ProjWData(RooArgSet(dt), dataset, True),
                RooFit.LineColor(kBlue))
     Bdecay.plotOn(tframe1, RooFit.LineColor(kRed))
     acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
@@ -325,7 +324,8 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     tframe2 = time.frame(RooFit.Range(0., 2), RooFit.Name('pztime'),
                          RooFit.Title('Projection on time (zoomed)'))
     dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
-    PDF.plotOn(tframe2, RooFit.ProjWData(RooArgSet(dt), dataset, True),
+    PDF.plotOn(tframe2,
+               # RooFit.ProjWData(RooArgSet(dt), dataset, True),
                RooFit.LineColor(kBlue))
     acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
                       RooFit.Normalization(100, RooAbsReal.Relative))

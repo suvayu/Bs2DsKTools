@@ -17,44 +17,48 @@
 int main()
 {
   bool doSelect = true;
-  // remember to delete ftree and felist
-  TTree *ftree = NULL;
-  TEntryList *felist = NULL;
+  for (unsigned i = 0; i < 2; ++i) {
+    // remember to delete ftree and felist
+    TTree *ftree = NULL;
+    TEntryList *felist = NULL;
 
-  string fileaccess((doSelect) ? "recreate" : "read");
-  TFile rfile("data/smalltree-new-MC-pico-offline-DsK.root", fileaccess.c_str());
-  // TFile rfile("data/smalltree-new-MC-pico-stripping.root", fileaccess.c_str());
+    string fileaccess((doSelect) ? "recreate" : "read");
+    string fname((i < 1) ? "data/smalltree-new-MC-pico-offline-DsK.root" :
+		 "data/smalltree-new-MC-pico-offline-DsPi.root");
+    TFile rfile(fname.c_str(), fileaccess.c_str());
+    // TFile rfile("data/smalltree-new-MC-pico-stripping.root", fileaccess.c_str());
 
-  // select
-  if (doSelect) {
-    bool DsK(true);
-    TChain * MCChain = initChain("MCChain", "../ntuples/MC/Dsh-MC11/Merged_Bs2DsK*BsHypo_BDTG.root/DecayTree");
-    // TChain * MCChain = initChain("MCChain", "../ntuples/MC/Dsh-MC11/Merged_Bs2DsPi*BsHypo_BDTG.root/DecayTree");
-    lifetime MCsample(MCChain);
-    selAccTree(MCsample, ftree, felist, DsK); // remember to delete ftree and felist
-  } else {
-    ftree  = (TTree*)      rfile.Get("ftree");
-    felist = (TEntryList*) rfile.Get("felist");
+    // select
+    if (doSelect) {
+      bool DsK(i < 1);
+      string tuplename((i < 1) ? "../ntuples/MC/Dsh-MC11/Merged_Bs2DsK*BsHypo_BDTG.root/DecayTree" :
+		       "../ntuples/MC/Dsh-MC11/Merged_Bs2DsPi*BsHypo_BDTG.root/DecayTree");
+      TChain * MCChain = initChain("MCChain", tuplename.c_str());
+      lifetime MCsample(MCChain);
+      selAccTree(MCsample, ftree, felist, DsK); // remember to delete ftree and felist
+    } else {
+      ftree  = (TTree*)      rfile.Get("ftree");
+      felist = (TEntryList*) rfile.Get("felist");
+    }
+
+    // ftree and felist can't be NULL pointers
+    assert(ftree);
+    assert(felist);
+
+    std::cout << "Entries: " << ftree->GetEntries() << std::endl;
+    // plotHistos(ftree);
+    // plotHistos(felist);
+    // plotHistoPanel(felist);
+
+    if (doSelect) {
+      rfile.cd();
+      ftree ->Write();
+      felist->Write();
+    }
+
+    // housekeeping
+    delete ftree; delete felist;
   }
-
-  // ftree and felist can't be NULL pointers
-  assert(ftree);
-  assert(felist);
-
-  std::cout << "Entries: " << ftree->GetEntries()
-	    << ", " << felist->GetN() << std::endl;
-  // plotHistos(ftree);
-  // plotHistos(felist);
-  // plotHistoPanel(felist);
-
-  if (doSelect) {
-    rfile.cd();
-    ftree ->Write();
-    felist->Write();
-  }
-
-  // housekeeping
-  delete ftree; delete felist;
   return 0;
 }
 
