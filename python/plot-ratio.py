@@ -82,11 +82,11 @@ workspace1.SetName('workspace1')
 workspace2 = get_workspace(fname2, 'workspace')
 workspace2.SetName('workspace2')
 
-fitresult1 = workspace1.obj('fitresult_FullModel_dataset')
-fitresult1.SetNameTitle('fitresult_FullModel_dataset_%s' % mode1,
+fitresult1 = workspace1.obj('fitresult_PDF_dataset')
+fitresult1.SetNameTitle('fitresult_PDF_dataset_%s' % mode1,
                         '%s decay time acceptance' % mode1)
-fitresult2 = workspace2.obj('fitresult_FullModel_dataset')
-fitresult2.SetNameTitle('fitresult_FullModel_dataset_%s' % mode2,
+fitresult2 = workspace2.obj('fitresult_PDF_dataset')
+fitresult2.SetNameTitle('fitresult_PDF_dataset_%s' % mode2,
                         '%s decay time acceptance' % mode2)
 
 # order of parameters:

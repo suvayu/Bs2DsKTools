@@ -92,7 +92,7 @@ patt = re.compile('powerlaw4|cpowerlaw|bdpt')
 if re.search(patt, accfntype): beta = workspace.var('beta')
 
 # PDFs
-PDF = workspace.pdf('FullModel')
+PDF = workspace.pdf('PDF')
 acceptance = workspace.function('acceptance')
 dataset = workspace.data('dataset')
 
@@ -126,7 +126,7 @@ dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp),
 PDF.plotOn(tframe2, RooFit.ProjWData(dtargset, dataset, True),
            RooFit.LineColor(kBlue))
 acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
-                  RooFit.Normalization(800, RooAbsReal.Relative))
+                  RooFit.Normalization(400, RooAbsReal.Relative))
 
 
 time.setRange('fullrange', epsilon, tmax)
@@ -137,14 +137,14 @@ dataset.plotOn(tframe3, RooFit.MarkerStyle(kFullTriangleUp))
 PDF.plotOn(tframe3, RooFit.ProjWData(dtargset, dataset, True),
            RooFit.LineColor(kBlue))
 acceptance.plotOn(tframe3, RooFit.LineColor(kGreen),
-                  RooFit.Normalization(1000, RooAbsReal.Relative))
+                  RooFit.Normalization(500, RooAbsReal.Relative))
 
 
 print
 tframe3.Print('v')
 
 # FIXME: hard coded RooCurve and RooHist name strings
-pullhist = tframe3.residHist('h_dataset', 'FullModel_Norm[time]_DataAvg[dt]', True)
+pullhist = tframe3.residHist('h_dataset', 'PDF_Norm[time]_DataAvg[dt]', True)
 print 'Y Mean: %E' % pullhist.GetMean(2)
 print 'Y RMS:  %E' % pullhist.GetRMS(2)
 
@@ -186,7 +186,7 @@ if doPrint:
 # ilist = gPad.GetListOfPrimitives()
 # for obj in ilist:
 #     if obj.InheritsFrom(RooCurve.Class()):
-#         if -1 < str(obj.GetName()).find('FullModel'):
+#         if -1 < str(obj.GetName()).find('PDF'):
 #             pdfname = obj.GetName()
 #     if obj.InheritsFrom(RooHist.Class()):
 #         dstname = obj.GetName()
