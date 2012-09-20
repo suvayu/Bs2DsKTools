@@ -138,6 +138,7 @@ def save_in_workspace(fname, **argsets):
         print 'Importing RooFit objects in %s list.' % key
         for arg in argsets[key]: _import(workspace, arg)
     workspace.writeToFile(fname)
+    print 'Saving arguments to file: %s' % fname
 
 
 def get_workspace(fname, wname):

@@ -197,6 +197,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     # Get tree
     rfile = get_file('data/smalltree-new-MC%s.root' % fsuffix, 'read')
     ftree = get_object('ftree', rfile)
+    print 'Reading from file: %s' % rfile.GetName()
 
     # Trigger:
     # HLT1TrackAllL0TOS
@@ -344,6 +345,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
 
     # Print plots
     canvas.Print(plotfile)
+    print 'Plotting to file: %s' % plotfile
 
     # Persistify variables, PDFs and datasets
     save_in_workspace(rootfile, var=varlist, pdf=[PDF], data=[dataset],
