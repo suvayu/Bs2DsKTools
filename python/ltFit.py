@@ -236,8 +236,9 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     mean = RooRealVar('mean', 'Mean', 0.)
     scale = RooRealVar('scale', 'Per-event time error scale factor', 1.19)
     resmodel = RooGaussModel('resmodel', 'Time resolution model', time,
-                             mean, RooRealConstant.value(0.44),
-                             RooRealConstant.value(1.0), scale)
+                             mean, RooRealConstant.value(0.044),
+                             RooRealConstant.value(1.0),
+                             RooRealConstant.value(1.0))
                              # RooRealConstant::value(0), scale, dt)
                              # RooRealConstant::value(0), scale,
                              # RooRealConstant::value(0.00004))
