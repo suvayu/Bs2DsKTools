@@ -112,7 +112,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     if not accfn.find('powerlaw') < 0:
         turnon = RooRealVar('turnon', 'turnon', 1.5, 0.5, 5.0)
         exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
-        offset = RooRealVar('offset', 'offset', 0.0, -0.5, 0.5)
+        offset = RooRealVar('offset', 'offset', 0.0) # , -0.5, 0.5)
         beta = RooRealVar('beta', 'beta', 0.04, 0.00, 0.05)
         varlist += [ turnon, exponent, offset, beta ]
     elif accfn == 'bdpt':
