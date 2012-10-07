@@ -18,7 +18,7 @@ class RunningAverage(object):
 
     """
 
-    def __init__(self, ):
+    def __init__(self):
         self.__mean__ = 0.
         self.__var__ = 0.
         self.__min__ = sys.float_info.max
@@ -27,11 +27,7 @@ class RunningAverage(object):
 
     def reset(self):
         """Reset running average calculation."""
-        self.__mean__ = 0.
-        self.__var__ = 0.
-        self.__min__ = sys.float_info.max
-        self.__max__ = sys.float_info.min
-        self.__nentries__ = 0
+        self.__init__()
 
     def fill(self, x):
         """Calculate running average and variance (default method).
