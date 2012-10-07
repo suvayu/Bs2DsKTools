@@ -122,7 +122,7 @@ def get_dataset(varargset, ftree, cut, *cutVars):
     return dataset
 
 
-def save_in_workspace(fname, **argsets):
+def save_in_workspace(rfile, **argsets):
     """Save RooFit objects in workspace and persistify.
 
     Pass the different types of objects as a keyword arguments. e.g.
@@ -137,12 +137,12 @@ def save_in_workspace(fname, **argsets):
     for key in keys:
         print 'Importing RooFit objects in %s list.' % key
         for arg in argsets[key]: _import(workspace, arg)
-    workspace.writeToFile(fname)
-    print 'Saving arguments to file: %s' % fname
+    rfile.WriteTObject(workspace)
+    print 'Saving arguments to file: %s' % rfile.GetName()
 
 
 def get_workspace(fname, wname):
     """Read and return RooWorkspace from file."""
     ffile = get_file(fname, 'read')
     workspace = ffile.Get(wname)
-    return workspace
+    return workspace, ffile

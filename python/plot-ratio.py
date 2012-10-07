@@ -60,11 +60,11 @@ loadstatus = { 0: 'loaded',
 
 library = 'libacceptance.so'
 status = gSystem.Load(library)
-if status < 0: sys.exit('Problem loading %s, %s' % (library, loadstatus[status]) )
+if status < 0: sys.exit('Problem loading %s, %s' % (library, loadstatus[status]))
 from ROOT import PowLawAcceptance
 
 # my stuff
-from factory import get_workspace
+from factory import get_workspace, get_file, get_object
 from utilities import RunningAverage
 
 # time range and bins for ratio plots
@@ -77,17 +77,22 @@ nbins = 150
 # data/fitresult-DsK-powerlaw4-2012-08-10-Fri-07-56.root
 
 # Get objects from workspace
-workspace1 = get_workspace(fname1, 'workspace')
-workspace1.SetName('workspace1')
-workspace2 = get_workspace(fname2, 'workspace')
-workspace2.SetName('workspace2')
+fitresults = []
+fnames = [ fname1, fname2 ]
+modes = [mode1, mode2]
+for i in xrange(0, len(fnames)):
+    fn = fnames[i]
+    mode = modes[i]
+    ws, ffile = get_workspace(fn, 'workspace')
+    # ws.Print('v')
+    fitresult = ws.obj('fitresult_Model_dataset')
+    fitresult.SetNameTitle('fitresult_Model_dataset_%s' % mode,
+                            '%s decay time acceptance' % mode)
+    fitresults.append(fitresult.Clone())
+    ffile.Close()
 
-fitresult1 = workspace1.obj('fitresult_PDF_dataset')
-fitresult1.SetNameTitle('fitresult_PDF_dataset_%s' % mode1,
-                        '%s decay time acceptance' % mode1)
-fitresult2 = workspace2.obj('fitresult_PDF_dataset')
-fitresult2.SetNameTitle('fitresult_PDF_dataset_%s' % mode2,
-                        '%s decay time acceptance' % mode2)
+fitresult1 = fitresults[0]
+fitresult2 = fitresults[1]
 
 # order of parameters:
 # - beta
@@ -218,17 +223,27 @@ for i in range(nbins):
     val = fns[-1].Eval(haccratio.GetBinCenter(i+1))
     haccratio.SetBinContent(i+1, val)
 
+rfile1 = get_file(fname1, 'read')
+hist1 = get_object('hdataset_%s' % mode1, rfile1)
+
+rfile2 = get_file(fname2, 'read')
+hist2 = get_object('hdataset_%s' % mode2, rfile2)
+
+hratio = hist1.Clone('%s_DsPi' % hist1.GetName())
+hratio.Divide(hist2)
+
 if doPrint:
     plt.savefig('plots/acceptance-ratio-%s-mean-rms.png' % accfntype1)
     plt.savefig('plots/acceptance-ratio-%s-mean-rms.pdf' % accfntype1)
     print 'Printed: plots/acceptance-ratio-%s-mean-rms.{png,pdf}' % accfntype1
 
     # save acceptance ratio as ROOT histogram
-    rfile = TFile('data/acceptance-ratio-hists.root', 'update')
+    rfile = TFile('data/acceptance-ratio-hists-%s.root' % constoffset1, 'update')
     haccratio.SetDirectory(rfile)
+    hratio.SetDirectory(rfile)
     rfile.Write('', TFile.kOverwrite)
+    print 'Wrote ROOT file: %s' % rfile.GetName()
     rfile.Close()
-    print 'Wrote ROOT file: data/acceptance-ratio-hists.root'
 else:
     plt.show()
 

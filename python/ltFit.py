@@ -225,12 +225,15 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
         print 'Unrecognised mode: %s. Aborting.' % mode
         return
 
+    time.setBins(150)
     try:
         dataset = get_dataset(RooArgSet(time), ftree, cut, modeVar, trigger1Var,
                               trigger2Var, trigger3Var, trigger4Var)
     except TypeError, IOError:
         print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
     if isToy: del dataset
+    datahist = dataset.binnedClone('datahist')
+    hist = datahist.createHistogram('time')
 
     # Resolution model
     mean = RooRealVar('mean', 'Mean', 0.)
@@ -348,9 +351,16 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     canvas.Print(plotfile)
     print 'Plotting to file: %s' % plotfile
 
+    hfile = TFile(rootfile, 'recreate')
     # Persistify variables, PDFs and datasets
-    save_in_workspace(rootfile, var=varlist, pdf=[PDF], data=[dataset],
+    save_in_workspace(hfile, var=varlist, pdf=[PDF], data=[dataset],
                       fit=[fitresult], plots=[tframe1, tframe2])
+
+    hist.SetName('hdataset_%s' % mode)
+    # hist.SetDirectory(hfile)
+    # hfile.Write('', TFile.kOverwrite)
+    hfile.WriteTObject(hist)
+    hfile.Close()
 
 
 if __name__ == "__main__":

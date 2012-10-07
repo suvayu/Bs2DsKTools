@@ -76,7 +76,7 @@ tmax = 15.0
 # data/fitresult-powerlaw3-2012-06-23-Sat-23-50.root
 
 # Get objects from workspace
-workspace = get_workspace(fname, 'workspace')
+workspace, rfile = get_workspace(fname, 'workspace')
 # variables
 time = workspace.var('time')
 dt = workspace.var('dt')
