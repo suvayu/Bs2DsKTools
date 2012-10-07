@@ -27,10 +27,12 @@ fname2 = options.file2
 fname1tokens = fname1.split('-')
 accfntype1 = fname1tokens[2]
 mode1 = fname1tokens[1]
+constoffset1 = fname1tokens[-1]
 
 fname2tokens = fname2.split('-')
 accfntype2 = fname2tokens[2]
 mode2 = fname2tokens[1]
+constoffset2 = fname2tokens[-1]
 
 # FIXME: Batch running fails on importing anything but gROOT
 # ROOT global variables
@@ -45,7 +47,7 @@ from ROOT import kFullTriangleUp
 
 # ROOT classes
 from ROOT import TTree, TFile, TCanvas, TPad, TClass, TLatex
-from ROOT import TF1, TMatrixDSym, TH1D, TH2D
+from ROOT import TF1, TMatrixDSym, TH1, TH1D, TH2D
 
 # RooFit classes
 from ROOT import RooPlot, RooWorkspace, RooFitResult, RooFit
@@ -163,8 +165,8 @@ fns += [ratio.Clone('%s_%d' % (ratio.GetName(), entry+1))]
 # ratio.GetYaxis().SetTitle('Acceptance ratio (DsK/Ds#pi)')
 
 if doPrint:
-    gPad.Print('plots/acceptance-ratio-%s.png' % accfntype1)
-    gPad.Print('plots/acceptance-ratio-%s.pdf' % accfntype1)
+    gPad.Print('plots/acceptance-ratio-%s-%s.png' % (accfntype1, constoffset1))
+    gPad.Print('plots/acceptance-ratio-%s-%s.pdf' % (accfntype1, constoffset2))
 
 
 # get the ratio from the ensemble of generated parameter sets

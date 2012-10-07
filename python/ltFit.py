@@ -85,7 +85,7 @@ tau = 1.0 / gamma
 dgamma = gammaH - gammaL
 
 
-def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
+def main(accfn='powerlaw', mode='DsK', fsuffix='', constoffset=False, isToy=False):
     """Setup RooFit variables then construct the PDF as per options.
 
     Fit the model to a dataset. If toy generation is requested,
@@ -97,6 +97,7 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     # for persistency/logging
     varlist = []
     pdflist = []
+    print 'Fitting with constant offset set to: %d' % constoffset
 
     # Observables
     time = RooRealVar('time', 'B_{s} lifetime in ps', epsilon, 15.0)
@@ -112,7 +113,10 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
     if not accfn.find('powerlaw') < 0:
         turnon = RooRealVar('turnon', 'turnon', 1.5, 0.5, 5.0)
         exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
-        offset = RooRealVar('offset', 'offset', 0.0) # , -0.5, 0.5)
+        if constoffset:
+            offset = RooRealVar('offset', 'offset', 0.0)
+        else:
+            offset = RooRealVar('offset', 'offset', 0.0, -0.5, 0.5)
         beta = RooRealVar('beta', 'beta', 0.04, 0.00, 0.05)
         varlist += [ turnon, exponent, offset, beta ]
     elif accfn == 'bdpt':
@@ -344,8 +348,8 @@ def main(accfn='powerlaw', mode='DsK', fsuffix='', isToy=False):
 
     # Save plots and PDFs
     timestamp = get_timestamp()
-    plotfile = 'plots/canvas-%s-%s-%s.png' % (mode, accfn, timestamp)
-    rootfile = 'data/fitresult-%s-%s-%s.root' % (mode, accfn, timestamp)
+    plotfile = 'plots/canvas-%s-%s-%s-const-offset-%d.png' % (mode, accfn, timestamp, constoffset)
+    rootfile = 'data/fitresult-%s-%s-%s-const-offset-%d.root' % (mode, accfn, timestamp, constoffset)
 
     # Print plots
     canvas.Print(plotfile)
@@ -369,9 +373,14 @@ if __name__ == "__main__":
         fn = sys.argv[1]
         mode = sys.argv[2]
         fsuffix = sys.argv[3]
+        if sys.argv[4] == '1':
+            constoffset = True
+        else:
+            constoffset = False
     else:
         fn = 'cpowerlaw'
         mode = 'DsK'
         fsuffix = ''
+        constoffset = False
 
-    main(fn, mode, fsuffix, False)
+    main(fn, mode, fsuffix, constoffset, False)
