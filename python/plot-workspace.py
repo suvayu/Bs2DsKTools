@@ -92,7 +92,7 @@ patt = re.compile('powerlaw4|cpowerlaw|bdpt')
 if re.search(patt, accfntype): beta = workspace.var('beta')
 
 # PDFs
-PDF = workspace.pdf('PDF')
+PDF = workspace.pdf('Model')
 acceptance = workspace.function('acceptance')
 dataset = workspace.data('dataset')
 
@@ -144,7 +144,7 @@ print
 tframe3.Print('v')
 
 # FIXME: hard coded RooCurve and RooHist name strings
-pullhist = tframe3.residHist('h_dataset', 'PDF_Norm[time]_DataAvg[dt]', True)
+pullhist = tframe3.residHist('h_dataset', 'Model_Norm[time]', True)
 print 'Y Mean: %E' % pullhist.GetMean(2)
 print 'Y RMS:  %E' % pullhist.GetRMS(2)
 
@@ -186,7 +186,7 @@ if doPrint:
 # ilist = gPad.GetListOfPrimitives()
 # for obj in ilist:
 #     if obj.InheritsFrom(RooCurve.Class()):
-#         if -1 < str(obj.GetName()).find('PDF'):
+#         if -1 < str(obj.GetName()).find('Model'):
 #             pdfname = obj.GetName()
 #     if obj.InheritsFrom(RooHist.Class()):
 #         dstname = obj.GetName()
