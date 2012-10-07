@@ -2,7 +2,7 @@
 
 """This module implements several statistical tools.
 
-Classes: RunningAverage
+Classes: RunningAverage, BinnedAvgFunction
 
 """
 
@@ -100,3 +100,39 @@ class RunningAverage(object):
     def max(self):
         """Return maximum."""
         return self.__max__
+
+
+import numpy
+from ROOT import TF1
+
+class BinnedAvgFunction(object):
+    """Finds binned average of an ensemble of ROOT functions.
+
+    The running average of the ensemble of ROOT functions in bins are
+    used as the binned average function.  The running variances of the
+    ensemble are treated as vertical error bars for the function.
+
+    """
+
+    def __init__(self, fnlist, xbins):
+        self.__fns__ = fnlist
+        self.__xbins__ = xbins
+        self.__fnavg__ = numpy.zeros(len(xbins), dtype=float)
+        self.__fnavgerr__ = numpy.zeros(len(xbins), dtype=float)
+
+    def calculate(self):
+        """Calculate average and variances."""
+        for i, xval in enumerate(self.__xbins__):
+            ravg = RunningAverage()
+            for fn in self.__fns__:
+                ravg.fill(fn.Eval(xval))
+            self.__fnavg__[i] = ravg.mean()
+            self.__fnavgerr__[i] = ravg.rms()
+
+    def get_avg_fn(self):
+        """Return binned average function."""
+        return self.__fnavg__
+
+    def get_avg_fn_var(self):
+        """Return variance for binned average function."""
+        return self.__fnavgerr__
