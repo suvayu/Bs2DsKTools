@@ -67,7 +67,7 @@ from ROOT import PowLawAcceptance
 
 # my stuff
 from factory import get_workspace, get_file, get_object
-from utilities import RunningAverage
+from stattools import RunningAverage
 
 # time range and bins for ratio plots
 tfloor = 0.2
