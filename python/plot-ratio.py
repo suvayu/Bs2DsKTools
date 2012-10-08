@@ -67,7 +67,7 @@ from ROOT import PowLawAcceptance
 
 # my stuff
 from factory import get_workspace, get_file, get_object
-from stattools import RunningAverage
+from stattools import *
 
 # time range and bins for ratio plots
 tfloor = 0.2
@@ -89,98 +89,56 @@ for i in xrange(0, len(fnames)):
     # ws.Print('v')
     fitresult = ws.obj('fitresult_Model_dataset')
     fitresult.SetNameTitle('fitresult_Model_dataset_%s' % mode,
-                            '%s decay time acceptance' % mode)
+                           '%s decay time acceptance' % mode)
     fitresults.append(fitresult.Clone())
     ffile.Close()
-
-fitresult1 = fitresults[0]
-fitresult2 = fitresults[1]
 
 # order of parameters:
 # - beta
 # - exponent
 # - offset
 # - turnon
-parlist1 = fitresult1.floatParsFinal()
-parlist2 = fitresult2.floatParsFinal()
-
-cmatrix1 = fitresult1.covarianceMatrix()
-cmatrix2 = fitresult2.covarianceMatrix()
-
-veclist1 = RooArgList()
-veclist2 = RooArgList()
-
-for i in range(parlist1.getSize()):
-    name = '%s1' % parlist1[i].GetName()
-    veclist1.add(parlist1[i].clone(name))
-
-    name = '%s2' % parlist2[i].GetName()
-    veclist2.add(parlist2[i].clone(name))
-
-multigauss1 = RooMultiVarGaussian('multigauss1', 'multigauss1', veclist1, parlist1, cmatrix1)
-multigauss2 = RooMultiVarGaussian('multigauss2', 'multigauss2', veclist2, parlist2, cmatrix2)
-
-dset1 = multigauss1.generate(RooArgSet(veclist1), 1000)
-dset2 = multigauss2.generate(RooArgSet(veclist2), 1000)
+formula = '((1.-1./(1. + ([3]*x)**[1] - [2]))*(1 - [0]*x))'
+acceptance = TF1('acceptance', formula, tfloor, tceil)
+acceptance.SetMinimum(0.5)
+acceptance.SetMaximum(1.5)
 
 # (1) DsK, (2) DsPi
-formula1 = '((1.-1./(1. + ([3]*x)**[1] - [2]))*(1 - [0]*x))'
-formula2 = '((1.-1./(1. + ([7]*x)**[5] - [6]))*(1 - [4]*x))'
-ratio = TF1('ratio', '(%s)/(%s)' % (formula1, formula2), tfloor, tceil)
-ratio.SetMinimum(0.5)
-ratio.SetMaximum(1.5)
-
-ratio.SetLineColor(kBlack)
-ratio.SetLineStyle(3)
-
-fns = []
-for entry in range(dset1.numEntries()):
-    vecset1 = dset1.get(entry)
-    vecset2 = dset2.get(entry)
-
-    veclist1 = RooArgList(vecset1)
-    veclist2 = RooArgList(vecset2)
-    for i in range(veclist1.getSize()):
-        ratio.SetParameter(i, veclist1[i].getVal())
-        ratio.SetParameter(i+4, veclist2[i].getVal())
-
-    fns += [ratio.Clone('%s_%d' % (ratio.GetName(), entry))]
-    if entry == 0:
-        ratio.DrawCopy('l')
-    else:
-        ratio.DrawCopy('same')
-
-for i in range(parlist1.getSize()):
-    ratio.SetParameter(i, parlist1[i].getVal())
-    ratio.SetParameter(i+4, parlist2[i].getVal())
-
-ratio.SetLineColor(kRed)
-ratio.SetLineStyle(1)
-ratio.SetLineWidth(5)
-ratio.DrawCopy('lsame')
-fns += [ratio.Clone('%s_%d' % (ratio.GetName(), entry+1))]
-
-# # labels
-# ratio.GetXaxis().SetTitle('B decay time (ps)')
-# ratio.GetYaxis().SetTitle('Acceptance ratio (DsK/Ds#pi)')
-
-if doPrint:
-    gPad.Print('plots/acceptance-ratio-%s-%s.png' % (accfntype1, constoffset1))
-    gPad.Print('plots/acceptance-ratio-%s-%s.pdf' % (accfntype1, constoffset2))
-
-
-# get the ratio from the ensemble of generated parameter sets
-means = numpy.zeros(nbins, dtype=float)
-varis = numpy.zeros(nbins, dtype=float)
+accfns = []
+accfnerrs = []
 xbincs = numpy.linspace(tfloor + 0.05, tceil - 0.05, nbins)
 
-hratiodist = []
+for mode, fitresult in enumerate(fitresults):
+    parlist = fitresult.floatParsFinal()
+    cmatrix = fitresult.covarianceMatrix()
+
+    veclist = RooArgList()
+    for i in range(parlist.getSize()):
+        name = '%s_%d' % (parlist[i].GetName(), i)
+        veclist.add(parlist[i].clone(name))
+
+    multigauss = RooMultiVarGaussian('multigauss', 'multigauss', veclist, parlist, cmatrix)
+    dset = multigauss.generate(RooArgSet(veclist), 1000)
+
+    fns = []
+    for entry in range(dset.numEntries()):
+        vecset = dset.get(entry)
+        veclist = RooArgList(vecset)
+        for pars in range(veclist.getSize()):
+            acceptance.SetParameter(pars, veclist[pars].getVal())
+        fns += [acceptance.Clone('%s_%d' % (acceptance.GetName(), entry))]
+
+    avgfn = BinnedAvgFunction(fns, xbincs)
+    avgfn.calculate()
+    accfns += [avgfn.get_avg_fn()]
+    accfnerrs += [avgfn.get_avg_fn_var()]
+
+
+means = numpy.zeros(nbins, dtype=float)
+varis = numpy.zeros(nbins, dtype=float)
 for ibin in range(nbins):
-    ravg = RunningAverage()
-    for fn in fns:
-        ravg.fill(fn.Eval(xbincs[ibin]))
-    means[ibin] = ravg.mean()
-    varis[ibin] = math.sqrt(ravg.var())
+    means[ibin] = accfns[0][ibin] / accfns[1][ibin]
+    varis[ibin] = accfnerrs[0][ibin] + accfnerrs[1][ibin]
 
 #     if 0 == (ibin % 30):
 #         hratiodist += [ TH1D('hratiodist_%d' % ibin, 'Distribution of acceptance ratio',
@@ -215,15 +173,10 @@ haccratio = TH1D('haccratio_%s' % accfntype1, 'Acceptance ratio %s' % accfntype1
 haccratio.SetXTitle('B decay time (ps)')
 haccratio.SetYTitle('%s/%s acceptance ratio mean' % (mode1, mode2))
 
-# for i, mean in enumerate(means):
-#     if i < nbins:
-#         haccratio.SetBinContent(i+1, mean)
-#         haccratio.SetBinError(i+1, varis[i])
-
-for i in range(nbins):
-    # fns[-1] point to the best fit value ratio
-    val = fns[-1].Eval(haccratio.GetBinCenter(i+1))
-    haccratio.SetBinContent(i+1, val)
+for i, mean in enumerate(means):
+    if i < nbins:
+        haccratio.SetBinContent(i+1, mean)
+        haccratio.SetBinError(i+1, varis[i])
 
 rfile1 = get_file(fname1, 'read')
 hist1 = get_object('hdataset_%s' % mode1, rfile1)
@@ -231,7 +184,7 @@ hist1 = get_object('hdataset_%s' % mode1, rfile1)
 rfile2 = get_file(fname2, 'read')
 hist2 = get_object('hdataset_%s' % mode2, rfile2)
 
-hratio = hist1.Clone('%s_DsPi' % hist1.GetName())
+hratio = hist1.Clone('hdataset_ratio')
 hratio.Divide(hist2)
 
 if doPrint:
