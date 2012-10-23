@@ -181,7 +181,7 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
    Long64_t nentries = fChain->GetEntries();
    std::cout << nentries << " entries!" << std::endl;
 
-   TLorentzVector BsMom(0,0,0,0);
+   TLorentzVector BsMom(0,0,0,0), hMom(0,0,0,0), DsMom(0,0,0,0);
    TVector3 OWNPV(0,0,0), ENDVX(0,0,0);
    double wt(0.0), truewt(0.0), time(0.0), dt(0.0), truetime(0.0);
 
@@ -203,6 +203,9 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
    ftree.Branch("HLT2Topo3BodyTOS" , &lab0Hlt2Topo3BodyBBDTDecision_TOS);
    ftree.Branch("HLT2Topo2BodyTOS" , &lab0Hlt2Topo2BodyBBDTDecision_TOS);
    ftree.Branch("HLT2TopoIncPhiTOS", &lab0Hlt2IncPhiDecision_TOS);
+
+   ftree.Branch("hMom" , &hMom);
+   ftree.Branch("DsMom", &DsMom);
 
    unsigned long rdskcount(0), rdspicount(0);
    unsigned long dskcount(0), dspicount(0);
@@ -233,6 +236,10 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
        BsMom.SetPxPyPzE(lab0_PX, lab0_PY, lab0_PZ, lab0_MM);
        OWNPV.SetXYZ(lab0_OWNPV_X, lab0_OWNPV_Y, lab0_OWNPV_Z);
        ENDVX.SetXYZ(lab0_ENDVERTEX_X, lab0_ENDVERTEX_Y, lab0_ENDVERTEX_Z);
+
+       hMom.SetPxPyPzE(lab1_PX, lab1_PY, lab1_PZ, lab1_M);
+       DsMom.SetPxPyPzE(lab2_PX, lab2_PY, lab2_PZ, lab2_MM);
+
        ftree.Fill();
        felist.Enter(jentry, fChain);
        if (std::abs(lab1_TRUEID) == 321) dskcount++;
