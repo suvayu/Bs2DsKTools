@@ -181,12 +181,12 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
    Long64_t nentries = fChain->GetEntries();
    std::cout << nentries << " entries!" << std::endl;
 
-   TLorentzVector BsMom(0,0,0,0), hMom(0,0,0,0), DsMom(0,0,0,0);
+   TLorentzVector BsMom(0,0,0,0), hMom(0,0,0,0), DsMom(0,0,0,0),
+     tru_BsMom(0,0,0,0), tru_hMom(0,0,0,0), tru_DsMom(0,0,0,0);
    TVector3 OWNPV(0,0,0), ENDVX(0,0,0);
    double wt(0.0), truewt(0.0), time(0.0), dt(0.0), truetime(0.0);
 
    ftree.Branch("Bsmass" , &lab0_MM);
-   ftree.Branch("BsMom"  , &BsMom);
    ftree.Branch("hID"    , &lab1_TRUEID);
    ftree.Branch("time"   , &time);
    ftree.Branch("dt"     , &dt);
@@ -204,8 +204,13 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
    ftree.Branch("HLT2Topo2BodyTOS" , &lab0Hlt2Topo2BodyBBDTDecision_TOS);
    ftree.Branch("HLT2TopoIncPhiTOS", &lab0Hlt2IncPhiDecision_TOS);
 
+   ftree.Branch("BsMom", &BsMom);
    ftree.Branch("hMom" , &hMom);
    ftree.Branch("DsMom", &DsMom);
+
+   ftree.Branch("tru_BsMom", &tru_BsMom);
+   ftree.Branch("tru_hMom" , &tru_hMom);
+   ftree.Branch("tru_DsMom", &tru_DsMom);
 
    unsigned long rdskcount(0), rdspicount(0);
    unsigned long dskcount(0), dspicount(0);
@@ -233,12 +238,16 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
        truetime = lab0_TRUETAU * 1E3;
        wt       = TMath::Exp(lab0_TAU*1e3/1.472);
        truewt   = TMath::Exp(lab0_TRUETAU*1e3/1.472);
-       BsMom.SetPxPyPzE(lab0_PX, lab0_PY, lab0_PZ, lab0_MM);
        OWNPV.SetXYZ(lab0_OWNPV_X, lab0_OWNPV_Y, lab0_OWNPV_Z);
        ENDVX.SetXYZ(lab0_ENDVERTEX_X, lab0_ENDVERTEX_Y, lab0_ENDVERTEX_Z);
 
-       hMom.SetPxPyPzE(lab1_PX, lab1_PY, lab1_PZ, lab1_M);
-       DsMom.SetPxPyPzE(lab2_PX, lab2_PY, lab2_PZ, lab2_MM);
+       BsMom.SetXYZM(lab0_PX, lab0_PY, lab0_PZ, lab0_MM);
+       hMom .SetXYZM(lab1_PX, lab1_PY, lab1_PZ, lab1_M);
+       DsMom.SetXYZM(lab2_PX, lab2_PY, lab2_PZ, lab2_MM);
+
+       tru_BsMom.SetPxPyPzE(lab0_TRUEP_X, lab0_TRUEP_Y, lab0_TRUEP_Z, lab0_TRUEP_E);
+       tru_hMom .SetPxPyPzE(lab1_TRUEP_X, lab1_TRUEP_Y, lab1_TRUEP_Z, lab1_TRUEP_E);
+       tru_DsMom.SetPxPyPzE(lab2_TRUEP_X, lab2_TRUEP_Y, lab2_TRUEP_Z, lab2_TRUEP_E);
 
        ftree.Fill();
        felist.Enter(jentry, fChain);
