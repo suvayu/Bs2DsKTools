@@ -74,6 +74,7 @@ TREESRC      += lifetime.cxx
 # libacceptance.so
 ACCSRC        =
 ACCSRC       += PowLawAcceptance.cxx
+ACCSRC       += AcceptanceRatio.cxx
 ACCSRC       += ErfAcceptance.cxx
 ACCSRC       += BdPTAcceptance.cxx
 
