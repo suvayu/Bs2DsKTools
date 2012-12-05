@@ -49,7 +49,7 @@ from ROOT import RooPlot, RooWorkspace, RooFitResult
 from ROOT import RooArgSet, RooArgList
 from ROOT import RooAbsReal, RooRealVar, RooRealConstant, RooFormulaVar
 from ROOT import RooAbsPdf, RooGaussian
-from ROOT import RooGenericPdf, RooEffProd, RooAddPdf, RooProdPdf, RooHistPdf
+from ROOT import RooGenericPdf, RooEffProd, RooAddPdf, RooProdPdf, RooHistPdf, RooProduct
 from ROOT import RooDataSet, RooDataHist, RooKeysPdf
 from ROOT import RooDecay, RooBDecay, RooGaussModel, RooUniformBinning
 
@@ -67,7 +67,7 @@ loadstatus = { 0: 'loaded',
 library = 'libacceptance.so'
 status = gSystem.Load(library)
 if status < 0: sys.exit('Problem loading %s, %s' % (library, loadstatus[status]) )
-from ROOT import PowLawAcceptance, BdPTAcceptance #, ErfAcceptance
+from ROOT import PowLawAcceptance, BdPTAcceptance, AcceptanceRatio
 
 epsilon = 0.2
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
@@ -124,7 +124,7 @@ time = RooRealVar('time', 'B_{s} lifetime in ps', epsilon, 15.0)
 varlist += [ time ]
 
 # Parameters
-if not accfn.find('powerlaw') < 0:
+if (not accfn.find('powerlaw') < 0) or (accfn == 'ratio'):
     turnon = RooRealVar('turnon', 'turnon', 1.5, 0.5, 5.0)
     exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
     if constoffset:
@@ -133,6 +133,12 @@ if not accfn.find('powerlaw') < 0:
         offset = RooRealVar('offset', 'offset', 0.0, -0.5, 0.5)
     beta = RooRealVar('beta', 'beta', 0.04, 0.00, 0.05)
     varlist += [ turnon, exponent, offset, beta ]
+    if accfn == 'ratio':
+        rnorm = RooRealVar('rnorm', 'rnorm', 1.3, 0.9, 2.0)
+        rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
+        roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.5)
+        rbeta = RooRealVar('rbeta', 'rbeta', 0.01, 0.00, 0.05)
+        varlist += [ rnorm, rturnon, roffset, rbeta ]
 elif accfn == 'bdpt':
     beta = RooRealVar('beta', 'beta', 0.04, 0.01, 0.07)
     slope = RooRealVar('slope', 'slope', 1.1, 0.1, 2.0)
@@ -204,7 +210,12 @@ elif accfn == 'bdpt':
     acceptance = BdPTAcceptance('acceptance',  'Bd PT acceptance',
                                 time, beta, slope, offset)
 elif accfn == 'ratio':
-    pass
+    acceptance_fn = PowLawAcceptance('acceptance_fn', 'Power law acceptance',
+                                     turnon, time, offset, exponent, beta)
+    ratio = AcceptanceRatio('ratio', 'Acceptance ratio',
+                            time, rnorm, rturnon, roffset, rbeta)
+    acceptance = RooProduct('acceptance', 'Acceptance with ratio',
+                            RooArgList(acceptance_fn, ratio))
 else:
     sys.exit('Unknown acceptance type. Aborting')
 
