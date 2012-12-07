@@ -23,27 +23,54 @@ is read from an ntuple and fitted to the model otherwise.
 
 """
 
-# Python modules
+
+## Python modules
 import os
 import sys
 from datetime import datetime
 
+## Option parsing
+import optparse
+usage='usage: $ %s <accfn> <mode> [options]' % sys.argv[0]
+description  = "<accfn> is Fit type to perform, cpowerlaw, ratio(default), etc.  "
+description += "<mode> is Bs decay mode, DsK (default) or DsPi."
+parser = optparse.OptionParser(description=description, usage=usage)
+
+# helpstr = 'ROOT file with fitresult from Dsπ fit, needed only for ratio fit with DsK (default: None).'
+parser.add_option('-r', '--ref', default=None,
+                  help='ROOT file with fitresult from DsPi fit, needed only for ratio fit with DsK (default: None).')
+
+# parser.add_option('accfn', default='ratio',
+#                   help='Fit type to perform, cpowerlaw, ratio(default), etc.')
+# parser.add_option('mode', default='DsK',
+#                   help='Bs decay mode, DsK (default) or DsPi.')
+
+options, args = parser.parse_args()
+fitresultfile = options.ref
+accfn = args[0]
+mode = args[1]
+
+# legacy options
+isToy=False
+constoffset = False
+
+
+## ROOT global variables
 # FIXME: Batch running fails on importing anything but gROOT
-# ROOT global variables
 from ROOT import gROOT
 gROOT.SetBatch(True)
 
 from ROOT import gStyle, gPad, gSystem
 gSystem.Load('libRooFit')
 
-# ROOT colours and styles
+## ROOT colours and styles
 from ROOT import kGreen, kRed, kBlack, kBlue, kAzure, kYellow
 from ROOT import kFullTriangleUp
 
-# ROOT classes
+## ROOT classes
 from ROOT import TTree, TFile, TCanvas, TPad, TClass
 
-# RooFit classes
+## RooFit classes
 from ROOT import RooFit
 from ROOT import RooPlot, RooWorkspace, RooFitResult
 from ROOT import RooArgSet, RooArgList
@@ -53,8 +80,8 @@ from ROOT import RooGenericPdf, RooEffProd, RooAddPdf, RooProdPdf, RooHistPdf, R
 from ROOT import RooDataSet, RooDataHist, RooKeysPdf
 from ROOT import RooDecay, RooBDecay, RooGaussModel, RooUniformBinning
 
-# my stuff
-from factory import *
+## my stuff
+from factory import *           # FIXME: clean up, do not use *
 set_integrator_config()
 
 # execfile('rootlogon.py')
@@ -69,11 +96,7 @@ status = gSystem.Load(library)
 if status < 0: sys.exit('Problem loading %s, %s' % (library, loadstatus[status]) )
 from ROOT import PowLawAcceptance, BdPTAcceptance, AcceptanceRatio
 
-epsilon = 0.2
-# epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
-
-
-# Physics constants
+## Physics constants
 # FIXME: check if the definitions are correct.  For now does not
 # matter as symmetric
 tauH = 1.536875
@@ -84,22 +107,8 @@ gamma = (gammaH + gammaL) / 2.0
 tau = 1.0 / gamma
 dgamma = gammaH - gammaL
 
-
-# option parsing
-isToy=False
-if len(sys.argv) > 1:
-    accfn = sys.argv[1]
-    mode = sys.argv[2]
-    fsuffix = sys.argv[3]
-    if sys.argv[4] == '1':
-        constoffset = True
-    else:
-        constoffset = False
-else:
-    accfn = 'cpowerlaw'
-    mode = 'DsK'
-    fsuffix = ''
-    constoffset = False
+epsilon = 0.2
+# epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
 
 
 ## Fit
@@ -111,7 +120,7 @@ else:
 # for persistency/logging
 varlist = []
 pdflist = []
-print 'Fitting with constant offset set to: %d' % constoffset
+print 'Legacy: Fitting with constant offset set to %d' % constoffset
 
 # Observables
 time = RooRealVar('time', 'B_{s} lifetime in ps', epsilon, 15.0)
@@ -135,7 +144,7 @@ if not accfn.find('powerlaw') < 0:
     varlist += [ turnon, exponent, offset, beta ]
 elif accfn == 'ratio':
     # get parameters from Dsπ fit and fix them
-    ws, ffile = get_workspace('data/fitresult-DsPi-cpowerlaw-2012-12-05-Wed-08-45-const-offset-0.root', 'workspace')
+    ws, ffile = get_workspace(fitresultfile, 'workspace')
     ws.SetNameTitle('%s_%s' % (mode, ws.GetName()), '%s %s' % (mode, ws.GetTitle()))
     turnon = RooRealConstant.value(ws.var('turnon').getValV())
     exponent = RooRealConstant.value(ws.var('exponent').getValV())
@@ -234,7 +243,7 @@ pdflist += [acceptance]
 # Build full 2-D PDF (t, δt)
 argset = RooArgSet(time)
 # Get tree
-rfile = get_file('data/smalltree-new-MC%s.root' % fsuffix, 'read')
+rfile = get_file('data/smalltree-new-MC-pico-offline-%s.root' % mode, 'read')
 ftree = get_object('ftree', rfile)
 print 'Reading from file: %s' % rfile.GetName()
 
