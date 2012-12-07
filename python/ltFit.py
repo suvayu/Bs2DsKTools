@@ -124,7 +124,7 @@ time = RooRealVar('time', 'B_{s} lifetime in ps', epsilon, 15.0)
 varlist += [ time ]
 
 # Parameters
-if (not accfn.find('powerlaw') < 0) or (accfn == 'ratio'):
+if not accfn.find('powerlaw') < 0:
     turnon = RooRealVar('turnon', 'turnon', 1.5, 0.5, 5.0)
     exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
     if constoffset:
@@ -133,12 +133,22 @@ if (not accfn.find('powerlaw') < 0) or (accfn == 'ratio'):
         offset = RooRealVar('offset', 'offset', 0.0, -0.5, 0.5)
     beta = RooRealVar('beta', 'beta', 0.04, 0.00, 0.05)
     varlist += [ turnon, exponent, offset, beta ]
-    if accfn == 'ratio':
-        rnorm = RooRealVar('rnorm', 'rnorm', 1.3, 0.9, 2.0)
-        rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
-        roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.5)
-        rbeta = RooRealVar('rbeta', 'rbeta', 0.01, 0.00, 0.05)
-        varlist += [ rnorm, rturnon, roffset, rbeta ]
+elif accfn == 'ratio':
+    # get parameters from Dsπ fit and fix them
+    ws, ffile = get_workspace('data/fitresult-DsPi-cpowerlaw-2012-12-05-Wed-08-45-const-offset-0.root', 'workspace')
+    ws.SetNameTitle('%s_%s' % (mode, ws.GetName()), '%s %s' % (mode, ws.GetTitle()))
+    turnon = RooRealConstant.value(ws.var('turnon').getValV())
+    exponent = RooRealConstant.value(ws.var('exponent').getValV())
+    offset = RooRealConstant.value(ws.var('offset').getValV())
+    beta = RooRealConstant.value(ws.var('beta').getValV())
+    ffile.Close()
+    del ws, ffile
+    # ratio parameters
+    rnorm = RooRealVar('rnorm', 'rnorm', 1.3, 0.9, 2.0)
+    rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
+    roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.5)
+    rbeta = RooRealVar('rbeta', 'rbeta', 0.01, 0.00, 0.05)
+    varlist += [ turnon, exponent, offset, beta , rnorm, rturnon, roffset, rbeta ]
 elif accfn == 'bdpt':
     beta = RooRealVar('beta', 'beta', 0.04, 0.01, 0.07)
     slope = RooRealVar('slope', 'slope', 1.1, 0.1, 2.0)
