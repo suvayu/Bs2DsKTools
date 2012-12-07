@@ -14,8 +14,8 @@ import sys
 from datetime import datetime
 
 # # FIXME: Batch running fails on importing anything but gROOT
-# # ROOT global variables
-# from ROOT import gROOT, gStyle, gPad, gSystem
+# ROOT global variables
+from ROOT import gROOT, gSystem
 
 # ROOT classes
 from ROOT import TTree, TFile, TCanvas, TPad, TClass
@@ -39,6 +39,16 @@ def get_timestamp(fmt='%Y-%m-%d-%a-%H-%M'):
 
 
 # ROOT wrappers
+def load_library(library):
+    loadstatus = { 0: 'loaded',
+                   1: 'already loaded',
+                   -1: 'does not exist',
+                   -2: 'version mismatch' }
+    status = gSystem.Load(library)
+    if status < 0:
+        sys.exit('Problem loading %s, %s' % (library, loadstatus[status]))
+
+
 def get_file(fname, mode='read'):
     """Open and return a ROOT file."""
     if os.path.exists(fname):
