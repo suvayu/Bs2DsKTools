@@ -156,7 +156,7 @@ elif accfn == 'ratio':
     rnorm = RooRealVar('rnorm', 'rnorm', 1.3, 0.9, 2.0)
     rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
     roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.5)
-    rbeta = RooRealVar('rbeta', 'rbeta', 0.01, 0.00, 0.05)
+    rbeta = RooRealVar('rbeta', 'rbeta', 0.01, -0.05, 0.05)
     varlist += [ turnon, exponent, offset, beta , rnorm, rturnon, roffset, rbeta ]
 elif accfn == 'bdpt':
     beta = RooRealVar('beta', 'beta', 0.04, 0.01, 0.07)

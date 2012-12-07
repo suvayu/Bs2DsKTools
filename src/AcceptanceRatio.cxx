@@ -86,7 +86,7 @@ Double_t AcceptanceRatio::evaluate() const
     beta((Double_t)_beta);
 
   if (time < 0.2) return 0.;
-  if (beta < -0.0) return 0.0;
+  // if (beta < -0.0) return 0.0;
   if (beta*time > 1.0) return 0.0;
   Double_t exponential = std::exp(-1.0 * turnon * (time - offset));
 
