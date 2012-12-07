@@ -86,14 +86,7 @@ set_integrator_config()
 
 # execfile('rootlogon.py')
 # Load custom ROOT classes
-loadstatus = { 0: 'loaded',
-               1: 'already loaded',
-               -1: 'does not exist',
-               -2: 'version mismatch' }
-
-library = 'libacceptance.so'
-status = gSystem.Load(library)
-if status < 0: sys.exit('Problem loading %s, %s' % (library, loadstatus[status]) )
+load_library('libacceptance.so')
 from ROOT import PowLawAcceptance, BdPTAcceptance, AcceptanceRatio
 
 ## Physics constants

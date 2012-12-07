@@ -53,19 +53,12 @@ from ROOT import RooAbsData, RooDataSet, RooDataHist
 from ROOT import RooDecay, RooGaussModel
 from ROOT import RooList, RooCurve, RooHist
 
-# Load custom ROOT classes
-loadstatus = { 0: 'loaded',
-               1: 'already loaded',
-               -1: 'does not exist',
-               -2: 'version mismatch' }
-
-library = 'libacceptance.so'
-status = gSystem.Load(library)
-if status < 0: sys.exit('Problem loading %s, %s' % (library, loadstatus[status]) )
-from ROOT import PowLawAcceptance, BdPTAcceptance #, ErfAcceptance
-
 # my stuff
 from factory import *
+
+# Load custom ROOT classes
+load_library('libacceptance.so')
+from ROOT import PowLawAcceptance, BdPTAcceptance #, ErfAcceptance
 
 set_integrator_config()
 epsilon = 0.2
