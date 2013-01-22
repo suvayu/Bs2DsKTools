@@ -50,6 +50,10 @@ fitresultfile = options.ref
 accfn = args[0]
 mode = args[1]
 
+# test program argument consistency
+if accfn == 'ratio' and fitresultfile == None:
+    sys.exit('Please provide a ROOT file with the fitresult from DsPi when fitting for acceptance ratio')
+
 # legacy options
 isToy=False
 constoffset = False
