@@ -29,7 +29,7 @@ class RunningAverage(object):
         """Reset running average calculation."""
         self.__init__()
 
-    def fill(self, x):
+    def fill(self, entry):
         """Calculate running average and variance (default method).
 
         Both ways of calculating variance is correct.  The default
@@ -39,19 +39,24 @@ class RunningAverage(object):
         """
 
         self.__nentries__ += 1
-        if x == self.__mean__ and 0. == self.__var__: return
-        newmean = self.__mean__ + (x - self.__mean__) / self.__nentries__
-        newvar = self.__var__ - (newmean - self.__mean__) * (newmean - self.__mean__) + (
-            (x - self.__mean__) * (x - self.__mean__) - self.__var__) / self.__nentries__
-        # newvar = (x**2 + (self.__nentries__ - 1) * (
+        if entry == self.__mean__ and 0. == self.__var__:
+            return
+        newmean = self.__mean__ + (entry - self.__mean__) / self.__nentries__
+        newvar = self.__var__ - (newmean - self.__mean__) * \
+                 (newmean - self.__mean__) + (
+                    (entry - self.__mean__) * (entry - self.__mean__)
+                     - self.__var__) / self.__nentries__
+        # newvar = (entry**2 + (self.__nentries__ - 1) * (
         #     self.__var__ + self.__mean__**2)) / self.__nentries__ - newmean**2
         self.__mean__ = newmean
         self.__var__ = newvar
-        if (self.__min__ > x): self.__min__ = x
-        if (self.__max__ < x): self.__max__ = x
+        if (self.__min__ > entry):
+            self.__min__ = entry
+        if (self.__max__ < entry):
+            self.__max__ = entry
         return
 
-    def alt_fill(self, x):
+    def alt_fill(self, entry):
         """Calculate running average and variance (alternate method).
 
         Both ways of calculating variance is correct.  The default
@@ -61,16 +66,21 @@ class RunningAverage(object):
         """
 
         self.__nentries__ += 1
-        if x == self.__mean__ and 0. == self.__var__: return
-        newmean = self.__mean__ + (x - self.__mean__) / self.__nentries__
-        # newvar = self.__var__ - (newmean - self.__mean__) * (newmean - self.__mean__) + (
-        #     (x - self.__mean__) * (x - self.__mean__) - self.__var__) / self.__nentries__
-        newvar = (x**2 + (self.__nentries__ - 1) * (
+        if entry == self.__mean__ and 0. == self.__var__:
+            return
+        newmean = self.__mean__ + (entry - self.__mean__) / self.__nentries__
+        # newvar = self.__var__ - (newmean - self.__mean__) * \
+        #          (newmean - self.__mean__) + (
+        #             (entry - self.__mean__) * (entry - self.__mean__)
+        #              - self.__var__) / self.__nentries__
+        newvar = (entry**2 + (self.__nentries__ - 1) * (
             self.__var__ + self.__mean__**2)) / self.__nentries__ - newmean**2
         self.__mean__ = newmean
         self.__var__ = newvar
-        if (self.__min__ > x): self.__min__ = x
-        if (self.__max__ < x): self.__max__ = x
+        if (self.__min__ > entry):
+            self.__min__ = entry
+        if (self.__max__ < entry):
+            self.__max__ = entry
         return
 
     def entries(self):
@@ -99,7 +109,6 @@ class RunningAverage(object):
 
 
 import numpy
-from ROOT import TF1
 
 class BinnedAvgFunction(object):
     """Finds binned average of an ensemble of ROOT functions.
@@ -120,8 +129,8 @@ class BinnedAvgFunction(object):
         """Calculate average and variances."""
         for i, xval in enumerate(self.__xbins__):
             ravg = RunningAverage()
-            for fn in self.__fns__:
-                ravg.fill(fn.Eval(xval))
+            for func in self.__fns__:
+                ravg.fill(func.Eval(xval))
             self.__fnavg__[i] = ravg.mean()
             self.__fnavgerr__[i] = ravg.rms()
 
