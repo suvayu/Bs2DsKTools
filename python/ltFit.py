@@ -88,10 +88,8 @@ from ROOT import RooDecay, RooBDecay, RooGaussModel, RooUniformBinning
 from factory import *           # FIXME: clean up, do not use *
 set_integrator_config()
 
-# execfile('rootlogon.py')
-# Load custom ROOT classes
-load_library('libacceptance.so')
-from ROOT import PowLawAcceptance, BdPTAcceptance, AcceptanceRatio
+from pdfhelpers import *
+
 
 ## Physics constants
 # FIXME: check if the definitions are correct.  For now does not
@@ -129,109 +127,11 @@ time = RooRealVar('time', 'B_{s} lifetime in ps', epsilon, 15.0)
 
 varlist += [ time ]
 
-# Parameters
-if not accfn.find('powerlaw') < 0:
-    turnon = RooRealVar('turnon', 'turnon', 1.5, 0.5, 5.0)
-    exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
-    if constoffset:
-        offset = RooRealVar('offset', 'offset', 0.0)
-    else:
-        offset = RooRealVar('offset', 'offset', 0.0, -0.5, 0.5)
-    beta = RooRealVar('beta', 'beta', 0.04, 0.00, 0.05)
-    varlist += [ turnon, exponent, offset, beta ]
+# acceptance function
+if accfn == 'cpowerlaw':
+    acceptance = cpowerlaw_fn(time, varlist)
 elif accfn == 'ratio':
-    # get parameters from Dsπ fit and fix them
-    ws, ffile = get_workspace(fitresultfile, 'workspace')
-    ws.SetNameTitle('%s_%s' % (mode, ws.GetName()), '%s %s' % (mode, ws.GetTitle()))
-    turnon = RooRealConstant.value(ws.var('turnon').getValV())
-    exponent = RooRealConstant.value(ws.var('exponent').getValV())
-    offset = RooRealConstant.value(ws.var('offset').getValV())
-    beta = RooRealConstant.value(ws.var('beta').getValV())
-    ffile.Close()
-    del ws, ffile
-    # ratio parameters
-    rnorm = RooRealVar('rnorm', 'rnorm', 1.3, 0.9, 2.0)
-    rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
-    roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.5)
-    rbeta = RooRealVar('rbeta', 'rbeta', 0.01, -0.05, 0.05)
-    varlist += [ turnon, exponent, offset, beta , rnorm, rturnon, roffset, rbeta ]
-elif accfn == 'bdpt':
-    beta = RooRealVar('beta', 'beta', 0.04, 0.01, 0.07)
-    slope = RooRealVar('slope', 'slope', 1.1, 0.1, 2.0)
-    offset = RooRealVar('offset', 'offset', 0.15, 0.0, 0.3)
-    varlist += [ beta, slope, offset ]
-elif accfn == 'arctan':
-    # here onwards, param ranges are such that time is in ns
-    # turnon has a different range as it is in the denominator
-    turnon = RooRealVar('turnon', 'turnon', 1., 1E-3, 1.)
-    offset = RooRealVar('offset', 'offset', 1E-3, 0, 5E-3)
-    varlist += [ turnon, offset ]
-elif accfn == 'erf':
-    # turnon has a different range as it is in the denominator
-    turnon = RooRealVar('turnon', 'turnon', 1., 1E-4, 100.)
-    offset = RooRealVar('offset', 'offset', 0., -1E-3, 1E-3)
-    varlist += [ turnon, offset ]
-else:
-    sys.exit('Unknown acceptance type. Aborting')
-
-
-# Acceptance model: 1-1/(1+(a*(t-t₀)³)
-# NB: Acceptance is not a PDF by nature
-# Other functional forms:
-# 1. no offset - (1.-1./(1.+(@0*@1)**@2)) with
-#    RooArgList(turnon, time, offset, exponent)
-# 2. Error function - 0.5*(TMath::Erf((@1-@2)/@0)+1) with
-#    RooArgList(turnon, time, offset)
-
-# Condition to ensure acceptance function is always +ve definite.
-# The first condition protects against the undefined nature of the
-# function for times less than 0. Whereas the second condition
-# ensures the 0.2 ps selection cut present in the sample is
-# incorporated into the model.
-
-if accfn == 'powerlaw':
-    acc_cond = '((@1-@2)<0 || @1<0.0002)'
-    expr = '(1.-1./(1.+(@0*(@1-@2))**3))'
-    acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
-                               RooArgList(turnon, time, offset))
-elif accfn == 'powerlaw2':
-    acc_cond = '(((@0*@1)**3 - @2)<0 || @1<0.0002)'
-    expr = '(1.-1./(1. + (@0*@1)**2.75 - @2))'
-    acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
-                               RooArgList(turnon, time, offset))
-elif accfn == 'powerlaw3':
-    acc_cond = '(((@0*@1)**@3 - @2)<0 || @1<0.0002)'
-    expr = '(1.-1./(1. + (@0*@1)**@3 - @2))'
-    acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
-                               RooArgList(turnon, time, offset, exponent))
-elif accfn == 'powerlaw4':
-    acc_cond = '(((@0*@1)**@3 - @2)<0 || @1<0.0002)'
-    expr = '((1.-1./(1. + (@0*@1)**@3 - @2))*(1 - @4*@1))'
-    acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
-                               RooArgList(turnon, time, offset, exponent, beta))
-elif accfn == 'arctan':
-    acc_cond = '(@0<0.0002)'
-    expr = '(atan(@0*exp(@1*@0-@2)))'
-    acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
-                               RooArgList(time, turnon, offset))
-elif accfn == 'erf':
-    acc_cond = '(@1<0.0002)'
-    expr = '(0.5*(TMath::Erf((@1-@2)/@0)+1))'
-    acceptance = RooFormulaVar('acceptance', '%s ? 0 : %s' % (acc_cond, expr),
-                               RooArgList(turnon, time, offset))
-elif accfn == 'cpowerlaw':
-    acceptance = PowLawAcceptance('acceptance',  'Power law acceptance',
-                                  turnon, time, offset, exponent, beta)
-elif accfn == 'bdpt':
-    acceptance = BdPTAcceptance('acceptance',  'Bd PT acceptance',
-                                time, beta, slope, offset)
-elif accfn == 'ratio':
-    acceptance_fn = PowLawAcceptance('acceptance_fn', 'Power law acceptance',
-                                     turnon, time, offset, exponent, beta)
-    ratio = AcceptanceRatio('ratio', 'Acceptance ratio',
-                            time, rnorm, rturnon, roffset, rbeta)
-    acceptance = RooProduct('acceptance', 'Acceptance with ratio',
-                            RooArgList(acceptance_fn, ratio))
+    acceptance = cpowerlaw_ratio_fn(time, mode, fitresultfile, varlist)
 else:
     sys.exit('Unknown acceptance type. Aborting')
 
