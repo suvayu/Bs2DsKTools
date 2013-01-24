@@ -105,6 +105,11 @@ dgamma = gammaH - gammaL
 epsilon = 0.2
 # epsilon = sys.float_info.epsilon # python -> C++ doesn't like this
 
+# for persistency/logging
+varlist = []
+pdflist = []
+print 'Legacy: Fitting with constant offset set to %d' % constoffset
+
 
 ## Fit
 # Setup RooFit variables then construct the PDF as per options.
@@ -112,12 +117,8 @@ epsilon = 0.2
 # generate toys from the model and use as dataset, otherwise read
 # dataset from ntuple in data/smalltree.root.
 
-# for persistency/logging
-varlist = []
-pdflist = []
-print 'Legacy: Fitting with constant offset set to %d' % constoffset
 
-# Observables
+## Observables
 time = RooRealVar('time', 'B_{s} lifetime in ps', epsilon, 15.0)
 # # Limits determined from tree
 # dt = RooRealVar('dt', 'Error in lifetime measurement (ps)', 1E-2, 9E-2)
@@ -127,7 +128,7 @@ time = RooRealVar('time', 'B_{s} lifetime in ps', epsilon, 15.0)
 
 varlist += [ time ]
 
-# acceptance function
+## Acceptance function
 if accfn == 'cpowerlaw':
     acceptance = cpowerlaw_fn(time, varlist)
 elif accfn == 'ratio':
@@ -137,30 +138,29 @@ else:
 
 pdflist += [acceptance]
 
-# Build full 2-D PDF (t, δt)
-argset = RooArgSet(time)
+
+## Read dataset, apply trigger and decay mode selection
 # Get tree
 rfile = get_file('data/smalltree-new-MC-pico-offline-%s.root' % mode, 'read')
 ftree = get_object('ftree', rfile)
 print 'Reading from file: %s' % rfile.GetName()
 
 # Trigger:
-# HLT1TrackAllL0TOS
-# HLT2Topo4BodyTOS
-# HLT2Topo3BodyTOS
-# HLT2Topo2BodyTOS
-# HLT2TopoIncPhiTOS
-trigger1 = 'HLT1TrackAllL0TOS'
-trigger1Var = RooRealVar(trigger1, trigger1, 0, 2)
-trigger2 = 'HLT2Topo2BodyTOS'
-trigger2Var = RooRealVar(trigger2, trigger2, 0, 2)
-trigger3 = 'HLT2Topo3BodyTOS'
-trigger3Var = RooRealVar(trigger3, trigger3, 0, 2)
-trigger4 = 'HLT2Topo4BodyTOS'
-trigger4Var = RooRealVar(trigger4, trigger4, 0, 2)
+tlist = [
+    'HLT1TrackAllL0TOS',
+    'HLT2Topo2BodyTOS',
+    'HLT2Topo3BodyTOS',
+    'HLT2Topo4BodyTOS'
+]
 
-cut = '(%s > 0) && (%s > 0 || %s > 0 || %s > 0)' % (trigger1, trigger2, trigger3, trigger4)
+triggerVars = []
+for var in tlist:
+    triggerVars += [RooRealVar(var, var, 0, 2)]
 
+cut = '(%s > 0) && (%s > 0 || %s > 0 || %s > 0)' % (
+    tlist[0], tlist[1], tlist[2], tlist[3])
+
+# Mode: DsPi or DsK
 modeVar = RooRealVar('hID', 'Decay mode %s' % mode, -350, 350)
 if mode == 'DsK':
     cut += '&& abs(hID) == 321'
@@ -169,16 +169,18 @@ elif mode == 'DsPi':
 else:                       # don't mix modes anymore
     sys.exit( 'Unrecognised mode: %s. Aborting.' % mode)
 
+# Get dataset
 time.setBins(150)
 try:
-    dataset = get_dataset(RooArgSet(time), ftree, cut, modeVar, trigger1Var,
-                          trigger2Var, trigger3Var, trigger4Var)
+    dataset = get_dataset(RooArgSet(time), ftree, cut, modeVar, *triggerVars)
 except TypeError, IOError:
     print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 if isToy: del dataset
 datahist = dataset.binnedClone('datahist')
 hist = datahist.createHistogram('time')
 
+
+## Build full 2-D PDF (t, δt)
 # Resolution model
 mean = RooRealVar('mean', 'Mean', 0.)
 scale = RooRealVar('scale', 'Per-event time error scale factor', 1.19)
@@ -214,14 +216,16 @@ pdflist += [Bdecay, Model]
 # # enable caching for dt integral
 # PDF.setParameterizeIntegral(RooArgSet(dt))
 
-# Generate toy if requested
+
+## Generate toy if requested
 if isToy:
     try:
-        dataset = get_toy_dataset(argset, PDF)
+        dataset = get_toy_dataset(RooArgSet(time), PDF)
     except TypeError, IOError:
         print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
-# Logging
+
+## Logging
 for var in varlist:
     var.Print('v')
 for pdf in pdflist:
@@ -250,6 +254,8 @@ fitresult = PDF.fitTo(dataset, RooFit.Optimize(0),
                       RooFit.Verbose(True))
 fitresult.Print()
 
+
+## Plot results
 # # Use when debugging plots
 # dataset = dataset.reduce(RooFit.EventRange(0, 100))
 
