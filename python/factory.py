@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # coding=utf-8
 """
 This module provides helper functions to get different ROOT and RooFit
