@@ -7,6 +7,10 @@ PDFs.
 """
 
 
+## ROOT global variables
+from ROOT import gSystem
+gSystem.Load('libRooFit')
+
 ## ROOT classes
 from ROOT import TTree, TFile, TClass
 
