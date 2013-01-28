@@ -272,8 +272,10 @@ if isToy:
 
 
 ## Logging
+print 'Variables: ', varlist
 for var in varlist:
     var.Print('v')
+print 'PDFs: ', pdflist
 for pdf in pdflist:
     pdf.Print('v')
 dataset.Print('v')
