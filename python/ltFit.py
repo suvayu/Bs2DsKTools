@@ -167,7 +167,7 @@ elif accfn == 'ratio':
     # ratio parameters
     rnorm = RooRealVar('rnorm', 'rnorm', 1.3, 0.9, 2.0)
     rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
-    roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.5)
+    roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.1)
     rbeta = RooRealVar('rbeta', 'rbeta', 0.01, -0.05, 0.05)
 
     # acceptance
