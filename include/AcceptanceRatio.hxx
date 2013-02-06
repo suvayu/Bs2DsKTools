@@ -28,9 +28,8 @@ public:
 
   AcceptanceRatio();
   AcceptanceRatio(const char *name, const char *title,
-		  RooAbsReal& time, RooAbsReal& norm,
-		  RooAbsReal& turnon, RooAbsReal& offset,
-		  RooAbsReal& beta);
+		  RooAbsReal& time, RooAbsReal& turnon,
+		  RooAbsReal& offset, RooAbsReal& beta);
   AcceptanceRatio(const AcceptanceRatio& other, const char* name=0);
   virtual ~AcceptanceRatio();
   virtual TObject* clone(const char* newname) const;
@@ -41,7 +40,6 @@ protected:
   Double_t evaluate() const;
 
   RooRealProxy _time;
-  RooRealProxy _norm;
   RooRealProxy _turnon;
   RooRealProxy _offset;
   RooRealProxy _beta;

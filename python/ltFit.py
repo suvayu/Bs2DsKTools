@@ -165,7 +165,6 @@ elif accfn == 'ratio':
     del ws, ffile
 
     # ratio parameters
-    rnorm = RooRealVar('rnorm', 'rnorm', 1.3, 0.9, 2.0)
     rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
     roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.1)
     rbeta = RooRealVar('rbeta', 'rbeta', 0.01, -0.05, 0.05)
@@ -174,11 +173,11 @@ elif accfn == 'ratio':
     acceptance_fn = PowLawAcceptance('acceptance_fn', 'Power law acceptance',
                                      turnon, time, offset, exponent, beta)
     ratio = AcceptanceRatio('ratio', 'Acceptance ratio',
-                            time, rnorm, rturnon, roffset, rbeta)
+                            time, rturnon, roffset, rbeta)
     acceptance = RooProduct('acceptance', 'Acceptance with ratio',
                             RooArgList(acceptance_fn, ratio))
     varlist += [ turnon, exponent, offset, beta ,
-                 rnorm, rturnon, roffset, rbeta ]
+                 rturnon, roffset, rbeta ]
 else:
     sys.exit('Unknown acceptance type. Aborting')
 
