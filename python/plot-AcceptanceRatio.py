@@ -33,7 +33,7 @@ if doPrint: gROOT.SetBatch(True)
 from ROOT import gStyle, gPad, gSystem
 
 # ROOT colours and styles
-from ROOT import kGreen, kRed, kBlack, kBlue, kAzure, kYellow
+from ROOT import kGreen, kRed, kBlack, kBlue, kAzure, kYellow, kCyan
 from ROOT import kFullTriangleUp
 
 # ROOT classes
@@ -56,7 +56,7 @@ from ROOT import PowLawAcceptance, AcceptanceRatio
 
 # Get objects from workspace
 workspace, ffile = get_workspace(fname1, 'workspace')
-# workspace.Print('v')
+workspace.Print('v')
 
 # variables
 time = workspace.var('time')
@@ -67,15 +67,28 @@ ratio = workspace.function('ratio')
 # DsK_acceptance = workspace.function('acceptance')
 # DsK_acceptance.SetName('%s_%s' % ('DsK', DsK_acceptance.GetName()))
 
+rturnon = workspace.var('rturnon')
+roffset = workspace.var('roffset')
+rbeta = workspace.var('rbeta')
+
+fitresult = workspace.obj('fitresult_Model_dataset')
+
 # ratio_hist = ratio.createHistogram('ratio_hist', time)
 # ratio_hist.Draw()
 
 tframe = time.frame(RooFit.Title('Time acceptance ratio'))
+
+paramset = RooArgSet(rturnon, roffset, rbeta)
+ratio.plotOn(tframe, RooFit.VisualizeError(fitresult, paramset, 1, False))
 ratio.plotOn(tframe)
+
+## Draw
+# RooFit
 tframe.Draw()
 
 if doPrint:
     gPad.Print('plots/DsK_ratio.png')
     # gPad.Print('plots/DsK_ratio.pdf')
 
+# NB: Do not close file, otherwise plot disappears
 # ffile.Close()
