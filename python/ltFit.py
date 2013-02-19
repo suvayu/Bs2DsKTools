@@ -245,9 +245,9 @@ rbeta = RooRealVar('rbeta', 'rbeta', 0.0, -0.05, 0.05)
 
 ratio = AcceptanceRatio('ratio', 'Acceptance ratio',
                         time, rturnon, roffset, rbeta)
-# dsk_acceptance = RooProduct('dsk_acceptance', 'DsK Acceptance with ratio',
-#                             RooArgList(dspi_acceptance, ratio))
-dsk_acceptance = PowLawAcceptance(dspi_acceptance, 'dsk_acceptance', ratio)
+dsk_acceptance = RooProduct('dsk_acceptance', 'DsK Acceptance with ratio',
+                            RooArgList(dspi_acceptance, ratio))
+# dsk_acceptance = PowLawAcceptance(dspi_acceptance, 'dsk_acceptance', ratio)
 DsK_Model = RooEffProd('DsK_Model', 'DsK acceptance model B_{s}',
                         Bdecay, dsk_acceptance)
 
