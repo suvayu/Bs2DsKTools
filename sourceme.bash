@@ -10,8 +10,10 @@
 which root-config &> /dev/null
 
 if [[ $? == 0 ]]; then
-    declare srcdir=${PWD%/sourceme.bash}
-    [[ -n $ROOTSYS ]] && export LD_LIBRARY_PATH=${srcdir}/lib:$LD_LIBRARY_PATH
+    declare srcdir=${PWD%/sourceme.bash} # FIXME: doesn't work from other dirs
+    [[ -n $LD_LIBRARY_PATH ]] && \
+	export LD_LIBRARY_PATH=${srcdir}/lib:$LD_LIBRARY_PATH || \
+	export LD_LIBRARY_PATH=${srcdir}/lib
 else
     echo "No ROOT installation found."
 fi
