@@ -51,7 +51,7 @@ gSystem.Load('libRooFit')
 
 ## ROOT colours and styles
 from ROOT import kGreen, kRed, kBlack, kBlue, kAzure, kYellow
-from ROOT import kFullTriangleUp
+from ROOT import kFullTriangleUp, kOpenTriangleDown
 
 ## ROOT classes
 from ROOT import TTree, TFile, TCanvas, TPad, TClass
@@ -327,13 +327,16 @@ RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-5)
 dkcatset = RooArgSet(decaycat)
 tframe1 = time.frame(RooFit.Name('ptime'),
                      RooFit.Title('Projection on time'))
-dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
-PDF.plotOn(tframe1, RooFit.Slice(decaycat, 'DsPi'),
-           RooFit.ProjWData(dkcatset, dataset, True),
-           RooFit.LineColor(kBlue))
-PDF.plotOn(tframe1, RooFit.Slice(decaycat, 'DsK'),
-           RooFit.ProjWData(dkcatset, dataset, True),
-           RooFit.LineColor(kBlue+2))
+dsetlist[0].plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
+DsPi_Model.plotOn(tframe1, RooFit.LineColor(kBlue))
+dsetlist[1].plotOn(tframe1, RooFit.MarkerStyle(kOpenTriangleDown))
+DsK_Model.plotOn(tframe1, RooFit.LineColor(kBlue+2))
+# PDF.plotOn(tframe1, RooFit.Slice(decaycat, 'DsPi'),
+#            RooFit.ProjWData(dkcatset, dataset, True),
+#            RooFit.LineColor(kBlue))
+# PDF.plotOn(tframe1, RooFit.Slice(decaycat, 'DsK'),
+#            RooFit.ProjWData(dkcatset, dataset, True),
+#            RooFit.LineColor(kBlue+2))
 Bdecay.plotOn(tframe1, RooFit.LineColor(kRed))
 dspi_acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
                        RooFit.Normalization(500, RooAbsReal.Relative))
@@ -343,13 +346,16 @@ dsk_acceptance.plotOn(tframe1, RooFit.LineColor(kGreen+2),
 # NOTE: this range is for the RooPlot axis
 tframe2 = time.frame(RooFit.Range(0., 2), RooFit.Name('zptime'),
                      RooFit.Title('Projection on time (zoomed)'))
-dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
-PDF.plotOn(tframe2, RooFit.Slice(decaycat, 'DsPi'),
-           RooFit.ProjWData(dkcatset, dataset, True),
-           RooFit.LineColor(kBlue))
-PDF.plotOn(tframe2, RooFit.Slice(decaycat, 'DsK'),
-           RooFit.ProjWData(dkcatset, dataset, True),
-           RooFit.LineColor(kBlue+2))
+dsetlist[0].plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
+DsPi_Model.plotOn(tframe2, RooFit.LineColor(kBlue))
+dsetlist[1].plotOn(tframe2, RooFit.MarkerStyle(kOpenTriangleDown))
+DsK_Model.plotOn(tframe2, RooFit.LineColor(kBlue+2))
+# PDF.plotOn(tframe2, RooFit.Slice(decaycat, 'DsPi'),
+#            RooFit.ProjWData(dkcatset, dataset, True),
+#            RooFit.LineColor(kBlue))
+# PDF.plotOn(tframe2, RooFit.Slice(decaycat, 'DsK'),
+#            RooFit.ProjWData(dkcatset, dataset, True),
+#            RooFit.LineColor(kBlue+2))
 dspi_acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
                        RooFit.Normalization(100, RooAbsReal.Relative))
 dsk_acceptance.plotOn(tframe2, RooFit.LineColor(kGreen+2),
