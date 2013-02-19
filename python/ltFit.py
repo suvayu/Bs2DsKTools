@@ -240,8 +240,8 @@ dspi_fitresult.Print()
 # ratio parameters: only for DsK
 rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
 roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.1)
-# rbeta = RooRealVar('rbeta', 'rbeta', 0.0, -0.05, 0.05)
-rbeta = RooRealConstant.value(0.0)
+rbeta = RooRealVar('rbeta', 'rbeta', 0.0, -0.05, 0.05)
+# rbeta = RooRealConstant.value(0.0)
 
 ratio = AcceptanceRatio('ratio', 'Acceptance ratio',
                         time, rturnon, roffset, rbeta)
