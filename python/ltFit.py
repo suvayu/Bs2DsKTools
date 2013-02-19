@@ -212,9 +212,6 @@ dataset = RooDataSet('dataset', 'Combined dataset (DsK + DsPi)',
                      RooFit.Import('DsPi', dsetlist[0]),
                      RooFit.Import('DsK', dsetlist[1]))
 
-datahist = dataset.binnedClone('datahist')
-hist = datahist.createHistogram('time')
-
 
 ## Build simultaneous 2-D PDF (t, δt) for DsPi and DsK
 # Resolution model
