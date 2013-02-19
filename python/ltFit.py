@@ -260,6 +260,11 @@ exponent.setConstant(True)
 offset.setConstant(True)
 beta.setConstant(True)
 
+# debug
+print 'PowLawAcceptance variables before DsK fit: '
+for var in [ turnon, exponent, offset, beta ]:
+    var.Print('v')
+
 print '=' * 5, ' 2-step fit: DsK ', '=' * 5
 dsk_fitresult = DsK_Model.fitTo(dsetlist[1], RooFit.Optimize(0),
                                 RooFit.Strategy(2), RooFit.Save(True),
