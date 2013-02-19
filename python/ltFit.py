@@ -31,14 +31,14 @@ from datetime import datetime
 
 ## Option parsing
 import optparse
-usage='usage: $ %s <accfn> <mode> [options]' % sys.argv[0]
-description  = "<accfn> is Fit type to perform, cpowerlaw, ratio(default), etc.  "
-description += "<mode> is Bs decay mode, DsK (default) or DsPi."
+usage='Usage: $ %s [options]' % sys.argv[0]
+description = ''
+# description  = "<accfn> is Fit type to perform, cpowerlaw, ratio(default), etc.  "
+# description += "<mode> is Bs decay mode, DsK (default) or DsPi."
 parser = optparse.OptionParser(description=description, usage=usage)
 
-# helpstr = 'ROOT file with fitresult from Dsπ fit, needed only for ratio fit with DsK (default: None).'
-parser.add_option('-r', '--ref', default=None,
-                  help='ROOT file with fitresult from DsPi fit, needed only for ratio fit with DsK (default: None).')
+parser.add_option('-s', '--save', action='store_true', default=False,
+                  help='Save the fitresult in a ROOT file (default: False).')
 
 # parser.add_option('accfn', default='ratio',
 #                   help='Fit type to perform, cpowerlaw, ratio(default), etc.')
@@ -46,17 +46,14 @@ parser.add_option('-r', '--ref', default=None,
 #                   help='Bs decay mode, DsK (default) or DsPi.')
 
 options, args = parser.parse_args()
-fitresultfile = options.ref
-accfn = args[0]
-mode = args[1]
+save = options.save
+# fitresultfile = options.ref
+# accfn = args[0]
+# mode = args[1]
 
-# test program argument consistency
-if accfn == 'ratio' and fitresultfile == None:
-    sys.exit('Please provide a ROOT file with the fitresult from DsPi when fitting for acceptance ratio')
-
-# legacy options
-isToy=False
-constoffset = False
+# # test program argument consistency
+# if accfn == 'ratio' and fitresultfile == None:
+#     sys.exit('Please provide a ROOT file with the fitresult from DsPi when fitting for acceptance ratio')
 
 
 ## ROOT global variables
@@ -75,14 +72,15 @@ from ROOT import kFullTriangleUp
 from ROOT import TTree, TFile, TCanvas, TPad, TClass
 
 ## RooFit classes
-from ROOT import RooFit
-from ROOT import RooPlot, RooWorkspace, RooFitResult
-from ROOT import RooArgSet, RooArgList
-from ROOT import RooAbsReal, RooRealVar, RooRealConstant, RooFormulaVar
-from ROOT import RooAbsPdf, RooGaussian
-from ROOT import RooGenericPdf, RooEffProd, RooAddPdf, RooProdPdf, RooHistPdf, RooProduct
-from ROOT import RooDataSet, RooDataHist, RooKeysPdf
-from ROOT import RooDecay, RooBDecay, RooGaussModel, RooUniformBinning
+from ROOT import RooFit, RooPlot, RooWorkspace, RooFitResult
+from ROOT import RooArgSet, RooArgList # containers
+from ROOT import RooAbsReal, RooAbsPdf # abstract classes
+# variables and pdfs
+from ROOT import RooRealVar, RooRealConstant, RooFormulaVar, RooGaussian
+from ROOT import RooEffProd, RooAddPdf, RooProdPdf, RooProduct # operations
+from ROOT import RooDataSet, RooDataHist, RooHistPdf, RooKeysPdf # data
+from ROOT import RooDecay, RooBDecay, RooGaussModel, RooUniformBinning # models
+from ROOT import RooSimultaneous, RooCategory
 
 ## my stuff
 from factory import *           # FIXME: clean up, do not use *
@@ -110,7 +108,6 @@ epsilon = 0.2
 # for persistency/logging
 varlist = []
 pdflist = []
-print 'Legacy: Fitting with constant offset set to %d' % constoffset
 
 
 ## Fit
@@ -139,57 +136,36 @@ varlist += [ time ]
 # ensures the 0.2 ps selection cut present in the sample is
 # incorporated into the model.
 
-# Parameters
-if accfn == 'cpowerlaw':
-    # parameters
-    turnon = RooRealVar('turnon', 'turnon', 1.5, 0.5, 5.0)
-    exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
-    offset = RooRealVar('offset', 'offset', 0.0, -0.5, 0.5)
-    beta = RooRealVar('beta', 'beta', 0.04, 0.00, 0.05)
+# acceptance fn parameters: common to both DsK and Dsπ
+turnon = RooRealVar('turnon', 'turnon', 1.5, 0.5, 5.0)
+exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
+offset = RooRealVar('offset', 'offset', 0.0, -0.5, 0.5)
+beta = RooRealVar('beta', 'beta', 0.04, 0.0, 0.05)
 
-    # acceptance
-    acceptance = PowLawAcceptance('acceptance',  'Power law acceptance',
-                                  turnon, time, offset, exponent, beta)
-    varlist += [ turnon, exponent, offset, beta ]
+# Dsπ acceptance
+dspi_acceptance = PowLawAcceptance('dspi_acceptance',
+                                   'DsPi Power law acceptance',
+                                   turnon, time, offset, exponent, beta)
+varlist += [ turnon, exponent, offset, beta ]
 
-elif accfn == 'ratio':
-    # get parameters from Dsπ fit and fix them
-    ws, ffile = get_workspace(fitresultfile, 'workspace')
-    ws.SetNameTitle('%s_%s' % (mode, ws.GetName()), '%s %s' % (
-        mode, ws.GetTitle()))
-    turnon = RooRealConstant.value(ws.var('turnon').getValV())
-    exponent = RooRealConstant.value(ws.var('exponent').getValV())
-    offset = RooRealConstant.value(ws.var('offset').getValV())
-    beta = RooRealConstant.value(ws.var('beta').getValV())
-    ffile.Close()
-    del ws, ffile
+# ratio parameters: only for DsK
+rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
+roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.1)
+# rbeta = RooRealVar('rbeta', 'rbeta', 0.0, -0.05, 0.05)
+rbeta = RooRealConstant.value(0.0)
 
-    # ratio parameters
-    rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
-    roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.1)
-    rbeta = RooRealVar('rbeta', 'rbeta', 0.01, -0.05, 0.05)
+# DsK acceptance
+ratio = AcceptanceRatio('ratio', 'Acceptance ratio',
+                        time, rturnon, roffset, rbeta)
+# dsk_acceptance = RooProduct('dsk_acceptance', 'DsK Acceptance with ratio',
+#                             RooArgList(dspi_acceptance, ratio))
+dsk_acceptance = PowLawAcceptance(dspi_acceptance, 'dsk_acceptance', ratio)
+varlist += [ rturnon, roffset, rbeta ]
 
-    # acceptance
-    acceptance_fn = PowLawAcceptance('acceptance_fn', 'Power law acceptance',
-                                     turnon, time, offset, exponent, beta)
-    ratio = AcceptanceRatio('ratio', 'Acceptance ratio',
-                            time, rturnon, roffset, rbeta)
-    acceptance = RooProduct('acceptance', 'Acceptance with ratio',
-                            RooArgList(acceptance_fn, ratio))
-    varlist += [ turnon, exponent, offset, beta ,
-                 rturnon, roffset, rbeta ]
-else:
-    sys.exit('Unknown acceptance type. Aborting')
-
-pdflist += [acceptance]
+pdflist += [ dspi_acceptance, dsk_acceptance ]
 
 
 ## Read dataset, apply trigger and decay mode selection
-# Get tree
-rfile = get_file('data/smalltree-new-MC-pico-offline-%s.root' % mode, 'read')
-ftree = get_object('ftree', rfile)
-print 'Reading from file: %s' % rfile.GetName()
-
 # Trigger:
 tlist = [
     'HLT1TrackAllL0TOS',
@@ -205,27 +181,42 @@ for var in tlist:
 cut = '(%s > 0) && (%s > 0 || %s > 0 || %s > 0)' % (
     tlist[0], tlist[1], tlist[2], tlist[3])
 
-# Mode: DsPi or DsK
-modeVar = RooRealVar('hID', 'Decay mode %s' % mode, -350, 350)
-if mode == 'DsK':
-    cut += '&& abs(hID) == 321'
-elif mode == 'DsPi':
-    cut += '&& abs(hID) == 211'
-else:                       # don't mix modes anymore
-    sys.exit( 'Unrecognised mode: %s. Aborting.' % mode)
-
-# Get dataset
+# Get dataset: DsPi and DsK
 time.setBins(150)
-try:
-    dataset = get_dataset(RooArgSet(time), ftree, cut, modeVar, *triggerVars)
-except TypeError, IOError:
-    print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
-if isToy: del dataset
+dsetlist = []
+for mode in [ 'DsPi', 'DsK' ]:
+    # Get tree
+    rfile = get_file('data/smalltree-new-MC-pico-offline-%s.root' % mode, 'read')
+    ftree = get_object('ftree', rfile)
+    print 'Reading from file: %s' % rfile.GetName()
+
+    modeVar = RooRealVar('hID', 'Decay mode %s' % mode, -350, 350)
+    if mode == 'DsK':
+        cut += '&& abs(hID) == 321'
+    elif mode == 'DsPi':
+        cut += '&& abs(hID) == 211'
+
+    try:
+        dataset = get_dataset(RooArgSet(time), ftree, cut, modeVar, *triggerVars)
+        dataset.SetName('%s_%s' % (dataset.GetName(), mode))
+        dsetlist += [dataset]
+    except TypeError, IOError:
+        print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
+
+decaycat = RooCategory('decaycat', 'Decay mode category')
+decaycat.defineType('DsPi')
+decaycat.defineType('DsK')
+
+dataset = RooDataSet('dataset', 'Combined dataset (DsK + DsPi)',
+                     RooArgSet(time), RooFit.Index(decaycat),
+                     RooFit.Import('DsPi', dsetlist[0]),
+                     RooFit.Import('DsK', dsetlist[1]))
+
 datahist = dataset.binnedClone('datahist')
 hist = datahist.createHistogram('time')
 
 
-## Build full 2-D PDF (t, δt)
+## Build simultaneous 2-D PDF (t, δt) for DsPi and DsK
 # Resolution model
 mean = RooRealVar('mean', 'Mean', 0.)
 scale = RooRealVar('scale', 'Per-event time error scale factor', 1.19)
@@ -246,10 +237,15 @@ Bdecay = RooBDecay('Bdecay', 'Decay function for the B_{s} (heavy + light)',
                    RooRealConstant.value(0.0),       # f3 - sin
                    RooRealConstant.value(0.0),       # Δm
                    resmodel, RooBDecay.SingleSided)
-Model = RooEffProd('Model', 'Acceptance model B_{s}', Bdecay, acceptance)
-PDF = Model
+DsPi_Model = RooEffProd('DsPi_Model', 'DsPi acceptance model B_{s}',
+                        Bdecay, dspi_acceptance)
+DsK_Model = RooEffProd('DsK_Model', 'DsK acceptance model B_{s}',
+                        Bdecay, dsk_acceptance)
+PDF = RooSimultaneous('PDF', 'Simultaneous PDF', decaycat)
+PDF.addPdf(DsPi_Model, 'DsPi')
+PDF.addPdf(DsK_Model, 'DsK')
 
-pdflist += [Bdecay, Model]
+pdflist += [Bdecay, DsPi_Model, DsK_Model, PDF]
 
 # #errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
 # #                       RooArgSet(dt), datahist)
@@ -260,14 +256,6 @@ pdflist += [Bdecay, Model]
 #                    RooFit.Conditional(RooArgSet(Model), RooArgSet(time)))
 # # enable caching for dt integral
 # PDF.setParameterizeIntegral(RooArgSet(dt))
-
-
-## Generate toy if requested
-if isToy:
-    try:
-        dataset = get_toy_dataset(RooArgSet(time), PDF)
-    except TypeError, IOError:
-        print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
 
 
 ## Logging
@@ -312,25 +300,36 @@ RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-5)
 RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-5)
 
 # RooFit.Range(0, 0.01+epsilon),
+dkcatset = RooArgSet(decaycat)
 tframe1 = time.frame(RooFit.Name('ptime'),
                      RooFit.Title('Projection on time'))
 dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
-PDF.plotOn(tframe1,
-           # RooFit.ProjWData(RooArgSet(dt), dataset, True),
+PDF.plotOn(tframe1, RooFit.Slice(decaycat, 'DsPi'),
+           RooFit.ProjWData(dkcatset, dataset, True),
            RooFit.LineColor(kBlue))
+PDF.plotOn(tframe1, RooFit.Slice(decaycat, 'DsK'),
+           RooFit.ProjWData(dkcatset, dataset, True),
+           RooFit.LineColor(kBlue+2))
 Bdecay.plotOn(tframe1, RooFit.LineColor(kRed))
-acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
-                  RooFit.Normalization(500, RooAbsReal.Relative))
+dspi_acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
+                       RooFit.Normalization(500, RooAbsReal.Relative))
+dsk_acceptance.plotOn(tframe1, RooFit.LineColor(kGreen+2),
+                      RooFit.Normalization(500, RooAbsReal.Relative))
 
 # NOTE: this range is for the RooPlot axis
-tframe2 = time.frame(RooFit.Range(0., 2), RooFit.Name('pztime'),
+tframe2 = time.frame(RooFit.Range(0., 2), RooFit.Name('zptime'),
                      RooFit.Title('Projection on time (zoomed)'))
 dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
-PDF.plotOn(tframe2,
-           # RooFit.ProjWData(RooArgSet(dt), dataset, True),
+PDF.plotOn(tframe2, RooFit.Slice(decaycat, 'DsPi'),
+           RooFit.ProjWData(dkcatset, dataset, True),
            RooFit.LineColor(kBlue))
-acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
-                  RooFit.Normalization(100, RooAbsReal.Relative))
+PDF.plotOn(tframe2, RooFit.Slice(decaycat, 'DsK'),
+           RooFit.ProjWData(dkcatset, dataset, True),
+           RooFit.LineColor(kBlue+2))
+dspi_acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
+                       RooFit.Normalization(100, RooAbsReal.Relative))
+dsk_acceptance.plotOn(tframe2, RooFit.LineColor(kGreen+2),
+                      RooFit.Normalization(100, RooAbsReal.Relative))
 
 canvas = TCanvas('canvas', 'canvas', 1600, 600)
 canvas.Divide(2,1)
@@ -341,20 +340,15 @@ tframe2.Draw()
 
 # Save plots and PDFs
 timestamp = get_timestamp()
-plotfile = 'plots/canvas-%s-%s-%s-const-offset-%d.png' % (mode, accfn, timestamp, constoffset)
-rootfile = 'data/fitresult-%s-%s-%s-const-offset-%d.root' % (mode, accfn, timestamp, constoffset)
+plotfile = 'plots/canvas-cpowerlaw-w-ratio-%s.png' % timestamp
+rootfile = 'data/fitresult-cpowerlaw-w-ratio-%s.root' % timestamp
 
 # Print plots
 canvas.Print(plotfile)
 print 'Plotting to file: %s' % plotfile
 
-hfile = TFile(rootfile, 'recreate')
-# Persistify variables, PDFs and datasets
-save_in_workspace(hfile, var=varlist, pdf=[PDF], data=[dataset],
-                  fit=[fitresult], plots=[tframe1, tframe2])
-
-hist.SetName('hdataset_%s' % mode)
-# hist.SetDirectory(hfile)
-# hfile.Write('', TFile.kOverwrite)
-hfile.WriteTObject(hist)
-hfile.Close()
+if save:
+    hfile = TFile(rootfile, 'recreate')
+    # Persistify variables, PDFs and datasets
+    save_in_workspace(hfile, var=varlist, pdf=[PDF], data=[dataset],
+                      fit=[fitresult], plots=[tframe1, tframe2])
