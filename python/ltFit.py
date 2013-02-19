@@ -127,43 +127,6 @@ time = RooRealVar('time', 'B_{s} lifetime in ps', epsilon, 15.0)
 
 varlist += [ time ]
 
-# Acceptance model: 1-1/(1+(a*(t-t₀)³)
-# NB: Acceptance is not a PDF by nature
-
-# Condition to ensure acceptance function is always +ve definite.
-# The first condition protects against the undefined nature of the
-# function for times less than 0. Whereas the second condition
-# ensures the 0.2 ps selection cut present in the sample is
-# incorporated into the model.
-
-# acceptance fn parameters: common to both DsK and Dsπ
-turnon = RooRealVar('turnon', 'turnon', 1.5, 0.5, 5.0)
-exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
-offset = RooRealVar('offset', 'offset', 0.0, -0.5, 0.5)
-beta = RooRealVar('beta', 'beta', 0.04, 0.0, 0.05)
-
-# Dsπ acceptance
-dspi_acceptance = PowLawAcceptance('dspi_acceptance',
-                                   'DsPi Power law acceptance',
-                                   turnon, time, offset, exponent, beta)
-varlist += [ turnon, exponent, offset, beta ]
-
-# ratio parameters: only for DsK
-rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
-roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.1)
-# rbeta = RooRealVar('rbeta', 'rbeta', 0.0, -0.05, 0.05)
-rbeta = RooRealConstant.value(0.0)
-
-# DsK acceptance
-ratio = AcceptanceRatio('ratio', 'Acceptance ratio',
-                        time, rturnon, roffset, rbeta)
-# dsk_acceptance = RooProduct('dsk_acceptance', 'DsK Acceptance with ratio',
-#                             RooArgList(dspi_acceptance, ratio))
-dsk_acceptance = PowLawAcceptance(dspi_acceptance, 'dsk_acceptance', ratio)
-varlist += [ rturnon, roffset, rbeta ]
-
-pdflist += [ dspi_acceptance, dsk_acceptance ]
-
 
 ## Read dataset, apply trigger and decay mode selection
 # Trigger:
@@ -213,7 +176,7 @@ dataset = RooDataSet('dataset', 'Combined dataset (DsK + DsPi)',
                      RooFit.Import('DsK', dsetlist[1]))
 
 
-## Build simultaneous 2-D PDF (t, δt) for DsPi and DsK
+## Basic B decay pdf with time resolution
 # Resolution model
 mean = RooRealVar('mean', 'Mean', 0.)
 scale = RooRealVar('scale', 'Per-event time error scale factor', 1.19)
@@ -234,15 +197,89 @@ Bdecay = RooBDecay('Bdecay', 'Decay function for the B_{s} (heavy + light)',
                    RooRealConstant.value(0.0),       # f3 - sin
                    RooRealConstant.value(0.0),       # Δm
                    resmodel, RooBDecay.SingleSided)
+
+pdflist += [ Bdecay ]
+
+
+## Acceptance model: 1-1/(1+(a*(t-t₀)³)
+# NB: Acceptance is not a PDF by nature
+
+# Condition to ensure acceptance function is always +ve definite.
+# The first condition protects against the undefined nature of the
+# function for times less than 0. Whereas the second condition
+# ensures the 0.2 ps selection cut present in the sample is
+# incorporated into the model.
+
+# acceptance fn parameters: common to both DsK and Dsπ
+turnon = RooRealVar('turnon', 'turnon', 1.5, 0.5, 5.0)
+exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
+offset = RooRealVar('offset', 'offset', 0.0, -0.5, 0.5)
+beta = RooRealVar('beta', 'beta', 0.04, 0.0, 0.05)
+
+
+## Dsπ acceptance and pdf
+dspi_acceptance = PowLawAcceptance('dspi_acceptance',
+                                   'DsPi Power law acceptance',
+                                   turnon, time, offset, exponent, beta)
 DsPi_Model = RooEffProd('DsPi_Model', 'DsPi acceptance model B_{s}',
                         Bdecay, dspi_acceptance)
+
+varlist += [ turnon, exponent, offset, beta ]
+pdflist += [ dspi_acceptance, DsPi_Model ]
+
+# fit to Dsπ only
+print '=' * 5, ' 2-step fit: Dsπ ', '=' * 5
+dspi_fitresult = DsPi_Model.fitTo(dsetlist[0], RooFit.Optimize(0),
+                                  RooFit.Strategy(2), RooFit.Save(True),
+                                  RooFit.NumCPU(1),
+                                  RooFit.Verbose(True))
+dspi_fitresult.Print()
+
+
+## DsK acceptance and pdf
+# ratio parameters: only for DsK
+rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
+roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.1)
+# rbeta = RooRealVar('rbeta', 'rbeta', 0.0, -0.05, 0.05)
+rbeta = RooRealConstant.value(0.0)
+
+ratio = AcceptanceRatio('ratio', 'Acceptance ratio',
+                        time, rturnon, roffset, rbeta)
+# dsk_acceptance = RooProduct('dsk_acceptance', 'DsK Acceptance with ratio',
+#                             RooArgList(dspi_acceptance, ratio))
+dsk_acceptance = PowLawAcceptance(dspi_acceptance, 'dsk_acceptance', ratio)
 DsK_Model = RooEffProd('DsK_Model', 'DsK acceptance model B_{s}',
                         Bdecay, dsk_acceptance)
+
+varlist += [ rturnon, roffset, rbeta ]
+pdflist += [ dsk_acceptance, DsK_Model ]
+
+# fit to DsK only
+turnon.setConstant(True)
+exponent.setConstant(True)
+offset.setConstant(True)
+beta.setConstant(True)
+
+print '=' * 5, ' 2-step fit: DsK ', '=' * 5
+dsk_fitresult = DsK_Model.fitTo(dsetlist[1], RooFit.Optimize(0),
+                                RooFit.Strategy(2), RooFit.Save(True),
+                                RooFit.NumCPU(1),
+                                RooFit.Verbose(True))
+dsk_fitresult.Print()
+
+# undo earlier set constant
+turnon.setConstant(False)
+exponent.setConstant(False)
+offset.setConstant(False)
+beta.setConstant(False)
+
+
+## Build simultaneous 2-D PDF (t, δt) for DsPi and DsK
 PDF = RooSimultaneous('PDF', 'Simultaneous PDF', decaycat)
 PDF.addPdf(DsPi_Model, 'DsPi')
 PDF.addPdf(DsK_Model, 'DsK')
 
-pdflist += [Bdecay, DsPi_Model, DsK_Model, PDF]
+pdflist += [ PDF ]
 
 # #errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
 # #                       RooArgSet(dt), datahist)
@@ -256,6 +293,7 @@ pdflist += [Bdecay, DsPi_Model, DsK_Model, PDF]
 
 
 ## Logging
+print '=' * 5, ' Simultaneous fit with initial values from 2-step fit', '=' * 5
 print 'Variables: ', varlist
 for var in varlist:
     var.Print('v')
@@ -278,8 +316,6 @@ dataset.Print('v')
 # minuit.hesse()
 # fitresult = minuit.save()
 
-# exponent.setConstant(True)
-# beta.setConstant(True)
 fitresult = PDF.fitTo(dataset, RooFit.Optimize(0),
                       RooFit.Strategy(2), RooFit.Save(True),
                       RooFit.NumCPU(1),
