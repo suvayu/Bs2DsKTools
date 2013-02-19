@@ -126,26 +126,24 @@ triggerVars = []
 for var in tlist:
     triggerVars += [RooRealVar(var, var, 0, 2)]
 
-cut = '(%s > 0) && (%s > 0 || %s > 0 || %s > 0)' % (
+cut = '(%s > 0) && (%s > 0 || %s > 0 || %s > 0) && abs(hID) == %%d' % (
     tlist[0], tlist[1], tlist[2], tlist[3])
 
 # Get dataset: DsPi and DsK
 time.setBins(150)
 dsetlist = []
-for mode in [ 'DsPi', 'DsK' ]:
+for mode, pid in [ ('DsPi', 211) , ('DsK', 321) ]:
     # Get tree
     rfile = get_file('data/smalltree-new-MC-pico-offline-%s.root' % mode, 'read')
     ftree = get_object('ftree', rfile)
     print 'Reading from file: %s' % rfile.GetName()
 
     modeVar = RooRealVar('hID', 'Decay mode %s' % mode, -350, 350)
-    if mode == 'DsK':
-        cut += '&& abs(hID) == 321'
-    elif mode == 'DsPi':
-        cut += '&& abs(hID) == 211'
+    cutstr = cut % pid
 
     try:
-        dataset = get_dataset(RooArgSet(time), ftree, cut, modeVar, *triggerVars)
+        dataset = get_dataset(RooArgSet(time), ftree, cutstr, modeVar,
+                              *triggerVars)
         dataset.SetName('%s_%s' % (dataset.GetName(), mode))
         dsetlist += [dataset]
     except TypeError, IOError:
@@ -159,6 +157,9 @@ dataset = RooDataSet('dataset', 'Combined dataset (DsK + DsPi)',
                      RooArgSet(time), RooFit.Index(decaycat),
                      RooFit.Import('DsPi', dsetlist[0]),
                      RooFit.Import('DsK', dsetlist[1]))
+
+for dset in dsetlist:
+    dset.Print('v')
 
 
 ## Basic B decay pdf with time resolution
