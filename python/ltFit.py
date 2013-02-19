@@ -33,27 +33,12 @@ from datetime import datetime
 import optparse
 usage='Usage: $ %s [options]' % sys.argv[0]
 description = ''
-# description  = "<accfn> is Fit type to perform, cpowerlaw, ratio(default), etc.  "
-# description += "<mode> is Bs decay mode, DsK (default) or DsPi."
 parser = optparse.OptionParser(description=description, usage=usage)
 
 parser.add_option('-s', '--save', action='store_true', default=False,
                   help='Save the fitresult in a ROOT file (default: False).')
-
-# parser.add_option('accfn', default='ratio',
-#                   help='Fit type to perform, cpowerlaw, ratio(default), etc.')
-# parser.add_option('mode', default='DsK',
-#                   help='Bs decay mode, DsK (default) or DsPi.')
-
 options, args = parser.parse_args()
 save = options.save
-# fitresultfile = options.ref
-# accfn = args[0]
-# mode = args[1]
-
-# # test program argument consistency
-# if accfn == 'ratio' and fitresultfile == None:
-#     sys.exit('Please provide a ROOT file with the fitresult from DsPi when fitting for acceptance ratio')
 
 
 ## ROOT global variables
