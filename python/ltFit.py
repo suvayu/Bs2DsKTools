@@ -64,7 +64,7 @@ from ROOT import RooAbsReal, RooAbsPdf # abstract classes
 from ROOT import RooRealVar, RooRealConstant, RooFormulaVar, RooGaussian
 from ROOT import RooEffProd, RooAddPdf, RooProdPdf, RooProduct # operations
 from ROOT import RooDataSet, RooDataHist, RooHistPdf, RooKeysPdf # data
-from ROOT import RooDecay, RooBDecay, RooGaussModel, RooUniformBinning # models
+from ROOT import RooDecay, RooBDecay, RooGaussModel # models
 from ROOT import RooSimultaneous, RooCategory
 
 ## my stuff
