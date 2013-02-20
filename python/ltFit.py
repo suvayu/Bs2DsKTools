@@ -187,7 +187,7 @@ Bdecay = RooBDecay('Bdecay', 'Decay function for the B_{s} (heavy + light)',
 pdflist += [ Bdecay ]
 
 
-## Acceptance model: 1-1/(1+(a*(t-t₀)³)
+## Acceptance model: [1 - 1/(1 + (a*t)ⁿ - b)]*(1 - β*t)
 # NB: Acceptance is not a PDF by nature
 
 # Condition to ensure acceptance function is always +ve definite.
@@ -327,9 +327,9 @@ RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-5)
 dkcatset = RooArgSet(decaycat)
 tframe1 = time.frame(RooFit.Name('ptime'),
                      RooFit.Title('Projection on time'))
-dsetlist[0].plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
+dsetlist[0].plotOn(tframe1, RooFit.MarkerStyle(kOpenTriangleDown))
 DsPi_Model.plotOn(tframe1, RooFit.LineColor(kBlue))
-dsetlist[1].plotOn(tframe1, RooFit.MarkerStyle(kOpenTriangleDown))
+dsetlist[1].plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
 DsK_Model.plotOn(tframe1, RooFit.LineColor(kBlue+2))
 # PDF.plotOn(tframe1, RooFit.Slice(decaycat, 'DsPi'),
 #            RooFit.ProjWData(dkcatset, dataset, True),
@@ -346,9 +346,9 @@ dsk_acceptance.plotOn(tframe1, RooFit.LineColor(kGreen+2),
 # NOTE: this range is for the RooPlot axis
 tframe2 = time.frame(RooFit.Range(0., 2), RooFit.Name('zptime'),
                      RooFit.Title('Projection on time (zoomed)'))
-dsetlist[0].plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
+dsetlist[0].plotOn(tframe2, RooFit.MarkerStyle(kOpenTriangleDown))
 DsPi_Model.plotOn(tframe2, RooFit.LineColor(kBlue))
-dsetlist[1].plotOn(tframe2, RooFit.MarkerStyle(kOpenTriangleDown))
+dsetlist[1].plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
 DsK_Model.plotOn(tframe2, RooFit.LineColor(kBlue+2))
 # PDF.plotOn(tframe2, RooFit.Slice(decaycat, 'DsPi'),
 #            RooFit.ProjWData(dkcatset, dataset, True),
