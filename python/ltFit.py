@@ -153,6 +153,8 @@ decaycat = RooCategory('decaycat', 'Decay mode category')
 decaycat.defineType('DsPi')
 decaycat.defineType('DsK')
 
+varlist += [ decaycat ]
+
 dataset = RooDataSet('dataset', 'Combined dataset (DsK + DsPi)',
                      RooArgSet(time), RooFit.Index(decaycat),
                      RooFit.Import('DsPi', dsetlist[0]),
@@ -381,4 +383,4 @@ if save:
     hfile = TFile(rootfile, 'recreate')
     # Persistify variables, PDFs and datasets
     save_in_workspace(hfile, var=varlist, pdf=[PDF], data=[dataset],
-                      fit=[fitresult], plots=[tframe1, tframe2])
+                      fit=[fitresult])
