@@ -31,14 +31,16 @@ from datetime import datetime
 
 ## Option parsing
 import optparse
-usage='Usage: $ %s [options]' % sys.argv[0]
+usage='Usage: $ %s [options] <ratiofn>' % sys.argv[0]
 description = ''
+description += "<ratiofn> - type of acceptance ratio function to use: flat, linear, exponential (default)."
 parser = optparse.OptionParser(description=description, usage=usage)
 
 parser.add_option('-s', '--save', action='store_true', default=False,
                   help='Save the fitresult in a ROOT file (default: False).')
 options, args = parser.parse_args()
 save = options.save
+ratiofn = args[0]
 
 
 ## ROOT global variables
@@ -225,21 +227,31 @@ dspi_fitresult.Print()
 
 
 ## DsK acceptance and pdf
-# ratio parameters: only for DsK
-rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
-roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.1)
-rbeta = RooRealVar('rbeta', 'rbeta', 0.01, -0.05, 0.05)
-# rbeta = RooRealConstant.value(0.0)
-
-ratio = AcceptanceRatio('ratio', 'Acceptance ratio',
-                        time, rturnon, roffset, rbeta)
+if ratiofn == 'exponential':
+    # ratio parameters: only for DsK
+    rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
+    roffset = RooRealVar('roffset', 'roffset', 0.0, -0.5, 0.1)
+    rbeta = RooRealVar('rbeta', 'rbeta', 0.01, -0.05, 0.05)
+    # rbeta = RooRealConstant.value(0.0)
+    ratio = AcceptanceRatio('ratio', 'Acceptance ratio',
+                            time, rturnon, roffset, rbeta)
+    varlist += [ rturnon, roffset, rbeta ]
+elif ratiofn == 'linear':
+    rslope = RooRealVar('rslope', 'rslope', 0.1, -1.0, 1.0)
+    roffset = RooRealVar('roffset', 'roffset', 1.0, 0.0, 2.0)
+    ratio = RooFormulaVar('ratio', '@0*@1 + @2',
+                          RooArgList(rslope, time, roffset))
+    varlist += [ rslope, roffset ]
+elif ratiofn == 'flat':
+    ratio = RooRealConstant.value(1.0)
+else:
+    sys.exit('Unknown acceptance type. Aborting')
 dsk_acceptance = RooProduct('dsk_acceptance', 'DsK Acceptance with ratio',
                             RooArgList(dspi_acceptance, ratio))
 # dsk_acceptance = PowLawAcceptance(dspi_acceptance, 'dsk_acceptance', ratio)
 DsK_Model = RooEffProd('DsK_Model', 'DsK acceptance model B_{s}',
                         Bdecay, dsk_acceptance)
 
-varlist += [ rturnon, roffset, rbeta ]
 pdflist += [ dsk_acceptance, DsK_Model ]
 
 # fit to DsK only
@@ -247,11 +259,6 @@ turnon.setConstant(True)
 exponent.setConstant(True)
 offset.setConstant(True)
 beta.setConstant(True)
-
-# debug
-print 'PowLawAcceptance variables before DsK fit: '
-for var in [ turnon, exponent, offset, beta ]:
-    var.Print('v')
 
 print '=' * 5, ' 2-step fit: DsK ', '=' * 5
 dsk_fitresult = DsK_Model.fitTo(dsetlist[1], RooFit.Optimize(0),
@@ -295,20 +302,7 @@ for pdf in pdflist:
     pdf.Print('v')
 dataset.Print('v')
 
-# # Call Minuit by hand, good for debugging
-# from ROOT import RooMinuit
-# nll = PDF.createNLL(dataset, RooFit.Optimize(0), RooFit.NumCPU(4))
-# minuit = RooMinuit(nll)
-# minuit.setEps(1e-7)
-# minuit.setStrategy(2)
-# minuit.setVerbose(True)
-# minuit.hesse()
-# # minuit.seek()
-# minuit.hesse()
-# minuit.migrad()
-# minuit.hesse()
-# fitresult = minuit.save()
-
+## Fit
 fitresult = PDF.fitTo(dataset, RooFit.Optimize(0),
                       RooFit.Strategy(2), RooFit.Save(True),
                       RooFit.NumCPU(1),
@@ -328,7 +322,8 @@ RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-5)
 # RooFit.Range(0, 0.01+epsilon),
 dkcatset = RooArgSet(decaycat)
 tframe1 = time.frame(RooFit.Name('ptime'),
-                     RooFit.Title('Projection on time'))
+                     RooFit.Title('Ds#pi - powerlaw, DsK - powerlaw * %s ratio' %
+                                  ratiofn))
 dsetlist[0].plotOn(tframe1, RooFit.MarkerStyle(kOpenTriangleDown))
 DsPi_Model.plotOn(tframe1, RooFit.LineColor(kBlue))
 dsetlist[1].plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp))
@@ -347,7 +342,8 @@ dsk_acceptance.plotOn(tframe1, RooFit.LineColor(kGreen+2),
 
 # NOTE: this range is for the RooPlot axis
 tframe2 = time.frame(RooFit.Range(0., 2), RooFit.Name('zptime'),
-                     RooFit.Title('Projection on time (zoomed)'))
+                     RooFit.Title('Ds#pi - powerlaw, DsK - powerlaw * %s ratio' %
+                                  ratiofn))
 dsetlist[0].plotOn(tframe2, RooFit.MarkerStyle(kOpenTriangleDown))
 DsPi_Model.plotOn(tframe2, RooFit.LineColor(kBlue))
 dsetlist[1].plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp))
@@ -372,8 +368,8 @@ tframe2.Draw()
 
 # Save plots and PDFs
 timestamp = get_timestamp()
-plotfile = 'plots/canvas-cpowerlaw-w-ratio-%s.png' % timestamp
-rootfile = 'data/fitresult-cpowerlaw-w-ratio-%s.root' % timestamp
+plotfile = 'plots/canvas-cpowerlaw-w-%s-ratio-%s.png' % (ratiofn, timestamp)
+rootfile = 'data/fitresult-cpowerlaw-w-%s-ratio-%s.root' % (ratiofn, timestamp)
 
 # Print plots
 canvas.Print(plotfile)
