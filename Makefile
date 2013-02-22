@@ -75,8 +75,8 @@ TREESRC      += lifetime.cxx
 ACCSRC        =
 ACCSRC       += PowLawAcceptance.cxx
 ACCSRC       += AcceptanceRatio.cxx
-ACCSRC       += ErfAcceptance.cxx
-ACCSRC       += BdPTAcceptance.cxx
+# ACCSRC       += ErfAcceptance.cxx
+# ACCSRC       += BdPTAcceptance.cxx
 
 # linkdef files for dictionaries
 LINKDEFS     =
