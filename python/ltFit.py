@@ -240,6 +240,14 @@ if ratiofn == 'exponential':
     ratio = AcceptanceRatio('ratio', 'Acceptance ratio',
                             time, rturnon, roffset, rbeta)
     varlist += [ rturnon, roffset, rbeta ]
+elif ratiofn == 'quadratic':
+    rquad = RooRealVar('rquad', 'rquad', 1.0, -10.0, 10.0)
+    rlinear = RooRealVar('rlinear', 'rlinear', 1.0, -10.0, 10.0)
+    # roffset = RooRealVar('roffset', 'roffset', 1.0, 0.0, 2.0)
+    roffset = RooRealConstant.value(0.0)
+    ratio = RooFormulaVar('ratio', '@2*(@0-@1)**2 + @3*(@0-@1) - @4',
+                          RooArgList(time, dsk_time_avg, rquad, rlinear, roffset))
+    varlist += [ rquad, rlinear, roffset ]
 elif ratiofn == 'linear':
     rslope = RooRealVar('rslope', 'rslope', 0.1, -1.0, 1.0)
     roffset = RooRealConstant.value(0.9)
