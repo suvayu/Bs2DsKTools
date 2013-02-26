@@ -7,7 +7,6 @@
 # Python modules
 import os
 import sys
-import re
 
 # option parsing
 import argparse
@@ -23,10 +22,9 @@ doPrint = options.doPrint
 logscale = options.log
 fname = options.filename
 
-# sample filename fitresult-DsK-powerlaw4-2012-08-25-Sat-13-24.root
+# sample filename fitresult-cpowerlaw-w-flat-ratio-2013-02-22-Fri-20-27.root
 fnametokens = fname.split('-')
-accfntype = fnametokens[2]
-mode = fnametokens[1]
+ratiofn = fnametokens[3]
 
 # FIXME: Batch running fails on importing anything but gROOT
 # ROOT global variables
@@ -37,141 +35,173 @@ from ROOT import gStyle, gPad, gSystem
 
 # ROOT colours and styles
 from ROOT import kGreen, kRed, kBlack, kBlue, kAzure, kYellow
-from ROOT import kFullTriangleUp
+from ROOT import kFullTriangleUp, kOpenTriangleDown
 
 # ROOT classes
 from ROOT import TTree, TFile, TCanvas, TPad, TClass, TLatex
 
-# RooFit classes
-from ROOT import RooFit, RooGlobalFunc
-from ROOT import RooPlot, RooWorkspace, RooFitResult
-from ROOT import RooArgSet, RooArgList
-from ROOT import RooAbsReal, RooRealVar, RooRealConstant, RooFormulaVar
-from ROOT import RooAbsPdf, RooGaussian
-from ROOT import RooGenericPdf, RooEffProd, RooAddPdf, RooProdPdf, RooHistPdf
-from ROOT import RooAbsData, RooDataSet, RooDataHist
-from ROOT import RooDecay, RooGaussModel
-from ROOT import RooList, RooCurve, RooHist
+## RooFit classes
+from ROOT import RooFit, RooPlot, RooWorkspace, RooFitResult
+from ROOT import RooArgSet, RooArgList # containers
+from ROOT import RooAbsReal, RooAbsPdf # abstract classes
+# variables and pdfs
+from ROOT import RooRealVar, RooRealConstant, RooFormulaVar, RooGaussian
+from ROOT import RooEffProd, RooAddPdf, RooProdPdf, RooProduct # operations
+from ROOT import RooDataSet, RooDataHist, RooHistPdf, RooKeysPdf # data
+from ROOT import RooDecay, RooBDecay, RooGaussModel # models
+from ROOT import RooCategory, RooList, RooCurve, RooHist
 
 # my stuff
 from factory import *
 
 # Load custom ROOT classes
 load_library('libacceptance.so')
-from ROOT import PowLawAcceptance, BdPTAcceptance #, ErfAcceptance
+from ROOT import PowLawAcceptance, AcceptanceRatio
 
 set_integrator_config()
 epsilon = 0.2
 tmax = 15.0
 
-# Files with fitresults:
-# data/fitresult-powerlaw2-2012-06-22-Fri-15-47.root
-# data/fitresult-powerlaw3-2012-06-23-Sat-23-50.root
-
 # Get objects from workspace
 workspace, rfile = get_workspace(fname, 'workspace')
+
 # variables
 time = workspace.var('time')
-dt = workspace.var('dt')
+
 offset = workspace.var('offset')
+turnon = workspace.var('turnon')
+exponent = workspace.var('exponent')
+beta = workspace.var('beta')
 
-if -1 < accfntype.find('powerlaw'):
-    turnon = workspace.var('turnon')
-    exponent = workspace.var('exponent')
-elif -1 < accfntype.find('bdpt'):
-    slope = workspace.var('slope')
-
-patt = re.compile('powerlaw4|cpowerlaw|bdpt')
-if re.search(patt, accfntype): beta = workspace.var('beta')
+rturnon = workspace.var('rturnon')
+roffset = workspace.var('roffset')
+rbeta = workspace.var('rbeta')
 
 # PDFs
-PDF = workspace.pdf('Model')
-acceptance = workspace.function('acceptance')
+DsPi_Model = workspace.pdf('DsPi_Model')
+dspi_acceptance = workspace.function('dspi_acceptance')
+DsK_Model = workspace.pdf('DsK_Model')
+dsk_acceptance = workspace.function('dsk_acceptance')
+
+# Dataset
+decaycat = workspace.var('decaycat')
 dataset = workspace.data('dataset')
+# also try RooAbsData::split(decaycat)
+dspi_dataset = dataset.reduce(RooFit.Cut('decaycat==0'))
+dsk_dataset = dataset.reduce(RooFit.Cut('decaycat==1'))
+ndspi = dspi_dataset.numEntries()
+ndsk = dsk_dataset.numEntries()
 
-# argset
-timeargset = RooArgSet(time)
-dtargset = RooArgSet(dt)
 
-
-# plots
-# NOTE: this range is for the dataset binning
-time.setRange('zoom1', 0., 2.0)
-# NOTE: this range is for the RooPlot axis
-tframe1 = time.frame(RooFit.Range('zoom1'), RooFit.Name('pztime1'),
-                     RooFit.Title('Projection on time (0 - 2 ps) with %s (%s)' %
-                                  (accfntype.rstrip('1234'), mode)))
+## Plots
+# zoomed: 0.0 - 2 ps
+time.setRange('zoom', 0., 2.0) # this range is for the dataset binning
+# the following range is for the RooPlot axis
+tframe1 = time.frame(RooFit.Range('zoom'), RooFit.Name('pztime1'),
+                     RooFit.Title('0-2 ps, Ds#pi - powerlaw, DsK - powerlaw * %s ratio' %
+                                  ratiofn))
 # tframe1.SetAxisRange(0, 1E-3) # probably same as 2nd RooFit.Range()
-dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp),
-               RooFit.CutRange('zoom'))
-PDF.plotOn(tframe1, RooFit.ProjWData(dtargset, dataset, True),
-           RooFit.LineColor(kBlue))
-acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
-                  RooFit.Normalization(200, RooAbsReal.Relative))
+dspi_dataset.plotOn(tframe1, RooFit.MarkerStyle(kOpenTriangleDown),
+                    RooFit.CutRange('zoom'))
+DsPi_Model.plotOn(tframe1, RooFit.LineColor(kBlue))
+dsk_dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp),
+                   RooFit.CutRange('zoom'))
+DsK_Model.plotOn(tframe1, RooFit.LineColor(kBlue+2))
+dspi_acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
+                       RooFit.Normalization(100, RooAbsReal.Relative))
+dsk_acceptance.plotOn(tframe1, RooFit.LineColor(kGreen+2),
+                      RooFit.Normalization(100, RooAbsReal.Relative))
 
-
-time.setRange('zoom2', 2.0, tmax)
-tframe2 = time.frame(RooFit.Range('zoom2'), RooFit.Name('pztime2'),
-                     RooFit.Title('Projection on time (2 - %d ps) with %s (%s)' %
-                                  (tmax, accfntype.rstrip('1234'), mode)))
-dataset.plotOn(tframe2, RooFit.MarkerStyle(kFullTriangleUp),
-               RooFit.CutRange('zoom2'))
-PDF.plotOn(tframe2, RooFit.ProjWData(dtargset, dataset, True),
-           RooFit.LineColor(kBlue))
-acceptance.plotOn(tframe2, RooFit.LineColor(kGreen),
-                  RooFit.Normalization(400, RooAbsReal.Relative))
-
-
+# full range: 0.2 - 15 ps
 time.setRange('fullrange', epsilon, tmax)
-tframe3 = time.frame(RooFit.Range('fullrange'), RooFit.Name('ptime3'),
-                     RooFit.Title('Projection on time (0.2 - %d ps) with %s (%s)' %
-                                  (tmax, accfntype.rstrip('1234'), mode)))
-dataset.plotOn(tframe3, RooFit.MarkerStyle(kFullTriangleUp))
-PDF.plotOn(tframe3, RooFit.ProjWData(dtargset, dataset, True),
-           RooFit.LineColor(kBlue))
-acceptance.plotOn(tframe3, RooFit.LineColor(kGreen),
-                  RooFit.Normalization(500, RooAbsReal.Relative))
+tframe2 = time.frame(RooFit.Range('fullrange'), RooFit.Name('ptime2'),
+                     RooFit.Title('0.2-15 ps, Ds#pi - powerlaw, DsK - powerlaw * %s ratio' %
+                                  ratiofn))
+dspi_dataset.plotOn(tframe2, RooFit.Name('hdspi_dataset'),
+                    RooFit.MarkerStyle(kOpenTriangleDown))
+DsPi_Model.plotOn(tframe2, RooFit.Name('hdspi_model'),
+                  RooFit.LineColor(kBlue))
+dsk_dataset.plotOn(tframe2, RooFit.Name('hdsk_dataset'),
+                   RooFit.MarkerStyle(kFullTriangleUp))
+DsK_Model.plotOn(tframe2, RooFit.Name('hdsk_model'),
+                 RooFit.LineColor(kBlue+2))
+dspi_acceptance.plotOn(tframe2, RooFit.Name('hdspi_acceptance'),
+                       RooFit.LineColor(kGreen),
+                       RooFit.Normalization(500, RooAbsReal.Relative))
+dsk_acceptance.plotOn(tframe2, RooFit.Name('hdsk_acceptance'),
+                      RooFit.LineColor(kGreen+2),
+                      RooFit.Normalization(500, RooAbsReal.Relative))
 
 
-print
-tframe3.Print('v')
+## Pull distributions
+# debug
+# print
+# tframe2.Print('v')
 
 # FIXME: hard coded RooCurve and RooHist name strings
-pullhist = tframe3.residHist('h_dataset', 'Model_Norm[time]', True)
-print 'Y Mean: %E' % pullhist.GetMean(2)
-print 'Y RMS:  %E' % pullhist.GetRMS(2)
+# pullhist = tframe2.residHist('h_dataset', 'Model_Norm[time]', True)
+dspi_pullhist = tframe2.pullHist('hdspi_dataset', 'hdspi_model') # equivalent
+dsk_pullhist = tframe2.pullHist('hdsk_dataset', 'hdsk_model')
 
-tframe4 = time.frame(RooFit.Range('fullrange'), RooFit.Name('fitpulls'),
-                     RooFit.Title('Fit pulls w.r.t. PDF (%s %s)' % (mode, accfntype)))
-tframe4.addPlotable(pullhist, 'P')
+# fit pulls
+tblhdr='| {0:<{width}} | {1:<{width}} |'
+tblrow='| {0:>{sign}{width}e} | {1:>{sign}{width}e} |'
+print 'Power law acceptance with %s ratio:' % ratiofn
+print tblhdr.format('Mean', 'RMS', width=13)
+print tblrow.format(dspi_pullhist.GetMean(2), dspi_pullhist.GetRMS(2),
+                    sign=' ', width=10)
+print tblrow.format(dsk_pullhist.GetMean(2), dsk_pullhist.GetRMS(2),
+                    sign=' ', width=10)
+
+# Dsπ
+xaxisvar = RooRealConstant.value(0.0)
+tframe3 = time.frame(RooFit.Range('fullrange'), RooFit.Name('dspi_pull'),
+                     RooFit.Title('Fit pulls - DsPi PDF'))
+xaxisvar.plotOn(tframe3, RooFit.LineWidth(1))
+tframe3.addPlotable(dspi_pullhist, 'P')
+
+# DsK
+tframe4 = time.frame(RooFit.Range('fullrange'), RooFit.Name('dsk_pull'),
+                     RooFit.Title('Fit pulls - DsK PDF w/ %s ratio' %
+                                  ratiofn))
+xaxisvar.plotOn(tframe4, RooFit.LineWidth(1))
+tframe4.addPlotable(dsk_pullhist, 'P')
 
 
-# draw and print
+## Draw and print
+# filenames
 timestamp = str(workspace.GetTitle())[19:]
-if logscale: plotfile = 'plots/savedcanvas_%s_%s_%s_%s.pdf' % ('log', mode, accfntype, timestamp)
-else: plotfile = 'plots/savedcanvas_%s_%s_%s.pdf' % (mode, accfntype, timestamp)
-canvas = TCanvas('canvas', 'canvas', 800, 600)
+if logscale: plotfile = 'plots/savedcanvas_%s_%s_%s.pdf' % ('log', ratiofn, timestamp)
+else: plotfile = 'plots/savedcanvas_%s_%s.pdf' % (ratiofn, timestamp)
 
+# 16:10 canvas
+canvas = TCanvas('canvas', 'canvas', 1024, 640)
+
+# open pdf file
 if doPrint: canvas.Print(plotfile + '[')
-
+# zoomed
 tframe1.Draw()
 if doPrint: canvas.Print(plotfile)
-
+# full range
 tframe2.Draw()
 if doPrint: canvas.Print(plotfile)
-
-tframe3.Draw()
-if doPrint: canvas.Print(plotfile)
-
+# full range log scale
 if logscale:
     gPad.SetLogy(1)
-    tframe3.Draw()
+    tframe2.Draw()
     if doPrint: canvas.Print(plotfile)
     gPad.SetLogy(0)
-
+# pull distributions
+gPad.Clear()
+gPad.Update()
+canvas.Divide(2, 1)
+canvas.cd(1)
+tframe3.Draw()
+canvas.cd(2)
 tframe4.Draw()
 if doPrint:
     canvas.Print(plotfile)
+    # close pdf file
     canvas.Print(plotfile + ']')
 
 
@@ -184,7 +214,7 @@ if doPrint:
 #     if obj.InheritsFrom(RooHist.Class()):
 #         dstname = obj.GetName()
 # if len(pdfname) and len(dstname):
-#     chi2 = tframe3.chiSquare(pdfname, dstname, 2)
+#     chi2 = tframe2.chiSquare(pdfname, dstname, 2)
 # print 'Fit χ² b/w %s and %s: %G' % (pdfname, dstname, chi2)
 
 # # label on final plot
