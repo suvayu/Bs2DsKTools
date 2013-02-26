@@ -169,7 +169,7 @@ for dset in dsetlist:
 ## Basic B decay pdf with time resolution
 # Resolution model
 mean = RooRealVar('mean', 'Mean', 0.)
-scale = RooRealVar('scale', 'Per-event time error scale factor', 1.19)
+# scale = RooRealVar('scale', 'Per-event time error scale factor', 1.19)
 resmodel = RooGaussModel('resmodel', 'Time resolution model', time,
                          mean, RooRealConstant.value(0.044),
                          RooRealConstant.value(1.0),
