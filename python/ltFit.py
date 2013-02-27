@@ -247,14 +247,15 @@ elif ratiofn == 'linear':
                           RooArgList(time, dsk_time_avg, rslope, roffset))
     varlist += [ rslope, roffset ]
 elif ratiofn == 'flat':
-    ratio = RooRealConstant.value(1.0)
+    ratio = RooRealVar('ratio', 'ratio', 1.0, 0.0, 2.0)
+    varlist += [ ratio ]
 else:
     sys.exit('Unknown acceptance type. Aborting')
 dsk_acceptance = RooProduct('dsk_acceptance', 'DsK Acceptance with ratio',
                             RooArgList(dspi_acceptance, ratio))
 # dsk_acceptance = PowLawAcceptance(dspi_acceptance, 'dsk_acceptance', ratio)
 DsK_Model = RooEffProd('DsK_Model', 'DsK acceptance model B_{s}',
-                        Bdecay, dsk_acceptance)
+                       Bdecay, dsk_acceptance)
 
 pdflist += [ dsk_acceptance, DsK_Model ]
 
