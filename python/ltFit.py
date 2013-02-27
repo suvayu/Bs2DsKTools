@@ -249,7 +249,7 @@ elif ratiofn == 'quadratic':
                           RooArgList(time, dsk_time_avg, rquad, rlinear, roffset))
     varlist += [ rquad, rlinear, roffset ]
 elif ratiofn == 'linear':
-    rslope = RooRealVar('rslope', 'rslope', 0.1, -1.0, 1.0)
+    rslope = RooRealVar('rslope', 'rslope', 0.01, -0.2, 0.2)
     roffset = RooRealConstant.value(0.9)
     ratio = RooFormulaVar('ratio', '@2*(@0-@1) - @3',
                           RooArgList(time, dsk_time_avg, rslope, roffset))
