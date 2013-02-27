@@ -242,7 +242,7 @@ if ratiofn == 'exponential':
     varlist += [ rturnon, roffset, rbeta ]
 elif ratiofn == 'linear':
     rslope = RooRealVar('rslope', 'rslope', 0.1, -1.0, 1.0)
-    roffset = RooRealVar('roffset', 'roffset', 1.0, 0.0, 2.0)
+    roffset = RooRealConstant.value(0.9)
     ratio = RooFormulaVar('ratio', '@2*(@0-@1) - @3',
                           RooArgList(time, dsk_time_avg, rslope, roffset))
     varlist += [ rslope, roffset ]
