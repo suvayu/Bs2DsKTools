@@ -227,6 +227,10 @@ dspi_fitresult.Print()
 
 
 ## DsK acceptance and pdf
+dsk_time_avg = RooRealConstant.value(dsetlist[1].mean(time))
+print 'DsK sample time avg:'
+dsk_time_avg.Print('v')
+
 if ratiofn == 'exponential':
     # ratio parameters: only for DsK
     rturnon = RooRealVar('rturnon', 'rturnon', 6.4, 0.5, 10.0)
@@ -239,8 +243,8 @@ if ratiofn == 'exponential':
 elif ratiofn == 'linear':
     rslope = RooRealVar('rslope', 'rslope', 0.1, -1.0, 1.0)
     roffset = RooRealVar('roffset', 'roffset', 1.0, 0.0, 2.0)
-    ratio = RooFormulaVar('ratio', '@0*@1 + @2',
-                          RooArgList(rslope, time, roffset))
+    ratio = RooFormulaVar('ratio', '@2*(@0-@1) - @3',
+                          RooArgList(time, dsk_time_avg, rslope, roffset))
     varlist += [ rslope, roffset ]
 elif ratiofn == 'flat':
     ratio = RooRealConstant.value(1.0)
