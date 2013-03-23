@@ -60,6 +60,27 @@ rbeta = workspace.var('rbeta')
 ratio = workspace.function('ratio')
 fitresult = workspace.obj('fitresult_PDF_dataset')
 
+# Dataset
+argset = RooArgSet(time)
+decaycat = workspace.cat('decaycat')
+decaycat.setRange('onlydspi', 'DsPi')
+decaycat.setRange('onlydsk', 'DsK')
+
+dataset = workspace.data('dataset')
+# RooFit limits entry selection to variables specified in the argset
+# passed to SelectVars.  Hence RooFit.SelectVars(argset) needs to be
+# called separately on reduced dataset
+dspi_data = dataset.reduce(RooFit.Name('dspi_data'),
+                           RooFit.CutRange('onlydspi')).reduce(
+                               RooFit.SelectVars(argset))
+dsk_data = dataset.reduce(RooFit.Name('dsk_data'),
+                          RooFit.CutRange('onlydsk')).reduce(
+                              RooFit.SelectVars(argset))
+
+print '=' * 5, ' Datasets retrieved ', '=' * 5
+for dset in (dataset, dspi_data, dsk_data):
+    dset.Print('v')
+
 ## Plot
 tframe = time.frame(RooFit.Title('Time acceptance ratio'))
 paramset = RooArgSet(rturnon, roffset, rbeta)
