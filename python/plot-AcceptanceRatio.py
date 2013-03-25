@@ -18,6 +18,7 @@ options = optparser.parse_args()
 doPrint = options.doPrint
 fname = options.file
 
+epsilon = 0.2
 
 # FIXME: Batch running fails on importing anything but gROOT
 # ROOT global variables
@@ -36,7 +37,7 @@ from ROOT import TH1, TH1D, TH2D
 
 # RooFit classes
 from ROOT import RooPlot, RooWorkspace, RooFitResult, RooFit
-from ROOT import RooArgSet, RooArgList
+from ROOT import RooArgSet, RooArgList, RooDataHist
 
 # my stuff
 from factory import get_workspace, get_file, get_object, load_library
@@ -81,11 +82,39 @@ print '=' * 5, ' Datasets retrieved ', '=' * 5
 for dset in (dataset, dspi_data, dsk_data):
     dset.Print('v')
 
+# histogram from dataset (FIXME:)
+dspihist = TH1D('dspihist', 'Ds#pi decay time', 150, epsilon, 15.0)
+dskhist = TH1D('dskhist', 'DsK decay time', 150, epsilon, 15.0)
+ratiohist = TH1D('ratiohist', 'DsK/Ds#pi ratio', 150, epsilon, 15.0)
+
+for hist in (dspihist, dskhist, ratiohist):
+    hist.Sumw2()
+
+dspihist = dspi_data.fillHistogram(dspihist, RooArgList(time))
+dskhist = dsk_data.fillHistogram(dskhist, RooArgList(time))
+ratiohist.Divide(dskhist, dspihist)
+
+# FIXME: relative normalisation
+time.setRange('fullrange', epsilon, 15.0)
+fintegral = ratio.createIntegral(RooArgSet(time), 'fullrange').getVal()
+hintegral = ratiohist.Integral()
+norm = fintegral / hintegral
+print '=' * 5, ' Integrals ', '=' * 5
+print 'Function integral / histogram integral = %g / %g = %g' % (
+    fintegral, hintegral, norm)
+ratiohist.Scale(norm)
+
+ratiodset = RooDataHist('ratiodset', '', RooArgList(time), ratiohist)
+ratiodset.Print('v')
+
+# TODO: variable binning (dynamic merge beyond 5ps) for long decay times
+
 ## Plot
 tframe = time.frame(RooFit.Title('Time acceptance ratio'))
 paramset = RooArgSet(rturnon, roffset, rbeta)
 ratio.plotOn(tframe, RooFit.VisualizeError(fitresult, paramset, 1, False))
 ratio.plotOn(tframe)
+ratiodset.plotOn(tframe)
 
 ## Draw
 tframe.Draw()
