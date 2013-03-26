@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 """
-Fit it for lifetime acceptance in Monte Carlo.
+Fit for decay time acceptance in Monte Carlo.
 
 Builds a PDF with a Gaussian time resolution model. Trigger acceptance
 is modelled as an efficiency function.
@@ -105,9 +105,9 @@ pdflist = []
 
 
 ## Observables
-time = RooRealVar('time', 'B_{s} lifetime in ps', epsilon, 15.0)
+time = RooRealVar('time', 'B_{s} decay time in ps', epsilon, 15.0)
 # # Limits determined from tree
-# dt = RooRealVar('dt', 'Error in lifetime measurement (ps)', 1E-2, 9E-2)
+# dt = RooRealVar('dt', 'Error in decay time measurement (ps)', 1E-2, 9E-2)
 # dt.setBins(100)             # default binning (since empty name)
 # # cache binning
 # dt.setBins(100, 'cache')
