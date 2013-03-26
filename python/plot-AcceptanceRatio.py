@@ -7,6 +7,8 @@
 # Python modules
 import os
 import sys
+import math
+import numpy
 
 # option parsing
 import argparse
@@ -29,7 +31,7 @@ from ROOT import gStyle, gPad, gSystem
 
 # ROOT colours and styles
 from ROOT import kGreen, kRed, kBlack, kBlue, kAzure, kYellow, kCyan
-from ROOT import kFullTriangleUp
+from ROOT import kFullTriangleUp, kOpenTriangleDown, kFullDotMedium
 
 # ROOT classes
 from ROOT import TTree, TFile, TCanvas, TPad, TClass, TLatex
@@ -82,10 +84,83 @@ print '=' * 5, ' Datasets retrieved ', '=' * 5
 for dset in (dataset, dspi_data, dsk_data):
     dset.Print('v')
 
-# histogram from dataset (FIXME:)
+# histogram from dataset
 dspihist = TH1D('dspihist', 'Ds#pi decay time', 150, epsilon, 15.0)
 dskhist = TH1D('dskhist', 'DsK decay time', 150, epsilon, 15.0)
-ratiohist = TH1D('ratiohist', 'DsK/Ds#pi ratio', 150, epsilon, 15.0)
+
+for hist in (dspihist, dskhist):
+    hist.Sumw2()
+
+dspihist = dspi_data.fillHistogram(dspihist, RooArgList(time))
+dskhist = dsk_data.fillHistogram(dskhist, RooArgList(time))
+
+# variable binning (dynamic merge of bins with fewer entries)
+nbins = dspihist.GetNbinsX()
+obins = numpy.zeros(nbins, dtype=float) # old binning
+dspihist.GetLowEdge(obins)
+
+## Algorithm:
+# 1. if δ/n > 0.1
+# 2. merge with next bin
+# 3. recalculate δ(=√(n₁+n₂)) & n(=n₁+n₂)
+# 4. if new δ/n > 0.1, repeat 2-3, else continue
+
+# bin content and bin error arrays
+dspicons = numpy.zeros(nbins, dtype=float)
+dspierrs = numpy.zeros(nbins, dtype=float)
+dskcons = numpy.zeros(nbins, dtype=float)
+dskerrs = numpy.zeros(nbins, dtype=float)
+
+for i in range(nbins):
+    dspicons[i] = dspihist.GetBinContent(i + 1)
+    dspierrs[i] = dspihist.GetBinContent(i + 1)
+    dskcons[i] = dskhist.GetBinContent(i + 1)
+    dskerrs[i] = dskhist.GetBinContent(i + 1)
+
+# new binning
+newbinedges = [obins[0]]
+# start from 2nd bin (i=1) because first bin is in the rising region
+# and might have fewer entries
+i = 1
+
+while i < nbins:
+    dspideln = dspierrs[i] / dspicons[i]
+    dskdeln = dskerrs[i] / dskcons[i]
+    if dspideln < 0.1 or dskdeln < 0.1:
+        newbinedges += [obins[i]]
+        i += 1
+    else:
+        dspicon = dspicons[i]
+        dskcon = dskcons[i]
+        n = 1                   # start merging bins
+        while i + n < nbins:
+            dspicon += dspicons[i + n]
+            dskcon += dskcons[i + n]
+            tdspideln = math.sqrt(dspicon) / dspicon
+            tdskdeln = math.sqrt(dskcon) / dskcon
+            if not (tdspideln < 0.1 or tdskdeln < 0.1):
+                n += 1
+            else:
+                newbinedges += [obins[i + n]]
+                break
+        i += n
+
+# new number of bins
+oldnbins = nbins
+nbins = len(newbinedges)
+# add upper bin edge for last bin
+newbinedges += [dspihist.GetBinLowEdge(oldnbins) + dspihist.GetBinWidth(oldnbins)]
+newbins = numpy.array(newbinedges)
+print 'Bin merging summary: # of bins %d -> %d ' % (oldnbins, nbins)
+
+# cleanup histograms for next step
+dspihist.Delete()
+dskhist.Delete()
+
+# instead of fiddling with TH1.Rebin(..) refill new histograms
+dspihist = TH1D('dspihist', 'Ds#pi decay time', nbins, newbins)
+dskhist = TH1D('dskhist', 'DsK decay time', nbins, newbins)
+ratiohist = TH1D('ratiohist', 'DsK/Ds#pi ratio', nbins, newbins)
 
 for hist in (dspihist, dskhist, ratiohist):
     hist.Sumw2()
@@ -94,27 +169,26 @@ dspihist = dspi_data.fillHistogram(dspihist, RooArgList(time))
 dskhist = dsk_data.fillHistogram(dskhist, RooArgList(time))
 ratiohist.Divide(dskhist, dspihist)
 
-# FIXME: relative normalisation
+# relative normalisation
 time.setRange('fullrange', epsilon, 15.0)
 fintegral = ratio.createIntegral(RooArgSet(time), 'fullrange').getVal()
-hintegral = ratiohist.Integral()
+hintegral = ratiohist.Integral('width') # has weights, use width
 norm = fintegral / hintegral
 print '=' * 5, ' Integrals ', '=' * 5
 print 'Function integral / histogram integral = %g / %g = %g' % (
     fintegral, hintegral, norm)
 ratiohist.Scale(norm)
 
+# make dataset from histogram
 ratiodset = RooDataHist('ratiodset', '', RooArgList(time), ratiohist)
 ratiodset.Print('v')
-
-# TODO: variable binning (dynamic merge beyond 5ps) for long decay times
 
 ## Plot
 tframe = time.frame(RooFit.Title('Time acceptance ratio'))
 paramset = RooArgSet(rturnon, roffset, rbeta)
 ratio.plotOn(tframe, RooFit.VisualizeError(fitresult, paramset, 1, False))
 ratio.plotOn(tframe)
-ratiodset.plotOn(tframe)
+ratiodset.plotOn(tframe, RooFit.MarkerStyle(kFullDotMedium))
 
 ## Draw
 tframe.Draw()
