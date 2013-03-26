@@ -205,5 +205,47 @@ if doPrint:
     gPad.Print('plots/DsK_ratio.png')
     gPad.Print('plots/DsK_ratio.pdf')
 
+
+## Finer bins for small decay times (requested by Eduardo)
+finebins = numpy.array([0.2 + i*0.05 for i in range(0, 37)])
+zdspihist = TH1D('zdspihist', 'Ds#pi decay time', len(finebins) - 1, finebins)
+zdskhist = TH1D('zdskhist', 'DsK decay time', len(finebins) - 1, finebins)
+zratiohist = TH1D('zratiohist', 'DsK/Ds#pi ratio', len(finebins) - 1, finebins)
+
+for hist in (zdspihist, zdskhist, zratiohist):
+    hist.Sumw2()
+
+zdspihist = dspi_data.fillHistogram(zdspihist, RooArgList(time))
+zdskhist = dsk_data.fillHistogram(zdskhist, RooArgList(time))
+zratiohist.Divide(zdskhist, zdspihist)
+
+# relative normalisation
+time.setRange('zoom', tmin, 2.0)
+fintegral = ratio.createIntegral(RooArgSet(time), 'zoom').getVal()
+hintegral = zratiohist.Integral('width') # has weights, use width
+print hintegral
+norm = fintegral / hintegral
+print '=' * 5, ' Integrals (zoomed) ', '=' * 5
+print 'Function integral / histogram integral = %g / %g = %g' % (
+    fintegral, hintegral, norm)
+zratiohist.Scale(norm)
+
+# make dataset from histogram
+zratiodset = RooDataHist('zratiodset', '', RooArgList(time), zratiohist)
+zratiodset.Print('v')
+
+ztframe = time.frame(RooFit.Title('Time acceptance ratio 0.2-2.0 ps'),
+                    RooFit.Range('zoom'))
+paramset = RooArgSet(rturnon, roffset, rbeta)
+ratio.plotOn(ztframe, RooFit.VisualizeError(fitresult, paramset, 1, False))
+ratio.plotOn(ztframe)
+zratiodset.plotOn(ztframe, RooFit.MarkerStyle(kFullDotMedium))
+ztframe.Draw()
+gPad.Update()
+
+# Print
+if doPrint:
+    gPad.Print('plots/DsK_ratio_zoomed.png')
+
 # NB: Do not close file, otherwise plot disappears
 # ffile.Close()
