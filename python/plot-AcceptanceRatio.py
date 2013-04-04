@@ -91,16 +91,28 @@ for dset in (dataset, dspi_data, dsk_data):
 
 ## Finer bins for small decay times (requested by Eduardo)
 finebins = numpy.array([0.2 + i*0.05 for i in range(0, 17)])
-zdspihist = TH1D('zdspihist', 'Ds#pi decay time', len(finebins) - 1, finebins)
-zdskhist = TH1D('zdskhist', 'DsK decay time', len(finebins) - 1, finebins)
-zratiohist = TH1D('zratiohist', 'DsK/Ds#pi ratio', len(finebins) - 1, finebins)
+z1dspihist = TH1D('z1dspihist', 'Ds#pi decay time', len(finebins) - 1, finebins)
+z1dskhist = TH1D('z1dskhist', 'DsK decay time', len(finebins) - 1, finebins)
+z1ratiohist = TH1D('z1ratiohist', 'DsK/Ds#pi ratio', len(finebins) - 1, finebins)
 
-for hist in (zdspihist, zdskhist, zratiohist):
+for hist in (z1dspihist, z1dskhist, z1ratiohist):
     hist.Sumw2()
 
-zdspihist = dspi_data.fillHistogram(zdspihist, RooArgList(time))
-zdskhist = dsk_data.fillHistogram(zdskhist, RooArgList(time))
-zratiohist.Divide(zdskhist, zdspihist)
+z1dspihist = dspi_data.fillHistogram(z1dspihist, RooArgList(time))
+z1dskhist = dsk_data.fillHistogram(z1dskhist, RooArgList(time))
+z1ratiohist.Divide(z1dskhist, z1dspihist)
+
+finebins = numpy.array([0.2 + i*0.025 for i in range(0, 33)])
+z2dspihist = TH1D('z2dspihist', 'Ds#pi decay time', len(finebins) - 1, finebins)
+z2dskhist = TH1D('z2dskhist', 'DsK decay time', len(finebins) - 1, finebins)
+z2ratiohist = TH1D('z2ratiohist', 'DsK/Ds#pi ratio', len(finebins) - 1, finebins)
+
+for hist in (z2dspihist, z2dskhist, z2ratiohist):
+    hist.Sumw2()
+
+z2dspihist = dspi_data.fillHistogram(z2dspihist, RooArgList(time))
+z2dskhist = dsk_data.fillHistogram(z2dskhist, RooArgList(time))
+z2ratiohist.Divide(z2dskhist, z2dspihist)
 
 # # debug error calculation
 # print
@@ -118,30 +130,49 @@ zratiohist.Divide(zdskhist, zdspihist)
 # relative normalisation
 time.setRange('zoom', tmin, 1.0)
 fintegral = ratio.createIntegral(RooArgSet(time), 'zoom').getVal()
-hintegral = zratiohist.Integral('width') # has weights, use width
+hintegral = z1ratiohist.Integral('width') # has weights, use width
 print hintegral
 norm = fintegral / hintegral
 print '=' * 5, ' Integrals (zoomed) ', '=' * 5
 print 'Function integral / histogram integral = %g / %g = %g' % (
     fintegral, hintegral, norm)
-zratiohist.Scale(norm)
+z1ratiohist.Scale(norm)
+hintegral = z2ratiohist.Integral('width') # has weights, use width
+norm = fintegral / hintegral
+z2ratiohist.Scale(norm)
 
 # make dataset from histogram
-zratiodset = RooDataHist('zratiodset', '', RooArgList(time), zratiohist)
-zratiodset.Print('v')
+z1ratiodset = RooDataHist('z1ratiodset', '', RooArgList(time), z1ratiohist)
+z1ratiodset.Print('v')
 
-ztframe = time.frame(RooFit.Title('Time acceptance ratio 0.2-1.0 ps'),
-                    RooFit.Range('zoom'))
+z2ratiodset = RooDataHist('z2ratiodset', '', RooArgList(time), z2ratiohist)
+z2ratiodset.Print('v')
+
+z1tframe = time.frame(RooFit.Title('Time acceptance ratio 0.2-1.0 ps'),
+                      RooFit.Range('zoom'))
 paramset = RooArgSet(rturnon, roffset, rbeta)
-ratio.plotOn(ztframe, RooFit.VisualizeError(fitresult, paramset, 1, False))
-ratio.plotOn(ztframe)
-zratiodset.plotOn(ztframe, RooFit.MarkerStyle(kFullDotMedium))
-ztframe.Draw()
+ratio.plotOn(z1tframe, RooFit.VisualizeError(fitresult, paramset, 1, False))
+ratio.plotOn(z1tframe)
+z1ratiodset.plotOn(z1tframe, RooFit.MarkerStyle(kFullDotMedium))
+z1tframe.Draw()
 gPad.Update()
 
 # Print
 if doPrint:
-    gPad.Print('plots/DsK_ratio_zoomed.png')
+    gPad.Print('plots/DsK_ratio_zoomed1.png')
+
+z2tframe = time.frame(RooFit.Title('Time acceptance ratio 0.2-1.0 ps'),
+                      RooFit.Range('zoom'))
+paramset = RooArgSet(rturnon, roffset, rbeta)
+ratio.plotOn(z2tframe, RooFit.VisualizeError(fitresult, paramset, 1, False))
+ratio.plotOn(z2tframe)
+z2ratiodset.plotOn(z2tframe, RooFit.MarkerStyle(kFullDotMedium))
+z2tframe.Draw()
+gPad.Update()
+
+# Print
+if doPrint:
+    gPad.Print('plots/DsK_ratio_zoomed2.png')
 
 # NB: Do not close file, otherwise plot disappears
 # ffile.Close()
