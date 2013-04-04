@@ -90,7 +90,7 @@ for dset in (dataset, dspi_data, dsk_data):
 
 
 ## Finer bins for small decay times (requested by Eduardo)
-finebins = numpy.array([0.2 + i*0.05 for i in range(0, 37)])
+finebins = numpy.array([0.2 + i*0.05 for i in range(0, 17)])
 zdspihist = TH1D('zdspihist', 'Ds#pi decay time', len(finebins) - 1, finebins)
 zdskhist = TH1D('zdskhist', 'DsK decay time', len(finebins) - 1, finebins)
 zratiohist = TH1D('zratiohist', 'DsK/Ds#pi ratio', len(finebins) - 1, finebins)
@@ -102,8 +102,20 @@ zdspihist = dspi_data.fillHistogram(zdspihist, RooArgList(time))
 zdskhist = dsk_data.fillHistogram(zdskhist, RooArgList(time))
 zratiohist.Divide(zdskhist, zdspihist)
 
+print
+print '=' * 5, ' Bin contents w/ errors for bins 1-3 ', '=' * 5
+print '|{0: >10s}|{1: >10s}|{2: >10s}|{3: >10s}|{4: >10s}|{5: >10s}|'.format(
+    'DsK', 'DsK err', 'DsPi', 'DsPi err', 'ratio', 'ratio err')
+print '|' + '+'.join(['-'*10 for i in range(6)]) + '|'
+for i in range(1,4):
+    print '|{0: > .3e}|{1: > .3e}|{2: > .3e}|{3: > .3e}|{4: > .3e}|{5: > .3e}|'.format(
+        zdskhist.GetBinContent(i), zdskhist.GetBinError(i),
+        zdspihist.GetBinContent(i), zdspihist.GetBinError(i),
+        zratiohist.GetBinContent(i), zratiohist.GetBinError(i))
+print
+
 # relative normalisation
-time.setRange('zoom', tmin, 2.0)
+time.setRange('zoom', tmin, 1.0)
 fintegral = ratio.createIntegral(RooArgSet(time), 'zoom').getVal()
 hintegral = zratiohist.Integral('width') # has weights, use width
 print hintegral
@@ -117,7 +129,7 @@ zratiohist.Scale(norm)
 zratiodset = RooDataHist('zratiodset', '', RooArgList(time), zratiohist)
 zratiodset.Print('v')
 
-ztframe = time.frame(RooFit.Title('Time acceptance ratio 0.2-2.0 ps'),
+ztframe = time.frame(RooFit.Title('Time acceptance ratio 0.2-1.0 ps'),
                     RooFit.Range('zoom'))
 paramset = RooArgSet(rturnon, roffset, rbeta)
 ratio.plotOn(ztframe, RooFit.VisualizeError(fitresult, paramset, 1, False))
