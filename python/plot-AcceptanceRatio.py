@@ -102,17 +102,18 @@ zdspihist = dspi_data.fillHistogram(zdspihist, RooArgList(time))
 zdskhist = dsk_data.fillHistogram(zdskhist, RooArgList(time))
 zratiohist.Divide(zdskhist, zdspihist)
 
-print
-print '=' * 5, ' Bin contents w/ errors for bins 1-3 ', '=' * 5
-print '|{0: >10s}|{1: >10s}|{2: >10s}|{3: >10s}|{4: >10s}|{5: >10s}|'.format(
-    'DsK', 'DsK err', 'DsPi', 'DsPi err', 'ratio', 'ratio err')
-print '|' + '+'.join(['-'*10 for i in range(6)]) + '|'
-for i in range(1,4):
-    print '|{0: > .3e}|{1: > .3e}|{2: > .3e}|{3: > .3e}|{4: > .3e}|{5: > .3e}|'.format(
-        zdskhist.GetBinContent(i), zdskhist.GetBinError(i),
-        zdspihist.GetBinContent(i), zdspihist.GetBinError(i),
-        zratiohist.GetBinContent(i), zratiohist.GetBinError(i))
-print
+# # debug error calculation
+# print
+# print '=' * 5, ' Bin contents w/ errors for bins 1-3 ', '=' * 5
+# print '|{0: >10s}|{1: >10s}|{2: >10s}|{3: >10s}|{4: >10s}|{5: >10s}|'.format(
+#     'DsK', 'DsK err', 'DsPi', 'DsPi err', 'ratio', 'ratio err')
+# print '|' + '+'.join(['-'*10 for i in range(6)]) + '|'
+# for i in range(1,4):
+#     print '|{0: > .3e}|{1: > .3e}|{2: > .3e}|{3: > .3e}|{4: > .3e}|{5: > .3e}|'.format(
+#         z1dskhist.GetBinContent(i), z1dskhist.GetBinError(i),
+#         z1dspihist.GetBinContent(i), z1dspihist.GetBinError(i),
+#         z1ratiohist.GetBinContent(i), z1ratiohist.GetBinError(i))
+# print
 
 # relative normalisation
 time.setRange('zoom', tmin, 1.0)
