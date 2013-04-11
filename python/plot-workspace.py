@@ -157,14 +157,14 @@ print tblrow.format(dsk_pullhist.GetMean(2), dsk_pullhist.GetRMS(2),
 xaxisvar = RooRealConstant.value(0.0)
 tframe3 = time.frame(RooFit.Range('fullrange'), RooFit.Name('dspi_pull'),
                      RooFit.Title('Fit pulls - DsPi PDF'))
-xaxisvar.plotOn(tframe3, RooFit.LineWidth(1))
+xaxisvar.plotOn(tframe3, RooFit.LineColor(kBlack), RooFit.LineWidth(1))
 tframe3.addPlotable(dspi_pullhist, 'P')
 
 # DsK
 tframe4 = time.frame(RooFit.Range('fullrange'), RooFit.Name('dsk_pull'),
                      RooFit.Title('Fit pulls - DsK PDF w/ %s ratio' %
                                   ratiofn))
-xaxisvar.plotOn(tframe4, RooFit.LineWidth(1))
+xaxisvar.plotOn(tframe4, RooFit.LineColor(kBlack), RooFit.LineWidth(1))
 tframe4.addPlotable(dsk_pullhist, 'P')
 
 
