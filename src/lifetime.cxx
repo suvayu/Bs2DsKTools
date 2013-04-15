@@ -228,7 +228,7 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
 
        // if (( UnbiasedSelection() == false ) or ( lab1_PIDK < 5 )) continue;
        if (CommonSelection(DsK) == false) continue;
-       if (OfflineSelection(DsK) == false) continue;
+       // if (OldOfflineSelection(DsK) == false) continue;
 
        if (lab0_TAUERR <= 0 or lab0_TAUERR >= 0.0002 or
 	   lab0_TAUERR != lab0_TAUERR) continue;
@@ -270,8 +270,13 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
 }
 
 
-bool lifetime::OfflineSelection(bool DsK)
+/// Email from Vava (notmuch-show "id:888867B9538E084291362976791C2C455B72047F@CERNXCHG31.cern.ch")
+
+bool lifetime::OldOfflineSelection(bool DsK)
 {
+  std::cout << "This method is deprecated.  All selection ignored." << std::endl;
+  return true;
+
   if (not (lab1_P > 0.0 and lab1_P < 1.0E11)) {
     _cutflow[0]++;
     return false;
