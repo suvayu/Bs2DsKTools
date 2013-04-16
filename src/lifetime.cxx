@@ -175,7 +175,7 @@ void lifetime::Loop(TTree &ftree)
 }
 
 
-void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
+void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK, bool MCmatch)
 {
    if (fChain == 0) return;
    Long64_t nentries = fChain->GetEntries();
@@ -185,6 +185,7 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
      tru_BsMom(0,0,0,0), tru_hMom(0,0,0,0), tru_DsMom(0,0,0,0);
    TVector3 OWNPV(0,0,0), ENDVX(0,0,0);
    double wt(0.0), truewt(0.0), time(0.0), dt(0.0), truetime(0.0);
+   double BDTG(0.0), PIDK(0.0);
 
    ftree.Branch("Bsmass" , &lab0_MM);
    ftree.Branch("hID"    , &lab1_TRUEID);
@@ -197,6 +198,9 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
    ftree.Branch("oscil"  , &lab0_OSCIL);
    ftree.Branch("OWNPV"  , &OWNPV);
    ftree.Branch("ENDVX"  , &ENDVX);
+
+   ftree.Branch("BDTGResponse_1", &BDTG);
+   ftree.Branch("lab1_PIDK", &PIDK);
 
    ftree.Branch("HLT1TrackAllL0TOS", &lab0Hlt1TrackAllL0Decision_TOS);
    ftree.Branch("HLT2Topo4BodyTOS" , &lab0Hlt2Topo4BodyBBDTDecision_TOS);
@@ -227,7 +231,8 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
        else if (std::abs(lab1_TRUEID) == 211) rdspicount++;
 
        // if (( UnbiasedSelection() == false ) or ( lab1_PIDK < 5 )) continue;
-       if (CommonSelection(DsK) == false) continue;
+       if (MCmatch)
+	 if (CommonSelection(DsK) == false) continue;
        // if (OldOfflineSelection(DsK) == false) continue;
 
        if (lab0_TAUERR <= 0 or lab0_TAUERR >= 0.0002 or
@@ -240,6 +245,9 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
        truewt   = TMath::Exp(lab0_TRUETAU*1e3/1.472);
        OWNPV.SetXYZ(lab0_OWNPV_X, lab0_OWNPV_Y, lab0_OWNPV_Z);
        ENDVX.SetXYZ(lab0_ENDVERTEX_X, lab0_ENDVERTEX_Y, lab0_ENDVERTEX_Z);
+
+       BDTG = BDTGResponse_1;
+       PIDK = lab1_PIDK;
 
        BsMom.SetXYZM(lab0_PX, lab0_PY, lab0_PZ, lab0_MM);
        hMom .SetXYZM(lab1_PX, lab1_PY, lab1_PZ, lab1_M);
