@@ -135,6 +135,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab0_MassFitConsD_nIter", lab0_MassFitConsD_nIter, &b_lab0_MassFitConsD_nIter);
   fChain->SetBranchAddress("lab0_MassFitConsD_status", lab0_MassFitConsD_status, &b_lab0_MassFitConsD_status);
 
+  /*
   // MC truth
   fChain->SetBranchAddress("lab0_TRUEID", &lab0_TRUEID, &b_lab0_TRUEID);
   fChain->SetBranchAddress("lab0_TRUEP_E", &lab0_TRUEP_E, &b_lab0_TRUEP_E);
@@ -150,6 +151,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab0_TRUEENDVERTEX_Z", &lab0_TRUEENDVERTEX_Z, &b_lab0_TRUEENDVERTEX_Z);
   fChain->SetBranchAddress("lab0_TRUEISSTABLE", &lab0_TRUEISSTABLE, &b_lab0_TRUEISSTABLE);
   fChain->SetBranchAddress("lab0_TRUETAU", &lab0_TRUETAU, &b_lab0_TRUETAU);
+  */
 
   // lifetime
   fChain->SetBranchAddress("lab0_OSCIL", &lab0_OSCIL, &b_lab0_OSCIL);
@@ -237,6 +239,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab1_PZ", &lab1_PZ, &b_lab1_PZ);
   fChain->SetBranchAddress("lab1_M", &lab1_M, &b_lab1_M);
 
+  /*
   // MC truth
   fChain->SetBranchAddress("lab1_TRUEID", &lab1_TRUEID, &b_lab1_TRUEID);
   fChain->SetBranchAddress("lab1_TRUEP_E", &lab1_TRUEP_E, &b_lab1_TRUEP_E);
@@ -252,6 +255,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab1_TRUEENDVERTEX_Z", &lab1_TRUEENDVERTEX_Z, &b_lab1_TRUEENDVERTEX_Z);
   fChain->SetBranchAddress("lab1_TRUEISSTABLE", &lab1_TRUEISSTABLE, &b_lab1_TRUEISSTABLE);
   fChain->SetBranchAddress("lab1_TRUETAU", &lab1_TRUETAU, &b_lab1_TRUETAU);
+  */
 
   // lifetime?
   fChain->SetBranchAddress("lab1_OSCIL", &lab1_OSCIL, &b_lab1_OSCIL);
@@ -341,6 +345,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab2_M", &lab2_M, &b_lab2_M);
   fChain->SetBranchAddress("lab2_BKGCAT", &lab2_BKGCAT, &b_lab2_BKGCAT);
 
+  /*
   // MC truth
   fChain->SetBranchAddress("lab2_TRUEID", &lab2_TRUEID, &b_lab2_TRUEID);
   fChain->SetBranchAddress("lab2_TRUEP_E", &lab2_TRUEP_E, &b_lab2_TRUEP_E);
@@ -356,6 +361,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab2_TRUEENDVERTEX_Z", &lab2_TRUEENDVERTEX_Z, &b_lab2_TRUEENDVERTEX_Z);
   fChain->SetBranchAddress("lab2_TRUEISSTABLE", &lab2_TRUEISSTABLE, &b_lab2_TRUEISSTABLE);
   fChain->SetBranchAddress("lab2_TRUETAU", &lab2_TRUETAU, &b_lab2_TRUETAU);
+  */
 
   // lifetime
   fChain->SetBranchAddress("lab2_OSCIL", &lab2_OSCIL, &b_lab2_OSCIL);
@@ -406,6 +412,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab3_PZ", &lab3_PZ, &b_lab3_PZ);
   fChain->SetBranchAddress("lab3_M", &lab3_M, &b_lab3_M);
 
+  /*
   // MC truth
   fChain->SetBranchAddress("lab3_TRUEID", &lab3_TRUEID, &b_lab3_TRUEID);
   fChain->SetBranchAddress("lab3_TRUEP_E", &lab3_TRUEP_E, &b_lab3_TRUEP_E);
@@ -421,6 +428,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab3_TRUEENDVERTEX_Z", &lab3_TRUEENDVERTEX_Z, &b_lab3_TRUEENDVERTEX_Z);
   fChain->SetBranchAddress("lab3_TRUEISSTABLE", &lab3_TRUEISSTABLE, &b_lab3_TRUEISSTABLE);
   fChain->SetBranchAddress("lab3_TRUETAU", &lab3_TRUETAU, &b_lab3_TRUETAU);
+  */
 
   fChain->SetBranchAddress("lab3_OSCIL", &lab3_OSCIL, &b_lab3_OSCIL);
   fChain->SetBranchAddress("lab3_ID", &lab3_ID, &b_lab3_ID);
@@ -489,6 +497,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab4_PZ", &lab4_PZ, &b_lab4_PZ);
   fChain->SetBranchAddress("lab4_M", &lab4_M, &b_lab4_M);
 
+  /*
   // MC truth
   fChain->SetBranchAddress("lab4_TRUEID", &lab4_TRUEID, &b_lab4_TRUEID);
   fChain->SetBranchAddress("lab4_TRUEP_E", &lab4_TRUEP_E, &b_lab4_TRUEP_E);
@@ -504,6 +513,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab4_TRUEENDVERTEX_Z", &lab4_TRUEENDVERTEX_Z, &b_lab4_TRUEENDVERTEX_Z);
   fChain->SetBranchAddress("lab4_TRUEISSTABLE", &lab4_TRUEISSTABLE, &b_lab4_TRUEISSTABLE);
   fChain->SetBranchAddress("lab4_TRUETAU", &lab4_TRUETAU, &b_lab4_TRUETAU);
+  */
 
   // lifetime?
   fChain->SetBranchAddress("lab4_OSCIL", &lab4_OSCIL, &b_lab4_OSCIL);
@@ -573,6 +583,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab5_PZ", &lab5_PZ, &b_lab5_PZ);
   fChain->SetBranchAddress("lab5_M", &lab5_M, &b_lab5_M);
 
+  /*
   fChain->SetBranchAddress("lab5_TRUEID", &lab5_TRUEID, &b_lab5_TRUEID);
   fChain->SetBranchAddress("lab5_TRUEP_E", &lab5_TRUEP_E, &b_lab5_TRUEP_E);
   fChain->SetBranchAddress("lab5_TRUEP_X", &lab5_TRUEP_X, &b_lab5_TRUEP_X);
@@ -587,6 +598,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab5_TRUEENDVERTEX_Z", &lab5_TRUEENDVERTEX_Z, &b_lab5_TRUEENDVERTEX_Z);
   fChain->SetBranchAddress("lab5_TRUEISSTABLE", &lab5_TRUEISSTABLE, &b_lab5_TRUEISSTABLE);
   fChain->SetBranchAddress("lab5_TRUETAU", &lab5_TRUETAU, &b_lab5_TRUETAU);
+  */
 
   fChain->SetBranchAddress("lab5_OSCIL", &lab5_OSCIL, &b_lab5_OSCIL);
   fChain->SetBranchAddress("lab5_ID", &lab5_ID, &b_lab5_ID);
@@ -702,8 +714,8 @@ void readMCTree::Loop(TTree &ftree)
    ftree.Branch("Bsmass"  , &BsM);
    ftree.Branch("cosangle", &Cosoangle);
    ftree.Branch("hPIDK"   , &lab1_PIDK);
-   ftree.Branch("BsID"    , &lab0_TRUEID);
-   ftree.Branch("hID"     , &lab1_TRUEID);
+   // ftree.Branch("BsID"    , &lab0_TRUEID);
+   // ftree.Branch("hID"     , &lab1_TRUEID);
 
    Long64_t nbytes = 0, nb = 0;
    // for (Long64_t jentry=0; jentry<10000;jentry++) // for testing
@@ -813,7 +825,7 @@ void readMCTree::Loop(TNtuple &noangle)
        Cosoangle = TMath::Cos((hP.Angle(boost)));
 
        // noangle.Fill(lab0_MM, TMath::Cos((hP.Angle(boost))), lab1_TRUEID);
-       noangle.Fill(BsP.M(), Cosoangle, lab1_TRUEID); // correct
+       // noangle.Fill(BsP.M(), Cosoangle, lab1_TRUEID); // correct
      }
 
    cout << "readMCTree::Loop(TNtuple&): Read " << nbytes << " bytes." << std::endl;
@@ -825,6 +837,7 @@ void readMCTree::Loop(TTree &, TEntryList &, bool) {}
 
 bool readMCTree::CommonSelection()
 {
+  /*
   // selecting only "true" Bs2DsK and Bs2Dsπ events
   if (lab0_TRUEID*lab0_TRUEID == 531*531 and
       lab2_TRUEID*lab2_TRUEID == 431*431 and
@@ -834,4 +847,6 @@ bool readMCTree::CommonSelection()
        (1944. < lab2_MM and lab2_MM < 1990.) and // Ds mass
        (lab1_P < 100000.)) return true;
   else return false;
+  */
+  return true;
 }

@@ -41,7 +41,6 @@ public :
   // overloaded non-virtual methods
   bool  CommonSelection(bool DsK=true);
   bool  UnbiasedSelection();
-  bool  OfflineSelection(unsigned level, bool DsK=true);
   bool  OldOfflineSelection(bool DsK=true);
 };
 

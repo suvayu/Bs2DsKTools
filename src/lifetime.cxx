@@ -88,13 +88,13 @@ void lifetime::Loop()
        // if (( lab0Hlt2IncPhiDecision_TOS == false )
 	   or ( CommonSelection() == false ) or ( lab1_PIDK < 5 )) {
 	 // off so that you can apply later
-	 hAccept.Fill(lab0_TRUETAU, 0);
+	 // hAccept.Fill(lab0_TRUETAU, 0);
 	 continue;
        }
        // if ( pPIDcut != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
 
-       hAccept   .Fill(lab0_TRUETAU, 1);
-       hlifetimew.Fill(lab0_TRUETAU, TMath::Exp(lab0_TRUETAU*1e3/1.472)); // time in ns / lifetime in ps
+       // hAccept   .Fill(lab0_TRUETAU, 1);
+       // hlifetimew.Fill(lab0_TRUETAU, TMath::Exp(lab0_TRUETAU*1e3/1.472)); // time in ns / lifetime in ps
        hlifetime .Fill(lab0_TAU);
      }
 
@@ -136,9 +136,9 @@ void lifetime::Loop(TTree &ftree)
 
    ftree.Branch("Bsmass" , &lab0_MM);
    ftree.Branch("BsMom"  , &BsMom);
-   ftree.Branch("hID"    , &lab1_TRUEID);
+   // ftree.Branch("hID"    , &lab1_TRUEID);
    ftree.Branch("time"   , &lab0_TAU);
-   ftree.Branch("truetime", &lab0_TRUETAU);
+   // ftree.Branch("truetime", &lab0_TRUETAU);
    ftree.Branch("wt"     , &wt);
    ftree.Branch("truewt" , &truewt);
    ftree.Branch("oscil"  , &lab0_OSCIL);
@@ -164,7 +164,7 @@ void lifetime::Loop(TTree &ftree)
        // if ( pPIDcut != 1) continue; // not in TTree,  pPIDcut = (lab5_PIDK - lab5PIDp > 0)
 
        wt       = TMath::Exp(lab0_TAU*1e3/1.472);
-       truewt   = TMath::Exp(lab0_TRUETAU*1e3/1.472);
+       // truewt   = TMath::Exp(lab0_TRUETAU*1e3/1.472);
        BsMom.SetPxPyPzE(lab0_PX, lab0_PY, lab0_PZ, lab0_MM);
        OWNPV.SetXYZ(lab0_OWNPV_X, lab0_OWNPV_Y, lab0_OWNPV_Z);
        ENDVX.SetXYZ(lab0_ENDVERTEX_X, lab0_ENDVERTEX_Y, lab0_ENDVERTEX_Z);
@@ -181,20 +181,20 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK, bool MCmatch)
    Long64_t nentries = fChain->GetEntries();
    std::cout << nentries << " entries!" << std::endl;
 
-   TLorentzVector BsMom(0,0,0,0), hMom(0,0,0,0), DsMom(0,0,0,0),
-     tru_BsMom(0,0,0,0), tru_hMom(0,0,0,0), tru_DsMom(0,0,0,0);
+   TLorentzVector BsMom(0,0,0,0), hMom(0,0,0,0), DsMom(0,0,0,0);
+   // TLorentzVector tru_BsMom(0,0,0,0), tru_hMom(0,0,0,0), tru_DsMom(0,0,0,0);
    TVector3 OWNPV(0,0,0), ENDVX(0,0,0);
    double wt(0.0), truewt(0.0), time(0.0), dt(0.0), truetime(0.0);
    double BDTG(0.0), PIDK(0.0);
 
    ftree.Branch("Bsmass" , &lab0_MM);
-   ftree.Branch("hID"    , &lab1_TRUEID);
+   // ftree.Branch("hID"    , &lab1_TRUEID);
    ftree.Branch("time"   , &time);
    ftree.Branch("dt"     , &dt);
    ftree.Branch("tchi2"  , &lab0_TAUCHI2);
    ftree.Branch("truetime", &truetime);
    ftree.Branch("wt"     , &wt);
-   ftree.Branch("truewt" , &truewt);
+   // ftree.Branch("truewt" , &truewt);
    ftree.Branch("oscil"  , &lab0_OSCIL);
    ftree.Branch("OWNPV"  , &OWNPV);
    ftree.Branch("ENDVX"  , &ENDVX);
@@ -212,9 +212,9 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK, bool MCmatch)
    ftree.Branch("hMom" , &hMom);
    ftree.Branch("DsMom", &DsMom);
 
-   ftree.Branch("tru_BsMom", &tru_BsMom);
-   ftree.Branch("tru_hMom" , &tru_hMom);
-   ftree.Branch("tru_DsMom", &tru_DsMom);
+   // ftree.Branch("tru_BsMom", &tru_BsMom);
+   // ftree.Branch("tru_hMom" , &tru_hMom);
+   // ftree.Branch("tru_DsMom", &tru_DsMom);
 
    unsigned long rdskcount(0), rdspicount(0);
    unsigned long dskcount(0), dspicount(0);
@@ -227,8 +227,8 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK, bool MCmatch)
        if (ientry < 0) break;
        nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-       if (std::abs(lab1_TRUEID) == 321) rdskcount++;
-       else if (std::abs(lab1_TRUEID) == 211) rdspicount++;
+       // if (std::abs(lab1_TRUEID) == 321) rdskcount++;
+       // else if (std::abs(lab1_TRUEID) == 211) rdspicount++;
 
        // if (( UnbiasedSelection() == false ) or ( lab1_PIDK < 5 )) continue;
        if (MCmatch)
@@ -240,9 +240,9 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK, bool MCmatch)
 
        time     = lab0_TAU * 1E3;
        dt       = lab0_TAUERR * 1E3;
-       truetime = lab0_TRUETAU * 1E3;
+       // truetime = lab0_TRUETAU * 1E3;
        wt       = TMath::Exp(lab0_TAU*1e3/1.472);
-       truewt   = TMath::Exp(lab0_TRUETAU*1e3/1.472);
+       // truewt   = TMath::Exp(lab0_TRUETAU*1e3/1.472);
        OWNPV.SetXYZ(lab0_OWNPV_X, lab0_OWNPV_Y, lab0_OWNPV_Z);
        ENDVX.SetXYZ(lab0_ENDVERTEX_X, lab0_ENDVERTEX_Y, lab0_ENDVERTEX_Z);
 
@@ -253,14 +253,14 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK, bool MCmatch)
        hMom .SetXYZM(lab1_PX, lab1_PY, lab1_PZ, lab1_M);
        DsMom.SetXYZM(lab2_PX, lab2_PY, lab2_PZ, lab2_MM);
 
-       tru_BsMom.SetPxPyPzE(lab0_TRUEP_X, lab0_TRUEP_Y, lab0_TRUEP_Z, lab0_TRUEP_E);
-       tru_hMom .SetPxPyPzE(lab1_TRUEP_X, lab1_TRUEP_Y, lab1_TRUEP_Z, lab1_TRUEP_E);
-       tru_DsMom.SetPxPyPzE(lab2_TRUEP_X, lab2_TRUEP_Y, lab2_TRUEP_Z, lab2_TRUEP_E);
+       // tru_BsMom.SetPxPyPzE(lab0_TRUEP_X, lab0_TRUEP_Y, lab0_TRUEP_Z, lab0_TRUEP_E);
+       // tru_hMom .SetPxPyPzE(lab1_TRUEP_X, lab1_TRUEP_Y, lab1_TRUEP_Z, lab1_TRUEP_E);
+       // tru_DsMom.SetPxPyPzE(lab2_TRUEP_X, lab2_TRUEP_Y, lab2_TRUEP_Z, lab2_TRUEP_E);
 
        ftree.Fill();
        felist.Enter(jentry, fChain);
-       if (std::abs(lab1_TRUEID) == 321) dskcount++;
-       else if (std::abs(lab1_TRUEID) == 211) dspicount++;
+       // if (std::abs(lab1_TRUEID) == 321) dskcount++;
+       // else if (std::abs(lab1_TRUEID) == 211) dspicount++;
      }
 
    std::cout << "Cutflow: ";
@@ -337,6 +337,7 @@ bool lifetime::OldOfflineSelection(bool DsK)
 
 bool lifetime::CommonSelection(bool DsK)
 {
+  /*
   // selecting only "true" Bs2DsK and Bs2Dsπ events
   if (lab0_TRUEID*lab0_TRUEID == 531*531 and
       lab2_TRUEID*lab2_TRUEID == 431*431 and
@@ -347,6 +348,8 @@ bool lifetime::CommonSelection(bool DsK)
        ((not DsK) and lab1_TRUEID*lab1_TRUEID == 211*211)))
     return true;
   else return false;
+  */
+  return true;
 }
 
 
