@@ -71,6 +71,15 @@ TChain* initChain(std::string name, std::string fileglob)
 }
 
 
+int selAccTree(readTree &sample, TTree *& ftree, TEntryList *& felist, bool DsK)
+{
+  ftree  = new TTree("ftree", "Selected events for lifetime acceptance");
+  felist = new TEntryList("felist", "Pre trigger"); // , "DecayTree", "../../ntuples/MC/Merged_Bs2Ds*.root"
+  sample.Loop(*ftree, *felist, DsK);
+  return felist->GetN();
+}
+
+
 void plotHistos(TEntryList* felist)
 {
   Style::setStyle();
@@ -123,15 +132,6 @@ void plotHistos(TTree* ftree)
   // housekeeping
   delete hlaccept; delete hltime;
   return;
-}
-
-
-int selAccTree(readTree &sample, TTree *& ftree, TEntryList *& felist, bool DsK)
-{
-  ftree  = new TTree("ftree", "Selected events for lifetime acceptance");
-  felist = new TEntryList("felist", "Pre trigger"); // , "DecayTree", "../../ntuples/MC/Merged_Bs2Ds*.root"
-  sample.Loop(*ftree, *felist, DsK);
-  return felist->GetN();
 }
 
 
