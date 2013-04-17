@@ -199,8 +199,8 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
    ftree.Branch("OWNPV"  , &OWNPV);
    ftree.Branch("ENDVX"  , &ENDVX);
 
-   ftree.Branch("BDTGResponse_1", &BDTG);
-   ftree.Branch("lab1_PIDK", &PIDK);
+   ftree.Branch("BDTG", &BDTG);
+   ftree.Branch("PIDK", &PIDK);
 
    ftree.Branch("HLT1TrackAllL0TOS", &lab0_Hlt1TrackAllL0Decision_TOS);
    ftree.Branch("HLT2Topo4BodyTOS" , &lab0_Hlt2Topo4BodyBBDTDecision_TOS);
