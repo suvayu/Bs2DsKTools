@@ -237,6 +237,9 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
        if (lab0_TAUERR <= 0 or lab0_TAUERR >= 0.0002 or
 	   lab0_TAUERR != lab0_TAUERR) continue;
 
+       // since there is a cut at 0.2 ps in stripping
+       if (lab0_TAU < 2E-4) continue;
+
        time     = lab0_TAU * 1E3;
        dt       = lab0_TAUERR * 1E3;
        // truetime = lab0_TRUETAU * 1E3;
