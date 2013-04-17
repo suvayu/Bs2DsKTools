@@ -141,37 +141,37 @@ protected:
   Float_t         lab0_TAUCHI2;
 
   // L0 trigger
-  Int_t           lab0L0Global_Dec;
-  Int_t           lab0L0Global_TIS;
-  Int_t           lab0L0Global_TOS;
-  Int_t           lab0L0HadronDecision_Dec;
-  Int_t           lab0L0HadronDecision_TIS;
-  Int_t           lab0L0HadronDecision_TOS;
+  Int_t           lab0_L0Global_Dec;
+  Int_t           lab0_L0Global_TIS;
+  Int_t           lab0_L0Global_TOS;
+  Int_t           lab0_L0HadronDecision_Dec;
+  Int_t           lab0_L0HadronDecision_TIS;
+  Int_t           lab0_L0HadronDecision_TOS;
 
   // HLT1 trigger
-  Int_t           lab0Hlt1Global_Dec;
-  Int_t           lab0Hlt1Global_TIS;
-  Int_t           lab0Hlt1Global_TOS;
-  Int_t           lab0Hlt1TrackAllL0Decision_Dec;
-  Int_t           lab0Hlt1TrackAllL0Decision_TIS;
-  Int_t           lab0Hlt1TrackAllL0Decision_TOS;
+  Int_t           lab0_Hlt1Global_Dec;
+  Int_t           lab0_Hlt1Global_TIS;
+  Int_t           lab0_Hlt1Global_TOS;
+  Int_t           lab0_Hlt1TrackAllL0Decision_Dec;
+  Int_t           lab0_Hlt1TrackAllL0Decision_TIS;
+  Int_t           lab0_Hlt1TrackAllL0Decision_TOS;
 
   // HLT2 trigger
-  Int_t           lab0Hlt2Global_Dec;
-  Int_t           lab0Hlt2Global_TIS;
-  Int_t           lab0Hlt2Global_TOS;
-  Int_t           lab0Hlt2Topo2BodyBBDTDecision_Dec;
-  Int_t           lab0Hlt2Topo2BodyBBDTDecision_TIS;
-  Int_t           lab0Hlt2Topo2BodyBBDTDecision_TOS;
-  Int_t           lab0Hlt2Topo3BodyBBDTDecision_Dec;
-  Int_t           lab0Hlt2Topo3BodyBBDTDecision_TIS;
-  Int_t           lab0Hlt2Topo3BodyBBDTDecision_TOS;
-  Int_t           lab0Hlt2Topo4BodyBBDTDecision_Dec;
-  Int_t           lab0Hlt2Topo4BodyBBDTDecision_TIS;
-  Int_t           lab0Hlt2Topo4BodyBBDTDecision_TOS;
-  Int_t           lab0Hlt2IncPhiDecision_Dec;
-  Int_t           lab0Hlt2IncPhiDecision_TIS;
-  Int_t           lab0Hlt2IncPhiDecision_TOS;
+  Int_t           lab0_Hlt2Global_Dec;
+  Int_t           lab0_Hlt2Global_TIS;
+  Int_t           lab0_Hlt2Global_TOS;
+  Int_t           lab0_Hlt2Topo2BodyBBDTDecision_Dec;
+  Int_t           lab0_Hlt2Topo2BodyBBDTDecision_TIS;
+  Int_t           lab0_Hlt2Topo2BodyBBDTDecision_TOS;
+  Int_t           lab0_Hlt2Topo3BodyBBDTDecision_Dec;
+  Int_t           lab0_Hlt2Topo3BodyBBDTDecision_TIS;
+  Int_t           lab0_Hlt2Topo3BodyBBDTDecision_TOS;
+  Int_t           lab0_Hlt2Topo4BodyBBDTDecision_Dec;
+  Int_t           lab0_Hlt2Topo4BodyBBDTDecision_TIS;
+  Int_t           lab0_Hlt2Topo4BodyBBDTDecision_TOS;
+  Int_t           lab0_Hlt2IncPhiDecision_Dec;
+  Int_t           lab0_Hlt2IncPhiDecision_TIS;
+  Int_t           lab0_Hlt2IncPhiDecision_TOS;
 
   /**
    * Declaration of leaf types for the bachelor (h, lab1_*)
@@ -730,40 +730,40 @@ protected:
   TBranch         *b_lab0_TAUCHI2;
 
   // L0 trigger
-  TBranch         *b_lab0L0Global_Dec;
-  TBranch         *b_lab0L0Global_TIS;
-  TBranch         *b_lab0L0Global_TOS;
+  TBranch         *b_lab0_L0Global_Dec;
+  TBranch         *b_lab0_L0Global_TIS;
+  TBranch         *b_lab0_L0Global_TOS;
 
-  TBranch         *b_lab0L0HadronDecision_Dec;
-  TBranch         *b_lab0L0HadronDecision_TIS;
-  TBranch         *b_lab0L0HadronDecision_TOS;
+  TBranch         *b_lab0_L0HadronDecision_Dec;
+  TBranch         *b_lab0_L0HadronDecision_TIS;
+  TBranch         *b_lab0_L0HadronDecision_TOS;
 
   // HLT1 trigger
-  TBranch         *b_lab0Hlt1Global_Dec;
-  TBranch         *b_lab0Hlt1Global_TIS;
-  TBranch         *b_lab0Hlt1Global_TOS;
+  TBranch         *b_lab0_Hlt1Global_Dec;
+  TBranch         *b_lab0_Hlt1Global_TIS;
+  TBranch         *b_lab0_Hlt1Global_TOS;
 
-  TBranch         *b_lab0Hlt1TrackAllL0Decision_Dec;
-  TBranch         *b_lab0Hlt1TrackAllL0Decision_TIS;
-  TBranch         *b_lab0Hlt1TrackAllL0Decision_TOS;
+  TBranch         *b_lab0_Hlt1TrackAllL0Decision_Dec;
+  TBranch         *b_lab0_Hlt1TrackAllL0Decision_TIS;
+  TBranch         *b_lab0_Hlt1TrackAllL0Decision_TOS;
 
   // HLT2 trigger
-  TBranch         *b_lab0Hlt2Global_Dec;
-  TBranch         *b_lab0Hlt2Global_TIS;
-  TBranch         *b_lab0Hlt2Global_TOS;
+  TBranch         *b_lab0_Hlt2Global_Dec;
+  TBranch         *b_lab0_Hlt2Global_TIS;
+  TBranch         *b_lab0_Hlt2Global_TOS;
 
-  TBranch         *b_lab0Hlt2Topo2BodyBBDTDecision_Dec;
-  TBranch         *b_lab0Hlt2Topo2BodyBBDTDecision_TIS;
-  TBranch         *b_lab0Hlt2Topo2BodyBBDTDecision_TOS;
-  TBranch         *b_lab0Hlt2Topo3BodyBBDTDecision_Dec;
-  TBranch         *b_lab0Hlt2Topo3BodyBBDTDecision_TIS;
-  TBranch         *b_lab0Hlt2Topo3BodyBBDTDecision_TOS;
-  TBranch         *b_lab0Hlt2Topo4BodyBBDTDecision_Dec;
-  TBranch         *b_lab0Hlt2Topo4BodyBBDTDecision_TIS;
-  TBranch         *b_lab0Hlt2Topo4BodyBBDTDecision_TOS;
-  TBranch         *b_lab0Hlt2IncPhiDecision_Dec;
-  TBranch         *b_lab0Hlt2IncPhiDecision_TIS;
-  TBranch         *b_lab0Hlt2IncPhiDecision_TOS;
+  TBranch         *b_lab0_Hlt2Topo2BodyBBDTDecision_Dec;
+  TBranch         *b_lab0_Hlt2Topo2BodyBBDTDecision_TIS;
+  TBranch         *b_lab0_Hlt2Topo2BodyBBDTDecision_TOS;
+  TBranch         *b_lab0_Hlt2Topo3BodyBBDTDecision_Dec;
+  TBranch         *b_lab0_Hlt2Topo3BodyBBDTDecision_TIS;
+  TBranch         *b_lab0_Hlt2Topo3BodyBBDTDecision_TOS;
+  TBranch         *b_lab0_Hlt2Topo4BodyBBDTDecision_Dec;
+  TBranch         *b_lab0_Hlt2Topo4BodyBBDTDecision_TIS;
+  TBranch         *b_lab0_Hlt2Topo4BodyBBDTDecision_TOS;
+  TBranch         *b_lab0_Hlt2IncPhiDecision_Dec;
+  TBranch         *b_lab0_Hlt2IncPhiDecision_TIS;
+  TBranch         *b_lab0_Hlt2IncPhiDecision_TOS;
 
   /**
    * Declaration of branches for the bachelor (h, lab1_*)

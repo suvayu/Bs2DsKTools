@@ -161,40 +161,40 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab0_TAUCHI2", &lab0_TAUCHI2, &b_lab0_TAUCHI2);
 
   // L0 trigger
-  fChain->SetBranchAddress("lab0L0Global_Dec", &lab0L0Global_Dec, &b_lab0L0Global_Dec);
-  fChain->SetBranchAddress("lab0L0Global_TIS", &lab0L0Global_TIS, &b_lab0L0Global_TIS);
-  fChain->SetBranchAddress("lab0L0Global_TOS", &lab0L0Global_TOS, &b_lab0L0Global_TOS);
+  fChain->SetBranchAddress("lab0_L0Global_Dec", &lab0_L0Global_Dec, &b_lab0_L0Global_Dec);
+  fChain->SetBranchAddress("lab0_L0Global_TIS", &lab0_L0Global_TIS, &b_lab0_L0Global_TIS);
+  fChain->SetBranchAddress("lab0_L0Global_TOS", &lab0_L0Global_TOS, &b_lab0_L0Global_TOS);
 
-  fChain->SetBranchAddress("lab0L0HadronDecision_Dec", &lab0L0HadronDecision_Dec, &b_lab0L0HadronDecision_Dec);
-  fChain->SetBranchAddress("lab0L0HadronDecision_TIS", &lab0L0HadronDecision_TIS, &b_lab0L0HadronDecision_TIS);
-  fChain->SetBranchAddress("lab0L0HadronDecision_TOS", &lab0L0HadronDecision_TOS, &b_lab0L0HadronDecision_TOS);
+  fChain->SetBranchAddress("lab0_L0HadronDecision_Dec", &lab0_L0HadronDecision_Dec, &b_lab0_L0HadronDecision_Dec);
+  fChain->SetBranchAddress("lab0_L0HadronDecision_TIS", &lab0_L0HadronDecision_TIS, &b_lab0_L0HadronDecision_TIS);
+  fChain->SetBranchAddress("lab0_L0HadronDecision_TOS", &lab0_L0HadronDecision_TOS, &b_lab0_L0HadronDecision_TOS);
 
   // HLT1 trigger
-  fChain->SetBranchAddress("lab0Hlt1Global_Dec", &lab0Hlt1Global_Dec, &b_lab0Hlt1Global_Dec);
-  fChain->SetBranchAddress("lab0Hlt1Global_TIS", &lab0Hlt1Global_TIS, &b_lab0Hlt1Global_TIS);
-  fChain->SetBranchAddress("lab0Hlt1Global_TOS", &lab0Hlt1Global_TOS, &b_lab0Hlt1Global_TOS);
+  fChain->SetBranchAddress("lab0_Hlt1Global_Dec", &lab0_Hlt1Global_Dec, &b_lab0_Hlt1Global_Dec);
+  fChain->SetBranchAddress("lab0_Hlt1Global_TIS", &lab0_Hlt1Global_TIS, &b_lab0_Hlt1Global_TIS);
+  fChain->SetBranchAddress("lab0_Hlt1Global_TOS", &lab0_Hlt1Global_TOS, &b_lab0_Hlt1Global_TOS);
 
-  fChain->SetBranchAddress("lab0Hlt1TrackAllL0Decision_Dec", &lab0Hlt1TrackAllL0Decision_Dec, &b_lab0Hlt1TrackAllL0Decision_Dec);
-  fChain->SetBranchAddress("lab0Hlt1TrackAllL0Decision_TIS", &lab0Hlt1TrackAllL0Decision_TIS, &b_lab0Hlt1TrackAllL0Decision_TIS);
-  fChain->SetBranchAddress("lab0Hlt1TrackAllL0Decision_TOS", &lab0Hlt1TrackAllL0Decision_TOS, &b_lab0Hlt1TrackAllL0Decision_TOS);
+  fChain->SetBranchAddress("lab0_Hlt1TrackAllL0Decision_Dec", &lab0_Hlt1TrackAllL0Decision_Dec, &b_lab0_Hlt1TrackAllL0Decision_Dec);
+  fChain->SetBranchAddress("lab0_Hlt1TrackAllL0Decision_TIS", &lab0_Hlt1TrackAllL0Decision_TIS, &b_lab0_Hlt1TrackAllL0Decision_TIS);
+  fChain->SetBranchAddress("lab0_Hlt1TrackAllL0Decision_TOS", &lab0_Hlt1TrackAllL0Decision_TOS, &b_lab0_Hlt1TrackAllL0Decision_TOS);
 
   // HLT2 trigger
-  fChain->SetBranchAddress("lab0Hlt2Global_Dec", &lab0Hlt2Global_Dec, &b_lab0Hlt2Global_Dec);
-  fChain->SetBranchAddress("lab0Hlt2Global_TIS", &lab0Hlt2Global_TIS, &b_lab0Hlt2Global_TIS);
-  fChain->SetBranchAddress("lab0Hlt2Global_TOS", &lab0Hlt2Global_TOS, &b_lab0Hlt2Global_TOS);
+  fChain->SetBranchAddress("lab0_Hlt2Global_Dec", &lab0_Hlt2Global_Dec, &b_lab0_Hlt2Global_Dec);
+  fChain->SetBranchAddress("lab0_Hlt2Global_TIS", &lab0_Hlt2Global_TIS, &b_lab0_Hlt2Global_TIS);
+  fChain->SetBranchAddress("lab0_Hlt2Global_TOS", &lab0_Hlt2Global_TOS, &b_lab0_Hlt2Global_TOS);
 
-  fChain->SetBranchAddress("lab0Hlt2Topo2BodyBBDTDecision_Dec", &lab0Hlt2Topo2BodyBBDTDecision_Dec, &b_lab0Hlt2Topo2BodyBBDTDecision_Dec);
-  fChain->SetBranchAddress("lab0Hlt2Topo2BodyBBDTDecision_TIS", &lab0Hlt2Topo2BodyBBDTDecision_TIS, &b_lab0Hlt2Topo2BodyBBDTDecision_TIS);
-  fChain->SetBranchAddress("lab0Hlt2Topo2BodyBBDTDecision_TOS", &lab0Hlt2Topo2BodyBBDTDecision_TOS, &b_lab0Hlt2Topo2BodyBBDTDecision_TOS);
-  fChain->SetBranchAddress("lab0Hlt2Topo3BodyBBDTDecision_Dec", &lab0Hlt2Topo3BodyBBDTDecision_Dec, &b_lab0Hlt2Topo3BodyBBDTDecision_Dec);
-  fChain->SetBranchAddress("lab0Hlt2Topo3BodyBBDTDecision_TIS", &lab0Hlt2Topo3BodyBBDTDecision_TIS, &b_lab0Hlt2Topo3BodyBBDTDecision_TIS);
-  fChain->SetBranchAddress("lab0Hlt2Topo3BodyBBDTDecision_TOS", &lab0Hlt2Topo3BodyBBDTDecision_TOS, &b_lab0Hlt2Topo3BodyBBDTDecision_TOS);
-  fChain->SetBranchAddress("lab0Hlt2Topo4BodyBBDTDecision_Dec", &lab0Hlt2Topo4BodyBBDTDecision_Dec, &b_lab0Hlt2Topo4BodyBBDTDecision_Dec);
-  fChain->SetBranchAddress("lab0Hlt2Topo4BodyBBDTDecision_TIS", &lab0Hlt2Topo4BodyBBDTDecision_TIS, &b_lab0Hlt2Topo4BodyBBDTDecision_TIS);
-  fChain->SetBranchAddress("lab0Hlt2Topo4BodyBBDTDecision_TOS", &lab0Hlt2Topo4BodyBBDTDecision_TOS, &b_lab0Hlt2Topo4BodyBBDTDecision_TOS);
-  fChain->SetBranchAddress("lab0Hlt2IncPhiDecision_Dec", &lab0Hlt2IncPhiDecision_Dec, &b_lab0Hlt2IncPhiDecision_Dec);;
-  fChain->SetBranchAddress("lab0Hlt2IncPhiDecision_TIS", &lab0Hlt2IncPhiDecision_TIS, &b_lab0Hlt2IncPhiDecision_TIS);;
-  fChain->SetBranchAddress("lab0Hlt2IncPhiDecision_TOS", &lab0Hlt2IncPhiDecision_TOS, &b_lab0Hlt2IncPhiDecision_TOS);;
+  fChain->SetBranchAddress("lab0_Hlt2Topo2BodyBBDTDecision_Dec", &lab0_Hlt2Topo2BodyBBDTDecision_Dec, &b_lab0_Hlt2Topo2BodyBBDTDecision_Dec);
+  fChain->SetBranchAddress("lab0_Hlt2Topo2BodyBBDTDecision_TIS", &lab0_Hlt2Topo2BodyBBDTDecision_TIS, &b_lab0_Hlt2Topo2BodyBBDTDecision_TIS);
+  fChain->SetBranchAddress("lab0_Hlt2Topo2BodyBBDTDecision_TOS", &lab0_Hlt2Topo2BodyBBDTDecision_TOS, &b_lab0_Hlt2Topo2BodyBBDTDecision_TOS);
+  fChain->SetBranchAddress("lab0_Hlt2Topo3BodyBBDTDecision_Dec", &lab0_Hlt2Topo3BodyBBDTDecision_Dec, &b_lab0_Hlt2Topo3BodyBBDTDecision_Dec);
+  fChain->SetBranchAddress("lab0_Hlt2Topo3BodyBBDTDecision_TIS", &lab0_Hlt2Topo3BodyBBDTDecision_TIS, &b_lab0_Hlt2Topo3BodyBBDTDecision_TIS);
+  fChain->SetBranchAddress("lab0_Hlt2Topo3BodyBBDTDecision_TOS", &lab0_Hlt2Topo3BodyBBDTDecision_TOS, &b_lab0_Hlt2Topo3BodyBBDTDecision_TOS);
+  fChain->SetBranchAddress("lab0_Hlt2Topo4BodyBBDTDecision_Dec", &lab0_Hlt2Topo4BodyBBDTDecision_Dec, &b_lab0_Hlt2Topo4BodyBBDTDecision_Dec);
+  fChain->SetBranchAddress("lab0_Hlt2Topo4BodyBBDTDecision_TIS", &lab0_Hlt2Topo4BodyBBDTDecision_TIS, &b_lab0_Hlt2Topo4BodyBBDTDecision_TIS);
+  fChain->SetBranchAddress("lab0_Hlt2Topo4BodyBBDTDecision_TOS", &lab0_Hlt2Topo4BodyBBDTDecision_TOS, &b_lab0_Hlt2Topo4BodyBBDTDecision_TOS);
+  fChain->SetBranchAddress("lab0_Hlt2IncPhiDecision_Dec", &lab0_Hlt2IncPhiDecision_Dec, &b_lab0_Hlt2IncPhiDecision_Dec);
+  fChain->SetBranchAddress("lab0_Hlt2IncPhiDecision_TIS", &lab0_Hlt2IncPhiDecision_TIS, &b_lab0_Hlt2IncPhiDecision_TIS);
+  fChain->SetBranchAddress("lab0_Hlt2IncPhiDecision_TOS", &lab0_Hlt2IncPhiDecision_TOS, &b_lab0_Hlt2IncPhiDecision_TOS);
 
   /**
    * Declaration of branches for the bachelor (h, lab1_*)
