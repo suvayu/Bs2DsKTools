@@ -36,7 +36,7 @@ public :
   virtual void  Loop();
   virtual void  Loop(TNtuple &) {}
   virtual void  Loop(TTree &);
-  virtual void  Loop(TTree &, TEntryList &, bool DsK, bool MCmatch=true);
+  virtual void  Loop(TTree &, TEntryList &, bool DsK);
 
   // overloaded non-virtual methods
   bool  CommonSelection(bool DsK=true);

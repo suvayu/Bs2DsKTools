@@ -175,7 +175,7 @@ void lifetime::Loop(TTree &ftree)
 }
 
 
-void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK, bool MCmatch)
+void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
 {
    if (fChain == 0) return;
    Long64_t nentries = fChain->GetEntries();
@@ -231,8 +231,7 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK, bool MCmatch)
        // else if (std::abs(lab1_TRUEID) == 211) rdspicount++;
 
        // if (( UnbiasedSelection() == false ) or ( lab1_PIDK < 5 )) continue;
-       if (MCmatch)
-	 if (CommonSelection(DsK) == false) continue;
+       if (CommonSelection(DsK) == false) continue;
        // if (OldOfflineSelection(DsK) == false) continue;
 
        if (lab0_TAUERR <= 0 or lab0_TAUERR >= 0.0002 or
