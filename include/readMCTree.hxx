@@ -55,8 +55,8 @@ protected:
    */
 
   // TODO: what is mini?
-  Float_t         lab0_MINIP;
-  Float_t         lab0_MINIPCHI2;
+  // Float_t         lab0_MINIP;
+  // Float_t         lab0_MINIPCHI2;
 
   // this is the PV with respect to which the given particle has the
   // smallest impact parameter.
@@ -96,7 +96,7 @@ protected:
   Float_t         lab0_MM;
   Float_t         lab0_MMERR;
   Float_t         lab0_M;
-  Int_t           lab0_BKGCAT;
+  // Int_t           lab0_BKGCAT;
 
   // BDTG variables
   Int_t           lab0_MassFitConsD_nPV;
@@ -104,7 +104,7 @@ protected:
   Float_t         lab0_MassFitConsD_MERR[10];   //[lab0_MassFitConsD_nPV]
   Float_t         lab0_MassFitConsD_P[10];   //[lab0_MassFitConsD_nPV]
   Float_t         lab0_MassFitConsD_PERR[10];   //[lab0_MassFitConsD_nPV]
-  Float_t         lab0_MassFitConsD_chi2_B[10];   //[lab0_MassFitConsD_nPV]
+  // Float_t         lab0_MassFitConsD_chi2_B[10];   //[lab0_MassFitConsD_nPV]
   Float_t         lab0_MassFitConsD_nDOF[10];   //[lab0_MassFitConsD_nPV]
   Float_t         lab0_MassFitConsD_nIter[10];   //[lab0_MassFitConsD_nPV]
   Float_t         lab0_MassFitConsD_status[10];   //[lab0_MassFitConsD_nPV]
@@ -134,7 +134,7 @@ protected:
   */
 
   // lifetime
-  Int_t           lab0_OSCIL;
+  // // Int_t           lab0_OSCIL;
   Int_t           lab0_ID;
   Float_t         lab0_TAU;
   Float_t         lab0_TAUERR;
@@ -181,8 +181,8 @@ protected:
   // TODO: what is mini?
   Float_t         lab1_CosTheta;
 
-  Float_t         lab1_MINIP;
-  Float_t         lab1_MINIPCHI2;
+  // Float_t         lab1_MINIP;
+  // Float_t         lab1_MINIPCHI2;
 
   Float_t         lab1_OWNPV_X;
   Float_t         lab1_OWNPV_Y;
@@ -237,7 +237,7 @@ protected:
   */
 
   // lifetime?
-  Int_t           lab1_OSCIL;
+  // // Int_t           lab1_OSCIL;
   Int_t           lab1_ID;
   Float_t         lab1_PIDe;
   Float_t         lab1_PIDmu;
@@ -249,8 +249,8 @@ protected:
   Float_t         lab1_ProbNNpi;
   Float_t         lab1_ProbNNmu;
   Float_t         lab1_ProbNNghost;
-  Float_t         lab1_CaloEcalE;      /**< Calibrated EM energy? */
-  Float_t         lab1_CaloHcalE;      /**< Calibrated Hadronic energy? */
+  // Float_t         lab1_CaloEcalE;      /**< Calibrated EM energy? */
+  // Float_t         lab1_CaloHcalE;      /**< Calibrated Hadronic energy? */
   Int_t           lab1_hasMuon;
   Int_t           lab1_isMuon;
   Int_t           lab1_hasRich;
@@ -271,8 +271,8 @@ protected:
 
   Float_t         lab2_CosTheta; // TODO: Opening angle?
 
-  Float_t         lab2_MINIP;
-  Float_t         lab2_MINIPCHI2;
+  // Float_t         lab2_MINIP;
+  // Float_t         lab2_MINIPCHI2;
 
   Float_t         lab2_OWNPV_X;
   Float_t         lab2_OWNPV_Y;
@@ -322,7 +322,7 @@ protected:
   Float_t         lab2_MM;
   Float_t         lab2_MMERR;
   Float_t         lab2_M;
-  Int_t           lab2_BKGCAT;
+  // Int_t           lab2_BKGCAT;
 
   /*
   // MC truth
@@ -343,7 +343,7 @@ protected:
   */
 
   // lifetime
-  Int_t           lab2_OSCIL;
+  // Int_t           lab2_OSCIL;
   Int_t           lab2_ID;
   Float_t         lab2_TAU;
   Float_t         lab2_TAUERR;
@@ -357,8 +357,8 @@ protected:
   // what is mini?
   Float_t         lab3_CosTheta;
 
-  Float_t         lab3_MINIP;
-  Float_t         lab3_MINIPCHI2;
+  // Float_t         lab3_MINIP;
+  // Float_t         lab3_MINIPCHI2;
 
   Float_t         lab3_OWNPV_X;
   Float_t         lab3_OWNPV_Y;
@@ -409,7 +409,7 @@ protected:
   Float_t         lab3_TRUETAU;
   */
 
-  Int_t           lab3_OSCIL;
+  // Int_t           lab3_OSCIL;
   Int_t           lab3_ID;
   Float_t         lab3_PIDe;
   Float_t         lab3_PIDmu;
@@ -421,8 +421,8 @@ protected:
   Float_t         lab3_ProbNNpi;
   Float_t         lab3_ProbNNmu;
   Float_t         lab3_ProbNNghost;
-  Float_t         lab3_CaloEcalE;
-  Float_t         lab3_CaloHcalE;
+  // Float_t         lab3_CaloEcalE;
+  // Float_t         lab3_CaloHcalE;
   Int_t           lab3_hasMuon;
   Int_t           lab3_isMuon;
   Int_t           lab3_hasRich;
@@ -443,8 +443,8 @@ protected:
 
   Float_t         lab4_CosTheta;
 
-  Float_t         lab4_MINIP;
-  Float_t         lab4_MINIPCHI2;
+  // Float_t         lab4_MINIP;
+  // Float_t         lab4_MINIPCHI2;
 
   Float_t         lab4_OWNPV_X;
   Float_t         lab4_OWNPV_Y;
@@ -495,7 +495,7 @@ protected:
   */
 
   // lifetime?
-  Int_t           lab4_OSCIL;
+  // Int_t           lab4_OSCIL;
   Int_t           lab4_ID;
   Float_t         lab4_PIDe;
   Float_t         lab4_PIDmu;
@@ -507,8 +507,8 @@ protected:
   Float_t         lab4_ProbNNpi;
   Float_t         lab4_ProbNNmu;
   Float_t         lab4_ProbNNghost;
-  Float_t         lab4_CaloEcalE;
-  Float_t         lab4_CaloHcalE;
+  // Float_t         lab4_CaloEcalE;
+  // Float_t         lab4_CaloHcalE;
   Int_t           lab4_hasMuon;
   Int_t           lab4_isMuon;
   Int_t           lab4_hasRich;
@@ -529,8 +529,8 @@ protected:
 
   Float_t         lab5_CosTheta;
 
-  Float_t         lab5_MINIP;
-  Float_t         lab5_MINIPCHI2;
+  // Float_t         lab5_MINIP;
+  // Float_t         lab5_MINIPCHI2;
 
   Float_t         lab5_OWNPV_X;
   Float_t         lab5_OWNPV_Y;
@@ -579,7 +579,7 @@ protected:
   Float_t         lab5_TRUETAU;
   */
 
-  Int_t           lab5_OSCIL;
+  // Int_t           lab5_OSCIL;
   Int_t           lab5_ID;
   Float_t         lab5_PIDe;
   Float_t         lab5_PIDmu;
@@ -591,8 +591,8 @@ protected:
   Float_t         lab5_ProbNNpi;
   Float_t         lab5_ProbNNmu;
   Float_t         lab5_ProbNNghost;
-  Float_t         lab5_CaloEcalE;
-  Float_t         lab5_CaloHcalE;
+  // Float_t         lab5_CaloEcalE;
+  // Float_t         lab5_CaloHcalE;
   Int_t           lab5_hasMuon;
   Int_t           lab5_isMuon;
   Int_t           lab5_hasRich;
@@ -623,7 +623,7 @@ protected:
   Int_t           L0DUTCK;
   Int_t           HLTTCK;
   Float_t         GpsTime;
-  Int_t           Primaries;
+  // Int_t           Primaries;
   Int_t           nPV;
   Float_t         PVX[100];   //[nPV]
   Float_t         PVY[100];   //[nPV]
@@ -653,8 +653,8 @@ protected:
    */
 
   // TODO: what is mini?
-  TBranch         *b_lab0_MINIP;
-  TBranch         *b_lab0_MINIPCHI2;
+  // TBranch         *b_lab0_MINIP;
+  // TBranch         *b_lab0_MINIPCHI2;
 
   TBranch         *b_lab0_OWNPV_X;
   TBranch         *b_lab0_OWNPV_Y;
@@ -691,7 +691,7 @@ protected:
   TBranch         *b_lab0_MM;
   TBranch         *b_lab0_MMERR;
   TBranch         *b_lab0_M;
-  TBranch         *b_lab0_BKGCAT;
+  // TBranch         *b_lab0_BKGCAT;
 
   // BDTG variables
   TBranch        *b_lab0_MassFitConsD_nPV;   //!
@@ -699,7 +699,7 @@ protected:
   TBranch        *b_lab0_MassFitConsD_MERR;   //!
   TBranch        *b_lab0_MassFitConsD_P;   //!
   TBranch        *b_lab0_MassFitConsD_PERR;   //!
-  TBranch        *b_lab0_MassFitConsD_chi2_B;   //!
+  // TBranch        *b_lab0_MassFitConsD_chi2_B;   //!
   TBranch        *b_lab0_MassFitConsD_nDOF;   //!
   TBranch        *b_lab0_MassFitConsD_nIter;   //!
   TBranch        *b_lab0_MassFitConsD_status;   //!
@@ -723,7 +723,7 @@ protected:
   */
 
   // lifetime
-  TBranch         *b_lab0_OSCIL;
+  // TBranch         *b_lab0_OSCIL;
   TBranch         *b_lab0_ID;
   TBranch         *b_lab0_TAU;
   TBranch         *b_lab0_TAUERR;
@@ -773,8 +773,8 @@ protected:
   // TODO: what is mini?
   TBranch         *b_lab1_CosTheta;
 
-  TBranch         *b_lab1_MINIP;
-  TBranch         *b_lab1_MINIPCHI2;
+  // TBranch         *b_lab1_MINIP;
+  // TBranch         *b_lab1_MINIPCHI2;
 
   TBranch         *b_lab1_OWNPV_X;
   TBranch         *b_lab1_OWNPV_Y;
@@ -825,7 +825,7 @@ protected:
   TBranch         *b_lab1_TRUETAU;
   */
 
-  TBranch         *b_lab1_OSCIL;
+  // TBranch         *b_lab1_OSCIL;
   TBranch         *b_lab1_ID;
   TBranch         *b_lab1_PIDe;
   TBranch         *b_lab1_PIDmu;
@@ -837,8 +837,8 @@ protected:
   TBranch         *b_lab1_ProbNNpi;
   TBranch         *b_lab1_ProbNNmu;
   TBranch         *b_lab1_ProbNNghost;
-  TBranch         *b_lab1_CaloEcalE;      /**< Calibrated EM energy? */
-  TBranch         *b_lab1_CaloHcalE;      /**< Calibrated Hadronic energy? */
+  // TBranch         *b_lab1_CaloEcalE;      /**< Calibrated EM energy? */
+  // TBranch         *b_lab1_CaloHcalE;      /**< Calibrated Hadronic energy? */
   TBranch         *b_lab1_hasMuon;
   TBranch         *b_lab1_isMuon;
   TBranch         *b_lab1_hasRich;
@@ -859,8 +859,8 @@ protected:
 
   TBranch         *b_lab2_CosTheta;
 
-  TBranch         *b_lab2_MINIP;
-  TBranch         *b_lab2_MINIPCHI2;
+  // TBranch         *b_lab2_MINIP;
+  // TBranch         *b_lab2_MINIPCHI2;
 
   TBranch         *b_lab2_OWNPV_X;
   TBranch         *b_lab2_OWNPV_Y;
@@ -910,7 +910,7 @@ protected:
   TBranch         *b_lab2_MM;
   TBranch         *b_lab2_MMERR;
   TBranch         *b_lab2_M;
-  TBranch         *b_lab2_BKGCAT;
+  // TBranch         *b_lab2_BKGCAT;
 
   /*
   // MC truth
@@ -931,7 +931,7 @@ protected:
   */
 
   // lifetime
-  TBranch         *b_lab2_OSCIL;
+  // TBranch         *b_lab2_OSCIL;
   TBranch         *b_lab2_ID;
   TBranch         *b_lab2_TAU;
   TBranch         *b_lab2_TAUERR;
@@ -945,8 +945,8 @@ protected:
   // what is mini?
   TBranch         *b_lab3_CosTheta;
 
-  TBranch         *b_lab3_MINIP;
-  TBranch         *b_lab3_MINIPCHI2;
+  // TBranch         *b_lab3_MINIP;
+  // TBranch         *b_lab3_MINIPCHI2;
 
   TBranch         *b_lab3_OWNPV_X;
   TBranch         *b_lab3_OWNPV_Y;
@@ -997,7 +997,7 @@ protected:
   TBranch         *b_lab3_TRUETAU;
   */
 
-  TBranch         *b_lab3_OSCIL;
+  // TBranch         *b_lab3_OSCIL;
   TBranch         *b_lab3_ID;
   TBranch         *b_lab3_PIDe;
   TBranch         *b_lab3_PIDmu;
@@ -1009,8 +1009,8 @@ protected:
   TBranch         *b_lab3_ProbNNpi;
   TBranch         *b_lab3_ProbNNmu;
   TBranch         *b_lab3_ProbNNghost;
-  TBranch         *b_lab3_CaloEcalE;
-  TBranch         *b_lab3_CaloHcalE;
+  // TBranch         *b_lab3_CaloEcalE;
+  // TBranch         *b_lab3_CaloHcalE;
   TBranch         *b_lab3_hasMuon;
   TBranch         *b_lab3_isMuon;
   TBranch         *b_lab3_hasRich;
@@ -1031,8 +1031,8 @@ protected:
 
   TBranch         *b_lab4_CosTheta;
 
-  TBranch         *b_lab4_MINIP;
-  TBranch         *b_lab4_MINIPCHI2;
+  // TBranch         *b_lab4_MINIP;
+  // TBranch         *b_lab4_MINIPCHI2;
 
   TBranch         *b_lab4_OWNPV_X;
   TBranch         *b_lab4_OWNPV_Y;
@@ -1083,7 +1083,7 @@ protected:
   */
 
   // lifetime?
-  TBranch         *b_lab4_OSCIL;
+  // TBranch         *b_lab4_OSCIL;
   TBranch         *b_lab4_ID;
   TBranch         *b_lab4_PIDe;
   TBranch         *b_lab4_PIDmu;
@@ -1095,8 +1095,8 @@ protected:
   TBranch         *b_lab4_ProbNNpi;
   TBranch         *b_lab4_ProbNNmu;
   TBranch         *b_lab4_ProbNNghost;
-  TBranch         *b_lab4_CaloEcalE;
-  TBranch         *b_lab4_CaloHcalE;
+  // TBranch         *b_lab4_CaloEcalE;
+  // TBranch         *b_lab4_CaloHcalE;
   TBranch         *b_lab4_hasMuon;
   TBranch         *b_lab4_isMuon;
   TBranch         *b_lab4_hasRich;
@@ -1117,8 +1117,8 @@ protected:
 
   TBranch         *b_lab5_CosTheta;
 
-  TBranch         *b_lab5_MINIP;
-  TBranch         *b_lab5_MINIPCHI2;
+  // TBranch         *b_lab5_MINIP;
+  // TBranch         *b_lab5_MINIPCHI2;
 
   TBranch         *b_lab5_OWNPV_X;
   TBranch         *b_lab5_OWNPV_Y;
@@ -1167,7 +1167,7 @@ protected:
   TBranch         *b_lab5_TRUETAU;
   */
 
-  TBranch         *b_lab5_OSCIL;
+  // TBranch         *b_lab5_OSCIL;
   TBranch         *b_lab5_ID;
   TBranch         *b_lab5_PIDe;
   TBranch         *b_lab5_PIDmu;
@@ -1179,8 +1179,8 @@ protected:
   TBranch         *b_lab5_ProbNNpi;
   TBranch         *b_lab5_ProbNNmu;
   TBranch         *b_lab5_ProbNNghost;
-  TBranch         *b_lab5_CaloEcalE;
-  TBranch         *b_lab5_CaloHcalE;
+  // TBranch         *b_lab5_CaloEcalE;
+  // TBranch         *b_lab5_CaloHcalE;
   TBranch         *b_lab5_hasMuon;
   TBranch         *b_lab5_isMuon;
   TBranch         *b_lab5_hasRich;
@@ -1211,7 +1211,7 @@ protected:
   TBranch         *b_L0DUTCK;
   TBranch         *b_HLTTCK;
   TBranch         *b_GpsTime;
-  TBranch         *b_Primaries;
+  // TBranch         *b_Primaries;
   TBranch         *b_nPV;
   TBranch         *b_PVX;   //[nPV]
   TBranch         *b_PVY;   //[nPV]

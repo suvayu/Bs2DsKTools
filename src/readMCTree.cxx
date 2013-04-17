@@ -82,8 +82,8 @@ void readMCTree::Init(TTree *tree)
   fChain->SetMakeClass(1);
 
   // TODO: what is mini?
-  fChain->SetBranchAddress("lab0_MINIP", &lab0_MINIP, &b_lab0_MINIP);
-  fChain->SetBranchAddress("lab0_MINIPCHI2", &lab0_MINIPCHI2, &b_lab0_MINIPCHI2);
+  // fChain->SetBranchAddress("lab0_MINIP", &lab0_MINIP, &b_lab0_MINIP);
+  // fChain->SetBranchAddress("lab0_MINIPCHI2", &lab0_MINIPCHI2, &b_lab0_MINIPCHI2);
 
   // TODO: not sure about this block
   fChain->SetBranchAddress("lab0_OWNPV_X", &lab0_OWNPV_X, &b_lab0_OWNPV_X);
@@ -122,7 +122,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab0_MM", &lab0_MM, &b_lab0_MM);
   fChain->SetBranchAddress("lab0_MMERR", &lab0_MMERR, &b_lab0_MMERR);
   fChain->SetBranchAddress("lab0_M", &lab0_M, &b_lab0_M);
-  fChain->SetBranchAddress("lab0_BKGCAT", &lab0_BKGCAT, &b_lab0_BKGCAT);
+  // fChain->SetBranchAddress("lab0_BKGCAT", &lab0_BKGCAT, &b_lab0_BKGCAT);
 
   // BDTG variables
   fChain->SetBranchAddress("lab0_MassFitConsD_nPV", &lab0_MassFitConsD_nPV, &b_lab0_MassFitConsD_nPV);
@@ -130,7 +130,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab0_MassFitConsD_MERR", lab0_MassFitConsD_MERR, &b_lab0_MassFitConsD_MERR);
   fChain->SetBranchAddress("lab0_MassFitConsD_P", lab0_MassFitConsD_P, &b_lab0_MassFitConsD_P);
   fChain->SetBranchAddress("lab0_MassFitConsD_PERR", lab0_MassFitConsD_PERR, &b_lab0_MassFitConsD_PERR);
-  fChain->SetBranchAddress("lab0_MassFitConsD_chi2_B", lab0_MassFitConsD_chi2_B, &b_lab0_MassFitConsD_chi2_B);
+  // fChain->SetBranchAddress("lab0_MassFitConsD_chi2_B", lab0_MassFitConsD_chi2_B, &b_lab0_MassFitConsD_chi2_B);
   fChain->SetBranchAddress("lab0_MassFitConsD_nDOF", lab0_MassFitConsD_nDOF, &b_lab0_MassFitConsD_nDOF);
   fChain->SetBranchAddress("lab0_MassFitConsD_nIter", lab0_MassFitConsD_nIter, &b_lab0_MassFitConsD_nIter);
   fChain->SetBranchAddress("lab0_MassFitConsD_status", lab0_MassFitConsD_status, &b_lab0_MassFitConsD_status);
@@ -154,7 +154,7 @@ void readMCTree::Init(TTree *tree)
   */
 
   // lifetime
-  fChain->SetBranchAddress("lab0_OSCIL", &lab0_OSCIL, &b_lab0_OSCIL);
+  // fChain->SetBranchAddress("lab0_OSCIL", &lab0_OSCIL, &b_lab0_OSCIL);
   fChain->SetBranchAddress("lab0_ID", &lab0_ID, &b_lab0_ID);
   fChain->SetBranchAddress("lab0_TAU", &lab0_TAU, &b_lab0_TAU);
   fChain->SetBranchAddress("lab0_TAUERR", &lab0_TAUERR, &b_lab0_TAUERR);
@@ -204,8 +204,8 @@ void readMCTree::Init(TTree *tree)
   // TODO: what is mini?
   fChain->SetBranchAddress("lab1_CosTheta", &lab1_CosTheta, &b_lab1_CosTheta);
 
-  fChain->SetBranchAddress("lab1_MINIP", &lab1_MINIP, &b_lab1_MINIP);
-  fChain->SetBranchAddress("lab1_MINIPCHI2", &lab1_MINIPCHI2, &b_lab1_MINIPCHI2);
+  // fChain->SetBranchAddress("lab1_MINIP", &lab1_MINIP, &b_lab1_MINIP);
+  // fChain->SetBranchAddress("lab1_MINIPCHI2", &lab1_MINIPCHI2, &b_lab1_MINIPCHI2);
 
   fChain->SetBranchAddress("lab1_OWNPV_X", &lab1_OWNPV_X, &b_lab1_OWNPV_X);
   fChain->SetBranchAddress("lab1_OWNPV_Y", &lab1_OWNPV_Y, &b_lab1_OWNPV_Y);
@@ -258,7 +258,7 @@ void readMCTree::Init(TTree *tree)
   */
 
   // lifetime?
-  fChain->SetBranchAddress("lab1_OSCIL", &lab1_OSCIL, &b_lab1_OSCIL);
+  // fChain->SetBranchAddress("lab1_OSCIL", &lab1_OSCIL, &b_lab1_OSCIL);
   fChain->SetBranchAddress("lab1_ID", &lab1_ID, &b_lab1_ID);
   fChain->SetBranchAddress("lab1_PIDe", &lab1_PIDe, &b_lab1_PIDe);	// TODO: what are PIDx ?
   fChain->SetBranchAddress("lab1_PIDmu", &lab1_PIDmu, &b_lab1_PIDmu);
@@ -270,8 +270,8 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab1_ProbNNpi", &lab1_ProbNNpi, &b_lab1_ProbNNpi);
   fChain->SetBranchAddress("lab1_ProbNNmu", &lab1_ProbNNmu, &b_lab1_ProbNNmu);
   fChain->SetBranchAddress("lab1_ProbNNghost", &lab1_ProbNNghost, &b_lab1_ProbNNghost);
-  fChain->SetBranchAddress("lab1_CaloEcalE", &lab1_CaloEcalE, &b_lab1_CaloEcalE);      /**< Calibrated EM energy? */
-  fChain->SetBranchAddress("lab1_CaloHcalE", &lab1_CaloHcalE, &b_lab1_CaloHcalE);      /**< Calibrated Hadronic energy? */
+  // fChain->SetBranchAddress("lab1_CaloEcalE", &lab1_CaloEcalE, &b_lab1_CaloEcalE);      /**< Calibrated EM energy? */
+  // fChain->SetBranchAddress("lab1_CaloHcalE", &lab1_CaloHcalE, &b_lab1_CaloHcalE);      /**< Calibrated Hadronic energy? */
   fChain->SetBranchAddress("lab1_hasMuon", &lab1_hasMuon, &b_lab1_hasMuon);
   fChain->SetBranchAddress("lab1_isMuon", &lab1_isMuon, &b_lab1_isMuon);
   fChain->SetBranchAddress("lab1_hasRich", &lab1_hasRich, &b_lab1_hasRich);
@@ -292,8 +292,8 @@ void readMCTree::Init(TTree *tree)
 
   fChain->SetBranchAddress("lab2_CosTheta", &lab2_CosTheta, &b_lab2_CosTheta);
 
-  fChain->SetBranchAddress("lab2_MINIP", &lab2_MINIP, &b_lab2_MINIP);
-  fChain->SetBranchAddress("lab2_MINIPCHI2", &lab2_MINIPCHI2, &b_lab2_MINIPCHI2);
+  // fChain->SetBranchAddress("lab2_MINIP", &lab2_MINIP, &b_lab2_MINIP);
+  // fChain->SetBranchAddress("lab2_MINIPCHI2", &lab2_MINIPCHI2, &b_lab2_MINIPCHI2);
 
   fChain->SetBranchAddress("lab2_OWNPV_X", &lab2_OWNPV_X, &b_lab2_OWNPV_X);
   fChain->SetBranchAddress("lab2_OWNPV_Y", &lab2_OWNPV_Y, &b_lab2_OWNPV_Y);
@@ -343,7 +343,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab2_MM", &lab2_MM, &b_lab2_MM);
   fChain->SetBranchAddress("lab2_MMERR", &lab2_MMERR, &b_lab2_MMERR);
   fChain->SetBranchAddress("lab2_M", &lab2_M, &b_lab2_M);
-  fChain->SetBranchAddress("lab2_BKGCAT", &lab2_BKGCAT, &b_lab2_BKGCAT);
+  // fChain->SetBranchAddress("lab2_BKGCAT", &lab2_BKGCAT, &b_lab2_BKGCAT);
 
   /*
   // MC truth
@@ -364,7 +364,7 @@ void readMCTree::Init(TTree *tree)
   */
 
   // lifetime
-  fChain->SetBranchAddress("lab2_OSCIL", &lab2_OSCIL, &b_lab2_OSCIL);
+  // fChain->SetBranchAddress("lab2_OSCIL", &lab2_OSCIL, &b_lab2_OSCIL);
   fChain->SetBranchAddress("lab2_ID", &lab2_ID, &b_lab2_ID);
   fChain->SetBranchAddress("lab2_TAU", &lab2_TAU, &b_lab2_TAU);
   fChain->SetBranchAddress("lab2_TAUERR", &lab2_TAUERR, &b_lab2_TAUERR);
@@ -378,8 +378,8 @@ void readMCTree::Init(TTree *tree)
   // what is mini?
   fChain->SetBranchAddress("lab3_CosTheta", &lab3_CosTheta, &b_lab3_CosTheta);
 
-  fChain->SetBranchAddress("lab3_MINIP", &lab3_MINIP, &b_lab3_MINIP);
-  fChain->SetBranchAddress("lab3_MINIPCHI2", &lab3_MINIPCHI2, &b_lab3_MINIPCHI2);
+  // fChain->SetBranchAddress("lab3_MINIP", &lab3_MINIP, &b_lab3_MINIP);
+  // fChain->SetBranchAddress("lab3_MINIPCHI2", &lab3_MINIPCHI2, &b_lab3_MINIPCHI2);
 
   fChain->SetBranchAddress("lab3_OWNPV_X", &lab3_OWNPV_X, &b_lab3_OWNPV_X);
   fChain->SetBranchAddress("lab3_OWNPV_Y", &lab3_OWNPV_Y, &b_lab3_OWNPV_Y);
@@ -430,7 +430,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab3_TRUETAU", &lab3_TRUETAU, &b_lab3_TRUETAU);
   */
 
-  fChain->SetBranchAddress("lab3_OSCIL", &lab3_OSCIL, &b_lab3_OSCIL);
+  // fChain->SetBranchAddress("lab3_OSCIL", &lab3_OSCIL, &b_lab3_OSCIL);
   fChain->SetBranchAddress("lab3_ID", &lab3_ID, &b_lab3_ID);
   fChain->SetBranchAddress("lab3_PIDe", &lab3_PIDe, &b_lab3_PIDe);
   fChain->SetBranchAddress("lab3_PIDmu", &lab3_PIDmu, &b_lab3_PIDmu);
@@ -442,8 +442,8 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab3_ProbNNpi", &lab3_ProbNNpi, &b_lab3_ProbNNpi);
   fChain->SetBranchAddress("lab3_ProbNNmu", &lab3_ProbNNmu, &b_lab3_ProbNNmu);
   fChain->SetBranchAddress("lab3_ProbNNghost", &lab3_ProbNNghost, &b_lab3_ProbNNghost);
-  fChain->SetBranchAddress("lab3_CaloEcalE", &lab3_CaloEcalE, &b_lab3_CaloEcalE);
-  fChain->SetBranchAddress("lab3_CaloHcalE", &lab3_CaloHcalE, &b_lab3_CaloHcalE);
+  // fChain->SetBranchAddress("lab3_CaloEcalE", &lab3_CaloEcalE, &b_lab3_CaloEcalE);
+  // fChain->SetBranchAddress("lab3_CaloHcalE", &lab3_CaloHcalE, &b_lab3_CaloHcalE);
   fChain->SetBranchAddress("lab3_hasMuon", &lab3_hasMuon, &b_lab3_hasMuon);
   fChain->SetBranchAddress("lab3_isMuon", &lab3_isMuon, &b_lab3_isMuon);
   fChain->SetBranchAddress("lab3_hasRich", &lab3_hasRich, &b_lab3_hasRich);
@@ -464,8 +464,8 @@ void readMCTree::Init(TTree *tree)
 
   fChain->SetBranchAddress("lab4_CosTheta", &lab4_CosTheta, &b_lab4_CosTheta);
 
-  fChain->SetBranchAddress("lab4_MINIP", &lab4_MINIP, &b_lab4_MINIP);
-  fChain->SetBranchAddress("lab4_MINIPCHI2", &lab4_MINIPCHI2, &b_lab4_MINIPCHI2);
+  // fChain->SetBranchAddress("lab4_MINIP", &lab4_MINIP, &b_lab4_MINIP);
+  // fChain->SetBranchAddress("lab4_MINIPCHI2", &lab4_MINIPCHI2, &b_lab4_MINIPCHI2);
 
   fChain->SetBranchAddress("lab4_OWNPV_X", &lab4_OWNPV_X, &b_lab4_OWNPV_X);
   fChain->SetBranchAddress("lab4_OWNPV_Y", &lab4_OWNPV_Y, &b_lab4_OWNPV_Y);
@@ -516,7 +516,7 @@ void readMCTree::Init(TTree *tree)
   */
 
   // lifetime?
-  fChain->SetBranchAddress("lab4_OSCIL", &lab4_OSCIL, &b_lab4_OSCIL);
+  // fChain->SetBranchAddress("lab4_OSCIL", &lab4_OSCIL, &b_lab4_OSCIL);
   fChain->SetBranchAddress("lab4_ID", &lab4_ID, &b_lab4_ID);
   fChain->SetBranchAddress("lab4_PIDe", &lab4_PIDe, &b_lab4_PIDe);
   fChain->SetBranchAddress("lab4_PIDmu", &lab4_PIDmu, &b_lab4_PIDmu);
@@ -528,8 +528,8 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab4_ProbNNpi", &lab4_ProbNNpi, &b_lab4_ProbNNpi);
   fChain->SetBranchAddress("lab4_ProbNNmu", &lab4_ProbNNmu, &b_lab4_ProbNNmu);
   fChain->SetBranchAddress("lab4_ProbNNghost", &lab4_ProbNNghost, &b_lab4_ProbNNghost);
-  fChain->SetBranchAddress("lab4_CaloEcalE", &lab4_CaloEcalE, &b_lab4_CaloEcalE);
-  fChain->SetBranchAddress("lab4_CaloHcalE", &lab4_CaloHcalE, &b_lab4_CaloHcalE);
+  // fChain->SetBranchAddress("lab4_CaloEcalE", &lab4_CaloEcalE, &b_lab4_CaloEcalE);
+  // fChain->SetBranchAddress("lab4_CaloHcalE", &lab4_CaloHcalE, &b_lab4_CaloHcalE);
   fChain->SetBranchAddress("lab4_hasMuon", &lab4_hasMuon, &b_lab4_hasMuon);
   fChain->SetBranchAddress("lab4_isMuon", &lab4_isMuon, &b_lab4_isMuon);
   fChain->SetBranchAddress("lab4_hasRich", &lab4_hasRich, &b_lab4_hasRich);
@@ -550,8 +550,8 @@ void readMCTree::Init(TTree *tree)
 
   fChain->SetBranchAddress("lab5_CosTheta", &lab5_CosTheta, &b_lab5_CosTheta);
 
-  fChain->SetBranchAddress("lab5_MINIP", &lab5_MINIP, &b_lab5_MINIP);
-  fChain->SetBranchAddress("lab5_MINIPCHI2", &lab5_MINIPCHI2, &b_lab5_MINIPCHI2);
+  // fChain->SetBranchAddress("lab5_MINIP", &lab5_MINIP, &b_lab5_MINIP);
+  // fChain->SetBranchAddress("lab5_MINIPCHI2", &lab5_MINIPCHI2, &b_lab5_MINIPCHI2);
 
   fChain->SetBranchAddress("lab5_OWNPV_X", &lab5_OWNPV_X, &b_lab5_OWNPV_X);
   fChain->SetBranchAddress("lab5_OWNPV_Y", &lab5_OWNPV_Y, &b_lab5_OWNPV_Y);
@@ -600,7 +600,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab5_TRUETAU", &lab5_TRUETAU, &b_lab5_TRUETAU);
   */
 
-  fChain->SetBranchAddress("lab5_OSCIL", &lab5_OSCIL, &b_lab5_OSCIL);
+  // fChain->SetBranchAddress("lab5_OSCIL", &lab5_OSCIL, &b_lab5_OSCIL);
   fChain->SetBranchAddress("lab5_ID", &lab5_ID, &b_lab5_ID);
   fChain->SetBranchAddress("lab5_PIDe", &lab5_PIDe, &b_lab5_PIDe);
   fChain->SetBranchAddress("lab5_PIDmu", &lab5_PIDmu, &b_lab5_PIDmu);
@@ -612,8 +612,8 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("lab5_ProbNNpi", &lab5_ProbNNpi, &b_lab5_ProbNNpi);
   fChain->SetBranchAddress("lab5_ProbNNmu", &lab5_ProbNNmu, &b_lab5_ProbNNmu);
   fChain->SetBranchAddress("lab5_ProbNNghost", &lab5_ProbNNghost, &b_lab5_ProbNNghost);
-  fChain->SetBranchAddress("lab5_CaloEcalE", &lab5_CaloEcalE, &b_lab5_CaloEcalE);
-  fChain->SetBranchAddress("lab5_CaloHcalE", &lab5_CaloHcalE, &b_lab5_CaloHcalE);
+  // fChain->SetBranchAddress("lab5_CaloEcalE", &lab5_CaloEcalE, &b_lab5_CaloEcalE);
+  // fChain->SetBranchAddress("lab5_CaloHcalE", &lab5_CaloHcalE, &b_lab5_CaloHcalE);
   fChain->SetBranchAddress("lab5_hasMuon", &lab5_hasMuon, &b_lab5_hasMuon);
   fChain->SetBranchAddress("lab5_isMuon", &lab5_isMuon, &b_lab5_isMuon);
   fChain->SetBranchAddress("lab5_hasRich", &lab5_hasRich, &b_lab5_hasRich);
@@ -644,7 +644,7 @@ void readMCTree::Init(TTree *tree)
   fChain->SetBranchAddress("L0DUTCK", &L0DUTCK, &b_L0DUTCK);
   fChain->SetBranchAddress("HLTTCK", &HLTTCK, &b_HLTTCK);
   fChain->SetBranchAddress("GpsTime", &GpsTime, &b_GpsTime);
-  fChain->SetBranchAddress("Primaries", &Primaries, &b_Primaries);
+  // fChain->SetBranchAddress("Primaries", &Primaries, &b_Primaries);
   fChain->SetBranchAddress("nPV", &nPV, &b_nPV);
   fChain->SetBranchAddress("PVX", PVX, &b_PVX);   //[nPV]
   fChain->SetBranchAddress("PVY", PVY, &b_PVY);   //[nPV]

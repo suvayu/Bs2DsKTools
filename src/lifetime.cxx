@@ -141,7 +141,7 @@ void lifetime::Loop(TTree &ftree)
    // ftree.Branch("truetime", &lab0_TRUETAU);
    ftree.Branch("wt"     , &wt);
    ftree.Branch("truewt" , &truewt);
-   ftree.Branch("oscil"  , &lab0_OSCIL);
+   // ftree.Branch("oscil"  , &lab0_OSCIL);
    ftree.Branch("OWNPV"  , &OWNPV);
    ftree.Branch("ENDVX"  , &ENDVX);
 
@@ -195,7 +195,7 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK, bool MCmatch)
    ftree.Branch("truetime", &truetime);
    ftree.Branch("wt"     , &wt);
    // ftree.Branch("truewt" , &truewt);
-   ftree.Branch("oscil"  , &lab0_OSCIL);
+   // ftree.Branch("oscil"  , &lab0_OSCIL);
    ftree.Branch("OWNPV"  , &OWNPV);
    ftree.Branch("ENDVX"  , &ENDVX);
 
@@ -318,14 +318,14 @@ bool lifetime::OldOfflineSelection(bool DsK)
     _cutflow[7]++;
     return false;
   }
-  if (not (lab0_BKGCAT < 60)) {
-    _cutflow[8]++;
-    return false;
-  }
-  if (not (lab2_BKGCAT < 30. or std::abs(lab2_BKGCAT -50.) < 1e-4)) {
-    _cutflow[9]++;
-    return false;
-  }
+  // if (not (lab0_BKGCAT < 60)) {
+  //   _cutflow[8]++;
+  //   return false;
+  // }
+  // if (not (lab2_BKGCAT < 30. or std::abs(lab2_BKGCAT -50.) < 1e-4)) {
+  //   _cutflow[9]++;
+  //   return false;
+  // }
   if (not ((DsK and lab1_PIDK > 10.0) or 
 	   ((not DsK) and lab1_PIDK < 10.0))) {
     _cutflow[10]++;
@@ -356,7 +356,7 @@ bool lifetime::CommonSelection(bool DsK)
 bool lifetime::UnbiasedSelection()
 {
   if (lab1_TRACK_PCHI2 < 4. and lab1_P > 5000. and lab1_PT > 500. and
-      lab1_MINIPCHI2 > 0. and 1918. < lab2_MM and lab2_MM < 2018. and // 100 MeV Ds mass window
+      // lab1_MINIPCHI2 > 0. and 1918. < lab2_MM and lab2_MM < 2018. and // 100 MeV Ds mass window
       lab0_ENDVERTEX_CHI2 < 9. and lab0_IPCHI2_OWNPV < 250. and
       -1000. < lab0_FDCHI2_OWNPV and -1. < lab0_DIRA_OWNPV and
       5116. < lab0_MM and lab0_MM < 5616.) return true; // 500 MeV Bs mass window
