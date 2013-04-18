@@ -42,7 +42,7 @@ public :
   virtual void  Loop();
   virtual void  Loop(TNtuple &);
   virtual void  Loop(TTree &);
-  virtual void  Loop(TTree &, TEntryList &, bool DsK=true);
+  virtual void  Loop(TTree &, TEntryList &, bool mode);
 
 protected:
 
