@@ -31,9 +31,9 @@ int main()
 
     // select
     if (doSelect) {
-      string tuplename(DsK ? "../ntuples/MC/MC11a_AfterOfflineSel/AfterOfflineSel/Bs2DsK*BDTG.root/DecayTree" :
-		       "../ntuples/MC/MC11a_AfterOfflineSel/AfterOfflineSel/Bs2DsPi*BDTG.root/DecayTree");
-      TChain * MCChain = initChain("MCChain", tuplename.c_str());
+      string tuplename(DsK ? "../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsK*BsHypo_BDTG.root/DecayTree" :
+		       "../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsPi*BsHypo_BDTG.root/DecayTree");
+      TChain * MCChain = initChain("DecayTree", tuplename.c_str());
       lifetime MCsample(MCChain);
       selAccTree(MCsample, ftree, felist, DsK); // remember to delete ftree and felist
     } else {
