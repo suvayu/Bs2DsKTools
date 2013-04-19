@@ -96,7 +96,7 @@ protected:
   Float_t         lab0_MM;
   Float_t         lab0_MMERR;
   Float_t         lab0_M;
-  // Int_t           lab0_BKGCAT;
+  Int_t           lab0_BKGCAT;
 
   // BDTG variables
   Int_t           lab0_MassFitConsD_nPV;
@@ -109,7 +109,6 @@ protected:
   Float_t         lab0_MassFitConsD_nIter[10];   //[lab0_MassFitConsD_nPV]
   Float_t         lab0_MassFitConsD_status[10];   //[lab0_MassFitConsD_nPV]
 
-  /*
   // MC truth
   Int_t           lab0_TRUEID;
   Float_t         lab0_TRUEP_E;
@@ -117,9 +116,7 @@ protected:
   Float_t         lab0_TRUEP_Y;
   Float_t         lab0_TRUEP_Z;
   Float_t         lab0_TRUEPT;
-  */
 
-  /*
   // this is the origin vertex of the particle. For the B this is just
   // the same as "OWNPV" and so not filled. For the D this is the same
   // as the B vertex.
@@ -131,10 +128,9 @@ protected:
   Float_t         lab0_TRUEENDVERTEX_Z;
   Int_t           lab0_TRUEISSTABLE;
   Float_t         lab0_TRUETAU;
-  */
 
   // lifetime
-  // // Int_t           lab0_OSCIL;
+  // Int_t           lab0_OSCIL;
   Int_t           lab0_ID;
   Float_t         lab0_TAU;
   Float_t         lab0_TAUERR;
@@ -218,7 +214,6 @@ protected:
   Float_t         lab1_PZ;
   Float_t         lab1_M;
 
-  /*
   // MC truth
   Int_t           lab1_TRUEID;
   Float_t         lab1_TRUEP_E;
@@ -234,10 +229,9 @@ protected:
   Float_t         lab1_TRUEENDVERTEX_Z;
   Int_t           lab1_TRUEISSTABLE;
   Float_t         lab1_TRUETAU;
-  */
 
   // lifetime?
-  // // Int_t           lab1_OSCIL;
+  // Int_t           lab1_OSCIL;
   Int_t           lab1_ID;
   Float_t         lab1_PIDe;
   Float_t         lab1_PIDmu;
@@ -271,8 +265,8 @@ protected:
 
   Float_t         lab2_CosTheta; // TODO: Opening angle?
 
-  // Float_t         lab2_MINIP;
-  // Float_t         lab2_MINIPCHI2;
+  Float_t         lab2_MINIP;
+  Float_t         lab2_MINIPCHI2;
 
   Float_t         lab2_OWNPV_X;
   Float_t         lab2_OWNPV_Y;
@@ -322,9 +316,8 @@ protected:
   Float_t         lab2_MM;
   Float_t         lab2_MMERR;
   Float_t         lab2_M;
-  // Int_t           lab2_BKGCAT;
+  Int_t           lab2_BKGCAT;
 
-  /*
   // MC truth
   Int_t           lab2_TRUEID;
   Float_t         lab2_TRUEP_E;
@@ -340,7 +333,6 @@ protected:
   Float_t         lab2_TRUEENDVERTEX_Z;
   Int_t           lab2_TRUEISSTABLE;
   Float_t         lab2_TRUETAU;
-  */
 
   // lifetime
   // Int_t           lab2_OSCIL;
@@ -391,7 +383,6 @@ protected:
   Float_t         lab3_PZ;
   Float_t         lab3_M;
 
-  /*
   // MC truth
   Int_t           lab3_TRUEID;
   Float_t         lab3_TRUEP_E;
@@ -407,7 +398,6 @@ protected:
   Float_t         lab3_TRUEENDVERTEX_Z;
   Int_t           lab3_TRUEISSTABLE;
   Float_t         lab3_TRUETAU;
-  */
 
   // Int_t           lab3_OSCIL;
   Int_t           lab3_ID;
@@ -476,7 +466,6 @@ protected:
   Float_t         lab4_PZ;
   Float_t         lab4_M;
 
-  /*
   // MC truth
   Int_t           lab4_TRUEID;
   Float_t         lab4_TRUEP_E;
@@ -492,7 +481,6 @@ protected:
   Float_t         lab4_TRUEENDVERTEX_Z;
   Int_t           lab4_TRUEISSTABLE;
   Float_t         lab4_TRUETAU;
-  */
 
   // lifetime?
   // Int_t           lab4_OSCIL;
@@ -562,7 +550,6 @@ protected:
   Float_t         lab5_PZ;
   Float_t         lab5_M;
 
-  /*
   Int_t           lab5_TRUEID;
   Float_t         lab5_TRUEP_E;
   Float_t         lab5_TRUEP_X;
@@ -577,7 +564,6 @@ protected:
   Float_t         lab5_TRUEENDVERTEX_Z;
   Int_t           lab5_TRUEISSTABLE;
   Float_t         lab5_TRUETAU;
-  */
 
   // Int_t           lab5_OSCIL;
   Int_t           lab5_ID;
@@ -691,7 +677,7 @@ protected:
   TBranch         *b_lab0_MM;
   TBranch         *b_lab0_MMERR;
   TBranch         *b_lab0_M;
-  // TBranch         *b_lab0_BKGCAT;
+  TBranch         *b_lab0_BKGCAT;
 
   // BDTG variables
   TBranch        *b_lab0_MassFitConsD_nPV;   //!
@@ -704,7 +690,6 @@ protected:
   TBranch        *b_lab0_MassFitConsD_nIter;   //!
   TBranch        *b_lab0_MassFitConsD_status;   //!
 
-  /*
   // MC truth
   TBranch         *b_lab0_TRUEID;
   TBranch         *b_lab0_TRUEP_E;
@@ -720,7 +705,6 @@ protected:
   TBranch         *b_lab0_TRUEENDVERTEX_Z;
   TBranch         *b_lab0_TRUEISSTABLE;
   TBranch         *b_lab0_TRUETAU;
-  */
 
   // lifetime
   // TBranch         *b_lab0_OSCIL;
@@ -807,7 +791,6 @@ protected:
   TBranch         *b_lab1_PZ;
   TBranch         *b_lab1_M;
 
-  /*
   // MC truth
   TBranch         *b_lab1_TRUEID;
   TBranch         *b_lab1_TRUEP_E;
@@ -823,7 +806,6 @@ protected:
   TBranch         *b_lab1_TRUEENDVERTEX_Z;
   TBranch         *b_lab1_TRUEISSTABLE;
   TBranch         *b_lab1_TRUETAU;
-  */
 
   // TBranch         *b_lab1_OSCIL;
   TBranch         *b_lab1_ID;
@@ -859,8 +841,8 @@ protected:
 
   TBranch         *b_lab2_CosTheta;
 
-  // TBranch         *b_lab2_MINIP;
-  // TBranch         *b_lab2_MINIPCHI2;
+  TBranch         *b_lab2_MINIP;
+  TBranch         *b_lab2_MINIPCHI2;
 
   TBranch         *b_lab2_OWNPV_X;
   TBranch         *b_lab2_OWNPV_Y;
@@ -910,9 +892,8 @@ protected:
   TBranch         *b_lab2_MM;
   TBranch         *b_lab2_MMERR;
   TBranch         *b_lab2_M;
-  // TBranch         *b_lab2_BKGCAT;
+  TBranch         *b_lab2_BKGCAT;
 
-  /*
   // MC truth
   TBranch         *b_lab2_TRUEID;
   TBranch         *b_lab2_TRUEP_E;
@@ -928,7 +909,6 @@ protected:
   TBranch         *b_lab2_TRUEENDVERTEX_Z;
   TBranch         *b_lab2_TRUEISSTABLE;
   TBranch         *b_lab2_TRUETAU;
-  */
 
   // lifetime
   // TBranch         *b_lab2_OSCIL;
@@ -979,7 +959,6 @@ protected:
   TBranch         *b_lab3_PZ;
   TBranch         *b_lab3_M;
 
-  /*
   // MC truth
   TBranch         *b_lab3_TRUEID;
   TBranch         *b_lab3_TRUEP_E;
@@ -995,7 +974,6 @@ protected:
   TBranch         *b_lab3_TRUEENDVERTEX_Z;
   TBranch         *b_lab3_TRUEISSTABLE;
   TBranch         *b_lab3_TRUETAU;
-  */
 
   // TBranch         *b_lab3_OSCIL;
   TBranch         *b_lab3_ID;
@@ -1031,8 +1009,8 @@ protected:
 
   TBranch         *b_lab4_CosTheta;
 
-  // TBranch         *b_lab4_MINIP;
-  // TBranch         *b_lab4_MINIPCHI2;
+  TBranch         *b_lab4_MINIP;
+  TBranch         *b_lab4_MINIPCHI2;
 
   TBranch         *b_lab4_OWNPV_X;
   TBranch         *b_lab4_OWNPV_Y;
@@ -1064,7 +1042,6 @@ protected:
   TBranch         *b_lab4_PZ;
   TBranch         *b_lab4_M;
 
-  /*
   // MC truth
   TBranch         *b_lab4_TRUEID;
   TBranch         *b_lab4_TRUEP_E;
@@ -1080,7 +1057,6 @@ protected:
   TBranch         *b_lab4_TRUEENDVERTEX_Z;
   TBranch         *b_lab4_TRUEISSTABLE;
   TBranch         *b_lab4_TRUETAU;
-  */
 
   // lifetime?
   // TBranch         *b_lab4_OSCIL;
@@ -1150,7 +1126,6 @@ protected:
   TBranch         *b_lab5_PZ;
   TBranch         *b_lab5_M;
 
-  /*
   TBranch         *b_lab5_TRUEID;
   TBranch         *b_lab5_TRUEP_E;
   TBranch         *b_lab5_TRUEP_X;
@@ -1165,7 +1140,6 @@ protected:
   TBranch         *b_lab5_TRUEENDVERTEX_Z;
   TBranch         *b_lab5_TRUEISSTABLE;
   TBranch         *b_lab5_TRUETAU;
-  */
 
   // TBranch         *b_lab5_OSCIL;
   TBranch         *b_lab5_ID;
