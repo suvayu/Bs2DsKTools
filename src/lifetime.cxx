@@ -11,6 +11,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include <boost/format.hpp>
+
 #include "lifetime.hxx"
 // #include "Event.h"
 
@@ -220,7 +222,7 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
    unsigned long dskcount(0), dspicount(0);
 
    Long64_t nbytes = 0, nb = 0;
-   // for (Long64_t jentry=0; jentry<nentries;jentry+=10) // for testing
+   // for (Long64_t jentry=0; jentry<nentries;jentry+=100) // for testing
    for (Long64_t jentry=0; jentry<nentries;jentry++)
      {
        Long64_t ientry = LoadTree(jentry);
@@ -235,10 +237,16 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
        // if (OldOfflineSelection(DsK) == false) continue;
 
        if (lab0_TAUERR <= 0 or lab0_TAUERR >= 0.0002 or
-	   lab0_TAUERR != lab0_TAUERR) continue;
+	   lab0_TAUERR != lab0_TAUERR) {
+	 _cutflow[12]++;
+	 continue;
+       }
 
        // since there is a cut at 0.2 ps in stripping
-       if (lab0_TAU < 2E-4) continue;
+       if (lab0_TAU < 2E-4) {
+	 _cutflow[13]++;
+	 continue;
+       }
 
        time     = lab0_TAU * 1E3;
        dt       = lab0_TAUERR * 1E3;
@@ -265,12 +273,11 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
        else if (std::abs(lab1_TRUEID) == 211) dspicount++;
      }
 
-   std::cout << "Cutflow: ";
+   std::cout << "Cutflow table: " << std::endl;
    for (std::map<unsigned int,long>::const_iterator itr = _cutflow.begin();
 	itr != _cutflow.end(); ++itr) {
-     std::cout << "(" << itr->first << "," << itr->second << "), ";
+     std::cout << boost::format("| %|2| | %|6| |\n") % itr->first % itr->second;
    }
-   std::cout << std::endl;
 
    std::cout << "Entry list: " << felist.GetN() << " DsK: " << dskcount
 	     << " DsPi: " << dspicount << std::endl;
@@ -288,49 +295,49 @@ bool lifetime::OldOfflineSelection(bool DsK)
   return true;
 
   if (not (lab1_P > 0.0 and lab1_P < 1.0E11)) {
-    _cutflow[0]++;
-    return false;
-  }
-  if (not (BDTGResponse_1 > 0.5)) {
     _cutflow[1]++;
     return false;
   }
-  if (not (lab2_FDCHI2_ORIVX > 2.0)) {
+  if (not (BDTGResponse_1 > 0.5)) {
     _cutflow[2]++;
+    return false;
+  }
+  if (not (lab2_FDCHI2_ORIVX > 2.0)) {
+    _cutflow[3]++;
     return false;
   }
   if (not ((DsK and lab1_M > 200.0) or
 	   ((not DsK) and lab1_M < 200.0))) {
-    _cutflow[3]++;
-    return false;
-  }
-  if (not (lab3_M < 200.0 and lab4_M > 200.0 and lab5_M > 200.0)) {
     _cutflow[4]++;
     return false;
   }
-  if (not (lab4_PIDK > 5.0 and lab3_PIDK < 0.0 and lab5_PIDK > 5.0)) {
+  if (not (lab3_M < 200.0 and lab4_M > 200.0 and lab5_M > 200.0)) {
     _cutflow[5]++;
     return false;
   }
-  if (not (5000.0 < lab0_MassFitConsD_M[0] and lab0_MassFitConsD_M[0] < 5500.0)) {
+  if (not (lab4_PIDK > 5.0 and lab3_PIDK < 0.0 and lab5_PIDK > 5.0)) {
     _cutflow[6]++;
     return false;
   }
-  if (not (1948.0 < lab2_MM and lab2_MM < 1990.0)) {
+  if (not (5000.0 < lab0_MassFitConsD_M[0] and lab0_MassFitConsD_M[0] < 5500.0)) {
     _cutflow[7]++;
     return false;
   }
-  if (not (lab0_BKGCAT < 60)) {
+  if (not (1948.0 < lab2_MM and lab2_MM < 1990.0)) {
     _cutflow[8]++;
     return false;
   }
-  if (not (lab2_BKGCAT < 30. or std::abs(lab2_BKGCAT -50.) < 1e-4)) {
+  if (not (lab0_BKGCAT < 60)) {
     _cutflow[9]++;
+    return false;
+  }
+  if (not (lab2_BKGCAT < 30. or std::abs(lab2_BKGCAT -50.) < 1e-4)) {
+    _cutflow[10]++;
     return false;
   }
   if (not ((DsK and lab1_PIDK > 10.0) or 
 	   ((not DsK) and lab1_PIDK < 10.0))) {
-    _cutflow[10]++;
+    _cutflow[11]++;
     return false;
   }
   return true;
@@ -348,7 +355,10 @@ bool lifetime::CommonSelection(bool DsK)
       ((DsK and lab1_TRUEID*lab1_TRUEID == 321*321) or
        ((not DsK) and lab1_TRUEID*lab1_TRUEID == 211*211)))
     return true;
-  else return false;
+  else {
+    _cutflow[0]++;
+    return false;
+  }
 }
 
 
