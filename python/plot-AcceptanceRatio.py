@@ -160,6 +160,7 @@ gPad.Update()
 # Print
 if doPrint:
     gPad.Print('plots/DsK_ratio_zoomed1.png')
+    gPad.Print('plots/DsK_ratio_zoomed1.pdf')
 
 z2tframe = time.frame(RooFit.Title('Time acceptance ratio 0.2-1.0 ps'),
                       RooFit.Range('zoom'))
@@ -173,6 +174,7 @@ gPad.Update()
 # Print
 if doPrint:
     gPad.Print('plots/DsK_ratio_zoomed2.png')
+    gPad.Print('plots/DsK_ratio_zoomed2.pdf')
 
 # NB: Do not close file, otherwise plot disappears
 # ffile.Close()
