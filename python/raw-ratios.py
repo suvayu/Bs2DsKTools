@@ -21,6 +21,7 @@ doPrint = options.doPrint
 # Python modules
 import os
 import sys
+# from numpy import fromfile
 
 # FIXME: Batch running fails on importing anything but gROOT
 # ROOT global variables
@@ -72,11 +73,15 @@ htypes = [
     'pid_bdt_trig'                     # all
 ]
 
+# # for variable binning (quite horrible at the moment)
+# hbins = fromfile('data/binning_scheme.dat')
+# nbins = len(hbins) - 1
 
 ## decay time distributions for different cuts
 for htype in htypes:
     for mode in modes:
-        hist_name = ('h' + modes[mode] + '_' + htype + '(100,0.2,15.0)') # ensure identical binning
+        # ensure identical binning
+        hist = Hist(100, 0.2, 15.0, name='h' + modes[mode] + '_' + htype, type='D')
         cut = cuts['nocuts']
         cut_tokens = htype.split('_')
         for token in cut_tokens:
@@ -90,7 +95,7 @@ for htype in htypes:
                 cut = cut & cuts['trig']
             else:
                 print 'Unknown permutation of cuts, weird things will happen.'
-        histograms[mode].append(trees[mode].Draw('time>>' + hist_name, cut))
+        histograms[mode].append(trees[mode].Draw('time', cut, '', hist))
 
 
 ## ratios for different cuts
