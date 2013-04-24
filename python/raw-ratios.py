@@ -35,7 +35,7 @@ from ROOT import kGreen, kRed, kBlack, kBlue, kAzure, kYellow, kCyan
 from ROOT import kPlus, kFullDotMedium, kFullDotSmall
 
 # ROOT classes
-from ROOT import TCanvas, TLatex, TText
+from ROOT import TCanvas
 
 # rootpy modules
 from rootpy.io import File
@@ -102,20 +102,13 @@ for htype in htypes:
 canvas0 = TCanvas('canvas0', '', 800, 500)
 canvas = TCanvas('canvas', '', 1600, 1000)
 canvas.Divide(3,2)
-# # text = TLatex()
-# text = TText()
-# text.SetNDC(True)
-# text.SetTextSize(0.05)
 
 ratio_histograms = [hist.clone() for hist in histograms[0]]
 for zoom in range(2):
     for idx, hist in enumerate(ratio_histograms):
         ratio_histograms[idx].reset('ices')
         htitle = ' '.join(histograms[0][idx].GetName().split('_')[1:])
-        # textdsk = histograms[0][idx].GetTitle()
-        # textdspi = histograms[1][idx].GetTitle()
-        # latex = '#frac{'+textdsk+'}{'+textdspi+'}'
-        ratio_histograms[idx].SetTitle(htitle)
+        ratio_histograms[idx].SetTitle(htitle+';decay time (ps);DsK/Ds#pi')
         ratio_histograms[idx].SetMarkerStyle(kPlus)
         ratio_histograms[idx].Divide(histograms[0][idx], histograms[1][idx])
         if zoom:
@@ -126,10 +119,6 @@ for zoom in range(2):
         if idx > 0 and idx < 7:
             canvas.cd(idx)
         ratio_histograms[idx].Draw('e1')
-        # # text.DrawLatex(0.4, 0.8, latex)
-        # text.DrawText(0.1, 0.8, textdsk)
-        # text.DrawText(0.1, 0.7, textdspi)
-        # gPad.Update()
         if doPrint and (idx == 0 or idx > 6):
             canvas0.Print('plots/DsK_ratio_'+str(idx)+'_'+str(zoom)+'.png')
             canvas0.Print('plots/DsK_ratio_'+str(idx)+'_'+str(zoom)+'.pdf')
