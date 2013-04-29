@@ -131,24 +131,27 @@ triggerVars = []
 for var in tlist:
     triggerVars += [RooRealVar(var, var, 0, 2)]
 
-cut = '(%s > 0) && (%s > 0 || %s > 0 || %s > 0) && abs(hID) == %%d' % (
+cut = '(%s > 0) && (%s > 0 || %s > 0 || %s > 0) ' % (
     tlist[0], tlist[1], tlist[2], tlist[3])
+cut += '&& BDTG > 0.5 '
+cut += '&& PIDK %s '
 
 # Get dataset: DsPi and DsK
 time.setBins(150)
 dsetlist = []
-for mode, pid in [ ('DsPi', 211) , ('DsK', 321) ]:
+for mode, pidcut in [ ('DsPi', '< 0') , ('DsK', '> 10') ]:
     # Get tree
-    rfile = get_file('data/smalltree-new-MC-pico-offline-%s.root' % mode, 'read')
+    rfile = get_file('data/smalltree-really-new-MC-pre-PID-%s.root' % mode, 'read')
     ftree = get_object('ftree', rfile)
     print 'Reading from file: %s' % rfile.GetName()
 
-    modeVar = RooRealVar('hID', 'Decay mode %s' % mode, -350, 350)
-    cutstr = cut % pid
+    cutstr = cut % pidcut
+    pidVar = RooRealVar('PIDK', 'PIDK', -200, 200)
+    BDTVar = RooRealVar('BDTG', 'BDTG', -1, 1)
 
     try:
-        dataset = get_dataset(RooArgSet(time), ftree, cutstr, modeVar,
-                              *triggerVars)
+        dataset = get_dataset(RooArgSet(time), ftree, cutstr, pidVar,
+                              BDTVar, *triggerVars)
         dataset.SetName('%s_%s' % (dataset.GetName(), mode))
         dsetlist += [dataset]
     except TypeError, IOError:
