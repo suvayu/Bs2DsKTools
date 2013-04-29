@@ -40,7 +40,10 @@ parser.add_option('-s', '--save', action='store_true', default=False,
                   help='Save the fitresult in a ROOT file (default: False).')
 options, args = parser.parse_args()
 save = options.save
-ratiofn = args[0]
+if not args:
+    ratiofn = 'exponential'
+else:
+    ratiofn = args[0]
 
 
 ## ROOT global variables
