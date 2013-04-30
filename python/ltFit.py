@@ -228,6 +228,7 @@ print '=' * 5, ' 2-step fit: Dsπ ', '=' * 5
 dspi_fitresult = DsPi_Model.fitTo(dsetlist[0], RooFit.Optimize(0),
                                   RooFit.Strategy(2), RooFit.Save(True),
                                   RooFit.NumCPU(1),
+                                  RooFit.Offset(True),
                                   RooFit.Verbose(True))
 dspi_fitresult.Print()
 
@@ -283,6 +284,7 @@ print '=' * 5, ' 2-step fit: DsK ', '=' * 5
 dsk_fitresult = DsK_Model.fitTo(dsetlist[1], RooFit.Optimize(0),
                                 RooFit.Strategy(2), RooFit.Save(True),
                                 RooFit.NumCPU(1),
+                                RooFit.Offset(True),
                                 RooFit.Verbose(True))
 dsk_fitresult.Print()
 
@@ -325,6 +327,7 @@ dataset.Print('v')
 fitresult = PDF.fitTo(dataset, RooFit.Optimize(0),
                       RooFit.Strategy(2), RooFit.Save(True),
                       RooFit.NumCPU(1),
+                      RooFit.Offset(True),
                       RooFit.Verbose(True))
 fitresult.Print()
 
