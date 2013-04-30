@@ -51,6 +51,7 @@ from ROOT import PowLawAcceptance, AcceptanceRatio
 # Get objects from workspace
 workspace, ffile = get_workspace(fname, 'workspace')
 workspace.Print('v')
+timestamp = str(workspace.GetTitle())[19:]
 
 # Variables
 time = workspace.var('time')
@@ -202,8 +203,9 @@ tframe.Draw()
 
 # Print
 if doPrint:
-    gPad.Print('plots/DsK_ratio.png')
-    gPad.Print('plots/DsK_ratio.pdf')
+    print 'Plotting to file: plots/DsK_ratio_%s.{png,pdf}' % timestamp
+    gPad.Print('plots/DsK_ratio_%s.png' % timestamp)
+    gPad.Print('plots/DsK_ratio_%s.pdf' % timestamp)
 
 # NB: Do not close file, otherwise plot disappears
 # ffile.Close()
