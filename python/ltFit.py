@@ -33,7 +33,8 @@ from datetime import datetime
 import optparse
 usage='Usage: $ %s [options] <ratiofn>' % sys.argv[0]
 description = ''
-description += "<ratiofn> - type of acceptance ratio function to use: flat, linear, exponential (default)."
+description += ('<ratiofn> - type of acceptance ratio function to use:'
+                ' flat, linear, quadratic, and exponential (default).')
 parser = optparse.OptionParser(description=description, usage=usage)
 
 parser.add_option('-s', '--save', action='store_true', default=False,
