@@ -26,7 +26,6 @@ doPrint = options.doPrint
 # Python modules
 import os
 import sys
-from collections import OrderedDict
 from glob import glob
 
 # FIXME: Batch running fails on importing anything but gROOT
@@ -52,19 +51,19 @@ from rootpy.plotting import Hist
 
 
 ## Read from file
-modes = OrderedDict([('dsk',0), ('dspi',1)])
+modes = ['dsk', 'dspi']
 
-trees = (                       # 0 - DsK, 1 - Dsπ
-    TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsK*BsHypo_BDTG.root')),
-    TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsPi*BsHypo_BDTG.root'))
-)
+trees = {
+    'dsk'  : TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsK*BsHypo_BDTG.root')),
+    'dspi' : TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsPi*BsHypo_BDTG.root'))
+}
 
-# trees = (                       # 0 - DsK, 1 - Dsπ
-#     File('data/smalltree-really-new-MC-pre-PID-DsK.root').Get('ftree'),
-#     File('data/smalltree-really-new-MC-pre-PID-DsPi.root').Get('ftree')
-# )
+# trees = {
+#     'dsk'  : File('data/smalltree-really-new-MC-pre-PID-DsK.root').Get('ftree'),
+#     'dspi' : File('data/smalltree-really-new-MC-pre-PID-DsPi.root').Get('ftree')
+# }
 
-histograms = []                 # list of pairs, each element is [hdsk, hdspi]
+histograms = []                 # list of dicts, keys: dsk, dspi
 
 # variables = ('Pt', 'Eta')
 # prettyvars = ('p#T', '#eta')
@@ -111,7 +110,7 @@ for htype in htypes:
             binning = (100, 0.0, 1E3)
         else:
             print 'Unknown variable, weird things will happen.'
-        hpair = []
+        hpair = {}
         for mode in modes:
             # ensure identical binning
             hist = Hist(*binning, name='h' + mode + '_' + htype + '_' + var, type='D')
@@ -128,10 +127,10 @@ for htype in htypes:
                     cut = cut & cuts['trig']
                 else:
                     print 'Unknown permutation of cuts, weird things will happen.'
-            if isinstance(trees[0], TreeChain):
-                hpair.append(trees[modes[mode]].Draw(var, cut, '', hist))
+            if isinstance(trees[mode], TreeChain):
+                hpair[mode] = trees[mode].Draw(var, cut, '', hist)
             else:
-                hpair.append(trees[modes[mode]].Draw('hMom.%s()' % var, cut, '', hist))
+                hpair[mode] = trees[mode].Draw('hMom.%s()' % var, cut, '', hist)
         histograms.append(hpair)
 
 
@@ -151,26 +150,25 @@ legend.SetFillStyle(0)
 legend.SetTextSize(0.035)
 
 # draw distributions side by side
-for idx in enumerate(histograms):
-    canvas.cd(idx[0] % 2 + 1)
-    var = prettyvars[idx[0] % len(variables)]
+for hidx, hpair in enumerate(histograms):
+    canvas.cd(hidx % 2 + 1)
+    var = prettyvars[hidx % len(variables)]
     legend.SetHeader('%s for %s ps' % (var, cuts['timelt1ps'].str))
-    modelist = modes.iteritems() # hack to extract order from OrderedDict
-    for mid, mode in enumerate(modelist):
-        htitle = ' '.join(idx[1][mode[1]].GetName().split('_')[1:])
-        idx[1][mode[1]].SetTitle(htitle + ';%s' % var)
+    for midx, mode in enumerate(modes):
+        htitle = ' '.join(hpair[mode].GetName().split('_')[1:])
+        hpair[mode].SetTitle(htitle + ';%s' % var)
         drawopts = 'hist'
-        if mode[0] == 'dsk':
-            idx[1][mode[1]].SetLineColor(kBlue)
-            legend.AddEntry(idx[1][mode[1]], 'DsK', 'l')
-        if mode[0] == 'dspi':
-            idx[1][mode[1]].SetLineColor(kRed)
-            legend.AddEntry(idx[1][mode[1]], 'Ds#pi', 'l')
-        if mid > 0:
+        if midx > 0:
             drawopts += ' same'
-        idx[1][mode[1]].DrawNormalized(drawopts)
+        if mode == 'dsk':
+            hpair[mode].SetLineColor(kBlue)
+            legend.AddEntry(hpair[mode], 'DsK', 'l')
+        if mode == 'dspi':
+            hpair[mode].SetLineColor(kRed)
+            legend.AddEntry(hpair[mode], 'Ds#pi', 'l')
+        hpair[mode].DrawNormalized(drawopts)
     legend.Draw()
-    if idx[0] % 2 > 0:
+    if hidx % 2 > 0:
         canvas.Update()
         if doPrint:
             canvas.Print(plotfile)
