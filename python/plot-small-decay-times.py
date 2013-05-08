@@ -155,17 +155,20 @@ for idx in enumerate(histograms):
     canvas.cd(idx[0] % 2 + 1)
     var = prettyvars[idx[0] % len(variables)]
     legend.SetHeader('%s for %s ps' % (var, cuts['timelt1ps'].str))
-    for mode in modes.iteritems():
+    modelist = modes.iteritems() # hack to extract order from OrderedDict
+    for mid, mode in enumerate(modelist):
         htitle = ' '.join(idx[1][mode[1]].GetName().split('_')[1:])
         idx[1][mode[1]].SetTitle(htitle + ';%s' % var)
+        drawopts = 'hist'
         if mode[0] == 'dsk':
             idx[1][mode[1]].SetLineColor(kBlue)
-            idx[1][mode[1]].DrawNormalized('hist')
             legend.AddEntry(idx[1][mode[1]], 'DsK', 'l')
         if mode[0] == 'dspi':
             idx[1][mode[1]].SetLineColor(kRed)
-            idx[1][mode[1]].DrawNormalized('hist same')
             legend.AddEntry(idx[1][mode[1]], 'Ds#pi', 'l')
+        if mid > 0:
+            drawopts += ' same'
+        idx[1][mode[1]].DrawNormalized(drawopts)
     legend.Draw()
     if idx[0] % 2 > 0:
         canvas.Update()
