@@ -129,6 +129,8 @@ for htype in htypes:
                     print 'Unknown permutation of cuts, weird things will happen.'
             if isinstance(trees[mode], TreeChain):
                 hpair[mode] = trees[mode].Draw(var, cut, '', hist)
+                # FIXME: TreeChain does some copying of histograms internally
+                hpair[mode].SetName(hist.GetName())
             else:
                 hpair[mode] = trees[mode].Draw('hMom.%s()' % var, cut, '', hist)
         histograms.append(hpair)
