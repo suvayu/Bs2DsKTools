@@ -19,9 +19,12 @@ import argparse
 optparser = argparse.ArgumentParser(description=__doc__)
 optparser.add_argument('-p', '--print', dest='doPrint', action='store_true',
                        help='Print plots to png/pdf files')
+optparser.add_argument('-r', '--reverse', dest='reverse', action='store_true',
+                       help=u'Reverse DsK and Dsπ overlay order'.encode('utf8'))
 optparser.formatter_class = argparse.RawDescriptionHelpFormatter
 options = optparser.parse_args()
 doPrint = options.doPrint
+reverse = options.reverse
 
 # Python modules
 import os
@@ -51,7 +54,10 @@ from rootpy.plotting import Hist
 
 
 ## Read from file
-modes = ['dsk', 'dspi']
+if reverse:
+    modes = ['dspi', 'dsk']
+else:
+    modes = ['dsk', 'dspi']
 
 trees = {
     'dsk'  : TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsK*BsHypo_BDTG.root')),
