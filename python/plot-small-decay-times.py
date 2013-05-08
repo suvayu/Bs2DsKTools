@@ -95,7 +95,7 @@ htypes = [
 for htype in htypes:
     for var in variables:
         if var == 'Pt':
-            binning = (100, 0.0, 20000.0)
+            binning = (100, 0.0, 2E4)
         elif var == 'Eta':
             binning = (100, 1.5, 5.0)
         else:
@@ -134,6 +134,7 @@ if doPrint:
 legend = TLegend(0.65, 0.5, 0.85, 0.65)
 legend.SetLineColor(0)
 legend.SetFillStyle(0)
+legend.SetTextSize(0.035)
 
 # draw distributions side by side
 for idx in enumerate(histograms):
