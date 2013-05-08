@@ -143,8 +143,9 @@ for htype in htypes:
 
 
 ## plot distributions
-canvas = TCanvas('canvas', '', 1600, 500)
-canvas.Divide(2,1)
+nvars = len(variables)
+canvas = TCanvas('canvas', '', 800*nvars, 500)
+canvas.Divide(nvars,1)
 
 # open file
 plotfile = 'plots/timelt1ps_%s.pdf' % '_'.join(variables)
@@ -159,8 +160,8 @@ legend.SetTextSize(0.035)
 
 # draw distributions side by side
 for hidx, hpair in enumerate(histograms):
-    canvas.cd(hidx % 2 + 1)
-    var = prettyvars[hidx % len(variables)]
+    canvas.cd(hidx % nvars + 1)
+    var = prettyvars[hidx % nvars]
     legend.SetHeader('%s for %s ps' % (var, cuts['timelt1ps'].str))
     for midx, mode in enumerate(modes):
         htitle = ' '.join(hpair[mode].GetName().split('_')[1:])
@@ -176,7 +177,7 @@ for hidx, hpair in enumerate(histograms):
             legend.AddEntry(hpair[mode], 'Ds#pi', 'l')
         hpair[mode].DrawNormalized(drawopts)
     legend.Draw()
-    if hidx % 2 > 0:
+    if (hidx + 1) % nvars == 0:
         canvas.Update()
         if doPrint:
             canvas.Print(plotfile)
