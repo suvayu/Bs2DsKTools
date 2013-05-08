@@ -27,6 +27,7 @@ doPrint = options.doPrint
 import os
 import sys
 from collections import OrderedDict
+from glob import glob
 
 # FIXME: Batch running fails on importing anything but gROOT
 # ROOT global variables
@@ -45,6 +46,7 @@ from ROOT import TCanvas, TLegend
 # rootpy modules
 from rootpy.io import File
 from rootpy.tree import Tree
+from rootpy.tree import TreeChain
 from rootpy.tree import Cut
 from rootpy.plotting import Hist
 
@@ -52,34 +54,41 @@ from rootpy.plotting import Hist
 ## Read from file
 modes = OrderedDict([('dsk',0), ('dspi',1)])
 
-# chains = (                       # 0 - DsK, 1 - Dsπ
-#     TreeChain('DecayTree', glob.glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsK*BsHypo_BDTG.root')),
-#     TreeChain('DecayTree', glob.glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsPi*BsHypo_BDTG.root'))
-# )
-
 trees = (                       # 0 - DsK, 1 - Dsπ
-    File('data/smalltree-really-new-MC-pre-PID-DsK.root').Get('ftree'),
-    File('data/smalltree-really-new-MC-pre-PID-DsPi.root').Get('ftree')
+    TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsK*BsHypo_BDTG.root')),
+    TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsPi*BsHypo_BDTG.root'))
 )
+
+# trees = (                       # 0 - DsK, 1 - Dsπ
+#     File('data/smalltree-really-new-MC-pre-PID-DsK.root').Get('ftree'),
+#     File('data/smalltree-really-new-MC-pre-PID-DsPi.root').Get('ftree')
+# )
 
 histograms = []                 # list of pairs, each element is [hdsk, hdspi]
 
-variables = ('Pt', 'Eta')
+# variables = ('Pt', 'Eta')
+# prettyvars = ('p#T', '#eta')
+variables = ['lab1_IPCHI2_OWNPV']
+prettyvars = ['IP #chi^{2}']
 
 cuts = {
     'nocuts'    : Cut(''),
-    'timelt1ps' : Cut('time<1.0'),
-    'dsk'       : Cut('PIDK>10'),
-    'dspi'      : Cut('PIDK<0'),
-    'bdt'       : Cut('BDTG>0.5'),
-    'HLT1'      : Cut('HLT1TrackAllL0TOS > 0'),
-    'HLT22Body' : Cut('HLT2Topo2BodyTOS > 0'),
-    'HLT23Body' : Cut('HLT2Topo3BodyTOS > 0'),
-    'HLT24Body' : Cut('HLT2Topo4BodyTOS > 0')
-    # 'HLT1'      : Cut('lab0_Hlt1TrackAllL0Decision_TOS > 0'),
-    # 'HLT22Body' : Cut('lab0_Hlt2Topo4BodyBBDTDecision_TOS > 0'),
-    # 'HLT23Body' : Cut('lab0_Hlt2Topo3BodyBBDTDecision_TOS > 0'),
-    # 'HLT24Body' : Cut('lab0_Hlt2Topo2BodyBBDTDecision_TOS > 0')
+    # 'timelt1ps' : Cut('time<1.0'), # from small tree
+    # 'dsk'       : Cut('PIDK>10'),
+    # 'dspi'      : Cut('PIDK<0'),
+    # 'bdt'       : Cut('BDTG>0.5'),
+    # 'HLT1'      : Cut('HLT1TrackAllL0TOS > 0'),
+    # 'HLT22Body' : Cut('HLT2Topo2BodyTOS > 0'),
+    # 'HLT23Body' : Cut('HLT2Topo3BodyTOS > 0'),
+    # 'HLT24Body' : Cut('HLT2Topo4BodyTOS > 0')
+    'timelt1ps' : Cut('lab0_TAU<1.0'), # from ntuples directly
+    'dsk'       : Cut('lab1_PIDK>10'),
+    'dspi'      : Cut('lab1_PIDK<0'),
+    'bdt'       : Cut('BDTGResponse_1>0.5'),
+    'HLT1'      : Cut('lab0_Hlt1TrackAllL0Decision_TOS > 0'),
+    'HLT22Body' : Cut('lab0_Hlt2Topo4BodyBBDTDecision_TOS > 0'),
+    'HLT23Body' : Cut('lab0_Hlt2Topo3BodyBBDTDecision_TOS > 0'),
+    'HLT24Body' : Cut('lab0_Hlt2Topo2BodyBBDTDecision_TOS > 0')
 }
 cuts.update(dict(HLT2 = cuts['HLT22Body'] | cuts['HLT23Body'] | cuts['HLT24Body']))
 cuts.update(dict(trig = cuts['HLT1'] & cuts['HLT2']))
@@ -98,6 +107,8 @@ for htype in htypes:
             binning = (100, 0.0, 2E4)
         elif var == 'Eta':
             binning = (100, 1.5, 5.0)
+        elif var == 'lab1_IPCHI2_OWNPV':
+            binning = (100, 0.0, 1E3)
         else:
             print 'Unknown variable, weird things will happen.'
         hpair = []
@@ -117,7 +128,10 @@ for htype in htypes:
                     cut = cut & cuts['trig']
                 else:
                     print 'Unknown permutation of cuts, weird things will happen.'
-            hpair.append(trees[modes[mode]].Draw('hMom.%s()' % var, cut, '', hist))
+            if isinstance(trees[0], TreeChain):
+                hpair.append(trees[modes[mode]].Draw(var, cut, '', hist))
+            else:
+                hpair.append(trees[modes[mode]].Draw('hMom.%s()' % var, cut, '', hist))
         histograms.append(hpair)
 
 
@@ -139,7 +153,7 @@ legend.SetTextSize(0.035)
 # draw distributions side by side
 for idx in enumerate(histograms):
     canvas.cd(idx[0] % 2 + 1)
-    var = variables[idx[0] % len(variables)]
+    var = prettyvars[idx[0] % len(variables)]
     legend.SetHeader('%s for %s ps' % (var, cuts['timelt1ps'].str))
     for mode in modes.iteritems():
         htitle = ' '.join(idx[1][mode[1]].GetName().split('_')[1:])
