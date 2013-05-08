@@ -52,6 +52,9 @@ from rootpy.tree import TreeChain
 from rootpy.tree import Cut
 from rootpy.plotting import Hist
 
+# my libs
+from helpers import *
+
 
 ## Read from file
 if reverse:
@@ -71,10 +74,10 @@ trees = {
 
 histograms = []                 # list of dicts, keys: dsk, dspi
 
-# variables = ('Pt', 'Eta')
-# prettyvars = ('p#T', '#eta')
+# variables = ('hMom.Pt()', 'hMom.Eta()')
+# prettyvars = ('h p#T', 'h #eta')
 variables = ['lab1_IPCHI2_OWNPV']
-prettyvars = ['IP #chi^{2}']
+prettyvars = ['h IP #chi^{2}']
 
 cuts = {
     'nocuts'    : Cut(''),
@@ -133,12 +136,10 @@ for htype in htypes:
                     cut = cut & cuts['trig']
                 else:
                     print 'Unknown permutation of cuts, weird things will happen.'
+            hpair[mode] = trees[mode].Draw(var, cut, '', hist)
+            # FIXME: TreeChain does some copying of histograms internally
             if isinstance(trees[mode], TreeChain):
-                hpair[mode] = trees[mode].Draw(var, cut, '', hist)
-                # FIXME: TreeChain does some copying of histograms internally
                 hpair[mode].SetName(hist.GetName())
-            else:
-                hpair[mode] = trees[mode].Draw('hMom.%s()' % var, cut, '', hist)
         histograms.append(hpair)
 
 
@@ -153,7 +154,7 @@ if doPrint:
     canvas.Print(plotfile + '[')
 
 # create legend
-legend = TLegend(0.65, 0.5, 0.85, 0.65)
+legend = TLegend(0.6, 0.5, 0.85, 0.65)
 legend.SetLineColor(0)
 legend.SetFillStyle(0)
 legend.SetTextSize(0.035)
@@ -162,7 +163,7 @@ legend.SetTextSize(0.035)
 for hidx, hpair in enumerate(histograms):
     canvas.cd(hidx % nvars + 1)
     var = prettyvars[hidx % nvars]
-    legend.SetHeader('%s for %s ps' % (var, cuts['timelt1ps'].str))
+    legend.SetHeader('%s (%s ps)' % (var, sanitise_str(cuts['timelt1ps'].str)))
     for midx, mode in enumerate(modes):
         htitle = ' '.join(hpair[mode].GetName().split('_')[1:])
         hpair[mode].SetTitle(htitle + ';%s' % var)
