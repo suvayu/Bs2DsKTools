@@ -111,18 +111,19 @@ htypes = [
 ## pT and η distributions for different cuts
 for htype in htypes:
     for var in variables:
-        if var == 'Pt':
+        if var.lower().find('pt') >= 0:
             binning = (100, 0.0, 2E4)
-        elif var == 'Eta':
+        elif var.lower().find('eta') >= 0:
             binning = (100, 1.5, 5.0)
-        elif var == 'lab1_IPCHI2_OWNPV':
+        elif var.lower().find('ipchi2') >= 0:
             binning = (100, 0.0, 1E3)
         else:
             print 'Unknown variable, weird things will happen.'
         hpair = {}
         for mode in modes:
             # ensure identical binning
-            hist = Hist(*binning, name='h' + mode + '_' + htype + '_' + var, type='D')
+            hist = Hist(*binning, name='h' + mode + '_' + htype + '_'
+                        + sanitise_str_src(var), type='D')
             cut = cuts['timelt1ps']
             cut_tokens = htype.split('_')
             for token in cut_tokens:
@@ -149,7 +150,7 @@ canvas = TCanvas('canvas', '', 800*nvars, 500)
 canvas.Divide(nvars,1)
 
 # open file
-plotfile = 'plots/timelt1ps_%s.pdf' % '_'.join(variables)
+plotfile = 'plots/timelt1ps_%s.pdf' % sanitise_str_src('_'.join(variables))
 if doPrint:
     canvas.Print(plotfile + '[')
 
