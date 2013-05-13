@@ -62,41 +62,41 @@ if reverse:
 else:
     modes = ['dsk', 'dspi']
 
-trees = {
-    'dsk'  : TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsK_*BsHypo_BDTG.root')),
-    'dspi' : TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsPi_*BsHypo_BDTG.root'))
-}
-
 # trees = {
-#     'dsk'  : File('data/smalltree-really-new-MC-pre-PID-DsK.root').Get('ftree'),
-#     'dspi' : File('data/smalltree-really-new-MC-pre-PID-DsPi.root').Get('ftree')
+#     'dsk'  : TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsK_*BsHypo_BDTG.root')),
+#     'dspi' : TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsPi_*BsHypo_BDTG.root'))
 # }
+
+trees = {
+    'dsk'  : File('data/smalltree-really-new-MC-pre-PID-DsK.root').Get('ftree'),
+    'dspi' : File('data/smalltree-really-new-MC-pre-PID-DsPi.root').Get('ftree')
+}
 
 histograms = []                 # list of dicts, keys: dsk, dspi
 
-# variables = ('hMom.Pt()', 'hMom.Eta()')
-# prettyvars = ('h p#T', 'h #eta')
-variables = ['lab1_IPCHI2_OWNPV']
-prettyvars = ['h IP #chi^{2}']
+variables = ('hMom.Pt()', 'hMom.Eta()', 'hIPchi2')
+prettyvars = ('h p#T', 'h #eta', 'h IP #chi^{2}')
+# variables = ['lab1_IPCHI2_OWNPV']
+# prettyvars = ['h IP #chi^{2}']
 
 cuts = {
     'nocuts'    : Cut(''),
-    # 'timelt1ps' : Cut('time<1.0'), # from small tree
-    # 'dsk'       : Cut('PIDK>10'),
-    # 'dspi'      : Cut('PIDK<0'),
-    # 'bdt'       : Cut('BDTG>0.5'),
-    # 'HLT1'      : Cut('HLT1TrackAllL0TOS > 0'),
-    # 'HLT22Body' : Cut('HLT2Topo2BodyTOS > 0'),
-    # 'HLT23Body' : Cut('HLT2Topo3BodyTOS > 0'),
-    # 'HLT24Body' : Cut('HLT2Topo4BodyTOS > 0')
-    'timelt1ps' : Cut('lab0_TAU<1.0'), # from ntuples directly
-    'dsk'       : Cut('lab1_PIDK>10'),
-    'dspi'      : Cut('lab1_PIDK<0'),
-    'bdt'       : Cut('BDTGResponse_1>0.5'),
-    'HLT1'      : Cut('lab0_Hlt1TrackAllL0Decision_TOS > 0'),
-    'HLT22Body' : Cut('lab0_Hlt2Topo4BodyBBDTDecision_TOS > 0'),
-    'HLT23Body' : Cut('lab0_Hlt2Topo3BodyBBDTDecision_TOS > 0'),
-    'HLT24Body' : Cut('lab0_Hlt2Topo2BodyBBDTDecision_TOS > 0')
+    'timelt1ps' : Cut('time<1.0'), # from small tree
+    'dsk'       : Cut('PIDK>10'),
+    'dspi'      : Cut('PIDK<0'),
+    'bdt'       : Cut('BDTG>0.5'),
+    'HLT1'      : Cut('HLT1TrackAllL0TOS > 0'),
+    'HLT22Body' : Cut('HLT2Topo2BodyTOS > 0'),
+    'HLT23Body' : Cut('HLT2Topo3BodyTOS > 0'),
+    'HLT24Body' : Cut('HLT2Topo4BodyTOS > 0')
+    # 'timelt1ps' : Cut('lab0_TAU<1.0'), # from ntuples directly
+    # 'dsk'       : Cut('lab1_PIDK>10'),
+    # 'dspi'      : Cut('lab1_PIDK<0'),
+    # 'bdt'       : Cut('BDTGResponse_1>0.5'),
+    # 'HLT1'      : Cut('lab0_Hlt1TrackAllL0Decision_TOS > 0'),
+    # 'HLT22Body' : Cut('lab0_Hlt2Topo4BodyBBDTDecision_TOS > 0'),
+    # 'HLT23Body' : Cut('lab0_Hlt2Topo3BodyBBDTDecision_TOS > 0'),
+    # 'HLT24Body' : Cut('lab0_Hlt2Topo2BodyBBDTDecision_TOS > 0')
 }
 cuts.update(dict(HLT2 = cuts['HLT22Body'] | cuts['HLT23Body'] | cuts['HLT24Body']))
 cuts.update(dict(trig = cuts['HLT1'] & cuts['HLT2']))
