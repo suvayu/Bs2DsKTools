@@ -63,8 +63,8 @@ else:
     modes = ['dsk', 'dspi']
 
 trees = {
-    'dsk'  : TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsK*BsHypo_BDTG.root')),
-    'dspi' : TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsPi*BsHypo_BDTG.root'))
+    'dsk'  : TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsK_*BsHypo_BDTG.root')),
+    'dspi' : TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsPi_*BsHypo_BDTG.root'))
 }
 
 # trees = {
