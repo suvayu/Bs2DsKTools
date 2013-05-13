@@ -44,8 +44,6 @@ public :
   virtual void  Loop(TTree &);
   virtual void  Loop(TTree &, TEntryList &, bool mode);
 
-protected:
-
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   Int_t           fCurrent; //!current Tree number in a TChain
 
@@ -640,6 +638,8 @@ protected:
   Int_t           nRich1Hits;
   Int_t           nRich2Hits;
   Float_t         BDTGResponse_1;
+
+protected:
 
   /**
    * Declaration of branches
