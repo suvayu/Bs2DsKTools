@@ -188,6 +188,7 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
    TVector3 OWNPV(0,0,0), ENDVX(0,0,0);
    double wt(0.0), truewt(0.0), time(0.0), dt(0.0), truetime(0.0);
    double BDTG(0.0), PIDK(0.0);
+   double hIPchi2(0.0);
 
    ftree.Branch("Bsmass" , &lab0_MM);
    ftree.Branch("hID"    , &lab1_TRUEID);
@@ -203,6 +204,7 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
 
    ftree.Branch("BDTG", &BDTG);
    ftree.Branch("PIDK", &PIDK);
+   ftree.Branch("hIPchi2", &hIPchi2);
 
    ftree.Branch("HLT1TrackAllL0TOS", &lab0_Hlt1TrackAllL0Decision_TOS);
    ftree.Branch("HLT2Topo4BodyTOS" , &lab0_Hlt2Topo4BodyBBDTDecision_TOS);
@@ -258,6 +260,7 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
 
        BDTG = BDTGResponse_1;
        PIDK = lab1_PIDK;
+       hIPchi2 = lab1_IPCHI2_OWNPV;
 
        BsMom.SetXYZM(lab0_PX, lab0_PY, lab0_PZ, lab0_MM);
        hMom .SetXYZM(lab1_PX, lab1_PY, lab1_PZ, lab1_M);
