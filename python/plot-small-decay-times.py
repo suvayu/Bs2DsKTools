@@ -120,6 +120,7 @@ for htype in htypes:
         else:
             print 'Unknown variable, weird things will happen.'
         hpair = {}
+        max_y_n = 0             # max Y after normalisation
         for mode in modes:
             # ensure identical binning
             hist = Hist(*binning, name='h' + mode + '_' + htype + '_'
@@ -141,6 +142,12 @@ for htype in htypes:
             # FIXME: TreeChain does some copying of histograms internally
             if isinstance(trees[mode], TreeChain):
                 hpair[mode].SetName(hist.GetName())
+            # determine max Y for normalised histograms
+            if max_y_n < hpair[mode].GetMaximum()/hpair[mode].Integral():
+                max_y_n = hpair[mode].GetMaximum() / hpair[mode].Integral()
+        # set max Y so that histograms fits in pad
+        for mode in modes:
+            hpair[mode].SetMaximum(1.1 * max_y_n * hpair[mode].Integral())
         histograms.append(hpair)
 
 
