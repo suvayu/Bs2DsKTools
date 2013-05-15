@@ -217,7 +217,12 @@ if doPrint:
     canvas.Print(plotfile + '[')
 
 # draw profile plots
+legend.SetX1NDC(0.4)
+legend.SetY1NDC(0.7)
+legend.SetX2NDC(0.65)
+legend.SetY2NDC(0.85)
 xvar, yvar = prettyvars[0], prettyvars[-1] # FIXME: sensitive to change in order
+
 for hidx, hprof_pair in enumerate(hprofiles):
     legend.SetHeader('%s vs %s (%s ps)' % (xvar, yvar,
                                            sanitise_str(cuts['timelt1ps'].str)))
