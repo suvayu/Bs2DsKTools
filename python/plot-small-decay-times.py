@@ -242,7 +242,7 @@ for hidx, hprof_pair in enumerate(hprofiles):
             hprof_pair[mode].SetLineColor(kRed)
             hprof_pair[mode].SetMarkerColor(kRed)
             legend.AddEntry(hprof_pair[mode], 'Ds#pi', 'pe')
-        hprof_pair[mode].DrawNormalized(drawopts)
+        hprof_pair[mode].Draw(drawopts)
     legend.Draw()
     if doPrint:
         canvas.Print(plotfile)
