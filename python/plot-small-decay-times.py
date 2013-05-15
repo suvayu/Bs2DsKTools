@@ -40,7 +40,7 @@ from ROOT import gPad, gDirectory
 
 # ROOT colours and styles
 from ROOT import kGreen, kRed, kBlack, kBlue, kAzure, kYellow, kCyan
-from ROOT import kPlus, kFullDotMedium, kFullDotSmall
+from ROOT import kDot, kPlus, kFullDotMedium, kFullDotSmall
 
 # ROOT classes
 from ROOT import TCanvas, TLegend
@@ -50,7 +50,7 @@ from rootpy.io import File
 from rootpy.tree import Tree
 from rootpy.tree import TreeChain
 from rootpy.tree import Cut
-from rootpy.plotting import Hist
+from rootpy.plotting import Hist, Profile
 
 # my libs
 from helpers import *
@@ -72,10 +72,8 @@ trees = {
     'dspi' : File('data/smalltree-really-new-MC-pre-PID-DsPi.root').Get('ftree')
 }
 
-histograms = []                 # list of dicts, keys: dsk, dspi
-
 variables = ('hMom.Pt()', 'hMom.Eta()', 'hIPchi2')
-prettyvars = ('h p#T', 'h #eta', 'h IP #chi^{2}')
+prettyvars = ('h p_{T}', 'h #eta', 'h IP #chi^{2}')
 # variables = ['lab1_IPCHI2_OWNPV']
 # prettyvars = ['h IP #chi^{2}']
 
@@ -107,6 +105,9 @@ htypes = [
     'pid_bdt_trig'                     # all
 ]
 
+histograms = []                 # list of dicts, keys: dsk, dspi
+hprofiles = []                  # list of dicts, keys: dsk, dspi
+
 
 ## pT and η distributions for different cuts
 for htype in htypes:
@@ -119,12 +120,15 @@ for htype in htypes:
             binning = (100, 0.0, 1E3)
         else:
             print 'Unknown variable, weird things will happen.'
-        hpair = {}
+        hpair, hprof_pair = {}, {}
         max_y_n = 0             # max Y after normalisation
         for mode in modes:
             # ensure identical binning
             hist = Hist(*binning, name='h' + mode + '_' + htype + '_'
                         + sanitise_str_src(var), type='D')
+            if var.lower().find('pt') >= 0:
+                hprof = Profile(*binning, name='h' + mode + '_prof_' + htype +
+                                '_' + sanitise_str_src(var) + '_IPchi2')
             cut = cuts['timelt1ps']
             cut_tokens = htype.split('_')
             for token in cut_tokens:
@@ -139,6 +143,11 @@ for htype in htypes:
                 else:
                     print 'Unknown permutation of cuts, weird things will happen.'
             hpair[mode] = trees[mode].Draw(var, cut, '', hist)
+            if var.lower().find('pt') >= 0:
+                hprof_pair[mode] = trees[mode].Draw(var + ':' + variables[-1],
+                                                    cut, 'prof', hprof)
+                # hprof.Print()
+                # hprof_pair[mode].Print()
             # FIXME: TreeChain does some copying of histograms internally
             if isinstance(trees[mode], TreeChain):
                 hpair[mode].SetName(hist.GetName())
@@ -149,6 +158,8 @@ for htype in htypes:
         for mode in modes:
             hpair[mode].SetMaximum(1.1 * max_y_n * hpair[mode].Integral())
         histograms.append(hpair)
+        if var.lower().find('pt') >= 0:
+            hprofiles.append(hprof_pair)
 
 
 ## plot distributions
@@ -191,6 +202,46 @@ for hidx, hpair in enumerate(histograms):
         if doPrint:
             canvas.Print(plotfile)
     legend.Clear()              # necessary for legend on both pads
+
+# close file
+if doPrint:
+    canvas.Print(plotfile + ']')
+legend.Clear()
+
+## plot profiles
+canvas = TCanvas('canvas', '', 800, 500)
+
+# open file
+plotfile = 'plots/timelt1ps_prof_%s.pdf' % sanitise_str_src('_'.join([variables[0], variables[-1]]))
+if doPrint:
+    canvas.Print(plotfile + '[')
+
+# draw profile plots
+xvar, yvar = prettyvars[0], prettyvars[-1] # FIXME: sensitive to change in order
+for hidx, hprof_pair in enumerate(hprofiles):
+    legend.SetHeader('%s vs %s (%s ps)' % (xvar, yvar,
+                                           sanitise_str(cuts['timelt1ps'].str)))
+    for midx, mode in enumerate(modes):
+        # print mode, hprof_pair[mode]
+        htitle = ' '.join(hprof_pair[mode].GetName().split('_')[1:])
+        hprof_pair[mode].SetTitle(htitle + ';%s;%s' % (xvar, yvar))
+        hprof_pair[mode].SetMarkerStyle(kPlus)
+        drawopts = 'e1'
+        if midx > 0:
+            drawopts += ' same'
+        if mode == 'dsk':
+            hprof_pair[mode].SetLineColor(kBlue)
+            hprof_pair[mode].SetMarkerColor(kBlue)
+            legend.AddEntry(hprof_pair[mode], 'DsK', 'pe')
+        if mode == 'dspi':
+            hprof_pair[mode].SetLineColor(kRed)
+            hprof_pair[mode].SetMarkerColor(kRed)
+            legend.AddEntry(hprof_pair[mode], 'Ds#pi', 'pe')
+        hprof_pair[mode].DrawNormalized(drawopts)
+    legend.Draw()
+    if doPrint:
+        canvas.Print(plotfile)
+    legend.Clear()              # necessary to clear old legends
 
 # close file
 if doPrint:
