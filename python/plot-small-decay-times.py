@@ -142,12 +142,12 @@ for htype in htypes:
                     cut = cut & cuts['trig']
                 else:
                     print 'Unknown permutation of cuts, weird things will happen.'
-            hpair[mode] = trees[mode].Draw(var, cut, '', hist)
+            trees[mode].Draw(var, cut, '', hist)
+            hpair[mode] = hist
             if var.lower().find('pt') >= 0:
-                hprof_pair[mode] = trees[mode].Draw(var + ':' + variables[-1],
-                                                    cut, 'prof', hprof)
-                # hprof.Print()
-                # hprof_pair[mode].Print()
+                trees[mode].Draw(var + ':' + variables[-1],
+                                 cut, 'prof', hprof)
+                hprof_pair[mode] = hprof
             # FIXME: TreeChain does some copying of histograms internally
             if isinstance(trees[mode], TreeChain):
                 hpair[mode].SetName(hist.GetName())
