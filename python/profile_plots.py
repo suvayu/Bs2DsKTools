@@ -71,13 +71,6 @@ plots = {
         'xname': '1/p_{T}',
         'yname': 'IP #chi^{2}'
     },
-    'ipt_pid' : {
-        'expr' : '1/hMom.Pt():PIDK',
-        'xbin' : (100, 0, 2.5E-3),
-        'ybin' : (100, -50, 50),
-        'xname': '1/p_{T}',
-        'yname': 'PIDK'
-    }
 }
 
 # profile plots
