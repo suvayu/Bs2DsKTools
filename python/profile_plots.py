@@ -25,6 +25,7 @@ from glob import glob
 
 # rootpy modules
 from rootpy import QROOT
+QROOT.gROOT.SetBatch(True)
 from rootpy.io import File
 from rootpy.tree import Tree, TreeChain
 from rootpy.plotting import Hist, Hist2D, Profile #, Legend
@@ -35,13 +36,13 @@ modes = {
     'dsk' : {
         'name' : 'DsK',
         'tree' : File('data/smalltree-really-new-MC-pre-PID-DsK.root').Get('ftree'),
-        'cuts' : 10,
+        'cuts' : 10,            # pid cut
         'cols' : QROOT.kBlue
     },
     'dspi' : {
         'name' : 'Ds#pi',
         'tree' : File('data/smalltree-really-new-MC-pre-PID-DsPi.root').Get('ftree'),
-        'cuts' : 0,
+        'cuts' : 0,             # pid cut
         'cols' : QROOT.kRed
     }
 }
@@ -107,17 +108,31 @@ legend.SetTextSize(0.035)
 # pid cut axes
 axes = {}
 for plot in plots:
+    if plots[plot]['expr'].find('PIDK') < 0:
+        continue
     axes[plot] = {}
     for mode in modes:
-        axes[plot][mode] = QROOT.TGaxis(plots[plot]['xbin'][1], modes[mode]['cuts'],
-                                        plots[plot]['xbin'][2], modes[mode]['cuts'],
-                                        plots[plot]['xbin'][1], plots[plot]['xbin'][2], 0)
-        axes[plot][mode].SetLineColor(modes[mode]['cols'])
+        if plots[plot]['expr'].find(':PIDK') > 0: # PIDK on Y-axis
+            axes[plot][mode] = QROOT.TGaxis(plots[plot]['xbin'][1],
+                                            modes[mode]['cuts'],
+                                            plots[plot]['xbin'][2],
+                                            modes[mode]['cuts'],
+                                            plots[plot]['xbin'][1],
+                                            plots[plot]['xbin'][2], 0)
+            axes[plot][mode].SetLineColor(modes[mode]['cols'])
+        elif plots[plot]['expr'].find('PIDK:') >= 0: # PIDK on X-axis
+            axes[plot][mode] = QROOT.TGaxis(modes[mode]['cuts'],
+                                            plots[plot]['ybin'][1],
+                                            modes[mode]['cuts'],
+                                            plots[plot]['ybin'][2],
+                                            plots[plot]['ybin'][1],
+                                            plots[plot]['ybin'][2], 0)
+            axes[plot][mode].SetLineColor(modes[mode]['cols'])
 
 # draw plots
 canvas = QROOT.TCanvas('canvas', '', 800, 500)
 if doPrint:
-    plotfile = 'plots/timelt1ps_profile_%s.pdf' % 'pT_IPchi2_PIDK' # sanitise_str_src('_'.join(plots))
+    plotfile = 'plots/timelt1ps_profile_%s.pdf' % 'pT_IPchi2_PIDK'
     canvas.Print(plotfile + '[')
 
 for plot in plots:
@@ -127,6 +142,9 @@ for plot in plots:
         if midx > 0:
             drawopts += ' sames'
         hprofiles[plot][mode].Draw(drawopts)
+        if (plots[plot]['expr'].find(':PIDK') > 0
+            or plots[plot]['expr'].find('PIDK:') >= 0):
+            axes[plot][mode].Draw()
         legend.AddEntry(hprofiles[plot][mode], modes[mode]['name'], 'pel')
         stats[mode] = hprofiles[plot][mode].FindObject('stats')
         if midx > 0:
