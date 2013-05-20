@@ -46,40 +46,55 @@ modes = {
     }
 }
 
-variables = {
-    'pt' : {
-        'expr' : 'hMom.Pt()',
-        'binn' : (100, 0, 4E4),
-        'name' : 'p_{T} (MeV/c)',
+## Note there are a few selection cuts in the variables
+# pT < 500, hIPchi2 < 4
+plots = {
+    'pt_pid' : {
+        'expr' : 'hMom.Pt():PIDK',
+        'xbin' : (100, 0, 4E4),
+        'ybin' : (100, -50, 50),
+        'xname': 'p_{T} (MeV/c)',
+        'yname': 'PIDK'
     },
-    'ip' : {
-        'expr' : 'hIPchi2',
-        'binn' : (100, 0, 8E3),
-        'name' : 'IP #chi^{2}',
+    'ip_pid' : {
+        'expr' : 'hIPchi2:PIDK',
+        'xbin' : (100, 0, 8E3),
+        'ybin' : (100, -50, 50),
+        'xname': 'IP #chi^{2}',
+        'yname': 'PIDK'
     },
-    # 'pid' : {
-    #     'expr' : 'PIDK',
-    #     'binn' : (100, -50, 50),
-    #     'name' : 'PIDK',
-    # }
+    'ipt_ip' : {
+        'expr' : '1/hMom.Pt():hIPchi2',
+        'xbin' : (100, 0, 2.5E-3),
+        'ybin' : (100, 0, 8E2),
+        'xname': '1/p_{T}',
+        'yname': 'IP #chi^{2}'
+    },
+    'ipt_pid' : {
+        'expr' : '1/hMom.Pt():PIDK',
+        'xbin' : (100, 0, 2.5E-3),
+        'ybin' : (100, -50, 50),
+        'xname': '1/p_{T}',
+        'yname': 'PIDK'
+    }
 }
 
 # profile plots
 hprofiles = {}
-for var in variables:
-    hprofiles[var] = {}
+for plot in plots:
+    hprofiles[plot] = {}
     for mode in modes:
-        hname='hprof_%s_%s' % (var, mode)
-        htitle='Profile plot of PIDK vs {0};{0};PIDK'.format(variables[var]['name'])
-        hprofiles[var][mode] = Profile(*variables[var]['binn'], name = hname,
-                                       title = htitle,
-                                       markerstyle = QROOT.kPlus,
-                                       markercolor = modes[mode]['cols'],
-                                       linecolor = modes[mode]['cols'])
-        hprofiles[var][mode].SetMaximum(50)
-        hprofiles[var][mode].SetMinimum(-50)
-        modes[mode]['tree'].Draw('%s:PIDK' % variables[var]['expr'], 'time<1',
-                                 'prof', hprofiles[var][mode])
+        hname='hprof_%s_%s' % (plot, mode)
+        htitle='Profile plot of {1} vs {0};{0};{1}'.format(plots[plot]['xname'], plots[plot]['yname'])
+        hprofiles[plot][mode] = Profile(*plots[plot]['xbin'], name = hname,
+                                        title = htitle,
+                                        markerstyle = QROOT.kPlus,
+                                        markercolor = modes[mode]['cols'],
+                                        linecolor = modes[mode]['cols'])
+        hprofiles[plot][mode].SetMaximum(plots[plot]['ybin'][2])
+        hprofiles[plot][mode].SetMinimum(plots[plot]['ybin'][1])
+        modes[mode]['tree'].Draw(plots[plot]['expr'], 'time<1',
+                                 'prof', hprofiles[plot][mode])
 
 
 # legend
@@ -91,30 +106,29 @@ legend.SetTextSize(0.035)
 
 # pid cut axes
 axes = {}
-for var in variables:
-    axes[var] = {}
+for plot in plots:
+    axes[plot] = {}
     for mode in modes:
-        axes[var][mode] = QROOT.TGaxis(variables[var]['binn'][1], modes[mode]['cuts'],
-                                       variables[var]['binn'][2], modes[mode]['cuts'],
-                                       variables[var]['binn'][1], variables[var]['binn'][2], 0)
-        axes[var][mode].SetLineColor(modes[mode]['cols'])
+        axes[plot][mode] = QROOT.TGaxis(plots[plot]['xbin'][1], modes[mode]['cuts'],
+                                        plots[plot]['xbin'][2], modes[mode]['cuts'],
+                                        plots[plot]['xbin'][1], plots[plot]['xbin'][2], 0)
+        axes[plot][mode].SetLineColor(modes[mode]['cols'])
 
 # draw plots
 canvas = QROOT.TCanvas('canvas', '', 800, 500)
 if doPrint:
-    plotfile = 'plots/timelt1ps_profile_%s.pdf' % 'pT_IPchi2_PIDK' # sanitise_str_src('_'.join(variables))
+    plotfile = 'plots/timelt1ps_profile_%s.pdf' % 'pT_IPchi2_PIDK' # sanitise_str_src('_'.join(plots))
     canvas.Print(plotfile + '[')
 
-for var in variables:
+for plot in plots:
     stats = {}
     for midx, mode in enumerate(modes):
         drawopts = 'e1'
         if midx > 0:
             drawopts += ' sames'
-        hprofiles[var][mode].Draw(drawopts)
-        axes[var][mode].Draw()
-        legend.AddEntry(hprofiles[var][mode], modes[mode]['name'], 'pel')
-        stats[mode] = hprofiles[var][mode].FindObject('stats')
+        hprofiles[plot][mode].Draw(drawopts)
+        legend.AddEntry(hprofiles[plot][mode], modes[mode]['name'], 'pel')
+        stats[mode] = hprofiles[plot][mode].FindObject('stats')
         if midx > 0:
             stats[mode].SetY1NDC(y1)
             stats[mode].SetY2NDC(y2)
