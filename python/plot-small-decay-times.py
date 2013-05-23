@@ -76,8 +76,8 @@ trees = {
     'dspi' : files['dspi'].Get('ftree')
 }
 
-variables = ('hMom.Pt()', 'hMom.Eta()', 'hIPchi2')
-prettyvars = ('h p_{T}', 'h #eta', 'h IP #chi^{2}')
+variables = ('hMom.Pt()', 'hMom.Eta()', 'hIPchi2', 'time')
+prettyvars = ('h p_{T}', 'h #eta', 'h IP #chi^{2}', 'decay time')
 # variables = ['lab1_IPCHI2_OWNPV']
 # prettyvars = ['h IP #chi^{2}']
 
@@ -122,6 +122,8 @@ for htype in htypes:
             binning = (100, 1.5, 5.0)
         elif var.lower().find('ipchi2') >= 0:
             binning = (100, 0.0, 1E3)
+        elif var.lower().find('time') >= 0:
+            binning = (100, 0.0, 1.0)
         else:
             print 'Unknown variable, weird things will happen.'
         hpair, hprof_pair = {}, {}
@@ -216,7 +218,8 @@ legend.Clear()
 canvas = TCanvas('canvas', '', 800, 500)
 
 # open file
-plotfile = 'plots/timelt1ps_prof_%s.pdf' % sanitise_str_src('_'.join([variables[0], variables[-1]]))
+# FIXME: sensitive to change in order
+plotfile = 'plots/timelt1ps_prof_%s.pdf' % sanitise_str_src('_'.join([variables[0], variables[2]]))
 if doPrint:
     canvas.Print(plotfile + '[')
 
@@ -225,7 +228,7 @@ legend.SetX1NDC(0.4)
 legend.SetY1NDC(0.7)
 legend.SetX2NDC(0.65)
 legend.SetY2NDC(0.85)
-xvar, yvar = prettyvars[0], prettyvars[-1] # FIXME: sensitive to change in order
+xvar, yvar = prettyvars[0], prettyvars[2] # FIXME: sensitive to change in order
 
 for hidx, hprof_pair in enumerate(hprofiles):
     legend.SetHeader('%s vs %s (%s ps)' % (xvar, yvar,
