@@ -47,9 +47,13 @@ from rootpy.plotting import Hist
 ## Read from file
 modes = {0:'dsk', 1:'dspi'}
 
+files = (                       # 0 - DsK, 1 - Dsπ
+    File('data/smalltree-really-new-MC-pre-PID-DsK.root'),
+    File('data/smalltree-really-new-MC-pre-PID-DsPi.root')
+)
 trees = (                       # 0 - DsK, 1 - Dsπ
-    File('data/smalltree-really-new-MC-pre-PID-DsK.root').Get('ftree'),
-    File('data/smalltree-really-new-MC-pre-PID-DsPi.root').Get('ftree')
+    files[0].Get('ftree'),
+    files[1].Get('ftree')
 )
 
 histograms = ([], [])           # 0 - DsK, 1 - Dsπ

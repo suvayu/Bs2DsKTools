@@ -67,9 +67,13 @@ else:
 #     'dspi' : TreeChain('DecayTree', glob('../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsPi_*BsHypo_BDTG.root'))
 # }
 
+files = {
+    'dsk'  : File('data/smalltree-really-new-MC-pre-PID-DsK.root'),
+    'dspi' : File('data/smalltree-really-new-MC-pre-PID-DsPi.root')
+}
 trees = {
-    'dsk'  : File('data/smalltree-really-new-MC-pre-PID-DsK.root').Get('ftree'),
-    'dspi' : File('data/smalltree-really-new-MC-pre-PID-DsPi.root').Get('ftree')
+    'dsk'  : files['dsk'].Get('ftree'),
+    'dspi' : files['dspi'].Get('ftree')
 }
 
 variables = ('hMom.Pt()', 'hMom.Eta()', 'hIPchi2')
