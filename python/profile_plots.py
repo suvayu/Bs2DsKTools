@@ -64,6 +64,13 @@ plots = {
         'xname': 'IP #chi^{2}',
         'yname': 'PIDK'
     },
+    'pt_ip' : {
+        'expr' : 'hMom.Pt():hIPchi2',
+        'xbin' : (100, 0, 4E4),
+        'ybin' : (100, 0, 1E3),
+        'xname': 'p_{T} (MeV/c)',
+        'yname': 'IP #chi^{2}'
+    },
     'ipt_ip' : {
         'expr' : '1/hMom.Pt():hIPchi2',
         'xbin' : (100, 0, 2.5E-3),
