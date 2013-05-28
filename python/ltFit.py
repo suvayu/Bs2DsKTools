@@ -135,18 +135,17 @@ for var in tlist:
 cut = '(%s > 0) && (%s > 0 || %s > 0 || %s > 0) ' % (
     tlist[0], tlist[1], tlist[2], tlist[3])
 cut += '&& BDTG > 0.5 '
-cut += '&& PIDK %s '
 
 # Get dataset: DsPi and DsK
 time.setBins(150)
 dsetlist = []
-for mode, pidcut in [ ('DsPi', '< 0') , ('DsK', '> 10') ]:
+for mode, pidcut in [ ('DsPi', 'PIDK < 0') , ('DsK', 'PIDK > 10') ]:
     # Get tree
     rfile = get_file('data/smalltree-really-new-MC-pre-PID-%s.root' % mode, 'read')
     ftree = get_object('ftree', rfile)
     print 'Reading from file: %s' % rfile.GetName()
 
-    cutstr = cut % pidcut
+    cutstr = cut + ' && ' + pidcut
     pidVar = RooRealVar('PIDK', 'PIDK', -200, 200)
     BDTVar = RooRealVar('BDTG', 'BDTG', -1, 1)
 
