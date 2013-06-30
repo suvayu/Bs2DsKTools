@@ -25,7 +25,8 @@ from glob import glob
 
 # rootpy modules
 from rootpy import QROOT
-QROOT.gROOT.SetBatch(True)
+if doPrint:
+    QROOT.gROOT.SetBatch(True)
 from rootpy.io import File
 from rootpy.tree import Tree, TreeChain
 from rootpy.plotting import Hist, Hist2D, Profile #, Legend
