@@ -112,7 +112,7 @@ def get_toy_dataset(varargset, PDF=None):
         raise TypeError('PDF should inherit from RooAbsPdf.')
 
 
-def get_dataset(varargset, ftree, cut='', *cutVars):
+def get_dataset(varargset, ftree, cut='', cutVars=[]):
     """Return a dataset.
 
     Return a dataset from the ntuple `ftree'. Apply a selection cut

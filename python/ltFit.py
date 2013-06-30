@@ -146,12 +146,12 @@ for mode, pidcut in [ ('DsPi', 'PIDK < 0') , ('DsK', 'PIDK > 10') ]:
     print 'Reading from file: %s' % rfile.GetName()
 
     cutstr = cut + ' && ' + pidcut
-    pidVar = RooRealVar('PIDK', 'PIDK', -200, 200)
-    BDTVar = RooRealVar('BDTG', 'BDTG', -1, 1)
+    cutVars = triggerVars[:]
+    cutVars += [RooRealVar('PIDK', 'PIDK', -200, 200)]
+    cutVars += [RooRealVar('BDTG', 'BDTG', -1, 1)]
 
     try:
-        dataset = get_dataset(RooArgSet(time), ftree, cutstr, pidVar,
-                              BDTVar, *triggerVars)
+        dataset = get_dataset(RooArgSet(time), ftree, cutstr, cutVars)
         dataset.SetName('%s_%s' % (dataset.GetName(), mode))
         dsetlist += [dataset]
     except TypeError, IOError:
