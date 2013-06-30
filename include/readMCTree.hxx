@@ -615,6 +615,7 @@ public :
   UInt_t           L0DUTCK;
   UInt_t           HLTTCK;
   ULong64_t         GpsTime;
+  Short_t           Polarity;
   // Int_t           Primaries;
   Int_t           nPV;
   Float_t         PVX[100];   //[nPV]
@@ -1193,6 +1194,7 @@ protected:
   TBranch         *b_L0DUTCK;
   TBranch         *b_HLTTCK;
   TBranch         *b_GpsTime;
+  TBranch         *b_Polarity;
   // TBranch         *b_Primaries;
   TBranch         *b_nPV;
   TBranch         *b_PVX;   //[nPV]
