@@ -150,8 +150,23 @@ for mode, pidcut in [ ('DsPi', 'PIDK < 0') , ('DsK', 'PIDK > 10') ]:
     cutVars += [RooRealVar('PIDK', 'PIDK', -200, 200)]
     cutVars += [RooRealVar('BDTG', 'BDTG', -1, 1)]
 
+    if pidcut.find(' -5') > 0:
+        wtvar = 'wt[0]'
+    elif pidcut.find(' 0') > 0:
+        wtvar = 'wt[1]'
+    elif pidcut.find(' 5') > 0:
+        wtvar = 'wt[2]'
+    elif pidcut.find(' 10') > 0:
+        wtvar = 'wt[3]'
+
     try:
-        dataset = get_dataset(RooArgSet(time), ftree, cutstr, cutVars)
+        wt = RooRealVar(wtvar, 'weight', 0.0, 1.0)
+    except NameError:
+        print 'Unknown PID selection. Weights not applied.'
+
+    try:
+        dataset = get_dataset(RooArgSet(time), ftree, cutstr, cutVars,
+                              RooFit.WeightVar(wt))
         dataset.SetName('%s_%s' % (dataset.GetName(), mode))
         dsetlist += [dataset]
     except TypeError, IOError:
