@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <cmath>
 
 #include <boost/format.hpp>
 
@@ -185,8 +186,10 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
 
    TLorentzVector BsMom(0,0,0,0), hMom(0,0,0,0), DsMom(0,0,0,0);
    TLorentzVector tru_BsMom(0,0,0,0), tru_hMom(0,0,0,0), tru_DsMom(0,0,0,0);
-   TVector3 OWNPV(0,0,0), ENDVX(0,0,0);
-   double wt(0.0), truewt(0.0), time(0.0), dt(0.0), truetime(0.0);
+   double time(0.0), dt(0.0), truetime(0.0);
+   double wt[4] = {0.0, 0.0, 0.0, 0.0};
+   double wt_pid[4] = {0.0, 0.0, 0.0, 0.0};
+   double wt_dmc(0.0);
    double BDTG(0.0), PIDK(0.0);
    double hIPchi2(0.0);
 
@@ -196,11 +199,10 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
    ftree.Branch("dt"     , &dt);
    ftree.Branch("tchi2"  , &lab0_TAUCHI2);
    ftree.Branch("truetime", &truetime);
-   ftree.Branch("wt"     , &wt);
-   // ftree.Branch("truewt" , &truewt);
-   // ftree.Branch("oscil"  , &lab0_OSCIL);
-   ftree.Branch("OWNPV"  , &OWNPV);
-   ftree.Branch("ENDVX"  , &ENDVX);
+
+   ftree.Branch("wt"     , &wt, "wt[4]/D");
+   ftree.Branch("wt_pid" , &wt_pid, "wt_pid[4]/D");
+   ftree.Branch("wt_dmc" , &wt_dmc);
 
    ftree.Branch("BDTG", &BDTG);
    ftree.Branch("PIDK", &PIDK);
@@ -222,6 +224,67 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
 
    unsigned long rdskcount(0), rdspicount(0);
    unsigned long dskcount(0), dspicount(0);
+
+   // Histograms with weight
+   TFile * fpid[2][2] = {
+     {
+       TFile::Open("../ntuples/histos/EffHistos_Reco12_39Mom_MagDown_0123.root"),
+       TFile::Open("../ntuples/histos/EffHistos_Reco12_39Mom_MagDown_45678.root")
+     }, {
+       TFile::Open("../ntuples/histos/EffHistos_Reco12_39Mom_MagUp_012.root"),
+       TFile::Open("../ntuples/histos/EffHistos_Reco12_39Mom_MagUp_3456.root")
+     }
+   };
+
+   TFile *fdmc[2] = {
+     TFile::Open("../ntuples/histos/MomVsnTr_Comp_DPi_Down_hist.root"),
+     TFile::Open("../ntuples/histos/MomVsnTr_Comp_DPi_Up_hist.root")
+   };
+
+   // 4 PID cuts (-5, 0, 5, 10) per polarity
+   std::vector<std::vector<TH1F*> > hpid;
+   for (unsigned i = 0; i < 2; ++i) {
+     std::vector<TH1F*> hpid_t(4, NULL);
+     boost::format fmt("hpid%d");
+     for (unsigned j = 0; j < 4; ++j) {
+       fmt % j;
+       // fpid[i][j]->ls();
+       hpid_t[j] = dynamic_cast<TH1F*>
+	 (fpid[i][0]->Get("MyPionMisID_0")->Clone(fmt.str().c_str()));
+       hpid_t[j]->Reset("icesm");
+     }
+     hpid.push_back(hpid_t);
+   }
+
+   // Magnet polarity
+   std::vector<TH2F*> hmomtrk(2, NULL);
+   boost::format fmt("hmomtrk%d");
+   for (unsigned i = 0; i < 2; ++i) {
+     fmt % i;
+     hmomtrk[i] = dynamic_cast<TH2F*>
+	(fdmc[i]->Get("histRatio")->Clone(fmt.str().c_str()));
+   }
+
+   // 4 PID cuts (-5, 0, 5, 10) per polarity, 2 samples per polarity
+   for (unsigned i = 0; i < 2; ++i) {
+     boost::format fmt("MyPionMisID_%s");
+     for (unsigned j = 0; j < 4; ++j) {
+       // format histogram name per PID cut
+       switch (j) {
+       case 0: fmt % "Minus5"; break;
+       case 1: fmt % "0"; break;
+       case 2: fmt % "5"; break;
+       case 3: fmt % "10"; break;
+       }
+       TH1F* hpid1 = dynamic_cast<TH1F*>(fpid[i][0]->Get(fmt.str().c_str())
+					 ->Clone("hpid1"));
+       TH1F* hpid2 = dynamic_cast<TH1F*>(fpid[i][1]->Get(fmt.str().c_str())
+					 ->Clone("hpid2"));
+       double n1(hpid1->GetEntries()), n2(hpid2->GetEntries());
+       double ntot(n1 + n2);
+       hpid[i][j]->Add(hpid1, hpid2, n1/ntot, n2/ntot);
+     }
+   }
 
    Long64_t nbytes = 0, nb = 0;
    // for (Long64_t jentry=0; jentry<nentries;jentry+=100) // for testing
@@ -253,10 +316,16 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
        time     = lab0_TAU * 1E3;
        dt       = lab0_TAUERR * 1E3;
        truetime = lab0_TRUETAU * 1E3;
-       wt       = TMath::Exp(lab0_TAU*1e3/1.472);
-       truewt   = TMath::Exp(lab0_TRUETAU*1e3/1.472);
-       OWNPV.SetXYZ(lab0_OWNPV_X, lab0_OWNPV_Y, lab0_OWNPV_Z);
-       ENDVX.SetXYZ(lab0_ENDVERTEX_X, lab0_ENDVERTEX_Y, lab0_ENDVERTEX_Z);
+
+       // FIXME: get weights from histogram
+       int bin(-1);
+       bin      = hmomtrk[Polarity < 0 ? 0 : 1]->FindBin(std::log(lab1_PT));
+       wt_dmc   = hmomtrk[Polarity < 0 ? 0 : 1]->GetBinContent(bin);
+       for (unsigned i = 0; i < 4; ++i) {
+	 bin = hpid[Polarity < 0 ? 0 : 1][i]->FindBin(lab1_P);
+	 wt_pid[i] = hpid[Polarity < 0 ? 0 : 1][i]->GetBinContent(bin);
+	 wt[i] = wt_dmc * wt_pid[i];
+       }
 
        BDTG = BDTGResponse_1;
        PIDK = lab1_PIDK;
