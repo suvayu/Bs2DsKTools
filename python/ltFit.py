@@ -139,6 +139,7 @@ cut += '&& BDTG > 0.5 '
 # Get dataset: DsPi and DsK
 time.setBins(150)
 dsetlist = []
+weights = []
 for mode, pidcut in [ ('DsPi', 'PIDK < 0') , ('DsK', 'PIDK > 10') ]:
     # Get tree
     rfile = get_file('data/smalltree-really-new-MC-pre-PID-%s.root' % mode, 'read')
@@ -151,23 +152,26 @@ for mode, pidcut in [ ('DsPi', 'PIDK < 0') , ('DsK', 'PIDK > 10') ]:
     cutVars += [RooRealVar('BDTG', 'BDTG', -1, 1)]
 
     if pidcut.find(' -5') > 0:
-        wtvar = 'wt[0]'
+        wtvar = 'wt0'
     elif pidcut.find(' 0') > 0:
-        wtvar = 'wt[1]'
+        wtvar = 'wt1'
     elif pidcut.find(' 5') > 0:
-        wtvar = 'wt[2]'
+        wtvar = 'wt2'
     elif pidcut.find(' 10') > 0:
-        wtvar = 'wt[3]'
+        wtvar = 'wt3'
 
     try:
         wt = RooRealVar(wtvar, 'weight', 0.0, 1.0)
+        cutVars += [wt]
+        weights += [wt]
     except NameError:
         print 'Unknown PID selection. Weights not applied.'
 
     try:
         dataset = get_dataset(RooArgSet(time), ftree, cutstr, cutVars,
-                              RooFit.WeightVar(wt))
+                              RooFit.WeightVar(wt, True))
         dataset.SetName('%s_%s' % (dataset.GetName(), mode))
+        print '%s is weighted: %s' % (dataset.GetName(), dataset.isWeighted())
         dsetlist += [dataset]
     except TypeError, IOError:
         print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
@@ -241,8 +245,9 @@ pdflist += [ dspi_acceptance, DsPi_Model ]
 # fit to Dsπ only
 print '=' * 5, ' 2-step fit: Dsπ ', '=' * 5
 dspi_fitresult = DsPi_Model.fitTo(dsetlist[0], RooFit.Optimize(0),
-                                  RooFit.Strategy(2), RooFit.Save(True),
-                                  RooFit.NumCPU(1),
+                                  RooFit.Strategy(2),
+                                  RooFit.Save(True), RooFit.NumCPU(1),
+                                  RooFit.SumW2Error(True),
                                   RooFit.Offset(True),
                                   RooFit.Verbose(True))
 dspi_fitresult.Print()
@@ -299,6 +304,7 @@ print '=' * 5, ' 2-step fit: DsK ', '=' * 5
 dsk_fitresult = DsK_Model.fitTo(dsetlist[1], RooFit.Optimize(0),
                                 RooFit.Strategy(2), RooFit.Save(True),
                                 RooFit.NumCPU(1),
+                                RooFit.SumW2Error(True),
                                 RooFit.Offset(True),
                                 RooFit.Verbose(True))
 dsk_fitresult.Print()
@@ -339,10 +345,9 @@ for pdf in pdflist:
 dataset.Print('v')
 
 ## Fit
-fitresult = PDF.fitTo(dataset, RooFit.Optimize(0),
-                      RooFit.Strategy(2), RooFit.Save(True),
-                      RooFit.NumCPU(1),
-                      RooFit.Offset(True),
+fitresult = PDF.fitTo(dataset, RooFit.Optimize(0), RooFit.Strategy(2),
+                      RooFit.Save(True), RooFit.NumCPU(1),
+                      RooFit.SumW2Error(True), RooFit.Offset(True),
                       RooFit.Verbose(True))
 fitresult.Print()
 
