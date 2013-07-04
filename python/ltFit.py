@@ -182,10 +182,14 @@ decaycat.defineType('DsK')
 
 varlist += [ decaycat ]
 
+for idx, mode in enumerate(['DsPi', 'DsK']):
+    decaycat.setLabel(mode)
+    dsetlist[idx].addColumn(decaycat)
+
 dataset = RooDataSet('dataset', 'Combined dataset (DsK + DsPi)',
-                     RooArgSet(time), RooFit.Index(decaycat),
-                     RooFit.Import('DsPi', dsetlist[0]),
-                     RooFit.Import('DsK', dsetlist[1]))
+                     RooArgSet(time, decaycat),
+                     RooFit.Import(dsetlist[0]))
+dataset.append(dsetlist[1])
 
 for dset in dsetlist:
     dset.Print('v')
