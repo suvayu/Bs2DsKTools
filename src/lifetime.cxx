@@ -319,7 +319,8 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
 
        // FIXME: get weights from histogram
        int bin(-1);
-       bin      = hmomtrk[Polarity < 0 ? 1 : 0]->FindBin(std::log(lab1_PT));
+       bin      = hmomtrk[Polarity < 0 ? 1 : 0]->FindBin(std::log(lab1_PT),
+							 std::log(nTracks));
        wt_dmc   = hmomtrk[Polarity < 0 ? 1 : 0]->GetBinContent(bin);
        for (unsigned i = 0; i < 4; ++i) {
 	 bin = hpid[Polarity < 0 ? 1 : 0][i]->FindBin(lab1_P);
