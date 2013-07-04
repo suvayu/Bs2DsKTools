@@ -189,6 +189,8 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
    double time(0.0), dt(0.0), truetime(0.0);
    double wt[4] = {0.0, 0.0, 0.0, 0.0};
    double wt_pid[4] = {0.0, 0.0, 0.0, 0.0};
+   double wt0(0.0), wt1(0.0), wt2(0.0), wt3(0.0);
+   double wt_pid0(0.0), wt_pid1(0.0), wt_pid2(0.0), wt_pid3(0.0);
    double wt_dmc(0.0);
    double BDTG(0.0), PIDK(0.0);
    double hIPchi2(0.0);
@@ -200,8 +202,14 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
    ftree.Branch("tchi2"  , &lab0_TAUCHI2);
    ftree.Branch("truetime", &truetime);
 
-   ftree.Branch("wt"     , &wt, "wt[4]/D");
-   ftree.Branch("wt_pid" , &wt_pid, "wt_pid[4]/D");
+   ftree.Branch("wt0"     , &wt0);
+   ftree.Branch("wt1"     , &wt1);
+   ftree.Branch("wt2"     , &wt2);
+   ftree.Branch("wt3"     , &wt3);
+   ftree.Branch("wt_pid0" , &wt_pid0);
+   ftree.Branch("wt_pid1" , &wt_pid1);
+   ftree.Branch("wt_pid2" , &wt_pid2);
+   ftree.Branch("wt_pid3" , &wt_pid3);
    ftree.Branch("wt_dmc" , &wt_dmc);
 
    ftree.Branch("BDTG", &BDTG);
@@ -327,6 +335,16 @@ void lifetime::Loop(TTree &ftree, TEntryList &felist, bool DsK)
 	 wt_pid[i] = hpid[Polarity < 0 ? 1 : 0][i]->GetBinContent(bin);
 	 wt[i] = wt_dmc * wt_pid[i];
        }
+
+       // assign weights to tree branches
+       wt0 = wt[0];
+       wt1 = wt[1];
+       wt2 = wt[2];
+       wt3 = wt[3];
+       wt_pid0 = wt_pid[0];
+       wt_pid1 = wt_pid[1];
+       wt_pid2 = wt_pid[2];
+       wt_pid3 = wt_pid[3];
 
        BDTG = BDTGResponse_1;
        PIDK = lab1_PIDK;
