@@ -15,8 +15,22 @@ options = optparser.parse_args()
 filename = options.filename
 
 import sys, os
-import subprocess 
+import subprocess
 from uuid import uuid4
+
+# history file for interactive use
+import atexit, readline
+history_path = '.browse.py'
+def save_history(history_path=history_path):
+    import readline
+    readline.write_history_file(history_path)
+
+if os.path.exists(history_path):
+    readline.read_history_file(history_path)
+
+atexit.register(save_history)
+del atexit, readline, save_history, history_path
+
 
 from ROOT import gDirectory, gROOT, gSystem, gPad, gStyle
 from ROOT import TFile, TTree, TH1D, TH2D, TH3D, TCanvas, TPad
