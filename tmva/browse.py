@@ -135,8 +135,18 @@ def _canvas_size(grid):
         return (x, ymax)
 
 
-def draw(plottables, scheme = None, grid = (1,1)):
+def _check_cols(cols, nhists):
+    """Check colours"""
+    if cols:
+        _assert_equal(len(cols), nhists, '# colours', '# histograms')
+    else:
+        cols = [kBlack] * nhists
+    return cols
+
+
+def draw(plottables, scheme = None, grid = (1,1), cols = None):
     """Draw histograms"""
+    cols = _check_cols(cols, len(plottables))
     scheme = _valid_scheme(scheme, len(plottables), grid)
     if not scheme: return
 
@@ -149,6 +159,9 @@ def draw(plottables, scheme = None, grid = (1,1)):
             pad = pad + 1
         canvas.cd(pad)
         plottable.Draw(scheme[idx])
+        plottable.SetLineColor(cols[idx])
+        plottable.SetMarkerColor(cols[idx])
+    canvas.Update()
     return canvas
 
 
@@ -160,10 +173,7 @@ def draw_expr(trees, exprs, scheme = None, grid = (1,1), sel = '', cols = None):
         sel = [sel] * nhists
     else:
         _assert_equal(len(sel), nhists, '# selections', '# expressions')
-    if cols:
-        _assert_equal(len(cols), nhists, '# colours', '# expressions')
-    else:
-        cols = [kBlack] * nhists
+    _check_cols(cols, nhists)
     scheme = _valid_scheme(scheme, nhists, grid)
 
     size = _canvas_size(grid)
