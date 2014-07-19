@@ -194,6 +194,7 @@ dataset.append(dsetlist[1])
 for dset in dsetlist:
     dset.Print('v')
 
+# assert(False)
 
 ## Basic B decay pdf with time resolution
 # Resolution model
@@ -233,7 +234,7 @@ pdflist += [ Bdecay ]
 turnon = RooRealVar('turnon', 'turnon', 1.5, 0.5, 5.0)
 exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
 offset = RooRealVar('offset', 'offset', 0.0, -0.5, 0.5)
-beta = RooRealVar('beta', 'beta', 0.04, 0.0, 0.05)
+beta = RooRealVar('beta', 'beta', 0.04, 0.0, 0.10)
 
 
 ## Dsπ acceptance and pdf
@@ -349,6 +350,7 @@ for pdf in pdflist:
 dataset.Print('v')
 
 ## Fit
+gSystem.ListLibraries()
 fitresult = PDF.fitTo(dataset, RooFit.Optimize(0), RooFit.Strategy(2),
                       RooFit.Save(True), RooFit.NumCPU(1),
                       RooFit.SumW2Error(True), RooFit.Offset(True),
@@ -365,9 +367,8 @@ time.setRange('fullrange', epsilon, 15.0)
 RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-5)
 RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-5)
 
-# RooFit.Range(0, 0.01+epsilon),
 dkcatset = RooArgSet(decaycat)
-tframe1 = time.frame(RooFit.Name('ptime'),
+tframe1 = time.frame(RooFit.Range(0., time.getMax()), RooFit.Name('ptime'),
                      RooFit.Title('Ds#pi - powerlaw, DsK - powerlaw * %s ratio' %
                                   ratiofn))
 dsetlist[0].plotOn(tframe1, RooFit.MarkerStyle(kOpenTriangleDown))
