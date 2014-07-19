@@ -70,6 +70,11 @@ def ls(directory = gDirectory):
     directory.ls()
 
 
+def cd(directory):
+    """Change directory"""
+    gDirectory.cd(directory)
+
+
 def cd(dirname):
     """Change directory to specified directory."""
     return gDirectory.cd(dirname)
