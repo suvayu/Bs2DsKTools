@@ -94,14 +94,14 @@ def _valid_scheme(scheme, nplots, grid):
     """Check plotting scheme"""
     if len(grid) != 2:
         raise ValueError('Invalid grid dimensions, expected form: (x,y).')
-    nplots = grid[0]*grid[1]
+    npads = grid[0]*grid[1]
     if not scheme:
-        _assert_equal(nplots, npads, 'grid size', '# of plottables')
+        _assert_equal(npads, nplots, 'grid size', '# of plottables')
         scheme = [''] * nplots
     else:
         if scheme[0].find('same') >= 0:
             raise ValueError('First plotting scheme has `same\'!  This is not allowed.')
-        _assert_equal(nplots, len([True for opt in scheme if opt.find('same') < 0]),
+        _assert_equal(npads, len([True for opt in scheme if opt.find('same') < 0]),
                       '# of plots', 'plotting scheme')
     return scheme
 
