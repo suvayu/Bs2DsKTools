@@ -84,20 +84,25 @@ def read(name, newname = ''):
         return gDirectory.Get(name)
 
 
+def _assert_equal(arg1, arg2, str1, str2):
+    """Assert the args are equal, raise exception otherwise"""
+    if arg1 != arg2:
+        raise ValueError('Value mismatch: {} != {}'.format(str1, str2))
+
+
 def _valid_scheme(scheme, nplots, grid):
     """Check plotting scheme"""
     if len(grid) != 2:
         raise ValueError('Invalid grid dimensions, expected form: (x,y).')
     nplots = grid[0]*grid[1]
     if not scheme:
-        if nplots != npads:
-            raise ValueError('Grid size and number of plottables do not match!')
+        _assert_equal(nplots, npads, 'grid size', '# of plottables')
         scheme = [''] * nplots
     else:
         if scheme[0].find('same') >= 0:
-            raise ValueError('First plotting scheme has same!  This is not allowed.')
-        if nplots != len([True for opt in scheme if opt.find('same') < 0]):
-            raise ValueError('Provided plotting scheme does not match number of plottables!')
+            raise ValueError('First plotting scheme has `same\'!  This is not allowed.')
+        _assert_equal(nplots, len([True for opt in scheme if opt.find('same') < 0]),
+                      '# of plots', 'plotting scheme')
     return scheme
 
 
