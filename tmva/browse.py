@@ -136,7 +136,7 @@ def draw(plottables, scheme = None, grid = (1,1)):
     if not scheme: return
 
     size = _canvas_size(grid)
-    canvas = TCanvas('fn-{}'.format(uuid4()), '', size[0], size[1])
+    canvas = TCanvas('canvas-{}'.format(uuid4()), '', size[0], size[1])
     canvas.Divide(grid[0], grid[1])
     pad = 0
     for idx, plottable in enumerate(plottables):
@@ -154,7 +154,7 @@ def draw_expr(trees, exprs, scheme = None, grid = (1,1)):
     scheme = _valid_scheme(scheme, len(exprs), grid)
 
     size = _canvas_size(grid)
-    canvas = TCanvas('fn-{}'.format(uuid4()), '', size[0], size[1])
+    canvas = TCanvas('canvas-{}'.format(uuid4()), '', size[0], size[1])
     canvas.Divide(grid[0], grid[1])
     pad = 0
     for idx, tree in enumerate(trees):
