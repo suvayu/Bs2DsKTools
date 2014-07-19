@@ -66,7 +66,7 @@ if not rfile:
 def ls(directory = gDirectory):
     """List contents of present or specified directory."""
     if isinstance(directory, str):
-        directory = gDirectory.Get(directory)
+        directory = gDirectory.GetDirectory(directory)
     directory.ls()
 
 
