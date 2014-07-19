@@ -152,11 +152,19 @@ def draw(plottables, scheme = None, grid = (1,1)):
     return canvas
 
 
-def draw_expr(trees, exprs, scheme = None, grid = (1,1)):
+def draw_expr(trees, exprs, scheme = None, grid = (1,1), sel = '', cols = None):
     """Draw expressions from trees"""
-    if len(trees) != len(exprs):
-        raise ValueError('No. of trees and expressions do not match!')
-    scheme = _valid_scheme(scheme, len(exprs), grid)
+    nhists = len(exprs)
+    _assert_equal(len(trees), nhists, '# trees', '# expressions')
+    if isinstance(sel, str):
+        sel = [sel] * nhists
+    else:
+        _assert_equal(len(sel), nhists, '# selections', '# expressions')
+    if cols:
+        _assert_equal(len(cols), nhists, '# colours', '# expressions')
+    else:
+        cols = [kBlack] * nhists
+    scheme = _valid_scheme(scheme, nhists, grid)
 
     size = _canvas_size(grid)
     canvas = TCanvas('canvas-{}'.format(uuid4()), '', size[0], size[1])
@@ -166,5 +174,12 @@ def draw_expr(trees, exprs, scheme = None, grid = (1,1)):
         if scheme[idx].find('same') < 0:
             pad = pad + 1
         canvas.cd(pad)
-        tree.Draw(exprs[idx], '', scheme[idx]) # FIXME: add selection
+        hname = 'hist-{}'.format(uuid4())
+        expr = '{}>>{}'.format(exprs[idx], hname)
+        print 'Drawing: {}'.format(expr)
+        tree.Draw(expr, sel[idx], scheme[idx])
+        hist = gROOT.FindObject(hname)
+        hist.SetLineColor(cols[idx])
+        hist.SetMarkerColor(cols[idx])
+    canvas.Update()
     return canvas
