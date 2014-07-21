@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from TMVAconfig import *
+from tmvaconfig import *
 
 conf = ConfigFile('TMVA.conf')
 n = conf.read()
