@@ -1,0 +1,84 @@
+* Files
+- path to root files
+- tree name
+
+* Methods
+- TMVA supports many multivariate methods (see:
+  TMVAClassification.C).  We use BDT and it's variants:
+  - BDT :: adaptive boost
+  - BDTG :: gradient boost
+  - BDTB :: bagging
+  - BDTD :: decorrelation + adaptive boost
+  - BDTF :: use Fisher discriminant for node splitting
+
+* TMVA training setup & configuration
+(NB: Assumes Python as the programming language)
+- Create instance & output file:
+  : TMVA.Tools.Instance()
+  : ofile = TFile.Open(fname, "recreate")
+- use factory: colon separated options, semi-colon separated list.
+  : factory = TMVA.Factory("TMVAClassification", ofile, "!V:!Silent:Color"+
+  :                        ":DrawProgressBar:Transformations=I;D;P;G,D")
+- add variables using factory:
+  : factory.AddVariable("myvar1 := var1+var2", "F")
+  Jacco has a nice class in [[file:jdv/myTMVAvars.py][myTMVAvars.py]], that makes it less tedious.
+  : confobj = TMVAvars(<mva_name>)
+  : varlist = confobj.getfullvarlist()
+- can also add spectator variables, not used in training, but will be
+  included in output tree.
+  : factory.AddSpectator(..)
+- get tree, and do branch renaming gymnastics.  Jacco's class makes it
+  easier.
+- Add signal/background event trees global event weights:
+  : factory.AddSignalTree(<tree>, <wt>)
+  : factory.AddBackgroundTree(<tree>, <wt>)
+  Separate event trees can be given for training and testing:
+  : factory.AddSignalTree(<tree1>, <wt1>, "Training")
+  : factory.AddSignalTree(<tree2>, <wt2>. "Test")
+- To learn how to add events by hand, see ~TMVAClassification.C~.
+- Individual event weights:
+  : factory.SetSignalWeightExpression("wt1*wt2")
+  : factory.SetBackgroundWeightExpression("wt1*wt2")
+  Variables in the expression should exist in the original event tree.
+- Apply any selection cuts on signal/background:
+  : factory.PrepareTrainingAndTestTree(sig_tcut, bkg_tcut,
+  :     "nTrain_Signal=0:nTrain_Background=0:SplitMode=Random"+
+  :     ":NormMode=NumEvents:!V")
+  To use different number of signal and background events, use:
+  : factory.PrepareTrainingAndTestTree(mycut, "NSigTrain=3000"+
+  :     ":NBkgTrain=3000:NSigTest=3000:NBkgTest=3000:SplitMode=Random:!V")
+- Book MVA methods, see source files like: [[http://root.cern.ch/gitweb?p=root.git;a=blob;f=tmva/src/MethodCuts.cxx;hb=HEAD][src/MethodCuts.cxx]], etc; or
+  on [[http://tmva.sourceforge.net/optionRef.html][sourceforge]].  Example for BDTG:
+  : factory.BookMethod(TMVA.Types.kBDT, "BDTG",
+  :     "!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.30:UseBaggedGrad"+
+  :     ":GradBaggingFraction=0.6:SeparationType=GiniIndex:nCuts=20"+
+  :     ":PruneMethod=CostComplexity:PruneStrength=50:NNodesMax=5")
+- Train, test, evaluate, and save:
+  : factory.TrainAllMethods()
+  : factory.TestAllMethods()
+  : factory.EvaluateAllMethods()
+  : ofile.Close()
+- By default weights written to in ~weights~ directory.
+- Run ~TMVAGui.C~ or some such for result macros.
+  : gROOT.ProcessLine("TMVAGui(\"%s\")" % outfname)
+  : gApplication.Run()
+
+* TMVA application setup & configuration
+- Create reader:
+  : reader = TMVA.Reader('!Color:!Silent')
+- Add variables to reader:
+  : reader.AddVariable(<name>, <ptr>)
+  Use ~numpy~, ~array~, or ~ROOT.Double~ for the pointer.  Again,
+  Jacco's class makes this less tedious.
+- Add spectators:
+  : reader.AddSpectator(<name>, <ptr>)
+- Book methods (with weights file):
+  : reader.BookMVA(<method_name>, <weights_file>)
+- Prepare output tree.
+  - Apply tree branch name transforms (see Jacco's code).
+  - Add MVA output branch
+  - Fill tree
+- Evaluate MVA, fill MVA output.
+  : reader.EvaluateMVA(<name>)
+- Get efficiencies (optional?):
+  : reader.FindCutsMVA(<name>)
