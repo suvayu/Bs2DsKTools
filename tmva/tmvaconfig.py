@@ -18,6 +18,16 @@ class TMVAconfig(object):
       self._cut_sig = ''
       self._cut_bkg = ''
 
+   def __str__(self):
+      h0 = 'MVA:              {}\n{}\n'.format(self._name, '-'*50)
+      l1 = 'vars:             {}\n'.format(self._vars)
+      l2 = 'combined_vars:    {}\n'.format(self._combined_vars)
+      l3 = 'specatators:      {}\n'.format(self._spectators)
+      l4 = 'cut_sig:          {}\n'.format(self._cut_sig)
+      l5 = 'cut_bkg:          {}\n'.format(self._cut_bkg)
+      l6 = 'branch_mappings:  {}\n'.format(self._branch_mappings)
+      return h0 + l1 + l2 + l3 + l4 + l5 + l6
+
    @property
    def vars(self):
       """Normal training MVA variables"""
