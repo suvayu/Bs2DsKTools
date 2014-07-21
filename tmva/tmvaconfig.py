@@ -3,9 +3,9 @@
 import sys, os
 
 # Config script for TMVA Classification and Application
-# _varlist entries have format [varname_in_tree, name, unit, type]
-# _combvarlist entries have format [vareval_in_c, name, unit, type, vareval_in_python]
-# _branchmask is renaming the branches from the signal tree in the classification, in case the branch names don't match
+# _vars entries have format varname_in_tree (float assumed)
+# _combined_vars entries have format varexpression (float assumed)
+# _branch_mappings is renaming the branches from the signal tree in the classification, in case the branch names don't match
 
 from collections import Iterable
 
