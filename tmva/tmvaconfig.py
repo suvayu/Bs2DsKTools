@@ -51,7 +51,7 @@ class TMVAconfig(object):
       del self._combined_vars
    
    def all_vars(self):
-      return self._varlist + self._combvarlist
+      return self._vars + self._combined_vars
 
    @property
    def spectators(self):
@@ -72,7 +72,7 @@ class TMVAconfig(object):
    @property
    def cut_sig(self):
       """Cuts on signal sample"""
-      return self._cutssig
+      return self._cut_sig
 
    @cut_sig.setter
    def cut_sig(self, value) :
@@ -88,7 +88,7 @@ class TMVAconfig(object):
    @property
    def cut_bkg(self):
       """Cuts on background sample"""
-      return self._cutsbkg
+      return self._cut_bkg
 
    @cut_bkg.setter
    def cut_bkg(self, value) :
