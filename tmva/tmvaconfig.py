@@ -191,4 +191,4 @@ class ConfigFile(object):
 
    def get_mva_config(self, mva):
       """Retrun MVA config"""
-      return self.mva
+      return getattr(self, mva)
