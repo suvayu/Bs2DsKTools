@@ -19,14 +19,31 @@ class TMVAconfig(object):
       self._cut_bkg = ''
 
    def __str__(self):
-      h0 = 'MVA:              {}\n{}\n'.format(self._name, '-'*50)
-      l1 = 'vars:             {}\n'.format(self._vars)
-      l2 = 'combined_vars:    {}\n'.format(self._combined_vars)
-      l3 = 'specatators:      {}\n'.format(self._spectators)
-      l4 = 'cut_sig:          {}\n'.format(self._cut_sig)
-      l5 = 'cut_bkg:          {}\n'.format(self._cut_bkg)
-      l6 = 'branch_mappings:  {}\n'.format(self._branch_mappings)
-      return h0 + l1 + l2 + l3 + l4 + l5 + l6
+      text  = 'Training session: {}\n{}\n'.format(self._name, '-'*50)
+      text += 'methods:          {}\n'.format(self._methods)
+      text += 'vars:             {}\n'.format(self._vars)
+      text += 'combined_vars:    {}\n'.format(self._combined_vars)
+      text += 'specatators:      {}\n'.format(self._spectators)
+      text += 'cut_sig:          {}\n'.format(self._cut_sig)
+      text += 'cut_bkg:          {}\n'.format(self._cut_bkg)
+      text += 'branch_mappings:  {}\n'.format(self._branch_mappings)
+      return text
+
+   @property
+   def methods(self):
+      """MVA training methods"""
+      return self._methods
+
+   @methods.setter
+   def methods(self, value):
+      if isinstance(value, Iterable):
+         self._methods = value
+      else:
+         self._methods = [value]
+
+   @methods.deleter
+   def methods(self):
+      del self._methods
 
    @property
    def vars(self):
@@ -38,7 +55,7 @@ class TMVAconfig(object):
       if isinstance(value, Iterable):
          self._vars = value
       else:
-         raise ValueError('Expecting an iterable')
+         self._vars = [value]
 
    @vars.deleter
    def vars(self):
@@ -54,7 +71,7 @@ class TMVAconfig(object):
       if isinstance(value, Iterable):
          self._combined_vars = value
       else:
-         raise ValueError('Expecting an iterable')
+         self._combined_vars = [value]
    
    @combined_vars.deleter
    def combined_vars(self):
@@ -73,7 +90,7 @@ class TMVAconfig(object):
       if isinstance(value, Iterable):
          self._spectators = value
       else:
-         raise ValueError('Expecting an iterable')
+         self._spectators = [value]
 
    @spectators.deleter
    def spectators(self):
@@ -121,7 +138,7 @@ class TMVAconfig(object):
       if isinstance(value, Iterable):
          self._branch_mappings = value
       else:
-         raise ValueError('Expecting an iterable')
+         self._branch_mappings = [value]
 
    @branch_mappings.deleter
    def branch_mappings(self):
@@ -133,7 +150,7 @@ from ROOT import TCut
 
 
 class ConfigFile(object):
-   """Read/write TMVA configuration from/to a file"""
+   """TMVA configuration file object, used to read/write to a file"""
    def __init__(self, filenames):
       self._parser = ConfigParser()
       self._filenames = filenames
@@ -149,33 +166,33 @@ class ConfigFile(object):
          raise ValueError('No file(s) found: {}!'.format(self._filenames))
 
       # parse options
-      self._mvas = self._parser.sections()
-      for mva in self._mvas:
+      self._sessions = self._parser.sections()
+      for session in self._sessions:
          options = {}
-         for opt in self._parser.options(mva):
-            value = self._parser.get(mva, opt)
-            if opt.find('vars') >= 0 or opt.find('spectator') >= 0:
-               options[opt] = [el.strip(',') for el in value.split()]
-            elif opt.find('cut') >= 0:
+         for opt in self._parser.options(session):
+            value = self._parser.get(session, opt)
+            if opt.find('cut') >= 0:
                options[opt] = TCut(value)
             else:
-               options[opt] = value
+               options[opt] = [el.strip(',') for el in value.split()]
+               if opt.find('mappings') >= 0:
+                  options[opt] = [m.split(':') for m in options[opt]]
 
-            # property list (after cleaning, no internal props)
+            # property list (after cleaning, i.e. no internal props)
             valid_props = [prop for prop in dict(vars(TMVAconfig))
                            if prop.find('_') != 0]
             # make TMVAconfig object
-            tmva_conf = TMVAconfig(mva)
+            session_conf = TMVAconfig(session)
             for opt in options:
                if opt in valid_props:
-                  setattr(tmva_conf, opt, options[opt])
+                  setattr(session_conf, opt, options[opt])
                else:
                   print 'Unknown option `{}\' in `{}\' section, ignoring.'\
-                     .format(opt, mva)
-            setattr(self, mva, tmva_conf)
+                     .format(opt, session)
+            setattr(self, session, session_conf)
 
-      # return # of MVA configs read
-      return len(self._mvas)
+      # return number of MVA configs read successfully
+      return len(self._sessions)
 
    def write(self, filename):
       """Write config file"""
@@ -185,10 +202,10 @@ class ConfigFile(object):
       """Update config file"""
       return NotImplemented
 
-   def mvas(self):
+   def sessions(self):
       """List of MVAs in config file"""
-      return self._mvas
+      return self._sessions
 
-   def get_mva_config(self, mva):
+   def get_session_config(self, session):
       """Retrun MVA config"""
-      return getattr(self, mva)
+      return getattr(self, session)
