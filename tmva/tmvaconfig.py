@@ -165,6 +165,12 @@ class ConfigFile(object):
       if not self._conf:
          raise ValueError('No file(s) found: {}!'.format(self._filenames))
 
+      # parse and return number of MVA configs read successfully
+      self._parse_opts()
+      return len(self._sessions)
+
+   def _parse_opts(self):
+      "The config file parser"
       # parse options
       self._sessions = self._parser.sections()
       for session in self._sessions:
@@ -190,9 +196,6 @@ class ConfigFile(object):
                   print 'Unknown option `{}\' in `{}\' section, ignoring.'\
                      .format(opt, session)
             setattr(self, session, session_conf)
-
-      # return number of MVA configs read successfully
-      return len(self._sessions)
 
    def write(self, filename):
       """Write config file"""
