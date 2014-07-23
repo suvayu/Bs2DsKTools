@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-
+# coding=utf-8
 import sys, os
 
 # Config script for TMVA Classification and Application
