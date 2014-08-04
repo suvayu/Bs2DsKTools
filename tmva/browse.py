@@ -60,7 +60,7 @@ TFile.Open._creates = True
 
 rfiles = []
 for f in filenames:
-    rfiles.append(TFile.Open(filename))
+    rfiles.append(TFile.Open(f))
 if not rfiles:
     sys.exit('Did you forget to provide a file to browse?')
 
