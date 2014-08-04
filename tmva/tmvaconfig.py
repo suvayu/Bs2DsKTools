@@ -223,7 +223,7 @@ class ConfigFile(object):
                   options[opt] = [m.split(':') for m in options[opt]]
 
             # property list (after cleaning, i.e. no internal props)
-            valid_props = [prop for prop in dict(vars(TMVAconfig))
+            valid_props = [prop for prop in vars(TMVAconfig)
                            if prop.find('_') != 0]
             # make TMVAconfig object
             session_conf = TMVAconfig(session)
