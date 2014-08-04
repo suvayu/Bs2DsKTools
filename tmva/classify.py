@@ -5,8 +5,8 @@ import argparse
 
 optparser = argparse.ArgumentParser(description=__doc__)
 optparser.add_argument('filename', help='ROOT file')
-optparser.add_argument('-s', dest='session', help='Session name')
-optparser.add_argument('-o', dest='out', help='Output ROOT file')
+optparser.add_argument('-s', dest='session', required=True, help='Session name')
+optparser.add_argument('-o', dest='out', required=True, help='Output ROOT file')
 options = optparser.parse_args()
 filename = options.filename
 session = options.session
