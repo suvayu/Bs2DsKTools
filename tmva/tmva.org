@@ -83,3 +83,8 @@
   : reader.EvaluateMVA(<name>)
 - Get efficiencies (optional?):
   : reader.FindCutsMVA(<name>)
+
+* B_{s} → D_{s}K 3/fb dataset
+/data/bfys/lbel/DsKntuples3fb/
+- B2DX_withtagging_strip20_DVv33r8_3fb_magdown_BDTG_Bs.root
+- B2DX_withtagging_strip20_DVv33r8_3fb_magup_BDTG_Bs.root
