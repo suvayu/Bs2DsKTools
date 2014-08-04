@@ -10,9 +10,9 @@
 import argparse
 
 optparser = argparse.ArgumentParser(description=__doc__)
-optparser.add_argument('filename', help='ROOT file')
+optparser.add_argument('filename', nargs='+', help='ROOT file')
 options = optparser.parse_args()
-filename = options.filename
+filenames = options.filename
 
 import sys, os
 import subprocess
@@ -58,8 +58,10 @@ _markers = (kDot, kPlus, kStar, kCircle, kMultiply, kFullDotSmall,
 # ownership
 TFile.Open._creates = True
 
-rfile = TFile.Open(filename)
-if not rfile:
+rfiles = []
+for f in filenames:
+    rfiles.append(TFile.Open(filename))
+if not rfiles:
     sys.exit('Did you forget to provide a file to browse?')
 
 
