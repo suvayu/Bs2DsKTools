@@ -4,36 +4,33 @@
 import argparse
 
 optparser = argparse.ArgumentParser(description=__doc__)
-optparser.add_argument('filename', help='ROOT file')
+optparser.add_argument('filename', nargs='?', default = None, help='ROOT file')
 optparser.add_argument('-s', dest='session', required=True, help='Session name')
+optparser.add_argument('--sig', dest='sig_tree', help='Signal tree name (required when filename present)')
+optparser.add_argument('--bkg', dest='bkg_tree', help='Background tree name (required when filename present)')
 optparser.add_argument('-o', dest='out', required=True, help='Output ROOT file')
 options = optparser.parse_args()
 filename = options.filename
 session = options.session
+sig_tree = options.sig_tree
+bkg_tree = options.bkg_tree
 out = options.out 
 
 import sys, os
-if not os.path.exists(filename):
+if filename and not os.path.exists(filename):
     sys.exit('File not found: {}'.format(filename))
+if filename and not (sig_tree and bkg_tree):
+    # required when input file is provided as positional argument
+    sys.exit('Missing signal and background tree names')
 
 from ROOT import gDirectory, gROOT, gSystem, gPad, gStyle
-from ROOT import TFile, TTree, TH1D, TH2D, TH3D, TCanvas, TPad
+from ROOT import TFile, TTree, TChain, TH1D, TH2D, TH3D, TCanvas, TPad
 
 from ROOT import TMVA
 from tmvaconfig import TMVAconfig, ConfigFile
 
-# instantiate
-TMVA.Tools.Instance()
-
 # ownership
 TFile.Open._creates = True
-
-# files
-ifile = TFile.Open(filename)
-ofile = TFile.Open(out, 'recreate')
-
-factory = TMVA.Factory("TMVAClassification", ofile, "!V:!Silent:Color" + \
-                       ":DrawProgressBar:Transformations=I;D;P;G,D")
 
 # read config
 conf = ConfigFile('TMVA.conf')
@@ -44,6 +41,29 @@ print '::: Training {} MVAs: {}\n{}'.format(len(session.methods),
 print session
 print ':::'
 
+# files & trees
+if not filename:                # config file
+    tree_s = TChain(sig_tree)
+    for f in session.sig_file:
+        tree_s.Add(f)
+    tree_b = TChain(bkg_tree)
+    for f in session.bkg_file:
+        tree_b.Add(f)
+else:                           # CLI options
+    ifile = TFile.Open(filename)
+    tree_s = ifile.Get(sig_tree)
+    tree_b = ifile.Get(bkg_tree)
+
+if not tree_s or not tree_b:
+    sys.exit('Unable to read input trees.')
+
+ofile = TFile.Open(out, 'recreate')
+
+# instantiate TMVA
+TMVA.Tools.Instance()
+factory = TMVA.Factory("TMVAClassification", ofile, "!V:!Silent:Color" + \
+                       ":DrawProgressBar:Transformations=I;D;P;G,D")
+
 # training variables
 for var in session.all_vars():
     factory.AddVariable(var, 'F')
@@ -53,8 +73,6 @@ for var in session.spectators:
     factory.AddSpectator(var, 'F')
 
 # get tree and perform branch name mappings if necessary
-tree_s = ifile.Get('TreeS')
-tree_b = ifile.Get('TreeB')
 factory.AddSignalTree(tree_s, 1.0)
 factory.AddBackgroundTree(tree_b, 1.0)
 
