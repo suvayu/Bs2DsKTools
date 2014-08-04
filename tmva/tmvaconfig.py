@@ -49,6 +49,38 @@ class TMVAconfig(object):
       del self._methods
 
    @property
+   def sig_file(self):
+      """Normal training MVA variables"""
+      return self._return_if('_sig_file')
+
+   @sig_file.setter
+   def sig_file(self, value):
+      if isinstance(value, Iterable):
+         self._sig_file = value
+      else:
+         self._sig_file = [value]
+
+   @sig_file.deleter
+   def sig_file(self):
+      del self._sig_file
+
+   @property
+   def bkg_file(self):
+      """Normal training MVA variables"""
+      return self._return_if('_bkg_file')
+
+   @bkg_file.setter
+   def bkg_file(self, value):
+      if isinstance(value, Iterable):
+         self._bkg_file = value
+      else:
+         self._bkg_file = [value]
+
+   @bkg_file.deleter
+   def bkg_file(self):
+      del self._bkg_file
+
+   @property
    def vars(self):
       """Normal training MVA variables"""
       return self._return_if('_vars')
