@@ -18,15 +18,19 @@ class TMVAconfig(object):
       self._cut_bkg = ''
 
    def __str__(self):
-      text  = 'Training session: {}\n{}\n'.format(self._name, '-'*50)
-      text += 'methods:          {}\n'.format(self._methods)
-      text += 'vars:             {}\n'.format(self._vars)
-      text += 'combined_vars:    {}\n'.format(self._combined_vars)
-      text += 'specatators:      {}\n'.format(self._spectators)
-      text += 'cut_sig:          {}\n'.format(self._cut_sig)
-      text += 'cut_bkg:          {}\n'.format(self._cut_bkg)
-      text += 'branch_mappings:  {}\n'.format(self._branch_mappings)
+      text  = 'Training session : {}\n{}\n'.format(self._name, '-'*50)
+
+      props = [prop for prop in vars(TMVAconfig)
+                     if prop.find('_') != 0]
+      props.sort()
+      for opt in props:
+         text += '{0:<{width}s} : {1:<s}\n'\
+            .format(opt, getattr(self, opt), width = 16)
       return text
+
+   def _return_if(self, prop):
+      if hasattr(self, prop):
+         return getattr(self, prop)
 
    @property
    def methods(self):
@@ -47,7 +51,7 @@ class TMVAconfig(object):
    @property
    def vars(self):
       """Normal training MVA variables"""
-      return self._vars
+      return self._return_if('_vars')
 
    @vars.setter
    def vars(self, value):
@@ -63,7 +67,7 @@ class TMVAconfig(object):
    @property
    def combined_vars(self):
       """Combined training MVA variables"""
-      return self._combined_vars
+      return self._return_if('_combined_vars')
 
    @combined_vars.setter
    def combined_vars(self, value):
@@ -77,12 +81,15 @@ class TMVAconfig(object):
       del self._combined_vars
    
    def all_vars(self):
-      return self._vars + self._combined_vars
+      all_vars = []
+      all_vars += self._return_if('_vars')
+      all_vars += self._return_if('_combined_vars')
+      return all_vars
 
    @property
    def spectators(self):
       """Spectator variables (not trained)"""
-      return self._spectators
+      return self._return_if('_spectators')
 
    @spectators.setter
    def spectators(self, value):
@@ -98,12 +105,12 @@ class TMVAconfig(object):
    @property
    def cut_sig(self):
       """Cuts on signal sample"""
-      return self._cut_sig
+      return self._return_if('_cut_sig')
 
    @cut_sig.setter
    def cut_sig(self, value) :
       if isinstance(value, str) or isinstance(value, TCut):
-         self._cut_sig = value
+         self._cut_sig = TCut(value)
       else:
          raise ValueError('Expecting a cut string or TCut')
 
@@ -114,12 +121,12 @@ class TMVAconfig(object):
    @property
    def cut_bkg(self):
       """Cuts on background sample"""
-      return self._cut_bkg
+      return self._return_if('_cut_bkg')
 
    @cut_bkg.setter
    def cut_bkg(self, value) :
       if isinstance(value, str) or isinstance(value, TCut):
-         self._cut_bkg = value
+         self._cut_bkg = TCut(value)
       else:
          raise ValueError('Expecting a cut string or TCut')
 
@@ -130,7 +137,7 @@ class TMVAconfig(object):
    @property
    def branch_mappings(self):
       """Input tree branch name mappings"""
-      return self._branch_mappings
+      return self._return_if('_branch_mappings')
 
    @branch_mappings.setter
    def branch_mappings(self, value) :
