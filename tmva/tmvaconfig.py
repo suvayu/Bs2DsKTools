@@ -152,8 +152,8 @@ class TMVAconfig(object):
 
    @property
    def cut_sig(self):
-      """Cuts on signal sample"""
-      return self._return_if('_cut_sig')
+      """Cuts on signal sample, including common cuts (cut_both)"""
+      return self.cut_both + TCut(self._return_if('_cut_sig'))
 
    @cut_sig.setter
    def cut_sig(self, value) :
@@ -168,8 +168,8 @@ class TMVAconfig(object):
 
    @property
    def cut_bkg(self):
-      """Cuts on background sample"""
-      return self._return_if('_cut_bkg')
+      """Cuts on background sample, including common cuts (cut_both)"""
+      return self.cut_both + TCut(self._return_if('_cut_bkg'))
 
    @cut_bkg.setter
    def cut_bkg(self, value) :
