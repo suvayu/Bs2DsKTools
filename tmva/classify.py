@@ -61,8 +61,8 @@ ofile = TFile.Open(out, 'recreate')
 
 # instantiate TMVA
 TMVA.Tools.Instance()
-factory = TMVA.Factory("TMVAClassification", ofile, "!V:!Silent:Color" + \
-                       ":DrawProgressBar:Transformations=I;D;P;G,D")
+factory = TMVA.Factory('TMVAClassification', ofile, '!V:!Silent:Color' + \
+                       ':DrawProgressBar:Transformations=I;D;P;G,D')
 
 # training variables
 for var in session.all_vars():
