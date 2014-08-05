@@ -135,6 +135,22 @@ class TMVAconfig(object):
       del self._spectators
 
    @property
+   def cut_both(self):
+      """Common cuts on signal and background sample"""
+      return TCut(self._return_if('_cut_both'))
+
+   @cut_both.setter
+   def cut_both(self, value) :
+      if isinstance(value, str) or isinstance(value, TCut):
+         self._cut_both = TCut(value)
+      else:
+         raise ValueError('Expecting a cut string or TCut')
+
+   @cut_both.deleter
+   def cut_both(self):
+      del self._cut_both
+
+   @property
    def cut_sig(self):
       """Cuts on signal sample"""
       return self._return_if('_cut_sig')
