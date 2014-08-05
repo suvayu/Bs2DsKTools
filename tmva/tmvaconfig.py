@@ -216,7 +216,7 @@ class ConfigFile(object):
          for opt in self._parser.options(session):
             value = self._parser.get(session, opt)
             if opt.find('cut') >= 0:
-               options[opt] = TCut(value)
+               options[opt] = TCut(value.replace('\n','')) # remove newlines
             else:
                options[opt] = [el.strip(',') for el in value.split()]
                if opt.find('mappings') >= 0:
