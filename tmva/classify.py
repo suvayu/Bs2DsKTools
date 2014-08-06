@@ -58,8 +58,8 @@ tree_b = ifile.Get('TreeB')
 factory.AddSignalTree(tree_s, 1.0)
 factory.AddBackgroundTree(tree_b, 1.0)
 
-# apply event weights if necessary
-factory.SetBackgroundWeightExpression('weight')
+# # apply event weights if necessary
+# factory.SetBackgroundWeightExpression('weight')
 
 # selection cuts, if any
 factory.PrepareTrainingAndTestTree(session.cut_sig, session.cut_bkg,
