@@ -23,7 +23,7 @@ public:
   virtual void  Loop() = 0;
   virtual void  Loop(TNtuple&) = 0;
   virtual void  Loop(TTree&) = 0;
-  virtual void  Loop(TTree &, TEntryList &, bool DsK=true) = 0;
+  virtual void  Loop(TTree &, TEntryList &, bool mode) = 0;
 
 };
 

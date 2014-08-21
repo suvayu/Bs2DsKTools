@@ -1,18 +1,15 @@
 #!/usr/bin/env python
 # coding=utf-8
-"""Plot acceptance ratio
+"""Dump variable binning scheme (as a numpy array) to a binary file
 
 """
 
 # option parsing
 import argparse
 optparser = argparse.ArgumentParser(description=__doc__)
-optparser.add_argument('file', help='ROOT file with fit result')
-optparser.add_argument('-p', '--print', dest='doPrint', action='store_true',
-                       help='Print plots to png/pdf files')
+optparser.add_argument('filename', help='ROOT file with fit result')
 options = optparser.parse_args()
-doPrint = options.doPrint
-fname = options.file
+fname = options.filename
 
 # Python modules
 import os
@@ -23,20 +20,14 @@ import numpy
 # FIXME: Batch running fails on importing anything but gROOT
 # ROOT global variables
 from ROOT import gROOT
-if doPrint: gROOT.SetBatch(True)
-
-from ROOT import gStyle, gPad, gSystem
-
-# ROOT colours and styles
-from ROOT import kGreen, kRed, kBlack, kBlue, kAzure, kYellow, kCyan
-from ROOT import kFullTriangleUp, kOpenTriangleDown, kFullDotMedium
+gROOT.SetBatch(True)
 
 # ROOT classes
-from ROOT import TTree, TFile, TCanvas, TPad, TClass, TLatex
-from ROOT import TH1, TH1D, TH2D
+from ROOT import TTree, TFile
+from ROOT import TH1, TH1D
 
 # RooFit classes
-from ROOT import RooPlot, RooWorkspace, RooFitResult, RooFit
+from ROOT import RooWorkspace, RooFit
 from ROOT import RooArgSet, RooArgList, RooDataHist
 
 # my stuff
@@ -51,7 +42,6 @@ from ROOT import PowLawAcceptance, AcceptanceRatio
 # Get objects from workspace
 workspace, ffile = get_workspace(fname, 'workspace')
 workspace.Print('v')
-timestamp = str(workspace.GetTitle())[19:]
 
 # Variables
 time = workspace.var('time')
@@ -60,13 +50,6 @@ tmin = time.getMin()
 tmax = time.getMax()
 time.setRange('fullrange', tmin, tmax)
 nbins = time.getBins()
-
-# DsK acceptance function
-rturnon = workspace.var('rturnon')
-roffset = workspace.var('roffset')
-rbeta = workspace.var('rbeta')
-ratio = workspace.function('ratio')
-fitresult = workspace.obj('fitresult_PDF_dataset')
 
 # Dataset
 argset = RooArgSet(time)
@@ -160,52 +143,7 @@ newbins = numpy.array(newbinedges)
 print '='*5, ' Dynamic bin merging summary ', '='*5
 print '# of bins %d -> %d ' % (oldnbins, nbins)
 
-# cleanup histograms for next step
-dspihist.Delete()
-dskhist.Delete()
-
-
-## Get histogram from dataset
-# instead of fiddling with TH1.Rebin(..) refill new histograms
-dspihist = TH1D('dspihist', 'Ds#pi decay time', nbins, newbins)
-dskhist = TH1D('dskhist', 'DsK decay time', nbins, newbins)
-ratiohist = TH1D('ratiohist', 'DsK/Ds#pi ratio', nbins, newbins)
-
-for hist in (dspihist, dskhist, ratiohist):
-    hist.Sumw2()
-
-dspihist = dspi_data.fillHistogram(dspihist, RooArgList(time))
-dskhist = dsk_data.fillHistogram(dskhist, RooArgList(time))
-ratiohist.Divide(dskhist, dspihist)
-
-# relative normalisation
-fintegral = ratio.createIntegral(RooArgSet(time), 'fullrange').getVal()
-hintegral = ratiohist.Integral('width') # has weights, use width
-norm = fintegral / hintegral
-print '=' * 5, ' Integrals ', '=' * 5
-print 'Function integral / histogram integral = %g / %g = %g' % (
-    fintegral, hintegral, norm)
-ratiohist.Scale(norm)
-
-# make dataset from histogram
-ratiodset = RooDataHist('ratiodset', '', RooArgList(time), ratiohist)
-ratiodset.Print('v')
-
-
-## Plot
-tframe = time.frame(RooFit.Title('Time acceptance ratio'))
-paramset = RooArgSet(rturnon, roffset, rbeta)
-ratio.plotOn(tframe, RooFit.VisualizeError(fitresult, paramset, 1, False))
-ratio.plotOn(tframe)
-ratiodset.plotOn(tframe, RooFit.MarkerStyle(kFullDotMedium))
-
-tframe.Draw()
-
-# Print
-if doPrint:
-    print 'Plotting to file: plots/DsK_ratio_%s.{png,pdf}' % timestamp
-    gPad.Print('plots/DsK_ratio_%s.png' % timestamp)
-    gPad.Print('plots/DsK_ratio_%s.pdf' % timestamp)
-
-# NB: Do not close file, otherwise plot disappears
-# ffile.Close()
+binfile = open('data/binning_scheme.dat', 'wb')
+print 'Dumping binning scheme to binary file: %s' % binfile.name
+newbins.tofile(binfile)
+binfile.close()

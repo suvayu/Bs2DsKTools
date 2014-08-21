@@ -33,14 +33,18 @@ from datetime import datetime
 import optparse
 usage='Usage: $ %s [options] <ratiofn>' % sys.argv[0]
 description = ''
-description += "<ratiofn> - type of acceptance ratio function to use: flat, linear, exponential (default)."
+description += ('<ratiofn> - type of acceptance ratio function to use:'
+                ' flat, linear, quadratic, and exponential (default).')
 parser = optparse.OptionParser(description=description, usage=usage)
 
 parser.add_option('-s', '--save', action='store_true', default=False,
                   help='Save the fitresult in a ROOT file (default: False).')
 options, args = parser.parse_args()
 save = options.save
-ratiofn = args[0]
+if not args:
+    ratiofn = 'exponential'
+else:
+    ratiofn = args[0]
 
 
 ## ROOT global variables
@@ -128,25 +132,46 @@ triggerVars = []
 for var in tlist:
     triggerVars += [RooRealVar(var, var, 0, 2)]
 
-cut = '(%s > 0) && (%s > 0 || %s > 0 || %s > 0) && abs(hID) == %%d' % (
+cut = '(%s > 0) && (%s > 0 || %s > 0 || %s > 0) ' % (
     tlist[0], tlist[1], tlist[2], tlist[3])
+cut += '&& BDTG > 0.5 '
 
 # Get dataset: DsPi and DsK
 time.setBins(150)
 dsetlist = []
-for mode, pid in [ ('DsPi', 211) , ('DsK', 321) ]:
+weights = []
+for mode, pidcut in [ ('DsPi', 'PIDK < 0') , ('DsK', 'PIDK > 10') ]:
     # Get tree
-    rfile = get_file('data/smalltree-new-MC-pico-offline-%s.root' % mode, 'read')
+    rfile = get_file('data/smalltree-really-new-MC-pre-PID-%s.root' % mode, 'read')
     ftree = get_object('ftree', rfile)
     print 'Reading from file: %s' % rfile.GetName()
 
-    modeVar = RooRealVar('hID', 'Decay mode %s' % mode, -350, 350)
-    cutstr = cut % pid
+    cutstr = cut + ' && ' + pidcut
+    cutVars = triggerVars[:]
+    cutVars += [RooRealVar('PIDK', 'PIDK', -200, 200)]
+    cutVars += [RooRealVar('BDTG', 'BDTG', -1, 1)]
+
+    if pidcut.find(' -5') > 0:
+        wtvar = 'wt0'
+    elif pidcut.find(' 0') > 0:
+        wtvar = 'wt1'
+    elif pidcut.find(' 5') > 0:
+        wtvar = 'wt2'
+    elif pidcut.find(' 10') > 0:
+        wtvar = 'wt3'
 
     try:
-        dataset = get_dataset(RooArgSet(time), ftree, cutstr, modeVar,
-                              *triggerVars)
+        wt = RooRealVar(wtvar, 'weight', 0.0, 1.0)
+        cutVars += [wt]
+        weights += [wt]
+    except NameError:
+        print 'Unknown PID selection. Weights not applied.'
+
+    try:
+        dataset = get_dataset(RooArgSet(time), ftree, cutstr, cutVars,
+                              RooFit.WeightVar(wt, True))
         dataset.SetName('%s_%s' % (dataset.GetName(), mode))
+        print '%s is weighted: %s' % (dataset.GetName(), dataset.isWeighted())
         dsetlist += [dataset]
     except TypeError, IOError:
         print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
@@ -157,14 +182,19 @@ decaycat.defineType('DsK')
 
 varlist += [ decaycat ]
 
+for idx, mode in enumerate(['DsPi', 'DsK']):
+    decaycat.setLabel(mode)
+    dsetlist[idx].addColumn(decaycat)
+
 dataset = RooDataSet('dataset', 'Combined dataset (DsK + DsPi)',
-                     RooArgSet(time), RooFit.Index(decaycat),
-                     RooFit.Import('DsPi', dsetlist[0]),
-                     RooFit.Import('DsK', dsetlist[1]))
+                     RooArgSet(time, decaycat),
+                     RooFit.Import(dsetlist[0]))
+dataset.append(dsetlist[1])
 
 for dset in dsetlist:
     dset.Print('v')
 
+# assert(False)
 
 ## Basic B decay pdf with time resolution
 # Resolution model
@@ -204,7 +234,7 @@ pdflist += [ Bdecay ]
 turnon = RooRealVar('turnon', 'turnon', 1.5, 0.5, 5.0)
 exponent = RooRealVar('exponent', 'exponent', 2., 1., 4.)
 offset = RooRealVar('offset', 'offset', 0.0, -0.5, 0.5)
-beta = RooRealVar('beta', 'beta', 0.04, 0.0, 0.05)
+beta = RooRealVar('beta', 'beta', 0.04, 0.0, 0.10)
 
 
 ## Dsπ acceptance and pdf
@@ -220,8 +250,10 @@ pdflist += [ dspi_acceptance, DsPi_Model ]
 # fit to Dsπ only
 print '=' * 5, ' 2-step fit: Dsπ ', '=' * 5
 dspi_fitresult = DsPi_Model.fitTo(dsetlist[0], RooFit.Optimize(0),
-                                  RooFit.Strategy(2), RooFit.Save(True),
-                                  RooFit.NumCPU(1),
+                                  RooFit.Strategy(2),
+                                  RooFit.Save(True), RooFit.NumCPU(1),
+                                  RooFit.SumW2Error(True),
+                                  RooFit.Offset(True),
                                   RooFit.Verbose(True))
 dspi_fitresult.Print()
 
@@ -277,6 +309,8 @@ print '=' * 5, ' 2-step fit: DsK ', '=' * 5
 dsk_fitresult = DsK_Model.fitTo(dsetlist[1], RooFit.Optimize(0),
                                 RooFit.Strategy(2), RooFit.Save(True),
                                 RooFit.NumCPU(1),
+                                RooFit.SumW2Error(True),
+                                RooFit.Offset(True),
                                 RooFit.Verbose(True))
 dsk_fitresult.Print()
 
@@ -316,9 +350,10 @@ for pdf in pdflist:
 dataset.Print('v')
 
 ## Fit
-fitresult = PDF.fitTo(dataset, RooFit.Optimize(0),
-                      RooFit.Strategy(2), RooFit.Save(True),
-                      RooFit.NumCPU(1),
+gSystem.ListLibraries()
+fitresult = PDF.fitTo(dataset, RooFit.Optimize(0), RooFit.Strategy(2),
+                      RooFit.Save(True), RooFit.NumCPU(1),
+                      RooFit.SumW2Error(True), RooFit.Offset(True),
                       RooFit.Verbose(True))
 fitresult.Print()
 
@@ -332,9 +367,8 @@ time.setRange('fullrange', epsilon, 15.0)
 RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-5)
 RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-5)
 
-# RooFit.Range(0, 0.01+epsilon),
 dkcatset = RooArgSet(decaycat)
-tframe1 = time.frame(RooFit.Name('ptime'),
+tframe1 = time.frame(RooFit.Range(0., time.getMax()), RooFit.Name('ptime'),
                      RooFit.Title('Ds#pi - powerlaw, DsK - powerlaw * %s ratio' %
                                   ratiofn))
 dsetlist[0].plotOn(tframe1, RooFit.MarkerStyle(kOpenTriangleDown))

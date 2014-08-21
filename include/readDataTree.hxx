@@ -35,8 +35,6 @@ public :
   virtual void     Loop(TTree&);
   virtual void     Loop(TTree &, TEntryList &);
 
-private:
-
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   Int_t           fCurrent; //!current Tree number in a TChain
 
@@ -90,6 +88,8 @@ private:
   Double_t        pPIDcut[1];   //[nSig]
   Double_t        eventNumber[1];   //[nSig]
 
+protected:
+
   // List of branches
   TBranch        *b_nSig;   //!
   TBranch        *b_BDTGResponse;   //!
@@ -139,7 +139,6 @@ private:
   TBranch        *b_lab5_ID;   //!
   TBranch        *b_pPIDcut;   //!
   TBranch        *b_eventNumber;   //!
-
 };
 
 #endif // __READDATATREE_HXX
