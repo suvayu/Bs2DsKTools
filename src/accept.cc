@@ -22,18 +22,18 @@ int main()
     TTree *ftree = NULL;
     TEntryList *felist = NULL;
 
+    bool DsK(i < 1);
     string fileaccess((doSelect) ? "recreate" : "read");
-    string fname((i < 1) ? "data/smalltree-new-MC-pico-offline-DsK.root" :
-		 "data/smalltree-new-MC-pico-offline-DsPi.root");
+    string fname(DsK ? "data/smalltree-really-new-MC-pre-PID-DsK.root" :
+		 "data/smalltree-really-new-MC-pre-PID-DsPi.root");
     TFile rfile(fname.c_str(), fileaccess.c_str());
     // TFile rfile("data/smalltree-new-MC-pico-stripping.root", fileaccess.c_str());
 
     // select
     if (doSelect) {
-      bool DsK(i < 1);
-      string tuplename((i < 1) ? "../ntuples/MC/Dsh-MC11/Merged_Bs2DsK*BsHypo_BDTG.root/DecayTree" :
-		       "../ntuples/MC/Dsh-MC11/Merged_Bs2DsPi*BsHypo_BDTG.root/DecayTree");
-      TChain * MCChain = initChain("MCChain", tuplename.c_str());
+      string tuplename(DsK ? "../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsK_*BsHypo_BDTG.root/DecayTree" :
+		       "../ntuples/MC/MC11a_AfterOfflineSel/MergedTree_Bs2DsPi_*BsHypo_BDTG.root/DecayTree");
+      TChain * MCChain = initChain("DecayTree", tuplename.c_str());
       lifetime MCsample(MCChain);
       selAccTree(MCsample, ftree, felist, DsK); // remember to delete ftree and felist
     } else {
@@ -68,6 +68,15 @@ TChain* initChain(std::string name, std::string fileglob)
   TChain *chain = new TChain(name.c_str());
   chain->Add(fileglob.c_str());
   return chain;
+}
+
+
+int selAccTree(readTree &sample, TTree *& ftree, TEntryList *& felist, bool DsK)
+{
+  ftree  = new TTree("ftree", "Selected events for lifetime acceptance");
+  felist = new TEntryList("felist", "Pre trigger"); // , "DecayTree", "../../ntuples/MC/Merged_Bs2Ds*.root"
+  sample.Loop(*ftree, *felist, DsK);
+  return felist->GetN();
 }
 
 
@@ -123,15 +132,6 @@ void plotHistos(TTree* ftree)
   // housekeeping
   delete hlaccept; delete hltime;
   return;
-}
-
-
-int selAccTree(readTree &sample, TTree *& ftree, TEntryList *& felist, bool DsK)
-{
-  ftree  = new TTree("ftree", "Selected events for lifetime acceptance");
-  felist = new TEntryList("felist", "Pre trigger"); // , "DecayTree", "../../ntuples/MC/Merged_Bs2Ds*.root"
-  sample.Loop(*ftree, *felist, DsK);
-  return felist->GetN();
 }
 
 

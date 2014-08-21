@@ -41,7 +41,7 @@ public :
   // overloaded non-virtual methods
   bool  CommonSelection(bool DsK=true);
   bool  UnbiasedSelection();
-  bool  OfflineSelection(bool DsK=true);
+  bool  OldOfflineSelection(bool DsK=true);
 };
 
 #endif // #ifndef __LIFETIME_HXX

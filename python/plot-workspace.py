@@ -82,6 +82,7 @@ DsPi_Model = workspace.pdf('DsPi_Model')
 dspi_acceptance = workspace.function('dspi_acceptance')
 DsK_Model = workspace.pdf('DsK_Model')
 dsk_acceptance = workspace.function('dsk_acceptance')
+ratio = workspace.function('ratio')
 
 # Dataset
 decaycat = workspace.var('decaycat')
@@ -94,6 +95,18 @@ ndsk = dsk_dataset.numEntries()
 
 
 ## Plots
+# ultra zoomed: 0.0 - 1 ps
+time.setRange('uzoom', 0.2, 0.7) # this range is for the dataset binning
+# the following range is for the RooPlot axis
+tframe0 = time.frame(RooFit.Range('uzoom'), RooFit.Name('pztime0'),
+                     RooFit.Title('0.2-0.7 ps, Ds#pi - powerlaw, DsK - powerlaw * %s ratio' %
+                                  ratiofn))
+dspi_acceptance.plotOn(tframe0, RooFit.LineColor(kGreen),
+                       RooFit.Normalization(10, RooAbsReal.Relative))
+dsk_acceptance.plotOn(tframe0, RooFit.LineColor(kGreen+2),
+                      RooFit.Normalization(10, RooAbsReal.Relative))
+ratio.plotOn(tframe0)
+
 # zoomed: 0.0 - 2 ps
 time.setRange('zoom', 0., 2.0) # this range is for the dataset binning
 # the following range is for the RooPlot axis
@@ -157,14 +170,14 @@ print tblrow.format(dsk_pullhist.GetMean(2), dsk_pullhist.GetRMS(2),
 xaxisvar = RooRealConstant.value(0.0)
 tframe3 = time.frame(RooFit.Range('fullrange'), RooFit.Name('dspi_pull'),
                      RooFit.Title('Fit pulls - DsPi PDF'))
-xaxisvar.plotOn(tframe3, RooFit.LineWidth(1))
+xaxisvar.plotOn(tframe3, RooFit.LineColor(kBlack), RooFit.LineWidth(1))
 tframe3.addPlotable(dspi_pullhist, 'P')
 
 # DsK
 tframe4 = time.frame(RooFit.Range('fullrange'), RooFit.Name('dsk_pull'),
                      RooFit.Title('Fit pulls - DsK PDF w/ %s ratio' %
                                   ratiofn))
-xaxisvar.plotOn(tframe4, RooFit.LineWidth(1))
+xaxisvar.plotOn(tframe4, RooFit.LineColor(kBlack), RooFit.LineWidth(1))
 tframe4.addPlotable(dsk_pullhist, 'P')
 
 
@@ -179,6 +192,11 @@ canvas = TCanvas('canvas', 'canvas', 1024, 640)
 
 # open pdf file
 if doPrint: canvas.Print(plotfile + '[')
+gPad.SetGrid(1,1)
+# ultra zoomed
+tframe0.Draw()
+if doPrint: canvas.Print(plotfile)
+gPad.SetGrid(0,0)
 # zoomed
 tframe1.Draw()
 if doPrint: canvas.Print(plotfile)

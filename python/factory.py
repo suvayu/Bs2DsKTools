@@ -90,8 +90,8 @@ def set_integrator_config():
     """
 
     # More precise integrals in RooFit
-    RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-7)
-    RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-7)
+    RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-9)
+    RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-9)
     # Set how intervals are determined and integrals calculated
     RooAbsReal.defaultIntegratorConfig().getConfigSection('RooAdaptiveGaussKronrodIntegrator1D').setCatLabel('method','21Points')
     RooAbsReal.defaultIntegratorConfig().getConfigSection('RooAdaptiveGaussKronrodIntegrator1D').setRealValue('maxSeg', 1000)
@@ -112,7 +112,7 @@ def get_toy_dataset(varargset, PDF=None):
         raise TypeError('PDF should inherit from RooAbsPdf.')
 
 
-def get_dataset(varargset, ftree, cut, *cutVars):
+def get_dataset(varargset, ftree, cut='', cutVars=[], *cmdArgs):
     """Return a dataset.
 
     Return a dataset from the ntuple `ftree'. Apply a selection cut
@@ -125,7 +125,7 @@ def get_dataset(varargset, ftree, cut, *cutVars):
         varargsetclone.add(cvar) # Add selVar to apply cut
 
     tmpdataset = RooDataSet('dataset', 'Dataset', varargsetclone,
-                            RooFit.Import(ftree), RooFit.Cut(cut))
+                            RooFit.Import(ftree), RooFit.Cut(cut), *cmdArgs)
     dataset = tmpdataset.reduce(varargset)
     del tmpdataset
     return dataset
