@@ -6,8 +6,8 @@ import argparse
 optparser = argparse.ArgumentParser(description=__doc__)
 optparser.add_argument('filename', nargs='?', default = None, help='ROOT file')
 optparser.add_argument('-s', dest='session', required=True, help='Session name')
-optparser.add_argument('--sig', dest='sig_tree', help='Signal tree name (required when filename present)')
-optparser.add_argument('--bkg', dest='bkg_tree', help='Background tree name (required when filename present)')
+optparser.add_argument('--sig', dest='sig_tree', help='Signal tree name (mandatory when filename present)')
+optparser.add_argument('--bkg', dest='bkg_tree', help='Background tree name (mandatory when filename present)')
 optparser.add_argument('-o', dest='out', required=True, help='Output ROOT file')
 options = optparser.parse_args()
 filename = options.filename
@@ -46,10 +46,10 @@ print ':::'
 
 # files & trees
 if not filename:                # config file
-    tree_s = TChain(sig_tree)
+    tree_s = TChain(sig_tree if sig_tree else 'TreeSig')
     for f in session.sig_file:
         tree_s.Add(f)
-    tree_b = TChain(bkg_tree)
+    tree_b = TChain(bkg_tree if bkg_tree else 'TreeBkg')
     for f in session.bkg_file:
         tree_b.Add(f)
 else:                           # CLI options
