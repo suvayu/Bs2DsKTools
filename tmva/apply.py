@@ -18,7 +18,10 @@ if not os.path.exists(filename):
 
 from array import array
 
-from ROOT import gDirectory, gROOT, gSystem, gPad, gStyle
+from ROOT import gROOT
+gROOT.SetBatch(True)
+
+from ROOT import gDirectory, gSystem, gPad, gStyle
 from ROOT import TFile, TTree, TH1D, TH2D, TH3D, TCanvas, TPad
 
 from ROOT import TMVA

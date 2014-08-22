@@ -23,7 +23,10 @@ if filename and not (sig_tree and bkg_tree):
     # required when input file is provided as positional argument
     sys.exit('Missing signal and background tree names')
 
-from ROOT import gDirectory, gROOT, gSystem, gPad, gStyle
+from ROOT import gROOT
+gROOT.SetBatch(True)
+
+from ROOT import gDirectory, gSystem, gPad, gStyle
 from ROOT import TFile, TTree, TChain, TH1D, TH2D, TH3D, TCanvas, TPad
 
 from ROOT import TMVA
