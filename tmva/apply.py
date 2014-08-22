@@ -2,15 +2,14 @@
 # coding=utf-8
 
 import argparse
+from utils import _import_args
 
 optparser = argparse.ArgumentParser(description=__doc__)
 optparser.add_argument('filename', help='ROOT file')
 optparser.add_argument('-s', dest='session', help='Session name')
 optparser.add_argument('-o', dest='out', help='ROOT file with output histograms')
 options = optparser.parse_args()
-filename = options.filename
-session = options.session
-out = options.out 
+locals().update(_import_args(options))
 
 import sys, os
 if not os.path.exists(filename):

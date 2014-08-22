@@ -2,6 +2,7 @@
 # coding=utf-8
 
 import argparse
+from utils import _import_args
 
 optparser = argparse.ArgumentParser(description=__doc__)
 optparser.add_argument('filename', nargs='?', default = None, help='ROOT file')
@@ -10,11 +11,7 @@ optparser.add_argument('--sig', dest='sig_tree', help='Signal tree name (mandato
 optparser.add_argument('--bkg', dest='bkg_tree', help='Background tree name (mandatory when filename present)')
 optparser.add_argument('-o', dest='out', required=True, help='Output ROOT file')
 options = optparser.parse_args()
-filename = options.filename
-session = options.session
-sig_tree = options.sig_tree
-bkg_tree = options.bkg_tree
-out = options.out 
+locals().update(_import_args(options))
 
 import sys, os
 if filename and not os.path.exists(filename):

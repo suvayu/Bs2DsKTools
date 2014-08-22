@@ -8,11 +8,12 @@
 """
 
 import argparse
+from utils import _import_args
 
 optparser = argparse.ArgumentParser(description=__doc__)
 optparser.add_argument('filename', nargs='+', help='ROOT file')
 options = optparser.parse_args()
-filenames = options.filename
+locals().update(_import_args(options))
 
 import sys, os
 import subprocess
