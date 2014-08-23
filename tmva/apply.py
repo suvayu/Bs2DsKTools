@@ -8,6 +8,7 @@ optparser = argparse.ArgumentParser(description=__doc__)
 optparser.add_argument('filename', help='ROOT file')
 optparser.add_argument('-s', dest='session', help='Session name')
 optparser.add_argument('-o', dest='out', help='ROOT file with output histograms')
+optparser.add_argument('-n', dest='name', help='Input tree name')
 options = optparser.parse_args()
 locals().update(_import_args(options))
 
@@ -55,7 +56,7 @@ for var in session.all_vars():
     reader.AddVariable(var, allvars[-1])
 
 # prepare apply tree
-itree = ifile.Get('TreeS')
+itree = ifile.Get(name)
 for i, var in enumerate(session.vars):
     # combined vars at the end (ignored)
     itree.SetBranchAddress(var, allvars[i])
