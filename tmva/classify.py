@@ -12,6 +12,8 @@ optparser.add_argument('--bkg', dest='bkg_tree', help='Background tree name (man
 optparser.add_argument('-o', dest='out', required=True, help='Output ROOT file')
 options = optparser.parse_args()
 locals().update(_import_args(options))
+# variables for future proofing
+wdir = 'weights'                # weights directory
 
 import sys, os
 if filename and not os.path.exists(filename):
@@ -61,7 +63,8 @@ ofile = TFile.Open(out, 'recreate')
 
 # instantiate TMVA
 TMVA.Tools.Instance()
-factory = TMVA.Factory('TMVAClassification', ofile, '!V:!Silent:Color' + \
+# TMVA.gConfig.GetIONames().fWeightFileDir = wdir
+factory = TMVA.Factory(session._name, ofile, '!V:!Silent:Color' + \
                        ':DrawProgressBar:Transformations=I;D;P;G,D')
 
 # training variables
@@ -101,3 +104,8 @@ factory.EvaluateAllMethods()
 ofile.Close()
 
 print '::: Training MVAs done!'
+
+# move output to session directory
+os.mkdir(session._name)
+os.rename(wdir, '{}/{}'.format(session._name, wdir))
+os.rename(out, '{}/{}'.format(session._name, out))
