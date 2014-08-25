@@ -106,6 +106,17 @@ ofile.Close()
 print '::: Training MVAs done!'
 
 # move output to session directory
-os.mkdir(session._name)
-os.rename(wdir, '{}/{}'.format(session._name, wdir))
+print '::: Moving all output to {}'.format(session._name)
+try:
+    os.makedirs(session._name)
+except OSError as err:
+    import errno
+    if err.errno == errno.EEXIST:
+        pass
+    else:
+        raise
+import shutil
+oldwdir = '{}/{}'.format(session._name, wdir)
+shutil.rmtree(oldwdir, True)
+os.rename(wdir, oldwdir)
 os.rename(out, '{}/{}'.format(session._name, out))
