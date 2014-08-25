@@ -78,8 +78,8 @@ for var in session.spectators:
 hists_discr = {}
 discriminant = {}
 for method in session.methods:
-    reader.BookMVA(method, 'weights/TMVAClassification_{}.weights.xml'
-                   .format(method))
+    reader.BookMVA(method, '{0}/weights/{0}_{1}.weights.xml'
+                   .format(session._name, method))
     # output histogram
     hname = 'MVA_{}'.format(method)
     hists_discr[method] = TH1D(hname, hname, 100, -1.0, 1.0 )
