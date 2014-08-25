@@ -42,7 +42,7 @@ int main (int argc, char **argv)
 
   TFile *ofile = TFile::Open(ofilen.c_str(), "recreate");
   // For one of MU/MD, data: 67798586L, MC (Dsπ): 67837L
-  TTree *otree = itree->CopyTree(cut, "", nentries/500);
+  TTree *otree = itree->CopyTree(cut, "", nentries/30);
   otree->Write();
   ofile->Write();
   ofile->Close();
