@@ -27,14 +27,14 @@ int main (int argc, char **argv)
   std::string ofilen(args[2]), ifilen(args[3]); // skim -o out.root in.root
 
   TCut dtau("lab2_TAU>0");
-  TCut dchi2("lab2_ENDVERTEX_CHI2>2");
+  TCut dchi2("lab2_ENDVERTEX_CHI2>2"); // FIXME: disable cut, first investigate if right variable
   TCut hlt1("lab0_Hlt1TrackAllL0Decision_TOS");
   TCut hlt2topo2body("lab0_Hlt2Topo2BodyBBDTDecision_TOS");
   TCut hlt2topo3body("lab0_Hlt2Topo3BodyBBDTDecision_TOS");
   TCut hlt2topo4body("lab0_Hlt2Topo4BodyBBDTDecision_TOS");
   TCut hlt2incphi("lab0_Hlt2IncPhiDecision_TOS");
   TCut hlt2 = hlt2topo2body || hlt2topo3body || hlt2topo4body || hlt2incphi;
-  TCut cut = dtau && dchi2 && hlt1 && hlt2;
+  TCut cut = dtau && hlt1 && hlt2;
 
   TFile *ifile = TFile::Open(ifilen.c_str());
   TTree *itree = dynamic_cast<TTree*>(ifile->Get("DecayTree"));
