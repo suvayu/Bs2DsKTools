@@ -112,6 +112,8 @@ int main (int argc, char **argv)
   std::string ofilen(vm["out"].as<std::string>());
   TFile *ofile = TFile::Open(ofilen.c_str(), "recreate");
   // For one of MU/MD, data: 67798586L, MC (Dsπ): 67837L
+  std::cout << "Selection: " << cut << std::endl;
+  std::cout << "Entries: " << (nentries/factor) <<   std::endl;
   TTree *otree = itree.CopyTree(cut, "", nentries/factor);
   otree->Write();
   ofile->Write();
