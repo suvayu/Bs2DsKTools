@@ -19,3 +19,5 @@ SRCS	:= $(wildcard *.cc)
 # targets
 $(SRCS:%.cc=%):%:	%.cc
 	$(CXX) $(OPT) $(BOOSTLIBS.CLI) $(ROOTCFLAGS) $(ROOTLIBS) -o $@ $<
+
+-include local.mk
