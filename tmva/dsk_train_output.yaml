@@ -1,0 +1,14 @@
+name: dsk_train_output.root
+children:
+    - name: InputVariables_PCA
+      children:
+        - name: CorrelationPlots
+    - name: InputVariables_Gauss_Deco
+      children:
+        - name: CorrelationPlots
+    - name: InputVariables_Id
+      children:
+        - name: CorrelationPlots
+    - name: InputVariables_Deco
+      children:
+        - name: CorrelationPlots

@@ -1,6 +1,9 @@
 # coding=utf-8
 """Utilities"""
 
+# pretty print
+from pprint import pprint
+
 def _import_args(namespace, d = {}):
     """Import attributes from namespace to local environment.
 
@@ -18,3 +21,31 @@ def _import_args(namespace, d = {}):
     for attr in attrs:
         d[attr] = getattr(namespace, attr)
     return d
+
+def make_paths(node):
+    """Return paths (directory) from dictionary"""
+    try:
+        pwd = node['name']
+    except KeyError:
+        print 'Malformed dict'
+        pprint(node)
+        raise
+    try:
+        children = node['children']
+    except KeyError:
+        children = None         # leaf node
+
+    if children:
+        paths = []
+        for child in children:
+            ret = make_paths(child)[0]
+            paths.append('{}/{}'.format(pwd, ret))
+        return paths
+    else:                       # this is a leaf node
+        return [pwd]
+
+def read_yaml(filename):
+    """Read yaml"""
+    stream = open(filename, 'r')
+    import yaml
+    return yaml.load(stream)
