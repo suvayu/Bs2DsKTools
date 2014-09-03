@@ -1,14 +1,23 @@
 name: dsk_train_output.root
+title: ROOT file
 children:
     - name: InputVariables_PCA
+      title: Input (PCA)
       children:
         - name: CorrelationPlots
+          title: Input corrn. (PCA)
     - name: InputVariables_Gauss_Deco
+      title: Input (Gauss)
       children:
         - name: CorrelationPlots
+          title: Input corrn. (Gauss)
     - name: InputVariables_Id
+      title: Input (Id)
       children:
         - name: CorrelationPlots
+          title: Input corrn. (Id)
     - name: InputVariables_Deco
+      title: Input (Deco)
       children:
         - name: CorrelationPlots
+          title: Input corrn. (Deco)
