@@ -34,13 +34,18 @@ def make_paths(node):
         children = node['children']
     except KeyError:
         children = None         # leaf node
+    try:
+        title = node['title']
+    except KeyError:
+        title = ''              # missing title
 
-    paths = [pwd]
+    paths = [{'path': pwd, 'title': title}]
     if children:
         for child in children:
             ret = make_paths(child)
             for i in ret:
-                paths.append('{}/{}'.format(pwd, i))
+                i['path'] = '{}/{}'.format(pwd, i['path'])
+                paths.append(i)
     return paths
 
 def read_yaml(filename):
