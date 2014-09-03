@@ -35,14 +35,13 @@ def make_paths(node):
     except KeyError:
         children = None         # leaf node
 
+    paths = [pwd]
     if children:
-        paths = []
         for child in children:
-            ret = make_paths(child)[0]
-            paths.append('{}/{}'.format(pwd, ret))
-        return paths
-    else:                       # this is a leaf node
-        return [pwd]
+            ret = make_paths(child)
+            for i in ret:
+                paths.append('{}/{}'.format(pwd, i))
+    return paths
 
 def read_yaml(filename):
     """Read yaml"""
