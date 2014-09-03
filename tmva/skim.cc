@@ -79,8 +79,7 @@ int main (int argc, char **argv)
   TCut cut;
   // cleaning cut versions (apply in reverse order, w/o using break statements)
   switch (cleaning_v) {
-    case 2: cut = cut && TCut("lab2_ENDVERTEX_CHI2>2");
-      // FIXME: disable now, first investigate if using right variable
+    case 2: cut = cut && TCut("lab2_FDCHI2_ORIVX>=2");
     case 1: cut = cut && TCut("lab2_TAU>0");
     }
 
