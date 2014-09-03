@@ -26,20 +26,19 @@ def make_paths(node):
     """Return paths (directory) from dictionary"""
     try:
         pwd = node['name']
+        del node['name']
     except KeyError:
         print 'Malformed dict'
         pprint(node)
         raise
     try:
         children = node['children']
+        del node['children']
     except KeyError:
         children = None         # leaf node
-    try:
-        title = node['title']
-    except KeyError:
-        title = ''              # missing title
 
-    paths = [{'path': pwd, 'title': title}]
+    node.update(path = pwd)
+    paths = [node]
     if children:
         for child in children:
             ret = make_paths(child)
