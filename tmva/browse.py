@@ -11,7 +11,7 @@ import argparse
 from utils import _import_args
 
 optparser = argparse.ArgumentParser(description=__doc__)
-optparser.add_argument('filename', nargs='+', help='ROOT file')
+optparser.add_argument('filenames', nargs='+', help='ROOT file')
 options = optparser.parse_args()
 locals().update(_import_args(options))
 
@@ -59,11 +59,7 @@ _markers = (kDot, kPlus, kStar, kCircle, kMultiply, kFullDotSmall,
 # ownership
 TFile.Open._creates = True
 
-rfiles = []
-for f in filenames:
-    rfiles.append(TFile.Open(f))
-if not rfiles:
-    sys.exit('Did you forget to provide a file to browse?')
+rfiles = [TFile.Open(f) for f in filenames]
 
 
 def ls(directory = gDirectory):
@@ -71,11 +67,6 @@ def ls(directory = gDirectory):
     if isinstance(directory, str):
         directory = gDirectory.GetDirectory(directory)
     directory.ls()
-
-
-def cd(directory):
-    """Change directory"""
-    gDirectory.cd(directory)
 
 
 def cd(dirname):
