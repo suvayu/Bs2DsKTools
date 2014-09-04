@@ -9,6 +9,17 @@ import sys, os
 from collections import Iterable
 
 
+def TMVAType(name):
+   """Mapping from MVA text string to TMVA.Types"""
+   name = name.lower()
+   if name.find('bdt') < 0:
+      return TMVA.Types.kBDT
+   elif name.find('likelihood') < 0:
+      return TMVA.Types.kLikelihood
+   else:
+      raise ValueError('Unsupported TMVA classifier type')
+
+
 class TMVAconfig(object):
    """Config class for TMVA Classification and Application"""
 
@@ -22,6 +33,8 @@ class TMVAconfig(object):
 
       props = [prop for prop in vars(TMVAconfig)
                      if prop.find('_') != 0]
+      for method in self.methods:
+         props.append(method.lower())
       props.sort()
       for opt in props:
          text += '{0:<{width}s} : {1:<s}\n'\
@@ -229,6 +242,11 @@ class ConfigFile(object):
       self._sessions = self._parser.sections()
       for session in self._sessions:
          options = {}
+         if 'methods' in self._parser.options(session):
+            method_opts = [el.strip(',').lower() for el in
+                           self._parser.get(session, 'methods').split()]
+         else:
+            raise ParsingError('Mandatory field, methods, is absent.')
          for opt in self._parser.options(session):
             value = self._parser.get(session, opt)
             if opt.find('cut') >= 0:
@@ -238,18 +256,18 @@ class ConfigFile(object):
                if opt.find('mappings') >= 0:
                   options[opt] = [m.split(':') for m in options[opt]]
 
-            # property list (after cleaning, i.e. no internal props)
-            valid_props = [prop for prop in vars(TMVAconfig)
-                           if prop.find('_') != 0]
-            # make TMVAconfig object
-            session_conf = TMVAconfig(session)
-            for opt in options:
-               if opt in valid_props:
-                  setattr(session_conf, opt, options[opt])
-               else:
-                  print 'Unknown option `{}\' in `{}\' section, ignoring.'\
-                     .format(opt, session)
-            setattr(self, session, session_conf)
+         # property list (after cleaning, i.e. no internal props)
+         valid_props = [prop for prop in vars(TMVAconfig)
+                        if prop.find('_') != 0]
+         # make TMVAconfig object
+         session_conf = TMVAconfig(session)
+         for opt in options:
+            if opt in valid_props or opt in method_opts:
+               setattr(session_conf, opt, options[opt])
+            else:
+               print 'Unknown option `{}\' in `{}\' section, ignoring.'\
+                  .format(opt, session)
+         setattr(self, session, session_conf)
 
    def write(self, filename):
       """Write config file"""
