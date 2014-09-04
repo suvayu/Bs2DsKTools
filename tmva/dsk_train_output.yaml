@@ -1,4 +1,4 @@
-name: dsk_train_output.root
+name: dsk_train_out.root
 title: ROOT file
 children:
     - name: InputVariables_PCA
