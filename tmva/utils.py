@@ -3,6 +3,7 @@
 
 # pretty print
 from pprint import pprint
+import ROOT
 
 def _import_args(namespace, d = {}):
     """Import attributes from namespace to local environment.
@@ -21,6 +22,17 @@ def _import_args(namespace, d = {}):
     for attr in attrs:
         d[attr] = getattr(namespace, attr)
     return d
+
+def path2rootdir(path, ext='.root'):
+    """Read path string and return ROOT directory
+
+    Returns (file/dir, directory)
+
+    """
+    res = path.split(ext, 1)
+    rfile = ROOT.TFile.Open('{}{}'.format(res[0], ext), 'read')
+    rdir = rfile.GetDirectory(res[-1]) # path in root file: /foo/bar
+    return (rfile, rdir)
 
 def make_paths(node):
     """Return paths (directory) from dictionary"""
