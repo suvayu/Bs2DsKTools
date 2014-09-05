@@ -59,6 +59,38 @@ class TMVAconfig(object):
       del self._methods
 
    @property
+   def factory_opts(self):
+      """TMVA factory options"""
+      return self._factory_opts
+
+   @factory_opts.setter
+   def factory_opts(self, value):
+      if isinstance(value, Iterable):
+         self._factory_opts = value
+      else:
+         self._factory_opts = [value]
+
+   @factory_opts.deleter
+   def factory_opts(self):
+      del self._factory_opts
+
+   @property
+   def training_opts(self):
+      """MVA training & testing options"""
+      return self._training_opts
+
+   @training_opts.setter
+   def training_opts(self, value):
+      if isinstance(value, Iterable):
+         self._training_opts = value
+      else:
+         self._training_opts = [value]
+
+   @training_opts.deleter
+   def training_opts(self):
+      del self._training_opts
+
+   @property
    def sig_file(self):
       """File with signal events"""
       return self._return_if('_sig_file')
