@@ -285,6 +285,14 @@ class ConfigFile(object):
                if opt.find('mappings') >= 0:
                   options[opt] = [m.split(':') for m in options[opt]]
 
+         # check if mandatory properties are present
+         def _test_(key1, key2):
+            if key1 == True: return True
+            mandatory = ['factory_opts', 'training_opts']
+            return key1 in mandatory or key2 in mandatory
+         if not reduce(_test_, options.keys()):
+            raise ParsingError('Mandatory option field missing')
+
          # make & set TMVAconfig object
          session_conf = TMVAconfig(session)
          map(lambda kv : setattr(session_conf, kv[0], kv[1]), options.items())
