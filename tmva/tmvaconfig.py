@@ -13,9 +13,9 @@ def TMVAType(name):
    """Mapping from MVA text string to TMVA.Types"""
    from ROOT import TMVA
    name = name.lower()
-   if name.find('bdt') < 0:
+   if name.find('bdt') >= 0:
       return TMVA.Types.kBDT
-   elif name.find('llh') < 0:
+   elif name.find('llh') >= 0:
       return TMVA.Types.kLikelihood
    else:
       raise ValueError('Unsupported TMVA classifier type')
