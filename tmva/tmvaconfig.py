@@ -253,17 +253,9 @@ class ConfigFile(object):
                if opt.find('mappings') >= 0:
                   options[opt] = [m.split(':') for m in options[opt]]
 
-         # property list (after cleaning, i.e. no internal props)
-         valid_props = [prop for prop in vars(TMVAconfig)
-                        if prop.find('_') != 0]
-         # make TMVAconfig object
+         # make & set TMVAconfig object
          session_conf = TMVAconfig(session)
-         for opt in options:
-            if opt in valid_props or opt in method_opts:
-               setattr(session_conf, opt, options[opt])
-            else:
-               print 'Unknown option `{}\' in `{}\' section, ignoring.'\
-                  .format(opt, session)
+         map(lambda kv : setattr(session_conf, kv[0], kv[1]), options.items())
          setattr(self, session, session_conf)
 
    def write(self, filename):
