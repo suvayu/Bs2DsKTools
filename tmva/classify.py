@@ -29,7 +29,7 @@ from ROOT import gDirectory, gSystem, gPad, gStyle
 from ROOT import TFile, TTree, TChain, TH1D, TH2D, TH3D, TCanvas, TPad
 
 from ROOT import TMVA
-from tmvaconfig import TMVAconfig, ConfigFile
+from tmvaconfig import TMVAType, TMVAconfig, ConfigFile
 
 # ownership
 TFile.Open._creates = True
@@ -89,13 +89,8 @@ factory.PrepareTrainingAndTestTree(session.cut_sig, session.cut_bkg,
 
 # book methods (FIXME: only one for now)
 for method in session.methods:
-    factory.BookMethod(TMVA.Types.kBDT, method, '!H:!V:NTrees=1000' + \
-                       ':MinNodeSize=2.5%:BoostType=Grad:Shrinkage=0.10' +\
-                       ':UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20' +\
-                       ':MaxDepth=2')
-                   # '!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.30:UseBaggedGrad'+
-                   # ':GradBaggingFraction=0.6:SeparationType=GiniIndex:nCuts=20'+
-                   # ':PruneMethod=CostComplexity:PruneStrength=50:NNodesMax=5')
+    opts = ':'.join(getattr(session, method))
+    factory.BookMethod(TMVAType(method), method, '!H:!V:' + opts)
 
 # train, test, evaluate
 factory.TrainAllMethods()
