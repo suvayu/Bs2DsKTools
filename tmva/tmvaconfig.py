@@ -60,7 +60,7 @@ class TMVAconfig(object):
 
    @property
    def sig_file(self):
-      """Normal training MVA variables"""
+      """File with signal events"""
       return self._return_if('_sig_file')
 
    @sig_file.setter
@@ -76,7 +76,7 @@ class TMVAconfig(object):
 
    @property
    def bkg_file(self):
-      """Normal training MVA variables"""
+      """File with background events"""
       return self._return_if('_bkg_file')
 
    @bkg_file.setter
