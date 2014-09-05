@@ -30,11 +30,8 @@ class TMVAconfig(object):
 
    def __str__(self):
       text  = 'Training session : {}\n{}\n'.format(self._name, '-'*50)
-
-      props = [prop for prop in vars(TMVAconfig)
-                     if prop.find('_') != 0]
-      for method in self.methods:
-         props.append(method.lower())
+      props = [prop for prop in vars(TMVAconfig) if prop.find('_') != 0]
+      props += [method.lower() for method in self.methods]
       props.sort()
       for opt in props:
          text += '{0:<{width}s} : {1:<s}\n'\
