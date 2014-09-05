@@ -88,3 +88,20 @@
 /data/bfys/lbel/DsKntuples3fb/
 - B2DX_withtagging_strip20_DVv33r8_3fb_magdown_BDTG_Bs.root
 - B2DX_withtagging_strip20_DVv33r8_3fb_magup_BDTG_Bs.root
+
+* Tasks [1/4]
+** TODO Resolve vertex χ² variable disambiguity
+- Vertex χ²/ndof
+- Lifetime vertex χ²/ndof
+** DONE Radial flight distance
+   CLOSED: [2014-09-05 Fri 15:45]
+- B_{s}: OWNPV - ENDVERTEX
+- D_{s}: B_{s} ENDVERTEX - D_{s} ENDVERTEX
+** TODO How to minimum/maximum of in TMVA
+- D_{s} children minimum track p_{T} and IP χ²
+- D_{s} children & bachelor maximum track ghost probability
+** TODO Efficiency plots
+BDT selection efficiency (for 3 diff arbitrary selections) for:
+- decay time → acceptance
+- decay time error → decay time resolution
+- B_{s} mass → mass fit
