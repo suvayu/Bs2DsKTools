@@ -64,8 +64,8 @@ ofile = TFile.Open(out, 'recreate')
 # instantiate TMVA
 TMVA.Tools.Instance()
 # TMVA.gConfig.GetIONames().fWeightFileDir = wdir
-factory = TMVA.Factory(session._name, ofile, '!V:!Silent:Color' + \
-                       ':DrawProgressBar:Transformations=I;D;P;G,D')
+factory = TMVA.Factory(session._name, ofile, '!V:' + \
+                       ':'.join(session.factory_opts))
 
 # training variables
 for var in session.all_vars():
@@ -84,10 +84,9 @@ factory.AddBackgroundTree(tree_b, 1.0)
 
 # selection cuts, if any
 factory.PrepareTrainingAndTestTree(session.cut_sig, session.cut_bkg,
-                                   'nTrain_Signal=0:nTrain_Background=0' + \
-                                   ':SplitMode=Random:NormMode=NumEvents:!V')
+                                   '!V:' + ':'.join(session.training_opts))
 
-# book methods (FIXME: only one for now)
+# book methods
 for method in session.methods:
     opts = ':'.join(getattr(session, method))
     factory.BookMethod(TMVAType(method), method, '!H:!V:' + opts)
