@@ -11,6 +11,7 @@ from collections import Iterable
 
 def TMVAType(name):
    """Mapping from MVA text string to TMVA.Types"""
+   from ROOT import TMVA
    name = name.lower()
    if name.find('bdt') < 0:
       return TMVA.Types.kBDT
