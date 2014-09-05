@@ -32,7 +32,7 @@ class TMVAconfig(object):
    def __str__(self):
       text  = 'Training session : {}\n{}\n'.format(self._name, '-'*50)
       props = [prop for prop in vars(TMVAconfig) if prop.find('_') != 0]
-      props += [method.lower() for method in self.methods]
+      props += [method for method in self.methods]
       props.sort()
       for opt in props:
          text += '{0:<{width}s} : {1:<s}\n'\
@@ -250,6 +250,7 @@ class ConfigFile(object):
    """TMVA configuration file object, used to read/write to a file"""
    def __init__(self, filenames):
       self._parser = ConfigParser()
+      self._parser.optionxform = str
       self._filenames = filenames
 
    def read(self):
@@ -273,7 +274,7 @@ class ConfigFile(object):
       for session in self._sessions:
          options = {}
          if 'methods' in self._parser.options(session):
-            method_opts = [el.strip(',').lower() for el in
+            method_opts = [el.strip(',') for el in
                            self._parser.get(session, 'methods').split()]
          else:
             raise ParsingError('Mandatory field, methods, is absent.')
