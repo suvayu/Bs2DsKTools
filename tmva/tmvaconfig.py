@@ -14,7 +14,7 @@ def TMVAType(name):
    name = name.lower()
    if name.find('bdt') < 0:
       return TMVA.Types.kBDT
-   elif name.find('likelihood') < 0:
+   elif name.find('llh') < 0:
       return TMVA.Types.kLikelihood
    else:
       raise ValueError('Unsupported TMVA classifier type')
