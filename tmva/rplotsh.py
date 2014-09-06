@@ -1,0 +1,158 @@
+#!/usr/bin/env python
+# coding=utf-8
+
+# argument parsing
+from argparse import ArgumentParser
+from utils import (_import_args)
+
+# ROOT
+from fixes import ROOT
+from ROOT import gDirectory, gROOT
+rootdir = gDirectory.GetDirectory('')
+
+
+import cmd
+class empty(cmd.Cmd):
+    def emptyline(self):
+        pass
+
+class shell(cmd.Cmd):
+    """Shell-like navigation commands for ROOT files"""
+
+    ls_parser = ArgumentParser()
+    ls_parser.add_argument('-l', action='store_true', dest='showtype', default=False)
+    ls_parser.add_argument('objs', nargs='*')
+
+    pwd = gDirectory.GetDirectory('')
+    prompt = '{}> '.format(pwd.GetName())
+
+    @classmethod
+    def _bytes2kb(cls, Bytes):
+        unit = 1
+        while Bytes >= 1024:
+            Bytes /= 1024.0
+            unit += 1
+        if unit == 1: return Bytes
+        elif unit == 2: unit = 'KB'
+        elif unit == 3: unit = 'MB'
+        elif unit == 4: unit = 'GB'
+        return '{:.1f}{}'.format(Bytes, unit)
+
+    def precmd(self, line):
+        self.oldpwd = self.pwd
+        return cmd.Cmd.precmd(self, line)
+
+    def postcmd(self, stop, line):
+        self.pwd = gDirectory.GetDirectory('')
+        dirn = self.pwd.GetName()
+        if len(dirn) > 20:
+            dirn = '{}..{}'.format(dirn[0:9], dirn[-9:])
+        self.prompt = '{}> '.format(dirn)
+        return cmd.Cmd.postcmd(self, stop, line)
+
+    def _list_objs(self, objs, showtype=False, depth=0, indent=''):
+        for obj in objs:
+            if isinstance(obj, str): # when invoked w/ args
+                objn = obj
+                if obj.find(':') < 0:
+                    obj = self.pwd.Get(obj)
+                else:
+                    tokens = obj.split(':', 1)
+                    obj = gROOT.GetListOfFiles().FindObject(tokens[0])
+                    if len(tokens[1]) > 0:
+                        obj = obj.GetKey(tokens[1])
+            else:
+                objn = 'No man\'s land'
+            if obj:             # obj is TFile or TKey
+                name = obj.GetName()
+                if isinstance(obj, ROOT.TKey):
+                    cname = obj.GetClassName()
+                else:
+                    cname = obj.ClassName()
+                ocls = ROOT.TClass.GetClass(cname)
+                if isinstance(obj, ROOT.TKey):
+                    fsize = self._bytes2kb(obj.GetNbytes())
+                    usize = self._bytes2kb(obj.GetObjlen())
+                if showtype:
+                    fmt = indent + '{cls:<20}{fs:>8}({us:>8}) {nm}{m}'
+                else:
+                    fmt = indent + '{nm}{m}'
+                if ocls.InheritsFrom(ROOT.TFile.Class()):
+                    print(fmt.format(cls = cname, nm = name, m = ':',
+                                     fs = '-', us = '-'))
+                elif ocls.InheritsFrom(ROOT.TDirectoryFile.Class()):
+                    print(fmt.format(cls = cname, nm = name, m = '/',
+                                     fs = fsize, us = usize))
+                else:
+                    print(fmt.format(cls = cname, nm = name, m = '',
+                                     fs = fsize, us = usize))
+                if depth and ocls.InheritsFrom(ROOT.TDirectoryFile.Class()):
+                    if depth > 0: tmp = depth -1
+                    else: tmp = depth
+                    self._list_objs(obj.GetListOfKeys(), showtype, tmp, indent+' ')
+            else:
+                print('ls: cannot access `{}\': No such object'.format(objn))
+
+    def do_ls(self, args=''):
+        """List contents of a directory/file. (see `pathspec')"""
+        opts = self.ls_parser.parse_args(args.split())
+        if opts.objs:           # w/ args
+            self._list_objs(opts.objs, opts.showtype, 1)
+        else:                   # no args
+            # can't access files trivially when in rootdir
+            if self.pwd == rootdir: # PyROOT
+                for f in rootdir.GetListOfFiles():
+                    print('{}:'.format(f.GetName()))
+            else:                   # in a root file
+                self._list_objs(self.pwd.GetListOfKeys(), opts.showtype)
+
+    def do_cd(self, args=''):
+        """Change directory to specified directory. (see `pathspec')"""
+        self.pwd.cd(args)
+
+    def help_pathspec(self):
+        msg  = "Paths inside the current file can be specified in the usual way:\n"
+        msg += "- full path: /dir1/dir2\n"
+        msg += "- relative path: ../dir1\n\n"
+
+        msg += "Paths in other root files have to be preceded by the file name\n"
+        msg += "and a colon:\n"
+        msg += "- file path: myfile.root:/dir1/dir2\n\n"
+
+        msg += "See: TDirectoryFile::cd(..) in ROOT docs"
+        print(msg)
+
+class plotsh(shell,empty):
+    """Interactive plotting interface for ROOT files"""
+
+    def do_EOF(self, line):
+        return True
+
+    def postloop(self):
+        print
+
+
+if __name__ == '__main__':
+    optparser = ArgumentParser(description=__doc__)
+    optparser.add_argument('filenames', nargs='+', help='ROOT file')
+    options = optparser.parse_args()
+    locals().update(_import_args(options))
+
+    # history file for interactive use
+    import atexit, readline, os
+    history_path = '.tplot'
+    def save_history(history_path=history_path):
+        import readline
+        readline.write_history_file(history_path)
+
+    if os.path.exists(history_path):
+        readline.read_history_file(history_path)
+
+    atexit.register(save_history)
+    del atexit, readline, save_history, history_path
+
+    rfiles = [ROOT.TFile.Open(f, 'read') for f in filenames]
+    rootdir.cd()
+
+    # command loop
+    plotsh().cmdloop()
