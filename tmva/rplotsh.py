@@ -16,7 +16,7 @@ class empty(cmd.Cmd):
     def emptyline(self):
         pass
 
-class shell(cmd.Cmd):
+class rshell(cmd.Cmd):
     """Shell-like navigation commands for ROOT files"""
 
     ls_parser = ArgumentParser()
@@ -154,7 +154,7 @@ class shell(cmd.Cmd):
         msg += "See: TDirectoryFile::cd(..) in ROOT docs"
         print(msg)
 
-class plotsh(shell,empty):
+class rplotsh(rshell,empty):
     """Interactive plotting interface for ROOT files"""
 
     def do_EOF(self, line):
@@ -187,4 +187,4 @@ if __name__ == '__main__':
     rootdir.cd()
 
     # command loop
-    plotsh().cmdloop()
+    rplotsh().cmdloop()
