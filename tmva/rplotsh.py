@@ -52,18 +52,16 @@ class shell(cmd.Cmd):
 
     def _list_objs(self, objs, showtype=False, depth=0, indent=''):
         for obj in objs:
+            objn = obj                 # for error msg
             if isinstance(obj, str): # when invoked w/ args
-                objn = obj
-                if obj.find(':') < 0:
-                    obj = self.pwd.Get(obj)
+                if obj.find(':') < 0: # not a file path: file:/path
+                    obj = self.pwd.GetKey(obj)
                 else:
                     tokens = obj.split(':', 1)
                     obj = gROOT.GetListOfFiles().FindObject(tokens[0])
                     if len(tokens[1]) > 0:
                         obj = obj.GetKey(tokens[1])
-            else:
-                objn = 'No man\'s land'
-            if obj:             # obj is TFile or TKey
+            if obj:             # NB: obj is TFile or TKey
                 name = obj.GetName()
                 if isinstance(obj, ROOT.TKey):
                     cname = obj.GetClassName()
@@ -89,7 +87,7 @@ class shell(cmd.Cmd):
                 if depth and ocls.InheritsFrom(ROOT.TDirectoryFile.Class()):
                     if depth > 0: tmp = depth -1
                     else: tmp = depth
-                    self._list_objs(obj.GetListOfKeys(), showtype, tmp, indent+' ')
+                    self._list_objs(obj.ReadObj().GetListOfKeys(), showtype, tmp, indent+' ')
             else:
                 print('ls: cannot access `{}\': No such object'.format(objn))
 
