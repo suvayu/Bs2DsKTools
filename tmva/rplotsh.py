@@ -38,6 +38,34 @@ class shell(cmd.Cmd):
         elif unit == 4: unit = 'GB'
         return '{:.1f}{}'.format(Bytes, unit)
 
+    def completion_helper(self, text, line, begidx, endidx, comp_type):
+        self.comp_f = map(lambda i: i + ':', filenames) # TFiles
+        if self.pwd == rootdir:
+            completions = self.comp_f
+        else:
+            path = os.path.split(text)
+            if path[0]: thisdir = self.pwd.GetDirectory(path[0])
+            else: thisdir = self.pwd
+            if comp_type == 'dir':
+                completions = self._get_paths(thisdir, dirs = True)
+            if comp_type == 'path':
+                completions = self._get_paths(thisdir, dirs = False)
+            if path[0]:
+                completions = ['/'.join((path[0],i)) for i in completions]
+            completions += self.comp_f
+        if not text:
+            return completions
+        else:
+            return filter(lambda i : str.startswith(i, text), completions)
+
+    def _get_paths(self, thisdir, dirs = False):
+        keys = thisdir.GetListOfKeys()
+        if dirs:
+            _is_dir = lambda key: ROOT.TClass.GetClass(key.GetClassName())\
+                                             .InheritsFrom(ROOT.TDirectoryFile.Class())
+            keys = filter(_is_dir, thisdir.GetListOfKeys())
+        return [k.GetName() for k in keys]
+
     def precmd(self, line):
         self.oldpwd = self.pwd
         return cmd.Cmd.precmd(self, line)
@@ -104,9 +132,15 @@ class shell(cmd.Cmd):
             else:                   # in a root file
                 self._list_objs(self.pwd.GetListOfKeys(), opts.showtype)
 
+    def complete_ls(self, text, line, begidx, endidx):
+        return self.completion_helper(text, line, begidx, endidx, 'path')
+
     def do_cd(self, args=''):
         """Change directory to specified directory. (see `pathspec')"""
         self.pwd.cd(args)
+
+    def complete_cd(self, text, line, begidx, endidx):
+        return self.completion_helper(text, line, begidx, endidx, 'dir')
 
     def help_pathspec(self):
         msg  = "Paths inside the current file can be specified in the usual way:\n"
