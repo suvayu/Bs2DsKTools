@@ -5,6 +5,10 @@
 from argparse import ArgumentParser
 from utils import (_import_args)
 
+optparser = ArgumentParser(description=__doc__)
+optparser.add_argument('filenames', nargs='+', help='ROOT files')
+options = optparser.parse_args()
+
 # ROOT
 from fixes import ROOT
 from ROOT import gDirectory, gROOT
@@ -165,14 +169,9 @@ class rplotsh(rshell,empty):
 
 
 if __name__ == '__main__':
-    optparser = ArgumentParser(description=__doc__)
-    optparser.add_argument('filenames', nargs='+', help='ROOT file')
-    options = optparser.parse_args()
-    locals().update(_import_args(options))
-
     # history file for interactive use
     import atexit, readline, os
-    history_path = '.tplot'
+    history_path = '.rplotsh'
     def save_history(history_path=history_path):
         import readline
         readline.write_history_file(history_path)
@@ -183,6 +182,7 @@ if __name__ == '__main__':
     atexit.register(save_history)
     del atexit, readline, save_history, history_path
 
+    locals().update(_import_args(options))
     rfiles = [ROOT.TFile.Open(f, 'read') for f in filenames]
     rootdir.cd()
 
