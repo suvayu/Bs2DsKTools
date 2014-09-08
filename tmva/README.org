@@ -96,7 +96,7 @@
 ** DONE Radial flight distance
    CLOSED: [2014-09-05 Fri 15:45]
 - B_{s}: OWNPV - ENDVERTEX
-- D_{s}: B_{s} ENDVERTEX - D_{s} ENDVERTEX
+- D_{s}: OWNPV - ENDVERTEX
 ** TODO How to minimum/maximum of in TMVA
 - D_{s} children minimum track p_{T} and IP χ²
 - D_{s} children & bachelor maximum track ghost probability
