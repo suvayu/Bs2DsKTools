@@ -89,7 +89,7 @@
 - B2DX_withtagging_strip20_DVv33r8_3fb_magdown_BDTG_Bs.root
 - B2DX_withtagging_strip20_DVv33r8_3fb_magup_BDTG_Bs.root
 
-* Tasks [1/4]
+* Tasks [2/4]
 ** TODO Resolve vertex χ² variable disambiguity
 - Vertex χ²/ndof
 - Lifetime vertex χ²/ndof
@@ -97,9 +97,14 @@
    CLOSED: [2014-09-05 Fri 15:45]
 - B_{s}: OWNPV - ENDVERTEX
 - D_{s}: OWNPV - ENDVERTEX
-** TODO How to minimum/maximum of in TMVA
+** DONE How to minimum/maximum of in TMVA
+   CLOSED: [2014-09-08 Mon 16:56]
 - D_{s} children minimum track p_{T} and IP χ²
 - D_{s} children & bachelor maximum track ghost probability
+Use the functions: =Max$()=, =Min$()=.  However this doesn't work with
+arbitrary branches, only takes a ~TTreeFormula~ argument.  So first
+add a branch with needed variables as a vector, then call the function
+in a formula.
 ** TODO Efficiency plots
 BDT selection efficiency (for 3 diff arbitrary selections) for:
 - decay time → acceptance
