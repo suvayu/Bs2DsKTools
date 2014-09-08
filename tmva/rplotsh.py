@@ -23,6 +23,7 @@ class empty(cmd.Cmd):
 class rshell(cmd.Cmd):
     """Shell-like navigation commands for ROOT files"""
 
+    from rdir import pathspec
     ls_parser = ArgumentParser()
     ls_parser.add_argument('-l', action='store_true', dest='showtype', default=False)
     ls_parser.add_argument('objs', nargs='*')
@@ -86,13 +87,13 @@ class rshell(cmd.Cmd):
         for obj in objs:
             objn = obj                 # for error msg
             if isinstance(obj, str): # when invoked w/ args
-                if obj.find(':') < 0: # not a file path: file:/path
+                ps = pathspec(obj)
+                if ps.norfile: # not a file path: file:/path
                     obj = self.pwd.GetKey(obj)
                 else:
-                    tokens = obj.split(':', 1)
-                    obj = gROOT.GetListOfFiles().FindObject(tokens[0])
-                    if len(tokens[1]) > 0:
-                        obj = obj.GetKey(tokens[1])
+                    obj = gROOT.GetListOfFiles().FindObject(ps.rfile)
+                    if ps.rpath:
+                        obj = obj.GetKey(ps.rpath)
             if obj:             # NB: obj is TFile or TKey
                 name = obj.GetName()
                 if isinstance(obj, ROOT.TKey):
