@@ -35,9 +35,10 @@ class pathspec(object):
     relative = None
     rfile_basename, rfile_dirname, rfile_split = None, None, None
     rpath_basename, rpath_dirname, rpath_split = None, None, None
-    
+
 
     def __init__(self, path):
+        self.path = path
         if path.find(':') < 0:
             if path.find('.root') < 0:
                 self.rfile = ''
@@ -62,3 +63,72 @@ class pathspec(object):
         self.rpath_split = os.path.split(self.rpath)
         self.rpath_basename = os.path.basename(self.rpath)
         self.rpath_dirname = os.path.dirname(self.rpath)
+
+
+class Rdir(object):
+    """Global filesystem like directory hierarchy for a ROOT session."""
+
+    from fixes import ROOT
+    from ROOT import gROOT, gDirectory
+    files = []
+
+    def __init__(self, files):
+        self.files = [ROOT.TFile.Open(f, 'read') for f in files]
+
+    def ls(self, path = None, robj_t = None, robj_p = None):
+        """Return list of key(s) in path.
+
+        If path is a directory, returns a list of keys in the
+        directory.  If it is a non-directory, returns the key for the
+        object.
+
+        The returned list can be filtered with object type, or a
+        custom filter function.  Object type can be any ROOT Class
+        that can uses the ClassDef macro in it's declaration.  The
+        custom filter function can be any function that can filter
+        using the object key.  Note that these two filtering methods
+        are mutually exclusive.  When robj_t is present, robj_p is
+        ignored; so when a custom filter function is used, robj_t
+        should be None.
+
+        path   -- path specification string (see pathspec for format)
+        robj_t -- ROOT object type
+        robj_p -- custom filter function that takes ROOT.TKey
+
+        """
+        if not path:
+            rdir = gDirectory.GetDirectory('')
+        else:
+            path = pathspec(path)
+            if path.rfile not in [f.GetName() for f in files]:
+                files += [ROOT.TFile.Open(path.rfile, 'read')]
+                # opening a file changes dir to the new file
+            rdir = gDirectory.GetDirectory(path.rpath)
+        if not rdir:
+            rdir = gDirectory.GetDirectory(path.rpath_dirname)
+            keys = [rdir.GetKey(path.rpath_basename)]
+        else:
+            keys = rdir.GetListOfKeys()
+        if robj_t:
+            robj_p = lambda key: \
+                     ROOT.TClass.GetClass(key.GetClassName()) \
+                                .InheritsFrom(robj_t.Class())
+        if robj_p:
+            keys = filter(robj_p, keys)
+        return keys
+
+    def ls_names(self, path = None, robj_t = None, robj_p = None):
+        """Return list of key(s) names in path.
+
+        For documentation on arguments, see Rdir.ls(..)
+
+        """
+        return [k.GetName() for k in self.ls(path, robj_t, robj_p)]
+
+    def read(self, path = None, robj_t = None, robj_p = None):
+        """Return list of object(s) in path.
+
+        For documentation on arguments, see Rdir.ls(..)
+
+        """
+        return [k.ReadObj() for k in self.ls(path, robj_t, robj_p)]
