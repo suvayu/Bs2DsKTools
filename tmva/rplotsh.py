@@ -170,7 +170,7 @@ class rplotsh(rshell,empty):
 
 if __name__ == '__main__':
     # history file for interactive use
-    import atexit, readline, os
+    import atexit, readline, os, sys
     history_path = '.rplotsh'
     def save_history(history_path=history_path):
         import readline
@@ -187,4 +187,9 @@ if __name__ == '__main__':
     rootdir.cd()
 
     # command loop
-    rplotsh().cmdloop()
+    try:
+        rplotsh_inst = rplotsh()
+        rplotsh_inst.cmdloop()
+    except KeyboardInterrupt:
+        rplotsh_inst.postloop()
+        sys.exit(1)
