@@ -94,7 +94,7 @@ class Rdir(object):
         with savepwd():
             self.files = [ROOT.TFile.Open(f, 'read') for f in files]
 
-    def ls_dir(self, path = None):
+    def get_dir(self, path = None):
         """Return directory from path.
 
         Doesn't check for non-directory.  It's the caller's
@@ -135,11 +135,11 @@ class Rdir(object):
         robj_p -- custom filter function that takes ROOT.TKey
 
         """
-        rdir = self.ls_dir(path)
+        rdir = self.get_dir(path)
         if not rdir:
             path = pathspec(path)
             # try again from one level up
-            rdir = self.ls_dir('{}:{}'.format(path.rfile, path.rpath_dirname))
+            rdir = self.get_dir('{}:{}'.format(path.rfile, path.rpath_dirname))
             # FIXME: should be: while not rdir: keep trying
             keys = [rdir.GetKey(path.rpath_basename)]
         else:

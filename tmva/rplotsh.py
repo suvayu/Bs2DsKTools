@@ -114,7 +114,7 @@ class rshell(cmd.Cmd):
         opts = self.ls_parser.parse_args(args.split())
         if opts.paths:          # w/ args
             for path in opts.paths:
-                isdir = self.rdir_helper.ls_dir(path)
+                isdir = self.rdir_helper.get_dir(path)
                 indent = ''
                 if isdir:
                     if not isinstance(isdir, ROOT.TFile):
