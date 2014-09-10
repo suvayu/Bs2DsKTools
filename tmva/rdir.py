@@ -64,6 +64,9 @@ class pathspec(object):
         self.rpath_basename = os.path.basename(self.rpath)
         self.rpath_dirname = os.path.dirname(self.rpath)
 
+    def __str__(self):
+        return self.path
+
 from fixes import ROOT
 from ROOT import gROOT, gDirectory
 
@@ -91,6 +94,26 @@ class Rdir(object):
         with savepwd():
             self.files = [ROOT.TFile.Open(f, 'read') for f in files]
 
+    def ls_dir(self, path = None):
+        """Return directory from path.
+
+        Doesn't check for non-directory.  It's the caller's
+        responsibility.
+
+        """
+        if not path:
+            return gDirectory.GetDirectory('')
+        else:
+            path = pathspec(path)
+            with savepwd():
+                if path.rfile:  # need to change to correct file first
+                    if path.rfile not in [f.GetName() for f in self.files]:
+                        # opening a file changes dir to the new file
+                        files += [ROOT.TFile.Open(path.rfile, 'read')]
+                    else:
+                        gROOT.cd('{}:'.format(path.rfile))
+                return gDirectory.GetDirectory(path.rpath)
+
     def ls(self, path = None, robj_t = None, robj_p = None):
         """Return list of key(s) in path.
 
@@ -112,20 +135,12 @@ class Rdir(object):
         robj_p -- custom filter function that takes ROOT.TKey
 
         """
-        if not path:
-            rdir = gDirectory.GetDirectory('')
-        else:
-            path = pathspec(path)
-            if path.rfile:
-                with savepwd():
-                    if path.rfile not in [f.GetName() for f in files]:
-                        # opening a file changes dir to the new file
-                        files += [ROOT.TFile.Open(path.rfile, 'read')]
-                    else:
-                        gROOT.cd(path.rfile)
-                    rdir = gDirectory.GetDirectory(path.rpath)
+        rdir = self.ls_dir(path)
         if not rdir:
-            rdir = gDirectory.GetDirectory(path.rpath_dirname)
+            path = pathspec(path)
+            # try again from one level up
+            rdir = self.ls_dir('{}:{}'.format(path.rfile, path.rpath_dirname))
+            # FIXME: should be: while not rdir: keep trying
             keys = [rdir.GetKey(path.rpath_basename)]
         else:
             keys = rdir.GetListOfKeys()
