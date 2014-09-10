@@ -64,16 +64,32 @@ class pathspec(object):
         self.rpath_basename = os.path.basename(self.rpath)
         self.rpath_dirname = os.path.dirname(self.rpath)
 
+from fixes import ROOT
+from ROOT import gROOT, gDirectory
+
+class savepwd(object):
+    """Save present working directory and restore when done."""
+
+    def __init__(self):
+        self.pwd = gDirectory.GetDirectory('')
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, type, value, traceback):
+        pass
+
+    def __del__(self):
+        self.pwd.cd()
 
 class Rdir(object):
     """Global filesystem like directory hierarchy for a ROOT session."""
 
-    from fixes import ROOT
-    from ROOT import gROOT, gDirectory
     files = []
 
     def __init__(self, files):
-        self.files = [ROOT.TFile.Open(f, 'read') for f in files]
+        with savepwd():
+            self.files = [ROOT.TFile.Open(f, 'read') for f in files]
 
     def ls(self, path = None, robj_t = None, robj_p = None):
         """Return list of key(s) in path.
@@ -100,10 +116,14 @@ class Rdir(object):
             rdir = gDirectory.GetDirectory('')
         else:
             path = pathspec(path)
-            if path.rfile not in [f.GetName() for f in files]:
-                files += [ROOT.TFile.Open(path.rfile, 'read')]
-                # opening a file changes dir to the new file
-            rdir = gDirectory.GetDirectory(path.rpath)
+            if path.rfile:
+                with savepwd():
+                    if path.rfile not in [f.GetName() for f in files]:
+                        # opening a file changes dir to the new file
+                        files += [ROOT.TFile.Open(path.rfile, 'read')]
+                    else:
+                        gROOT.cd(path.rfile)
+                    rdir = gDirectory.GetDirectory(path.rpath)
         if not rdir:
             rdir = gDirectory.GetDirectory(path.rpath_dirname)
             keys = [rdir.GetKey(path.rpath_basename)]
