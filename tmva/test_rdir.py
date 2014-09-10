@@ -67,29 +67,92 @@ class test_savepwd(unittest.TestCase):
 
 
 from rdir import Rdir
-@unittest.skip('Not implemented')
 class test_Rdir(unittest.TestCase):
     def setUp(self):
-        self.rfile1 = TFile.Open('/tmp/test_Rdir1.root', 'recreate')
-        self.dir11 = self.rfile1.mkdir('dir11')
-        self.dir12 = self.rfile1.mkdir('dir12')
-        self.rfile2 = TFile.Open('/tmp/test_Rdir2.root', 'recreate')
-        self.dir21 = self.rfile1.mkdir('dir21')
-        self.dir22 = self.rfile1.mkdir('dir22')
-        # FIXME: make regular objects for listing & reading
+        """Make ROOT files with some contents.
+
+        Structure:
+
+          /tmp/test_Rdir[0,1].root:/dira/hista
+          /tmp/test_Rdir[0,1].root:/dirb/histb
+          /tmp/test_Rdir[0,1].root:/hist[0,1]
+
+        """
+        self.fnames, self.rfiles = [], []
+        for i in xrange(2):
+            self.fnames.append('/tmp/test_Rdir{}.root'.format(i))
+            self.rfiles.append(TFile.Open(self.fnames[-1], 'recreate'))
+
+        for i, f in enumerate(self.rfiles):
+            rdir = f.mkdir('dira')
+            rdir.WriteTObject(ROOT.TH1C('hista', '', 10, 0, 10))
+
+            rdir = f.mkdir('dirb')
+            rdir.WriteTObject(ROOT.TH1C('histb', '', 10, 0, 10))
+
+            f.WriteTObject(ROOT.TH1C('hist{}'.format(i), '', 10, 0, 10))
+
+        for f in self.rfiles:
+            f.Write()
+            f.Close()
 
     def tearDown(self):
-        os.remove('/tmp/test_Rdir1.root')
-        os.remove('/tmp/test_Rdir2.root')
+        for fname in self.fnames:
+            os.remove(fname)
+
+    def test_init(self):
+        self.assertTrue(Rdir(self.fnames))
+        self.assertRaises(TypeError, Rdir, self.rfiles)
+
+    def test_get_dir(self):
+        rdir_helper = Rdir(self.fnames)
+        self.assertTrue(rdir_helper.get_dir('/tmp/test_Rdir1.root:/dira'))
+        self.assertTrue(rdir_helper.get_dir('/tmp/test_Rdir1.root:'))
+        self.assertTrue(rdir_helper.get_dir('/tmp/test_Rdir1.root'))
+        # not a directory
+        self.assertFalse(rdir_helper.get_dir('/tmp/test_Rdir1.root:/dira/hista'))
+        # non-existent
+        self.assertFalse(rdir_helper.get_dir('/tmp/test_Rdir1.root:/boohoo'))
 
     def test_ls(self):
-        pass
+        rdir_helper = Rdir(self.fnames)
+
+        keys_t = rdir_helper.ls('/tmp/test_Rdir0.root:/dirb')
+        keys_r = rdir_helper.files[0].GetDirectory('/dirb').GetListOfKeys()
+        res = map(lambda i, j: i.GetName() == j.GetName(), keys_t, keys_r)
+        self.assertTrue(reduce(lambda i, j: i and j, res), msg='Keys do not match')
+
+        # FIXME: change files to see if any effects show up, need better test
+        keys_t = rdir_helper.ls('/tmp/test_Rdir1.root')
+        keys_r = rdir_helper.files[1].GetListOfKeys()
+        res = map(lambda i, j: i.GetName() == j.GetName(), keys_t, keys_r)
+        self.assertTrue(reduce(lambda i, j: i and j, res), msg='Keys do not match')
 
     def test_ls_names(self):
-        pass
+        rdir_helper = Rdir(self.fnames)
+        # FIXME: Is using assertItemsEqual(..) correct?  Does it
+        # compare elements, or just count?
+        keys_t = rdir_helper.ls_names('/tmp/test_Rdir0.root:/hist0')
+        keys_r = [rdir_helper.files[0].GetKey('hist0').GetName()]
+        self.assertItemsEqual(keys_r, keys_t)
+
+        keys_t = rdir_helper.ls_names('/tmp/test_Rdir1.root')
+        keys_r = [k.GetName() for k in rdir_helper.files[1].GetListOfKeys()]
+        self.assertItemsEqual(keys_r, keys_t)
 
     def test_read(self):
-        pass
+        rdir_helper = Rdir(self.fnames)
+        objs_t = rdir_helper.read('/tmp/test_Rdir1.root')
+        objs_r = [k.ReadObj() for k in rdir_helper.files[1].GetListOfKeys()]
+        res = map(lambda i, j: i.GetName() == j.GetName(), objs_t, objs_r)
+        self.assertTrue(reduce(lambda i, j: i and j, res), msg='Keys do not match')
 
     def test_filter(self):
-        pass
+        rdir_helper = Rdir(self.fnames)
+        keys_t = rdir_helper.ls('/tmp/test_Rdir0.root:',
+                                robj_t = ROOT.TDirectoryFile)
+        keys_r = [k for k in rdir_helper.files[0].GetListOfKeys()
+                  if ROOT.TClass.GetClass(k.GetClassName()) \
+                  .InheritsFrom(ROOT.TDirectoryFile.Class())]
+        res = map(lambda i, j: i.GetName() == j.GetName(), keys_t, keys_r)
+        self.assertTrue(reduce(lambda i, j: i and j, res), msg='Keys do not match')
