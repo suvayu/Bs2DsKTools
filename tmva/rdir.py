@@ -92,7 +92,12 @@ class Rdir(object):
 
     def __init__(self, files):
         with savepwd():
-            self.files = [ROOT.TFile.Open(f, 'read') for f in files]
+            self.files = []
+            for f in files:
+                if isinstance(f, str):
+                    self.files.append(ROOT.TFile.Open(f, 'read'))
+                else:
+                    raise TypeError('Expected string, {} found'.format(type(f)))
 
     def get_dir(self, path = None):
         """Return directory from path.
