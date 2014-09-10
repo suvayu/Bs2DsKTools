@@ -9,26 +9,24 @@ optparser = ArgumentParser(description=__doc__)
 optparser.add_argument('filenames', nargs='+', help='ROOT files')
 options = optparser.parse_args()
 
-# ROOT
-from fixes import ROOT
-from ROOT import gDirectory, gROOT
-rootdir = gDirectory.GetDirectory('')
-
 
 import cmd
 class empty(cmd.Cmd):
     def emptyline(self):
         pass
 
+from fixes import ROOT
+from ROOT import gROOT, gDirectory
+from rdir import pathspec, Rdir, savepwd
+
 class rshell(cmd.Cmd):
     """Shell-like navigation commands for ROOT files"""
 
-    from rdir import pathspec
     ls_parser = ArgumentParser()
     ls_parser.add_argument('-l', action='store_true', dest='showtype', default=False)
-    ls_parser.add_argument('objs', nargs='*')
+    ls_parser.add_argument('paths', nargs='*')
 
-    pwd = gDirectory.GetDirectory('')
+    pwd = gROOT
     prompt = '{}> '.format(pwd.GetName())
 
     @classmethod
@@ -43,33 +41,23 @@ class rshell(cmd.Cmd):
         elif unit == 4: unit = 'GB'
         return '{:.1f}{}'.format(Bytes, unit)
 
-    def completion_helper(self, text, line, begidx, endidx, comp_type):
-        self.comp_f = map(lambda i: i + ':', filenames) # TFiles
-        if self.pwd == rootdir:
+    def add_files(self, files):
+        self.rdir_helper = Rdir(files)
+
+    def completion_helper(self, text, line, begidx, endidx, comp_type=None):
+        self.comp_f = map(lambda i: i.GetName() + ':', self.rdir_helper.files) # TFiles
+        if self.pwd == gROOT:
             completions = self.comp_f
         else:
-            path = os.path.split(text)
-            if path[0]: thisdir = self.pwd.GetDirectory(path[0])
-            else: thisdir = self.pwd
-            if comp_type == 'dir':
-                completions = self._get_paths(thisdir, dirs = True)
-            if comp_type == 'path':
-                completions = self._get_paths(thisdir, dirs = False)
-            if path[0]:
-                completions = ['/'.join((path[0],i)) for i in completions]
+            path = os.path.dirname(text)
+            completions = self.rdir_helper.ls_names(path, comp_type)
+            path = path.rstrip('/')
+            completions = ['/'.join((path,i)) for i in completions]
             completions += self.comp_f
         if not text:
             return completions
         else:
             return filter(lambda i : str.startswith(i, text), completions)
-
-    def _get_paths(self, thisdir, dirs = False):
-        keys = thisdir.GetListOfKeys()
-        if dirs:
-            _is_dir = lambda key: ROOT.TClass.GetClass(key.GetClassName())\
-                                             .InheritsFrom(ROOT.TDirectoryFile.Class())
-            keys = filter(_is_dir, thisdir.GetListOfKeys())
-        return [k.GetName() for k in keys]
 
     def precmd(self, line):
         self.oldpwd = self.pwd
@@ -83,69 +71,88 @@ class rshell(cmd.Cmd):
         self.prompt = '{}> '.format(dirn)
         return cmd.Cmd.postcmd(self, stop, line)
 
-    def _list_objs(self, objs, showtype=False, depth=0, indent=''):
-        for obj in objs:
-            objn = obj                 # for error msg
-            if isinstance(obj, str): # when invoked w/ args
-                ps = pathspec(obj)
-                if ps.norfile: # not a file path: file:/path
-                    obj = self.pwd.GetKey(obj)
-                else:
-                    obj = gROOT.GetListOfFiles().FindObject(ps.rfile)
-                    if ps.rpath:
-                        obj = obj.GetKey(ps.rpath)
-            if obj:             # NB: obj is TFile or TKey
-                name = obj.GetName()
-                if isinstance(obj, ROOT.TKey):
-                    cname = obj.GetClassName()
-                else:
-                    cname = obj.ClassName()
-                ocls = ROOT.TClass.GetClass(cname)
-                if isinstance(obj, ROOT.TKey):
-                    fsize = self._bytes2kb(obj.GetNbytes())
-                    usize = self._bytes2kb(obj.GetObjlen())
-                if showtype:
-                    fmt = indent + '{cls:<20}{fs:>8}({us:>8}) {nm}{m}'
-                else:
-                    fmt = indent + '{nm}{m}'
-                if ocls.InheritsFrom(ROOT.TFile.Class()):
-                    print(fmt.format(cls = cname, nm = name, m = ':',
-                                     fs = '-', us = '-'))
-                elif ocls.InheritsFrom(ROOT.TDirectoryFile.Class()):
-                    print(fmt.format(cls = cname, nm = name, m = '/',
-                                     fs = fsize, us = usize))
-                else:
-                    print(fmt.format(cls = cname, nm = name, m = '',
-                                     fs = fsize, us = usize))
-                if depth and ocls.InheritsFrom(ROOT.TDirectoryFile.Class()):
-                    if depth > 0: tmp = depth -1
-                    else: tmp = depth
-                    self._list_objs(obj.ReadObj().GetListOfKeys(), showtype, tmp, indent+' ')
-            else:
-                print('ls: cannot access `{}\': No such object'.format(objn))
+    def get_ls_fmt(self, showtype = False, indent = ''):
+        if showtype:
+            return indent + '{cls:<20}{fs:>8}({us:>8}) {nm}{m}'
+        else:
+            return indent + '{nm}{m}'
+
+    def print_key(self, key, fmt):
+        name = key.GetName()
+        if isinstance(key, ROOT.TKey):
+            cname = key.GetClassName()
+            fsize = self._bytes2kb(key.GetNbytes())
+            usize = self._bytes2kb(key.GetObjlen())
+        else:                   # NB: special case, a TFile
+            cname = key.ClassName()
+        cls = ROOT.TClass.GetClass(cname)
+        if cls.InheritsFrom(ROOT.TFile.Class()):
+            print(fmt.format(cls = cname, nm = name, m = ':',
+                             fs = '-', us = '-'))
+        elif cls.InheritsFrom(ROOT.TDirectoryFile.Class()):
+            print(fmt.format(cls = cname, nm = name, m = '/',
+                             fs = fsize, us = usize))
+        else:
+            print(fmt.format(cls = cname, nm = name, m = '',
+                             fs = fsize, us = usize))
+
+    def ls_objs(self, keys, showtype = False, indent = ''):
+        # handle invalid keys
+        if keys:
+            valid = reduce(lambda i, j: i and j, keys)
+        else:
+            valid = False
+        if valid:
+            fmt = self.get_ls_fmt(showtype, indent)
+            for key in keys:
+                self.print_key(key, fmt)
+        else:
+            raise ValueError('{}: cannot access {}: No such object')
 
     def do_ls(self, args=''):
         """List contents of a directory/file. (see `pathspec')"""
         opts = self.ls_parser.parse_args(args.split())
-        if opts.objs:           # w/ args
-            self._list_objs(opts.objs, opts.showtype, 1)
-        else:                   # no args
-            # can't access files trivially when in rootdir
-            if self.pwd == rootdir: # PyROOT
-                for f in rootdir.GetListOfFiles():
-                    print('{}:'.format(f.GetName()))
-            else:                   # in a root file
-                self._list_objs(self.pwd.GetListOfKeys(), opts.showtype)
+        if opts.paths:          # w/ args
+            for path in opts.paths:
+                isdir = self.rdir_helper.ls_dir(path)
+                indent = ''
+                if isdir:
+                    if not isinstance(isdir, ROOT.TFile):
+                        # convert to TKey when TDirectoryFile
+                        dirname = isdir.GetName()
+                        isdir.cd('..')
+                        isdir = filter(lambda k: k.GetName() == dirname,
+                                       gDirectory.GetListOfKeys())[0]
+                    self.print_key(isdir, self.get_ls_fmt(opts.showtype))
+                    indent = ' '
+                keys = self.rdir_helper.ls(path)
+                try:
+                    self.ls_objs(keys, opts.showtype, indent)
+                except ValueError as err:
+                    print(str(err).format('ls', path))
+        else:                     # no args
+            if gROOT == self.pwd:
+                # can't access files trivially when in root
+                for f in gROOT.GetListOfFiles():
+                    self.print_key(f, self.get_ls_fmt(opts.showtype))
+            else:               # in a file
+                try:
+                    self.ls_objs(self.rdir_helper.ls(), opts.showtype)
+                except ValueError as err:
+                    print(str(err).format('ls', ''))
+                    print('Warning: this shouldn\'t happen, something went terribly wrong!')
 
     def complete_ls(self, text, line, begidx, endidx):
-        return self.completion_helper(text, line, begidx, endidx, 'path')
+        return self.completion_helper(text, line, begidx, endidx)
 
     def do_cd(self, args=''):
         """Change directory to specified directory. (see `pathspec')"""
-        self.pwd.cd(args)
+        success = self.pwd.cd(args)
+        if not success:
+            print('cd: {}: No such file or directory'.format(args))
 
     def complete_cd(self, text, line, begidx, endidx):
-        return self.completion_helper(text, line, begidx, endidx, 'dir')
+        return self.completion_helper(text, line, begidx, endidx, ROOT.TDirectoryFile)
 
     def help_pathspec(self):
         msg  = "Paths inside the current file can be specified in the usual way:\n"
@@ -183,13 +190,13 @@ if __name__ == '__main__':
     atexit.register(save_history)
     del atexit, readline, save_history, history_path
 
+    # import CLI options to local namespace
     locals().update(_import_args(options))
-    rfiles = [ROOT.TFile.Open(f, 'read') for f in filenames]
-    rootdir.cd()
 
     # command loop
     try:
         rplotsh_inst = rplotsh()
+        rplotsh_inst.add_files(filenames)
         rplotsh_inst.cmdloop()
     except KeyboardInterrupt:
         rplotsh_inst.postloop()
