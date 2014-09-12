@@ -69,3 +69,42 @@ for i, var in enumerate(variables):
     if doprint:
         for typ in ['png', 'pdf']:
             canvas.Print('{}_bkg_sig_eff.{}'.format(var, typ))
+
+# Matplotlib
+import rootpy.plotting.root2matplotlib as rplt
+import matplotlib.pyplot as plt
+
+from matplotlib.backends.backend_pdf import PdfPages
+if doprint: pp = PdfPages('bkg_sig_eff.pdf')
+
+from matplotlib.legend_handler import HandlerErrorbar
+
+for i, var in enumerate(variables):
+    fig = plt.figure(var)                # one figure per variable
+    for j in (0, 1):                     # sig, bkg
+        if j == 1: continue              # only plot signal now
+        axes = fig.add_subplot(111)  # row, col, id (121+j, when plotting both)
+        axes.set_title('Signal selection efficiency')
+        axes.set_ylim(0, 6)
+        axes.set_ylabel('Efficiency (w/ offset)')
+        if var == 'time':
+            xlo, xhi = 0, 20
+            var = 'time [ps]'
+        elif var == 'terr':
+            xlo, xhi = 0, 0.27
+            var = 'time error [ps]'
+        elif var == 'lab0_MM':
+            xlo, xhi = 4600, 7000
+            var = r'$B_{s}$ mass [MeV]'
+        axes.set_xlim(xlo, xhi)
+        axes.set_xlabel(var, horizontalalignment='right')
+        for k, cut in enumerate(mva_cuts):
+            line = rplt.errorbar(hists[j][i*ncuts + k], label='BDTG>{}'.format(cut))[0]
+        axes.legend(handler_map={type(line): HandlerErrorbar()})
+
+    if doprint:
+        pp.savefig()
+    elif not batch:
+        plt.show()
+
+if doprint: pp.close()
