@@ -7,12 +7,13 @@ optparser = argparse.ArgumentParser(description=__doc__)
 optparser.add_argument('filename', nargs='?', default = None, help='ROOT file')
 optparser.add_argument('-t', dest='tree', default='TestTree', help='Tree name')
 optparser.add_argument('-p', dest='doprint', action='store_true', default=False, help='Print to png/pdf files')
+optparser.add_argument('-b', dest='batch', action='store_true', default=False, help='Batch mode')
 options = optparser.parse_args()
 locals().update(_import_args(options))
 
 from rootpy import QROOT
 from ROOT import gROOT
-# gROOT.SetBatch(True)
+gROOT.SetBatch(batch)
 from ROOT import gPad
 
 from rootpy.io import File, root_open
