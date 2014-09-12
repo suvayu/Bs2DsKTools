@@ -84,6 +84,7 @@ for i, var in enumerate(variables):
     for j in (0, 1):                     # sig, bkg
         if j == 1: continue              # only plot signal now
         axes = fig.add_subplot(111)  # row, col, id (121+j, when plotting both)
+        axes.grid(axis='y')
         axes.set_title('Signal selection efficiency')
         axes.set_ylim(0, 6)
         axes.set_ylabel('Efficiency (w/ offset)')
@@ -97,10 +98,13 @@ for i, var in enumerate(variables):
             xlo, xhi = 4600, 7000
             var = r'$B_{s}$ mass [MeV]'
         axes.set_xlim(xlo, xhi)
-        axes.set_xlabel(var, horizontalalignment='right')
+        axes.set_xlabel(var)
+        axes.xaxis.set_label_coords(0.9,-0.05)
         for k, cut in enumerate(mva_cuts):
-            line = rplt.errorbar(hists[j][i*ncuts + k], label='BDTG>{}'.format(cut))[0]
-        axes.legend(handler_map={type(line): HandlerErrorbar()})
+            line = rplt.errorbar(hists[j][i*ncuts + k], xerr=None,
+                                 label='BDTG>{}'.format(cut))[0]
+        axes.legend(fontsize=10, numpoints=1, frameon=False, ncol=ncuts,
+                    handler_map={type(line): HandlerErrorbar()})
 
     if doprint:
         pp.savefig()
