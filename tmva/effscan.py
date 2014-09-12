@@ -71,14 +71,21 @@ for i, var in enumerate(variables):
             canvas.Print('{}_bkg_sig_eff.{}'.format(var, typ))
 
 # Matplotlib
-import rootpy.plotting.root2matplotlib as rplt
 import matplotlib.pyplot as plt
+plt.rc('font', family='Liberation Sans') # choose font
+plt.rc('mathtext', default='regular')    # use default font for math
 
+# ROOT to Matplotlib translation layer
+import rootpy.plotting.root2matplotlib as rplt
+
+# PDF backend
 from matplotlib.backends.backend_pdf import PdfPages
 if doprint: pp = PdfPages('bkg_sig_eff.pdf')
 
+# Style
 from matplotlib.legend_handler import HandlerErrorbar
 
+# Plots
 for i, var in enumerate(variables):
     fig = plt.figure(var)                # one figure per variable
     for j in (0, 1):                     # sig, bkg
