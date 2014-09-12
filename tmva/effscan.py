@@ -67,7 +67,7 @@ for i, var in enumerate(variables):
     canvas.Modified()
     canvas.Update()
     if doprint:
-        for typ in ['png', 'pdf']:
+        for typ in ['png']: #, 'pdf']:
             canvas.Print('{}_bkg_sig_eff.{}'.format(var, typ))
 
 # Matplotlib
