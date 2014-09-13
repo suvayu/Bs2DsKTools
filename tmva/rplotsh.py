@@ -45,13 +45,20 @@ class rshell(cmd.Cmd):
         self.rdir_helper = Rdir(files)
 
     def completion_helper(self, text, line, begidx, endidx, comp_type=None):
+        if line.rfind(':') > 0:
+            pathstr = line.split()[-1]
+        else:
+            pathstr = text
         self.comp_f = map(lambda i: i.GetName() + ':', self.rdir_helper.files) # TFiles
-        if self.pwd == gROOT:
+        if self.pwd == gROOT and pathstr.find(':') < 0:
             completions = self.comp_f
         else:
-            path = os.path.dirname(text)
+            path = os.path.dirname(pathstr)
             completions = self.rdir_helper.ls_names(path, comp_type)
-            path = path.rstrip('/')
+            # NB: Strip trailing slash, and get path without filename.
+            # This is necessary since Cmd for some reason splits at
+            # the colon separator.
+            path = path.rstrip('/').split(':')[-1]
             if path or text.rfind('/') == 0:
                 completions = ['/'.join((path,i)) for i in completions]
             completions += self.comp_f
