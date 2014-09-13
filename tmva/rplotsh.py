@@ -224,6 +224,12 @@ class rplotsh(rshell,empty):
         else:
             print('Nothing to read!')
 
+    def do_python(self, args=None):
+        import code, readline, rlcompleter
+        readline.parse_and_bind("tab: complete")
+        shell = code.InteractiveConsole(globals())
+        shell.interact()
+
     def postloop(self):
         print
 
