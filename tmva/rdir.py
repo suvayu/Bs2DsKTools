@@ -29,13 +29,12 @@ class pathspec(object):
     ...     obj = rfile.Get(ps.rpath)
 
     """
+
     # declare properties for pydoc
-    rfile, rpath = None, None
-    norfile, norpath = None, None
-    relative = None
+    path, rfile, rpath = None, None, None
+    relative, norfile, norpath = None, None, None
     rfile_basename, rfile_dirname, rfile_split = None, None, None
     rpath_basename, rpath_dirname, rpath_split = None, None, None
-
 
     def __init__(self, path):
         self.path = path
