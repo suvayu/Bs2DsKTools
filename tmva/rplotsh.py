@@ -52,7 +52,8 @@ class rshell(cmd.Cmd):
             path = os.path.dirname(text)
             completions = self.rdir_helper.ls_names(path, comp_type)
             path = path.rstrip('/')
-            completions = ['/'.join((path,i)) for i in completions]
+            if path or text.rfind('/') == 0:
+                completions = ['/'.join((path,i)) for i in completions]
             completions += self.comp_f
         if not text:
             return completions
