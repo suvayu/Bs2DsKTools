@@ -26,7 +26,7 @@ This puts matplotlib in a batch state similar to ``ROOT.gROOT.SetBatch(True)``.
 from __future__ import absolute_import
 
 # trigger ROOT's finalSetup (GUI thread) before matplotlib's
-import ROOT
+from fixes import ROOT
 ROOT.kTRUE
 
 from math import sqrt
@@ -34,8 +34,6 @@ from itertools import izip
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .hist import _Hist
-from .graph import _Graph1DBase
 from .utils import get_limits
 
 
@@ -217,7 +215,7 @@ def hist(hists,
     curr_ylim = axes.get_ylim()
     was_empty = not axes.has_data()
     returns = []
-    if isinstance(hists, _Hist):
+    if isinstance(hists, ROOT.TH1):
         # This is a single plottable object.
         returns = _hist(hists, axes=axes, logy=logy, **kwargs)
         _set_bounds(hists, axes=axes,
@@ -388,7 +386,7 @@ def bar(hists,
     logy = kwargs.pop('log', axes.get_yscale() == 'log')
     kwargs['log'] = logy
     returns = []
-    if isinstance(hists, _Hist):
+    if isinstance(hists, ROOT.TH1):
         # This is a single histogram.
         returns = _bar(hists, xerr=xerr, yerr=yerr,
                        axes=axes, **kwargs)
@@ -553,7 +551,7 @@ def errorbar(hists,
     curr_xlim = axes.get_xlim()
     curr_ylim = axes.get_ylim()
     was_empty = not axes.has_data()
-    if isinstance(hists, (_Hist, _Graph1DBase)):
+    if isinstance(hists, (ROOT.TH1, ROOT.TGraph)):
         # This is a single plottable object.
         returns = _errorbar(
             hists, xerr, yerr,
@@ -678,7 +676,7 @@ def fill_between(a, b, logy=None, axes=None, **kwargs):
         axes = plt.gca()
     if logy is None:
         logy = axes.get_yscale() == 'log'
-    if not isinstance(a, _Hist) or not isinstance(b, _Hist):
+    if not isinstance(a, ROOT.TH1) or not isinstance(b, ROOT.TH1):
         raise TypeError(
             "fill_between only operates on 1D histograms")
     a.check_compatibility(b, check_edges=True)
