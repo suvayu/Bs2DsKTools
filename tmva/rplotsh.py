@@ -146,6 +146,21 @@ class rshell(cmd.Cmd):
     def complete_ls(self, text, line, begidx, endidx):
         return self.completion_helper(text, line, begidx, endidx)
 
+    def do_pwd(self, args=None):
+        """Print the name of current working directory"""
+        thisdir = self.pwd.GetDirectory('')
+        pwdname = thisdir.GetName()
+        while not (isinstance(thisdir, ROOT.TFile) or self.pwd == gROOT):
+            thisdir = thisdir.GetDirectory('../')
+            if isinstance(thisdir, ROOT.TFile): break
+            pwdname = '/'.join((thisdir.GetName(),pwdname))
+        if isinstance(self.pwd, ROOT.TFile):
+            print '{}:'.format(pwdname)
+        elif self.pwd == gROOT:
+            print pwdname
+        else:
+            print '{}:/{}'.format(thisdir.GetName(), pwdname)
+
     def do_cd(self, args=''):
         """Change directory to specified directory. (see `pathspec')"""
         success = self.pwd.cd(args)
