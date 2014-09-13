@@ -226,9 +226,11 @@ class rshell(cmd.Cmd):
 
     def do_python(self, args=None):
         import code, readline, rlcompleter
-        readline.set_completer(rlcompleter.Completer(self.objs).complete)
+        myobjs = self.objs
+        # myobjs.update({'ls': self.do_ls, 'cd': self.do_cd, 'read' : self.do_read})
+        readline.set_completer(rlcompleter.Completer(myobjs).complete)
         readline.parse_and_bind("tab: complete")
-        shell = code.InteractiveConsole(self.objs)
+        shell = code.InteractiveConsole(myobjs)
         shell.interact()
 
     def help_pathspec(self):
