@@ -61,10 +61,10 @@ class rshell(cmd.Cmd):
             return filter(lambda i : str.startswith(i, text), completions)
 
     def precmd(self, line):
-        self.oldpwd = self.pwd
         return cmd.Cmd.precmd(self, line)
 
     def postcmd(self, stop, line):
+        self.oldpwd = self.pwd.GetDirectory('')
         self.pwd = gDirectory.GetDirectory('')
         dirn = self.pwd.GetName()
         if len(dirn) > 20:
@@ -163,9 +163,14 @@ class rshell(cmd.Cmd):
 
     def do_cd(self, args=''):
         """Change directory to specified directory. (see `pathspec')"""
-        success = self.pwd.cd(args)
+        if args.strip() == '-':
+            success = self.oldpwd.cd()
+        else:
+            success = self.pwd.cd(args)
         if not success:
             print('cd: {}: No such file or directory'.format(args))
+        else:
+            if not args.strip(): gROOT.cd()
 
     def complete_cd(self, text, line, begidx, endidx):
         return self.completion_helper(text, line, begidx, endidx, ROOT.TDirectoryFile)
