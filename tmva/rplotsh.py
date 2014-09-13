@@ -182,27 +182,9 @@ class rshell(cmd.Cmd):
     def complete_cd(self, text, line, begidx, endidx):
         return self.completion_helper(text, line, begidx, endidx, ROOT.TDirectoryFile)
 
-    def help_pathspec(self):
-        msg  = "Paths inside the current file can be specified in the usual way:\n"
-        msg += "- full path: /dir1/dir2\n"
-        msg += "- relative path: ../dir1\n\n"
-
-        msg += "Paths in other root files have to be preceded by the file name\n"
-        msg += "and a colon:\n"
-        msg += "- file path: myfile.root:/dir1/dir2\n\n"
-
-        msg += "See: TDirectoryFile::cd(..) in ROOT docs and rdir.pathspec docs"
-        print(msg)
-
-class rplotsh(rshell,empty):
-    """Interactive plotting interface for ROOT files"""
-
     def read_obj(self, **args):
         """Read objects into global namespace"""
         globals().update(args)
-
-    def do_EOF(self, line):
-        return True
 
     def do_read(self, args):
         if args:
@@ -229,6 +211,24 @@ class rplotsh(rshell,empty):
         readline.parse_and_bind("tab: complete")
         shell = code.InteractiveConsole(globals())
         shell.interact()
+
+    def help_pathspec(self):
+        msg  = "Paths inside the current file can be specified in the usual way:\n"
+        msg += "- full path: /dir1/dir2\n"
+        msg += "- relative path: ../dir1\n\n"
+
+        msg += "Paths in other root files have to be preceded by the file name\n"
+        msg += "and a colon:\n"
+        msg += "- file path: myfile.root:/dir1/dir2\n\n"
+
+        msg += "See: TDirectoryFile::cd(..) in ROOT docs and rdir.pathspec docs"
+        print(msg)
+
+class rplotsh(rshell,empty):
+    """Interactive plotting interface for ROOT files"""
+
+    def do_EOF(self, line):
+        return True
 
     def postloop(self):
         print
