@@ -197,8 +197,32 @@ class rshell(cmd.Cmd):
 class rplotsh(rshell,empty):
     """Interactive plotting interface for ROOT files"""
 
+    def read_obj(self, **args):
+        """Read objects into global namespace"""
+        globals().update(args)
+
     def do_EOF(self, line):
         return True
+
+    def do_read(self, args):
+        if args:
+            import shlex
+            tokens = shlex.split(args)
+            ntoks = len(tokens)
+            try:
+                assert(ntoks == 1 or ntoks == 3)
+                obj = self.rdir_helper.read(tokens[0])[0]
+                if ntoks > 1:
+                    assert(tokens[1] == 'as')
+                    obj = {tokens[2] : obj}
+                else:
+                    obj = {obj.GetName() : obj}
+                self.read_obj(**obj)
+            except AssertionError:
+                print('Malformed command.')
+                print('Syntax: read <objname> as <newobjname>')
+        else:
+            print('Nothing to read!')
 
     def postloop(self):
         print
