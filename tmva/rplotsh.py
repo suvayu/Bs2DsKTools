@@ -184,7 +184,7 @@ class rshell(cmd.Cmd):
         msg += "and a colon:\n"
         msg += "- file path: myfile.root:/dir1/dir2\n\n"
 
-        msg += "See: TDirectoryFile::cd(..) in ROOT docs"
+        msg += "See: TDirectoryFile::cd(..) in ROOT docs and rdir.pathspec docs"
         print(msg)
 
 class rplotsh(rshell,empty):
