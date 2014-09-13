@@ -155,11 +155,11 @@ class rshell(cmd.Cmd):
             if isinstance(thisdir, ROOT.TFile): break
             pwdname = '/'.join((thisdir.GetName(),pwdname))
         if isinstance(self.pwd, ROOT.TFile):
-            print '{}:'.format(pwdname)
+            print('{}:'.format(pwdname))
         elif self.pwd == gROOT:
-            print pwdname
+            print(pwdname)
         else:
-            print '{}:/{}'.format(thisdir.GetName(), pwdname)
+            print('{}:/{}'.format(thisdir.GetName(), pwdname))
 
     def do_cd(self, args=''):
         """Change directory to specified directory. (see `pathspec')"""
