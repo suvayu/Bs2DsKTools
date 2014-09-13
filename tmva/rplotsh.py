@@ -29,6 +29,8 @@ class rshell(cmd.Cmd):
     pwd = gROOT
     prompt = '{}> '.format(pwd.GetName())
 
+    objs = {}
+
     @classmethod
     def _bytes2kb(cls, Bytes):
         unit = 1
@@ -182,34 +184,51 @@ class rshell(cmd.Cmd):
     def complete_cd(self, text, line, begidx, endidx):
         return self.completion_helper(text, line, begidx, endidx, ROOT.TDirectoryFile)
 
-    def read_obj(self, **args):
+    def read_obj(self, args):
         """Read objects into global namespace"""
-        globals().update(args)
+        self.objs.update(args)
 
     def do_read(self, args):
+        """Read objects into memory."""
         if args:
             import shlex
             tokens = shlex.split(args)
             ntoks = len(tokens)
             try:
-                assert(ntoks == 1 or ntoks == 3)
-                obj = self.rdir_helper.read(tokens[0])[0]
+                if not(ntoks == 1 or ntoks == 3):
+                    raise ValueError('Incorrect number of arguments: {}'.format(ntoks))
+                _not_dir = lambda key: \
+                           not ROOT.TClass.GetClass(key.GetClassName()) \
+                                          .InheritsFrom(ROOT.TDirectoryFile.Class())
+                objs = self.rdir_helper.read(tokens[0], robj_p = _not_dir)
                 if ntoks > 1:
-                    assert(tokens[1] == 'as')
-                    obj = {tokens[2] : obj}
+                    if len(objs) > 1:
+                        raise ValueError('{} is a directory; extra arguments: {}'
+                                         .format(tokens[0], tokens[1:]))
+                    if tokens[1] != 'as':
+                        raise ValueError('Unknown command option: {}'.format(tokens[1]))
+                    objs = {tokens[2] : objs[0]}
                 else:
-                    obj = {obj.GetName() : obj}
-                self.read_obj(**obj)
-            except AssertionError:
+                    objs = [(obj.GetName(), obj) for obj in objs]
+                self.read_obj(objs)
+            except ValueError:
                 print('Malformed command.')
-                print('Syntax: read <objname> as <newobjname>')
+                self.help_read()
         else:
             print('Nothing to read!')
 
+    def help_read(self):
+        print('Syntax: read <objname> [as <newobjname>]')
+        print
+        print('If <objname> is a directory, all objects in that')
+        print('directory are read in to memory.  In this case,')
+        print('using the `as <newobjname>\' syntax is not allowed.')
+
     def do_python(self, args=None):
         import code, readline, rlcompleter
+        readline.set_completer(rlcompleter.Completer(self.objs).complete)
         readline.parse_and_bind("tab: complete")
-        shell = code.InteractiveConsole(globals())
+        shell = code.InteractiveConsole(self.objs)
         shell.interact()
 
     def help_pathspec(self):
