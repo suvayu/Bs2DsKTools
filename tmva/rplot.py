@@ -7,32 +7,10 @@
 
 """
 
-import argparse
-from utils import _import_args
-
-optparser = argparse.ArgumentParser(description=__doc__)
-optparser.add_argument('filenames', nargs='+', help='ROOT file')
-options = optparser.parse_args()
-locals().update(_import_args(options))
-
 import sys, os
-import subprocess
 from uuid import uuid4
 
-# history file for interactive use
-import atexit, readline
-history_path = '.browse.py'
-def save_history(history_path=history_path):
-    import readline
-    readline.write_history_file(history_path)
-
-if os.path.exists(history_path):
-    readline.read_history_file(history_path)
-
-atexit.register(save_history)
-del atexit, readline, save_history, history_path
-
-
+from fixes import ROOT
 from ROOT import gDirectory, gROOT, gSystem, gPad, gStyle
 from ROOT import TFile, TTree, TH1D, TH2D, TH3D, TCanvas, TPad
 
@@ -55,32 +33,6 @@ _markers = (kDot, kPlus, kStar, kCircle, kMultiply, kFullDotSmall,
             kFullDotMedium, kFullDotLarge, kFullCircle, kFullSquare,
             kFullTriangleUp, kFullTriangleDown, kOpenCircle,
             kOpenSquare, kOpenTriangleUp, kOpenTriangleDown)
-
-# ownership
-TFile.Open._creates = True
-
-rfiles = [TFile.Open(f) for f in filenames]
-
-
-def ls(directory = gDirectory):
-    """List contents of present or specified directory."""
-    if isinstance(directory, str):
-        directory = gDirectory.GetDirectory(directory)
-    directory.ls()
-
-
-def cd(dirname):
-    """Change directory to specified directory."""
-    return gDirectory.cd(dirname)
-
-
-def read(name, newname = ''):
-    """Read the object with given name (paths allowed)."""
-    # with_path = name.find('/')
-    if len(newname):
-        return gDirectory.Get(name).Clone(newname)
-    else:
-        return gDirectory.Get(name)
 
 
 def _assert_equal(arg1, arg2, str1, str2):
@@ -107,6 +59,7 @@ def _valid_scheme(scheme, nplots, grid):
 
 def _screen_size():
     """Get screen size (linux only)"""
+    import subprocess
     xrandr = subprocess.Popen(('xrandr', '-q'), stdout = subprocess.PIPE)
     displays = subprocess.check_output(('grep', '\*'), stdin = xrandr.stdout)
     displays = displays.splitlines()
