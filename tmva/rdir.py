@@ -177,10 +177,17 @@ class Rdir(object):
         """
         return [k.GetName() for k in self.ls(path, robj_t, robj_p)]
 
-    def read(self, path = None, robj_t = None, robj_p = None):
+    def read(self, path = None, robj_t = None, robj_p = None, metainfo = False):
         """Return list of object(s) in path.
 
-        For documentation on arguments, see Rdir.ls(..)
+        When metainfo is True, source filename is added as a property
+        (obj.file).  For documentation on other arguments, see
+        Rdir.ls(..)
 
         """
-        return [k.ReadObj() for k in self.ls(path, robj_t, robj_p)]
+        objs = []
+        for k in self.ls(path, robj_t, robj_p):
+            objs.append(k.ReadObj())
+            if metainfo:
+                setattr(objs[-1], 'file', k.GetFile().GetName())
+        return objs
