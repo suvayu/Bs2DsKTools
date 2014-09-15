@@ -107,8 +107,22 @@ class Rplot(object):
             plottable.SetMarkerStyle(self.markers[num])
             plottable.SetMarkerColor(self.line_colours[num])
 
+    def get_viewport(self, plottables):
+        ymin, ymax = 0, 0
+        for plottable in plottables:
+            ymin = min(ymin, plottable.GetMinimum())
+            ymax = max(ymax, plottable.GetMaximum())
+        if ymin < 0:
+            ymin += 0.03*ymin
+        if ymax > 0:
+            ymax += 0.03*ymax
+        return (ymin, ymax)
+
     def draw_same(self, plottables, drawopts):
+        yrange = self.get_viewport(plottables)
         for i, plottable in enumerate(plottables):
+            plottable.SetMinimum(yrange[0])
+            plottable.SetMaximum(yrange[1])
             if i == 0:
                 opts = drawopts
             else:
