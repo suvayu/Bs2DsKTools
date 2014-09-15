@@ -6,8 +6,7 @@ import sys, os
 from uuid import uuid4
 
 from fixes import ROOT
-from ROOT import gDirectory, gROOT, gSystem, gPad, gStyle
-from ROOT import TFile, TTree, TH1D, TH2D, TH3D, TCanvas, TPad
+from ROOT import gROOT, gSystem, gDirectory, gPad, gStyle
 
 # colours
 from ROOT import (kBlack, kWhite, kGray, kViolet, kMagenta, kPink,
