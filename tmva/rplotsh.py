@@ -226,6 +226,9 @@ class rshell(cmd.Cmd):
         else:
             print('Nothing to read!')
 
+    def complete_read(self, text, line, begidx, endidx):
+        return self.completion_helper(text, line, begidx, endidx)
+
     def help_read(self):
         print('Syntax: read <objname> [as <newobjname>]')
         print
