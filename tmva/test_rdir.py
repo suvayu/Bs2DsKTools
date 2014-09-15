@@ -147,6 +147,10 @@ class test_Rdir(unittest.TestCase):
         res = map(lambda i, j: i.GetName() == j.GetName(), objs_t, objs_r)
         self.assertTrue(reduce(lambda i, j: i and j, res), msg='Keys do not match')
 
+        objs_t = rdir_helper.read('/tmp/test_Rdir1.root', metainfo = True)
+        res = map(lambda o: o.file == '/tmp/test_Rdir1.root', objs_t)
+        self.assertTrue(reduce(lambda i, j: i and j, res))
+
     def test_filter(self):
         rdir_helper = Rdir(self.fnames)
         keys_t = rdir_helper.ls('/tmp/test_Rdir0.root:',
