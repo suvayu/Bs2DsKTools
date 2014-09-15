@@ -79,6 +79,7 @@ class Rplot(object):
     grid = (1,1)
     size = (400, 400)
     plottables = []
+    canvas = None
     style = True
     stats = False
 
@@ -132,6 +133,8 @@ class Rplot(object):
             plottable.Draw(opts)
 
     def draw_hist(self, plottables, drawopts):
+        if not self.canvas:
+            self.prep_canvas()
         if len(plottables) % self.nplots == 0:
             for i, plot in enumerate(plottables):
                 self.canvas.cd(i+1)
