@@ -302,6 +302,7 @@ class rplotsh(rshell,empty):
     """Interactive plotting interface for ROOT files"""
 
     def do_EOF(self, line):
+        """Exit rplot shell"""
         return True
 
     def postloop(self):
