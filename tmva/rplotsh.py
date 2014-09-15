@@ -220,7 +220,7 @@ class rshell(cmd.Cmd):
                         raise ValueError('Unknown command option: {}'.format(tokens[1]))
                     else:
                         try:
-                            dest = token[1]
+                            dest = tokens[1]
                         except IndexError:
                             raise ValueError('Missing destination variable')
                 else:
