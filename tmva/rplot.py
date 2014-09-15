@@ -54,7 +54,8 @@ def get_optimal_size(xgrid, ygrid, width=None, height=None, aspect=4.0/3):
     return (width, height)
 
 def isplottable(plottable):
-    plottable_t = (ROOT.TH1, ROOT.TGraph, ROOT.TEfficiency)
+    plottable_t = (ROOT.TAttLine, ROOT.TAttFill, ROOT.TAttMarker,
+                   ROOT.TAttText, ROOT.TAttBBox2D, ROOT.TAttImage)
     return isinstance(plottable, plottable_t)
 
 
