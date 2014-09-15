@@ -196,7 +196,7 @@ class rshell(cmd.Cmd):
         return self.completion_helper(text, line, begidx, endidx, ROOT.TDirectoryFile)
 
     def read_obj(self, args):
-        """Read objects into global namespace"""
+        """Read objects into shell"""
         self.objs.update(args)
 
     def do_read(self, args):
@@ -208,9 +208,7 @@ class rshell(cmd.Cmd):
             try:
                 if not(ntoks == 1 or ntoks == 3):
                     raise ValueError('Incorrect number of arguments: {}'.format(ntoks))
-                _not_dir = lambda key: \
-                           not ROOT.TClass.GetClass(key.GetClassName()) \
-                                          .InheritsFrom(ROOT.TDirectoryFile.Class())
+                _not_dir = lambda key: not key.IsFolder()
                 objs = self.rdir_helper.read(tokens[0], robj_p = _not_dir)
                 if ntoks > 1:
                     if len(objs) > 1:
