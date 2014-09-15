@@ -60,6 +60,10 @@ def get_optimal_size(xgrid, ygrid, width=None, height=None, aspect=4.0/3):
     return (width, height)
 
 
+def isplottable(plottable):
+    plottable_t = (ROOT.TH1, ROOT.TGraph, ROOT.TEfficiency)
+    return isinstance(plottable, plottable_t)
+
 def draw_expr(trees, exprs, scheme = None, grid = (1,1), sel = '', cols = None):
     """Draw expressions from trees"""
     nhists = len(exprs)
@@ -116,21 +120,32 @@ class Rplot(object):
         if self.nplots > 1:
             self.canvas.Divide(*self.grid)
 
+    def set_style(self, plottable, col):
+        plottable.SetLineColor(self.colours[col] + 1)
+        plottable.SetFillColor(self.colours[col])
+        # plottable.SetMarker(self.markers)
+        # plottable.SetMarkerSize(0.2)
+
+    def draw_same(self, plottables, drawopts):
+        for i, plottable in enumerate(plottables):
+            if i == 0:
+                opts = drawopts
+            else:
+                opts = '{} same'.format(drawopts)
+            if self.style:
+                self.set_style(plottable, i)
+            plottable.Draw(opts)
+
     def draw_hist(self, plottables, drawopts):
         if len(plottables) % self.nplots == 0:
             for i, plot in enumerate(plottables):
-                this_plot = i % self.nplots
-                if this_plot == 0:
-                    self.canvas.cd(i/self.nplots + 1)
-                    opts = drawopts
-                else:
-                    opts = '{} same'.format(drawopts)
-                if self.style:
-                    plottables.SetLineColor(self.colours[this_plot] + 1)
-                    plottables.SetFillColor(self.colours[this_plot])
-                    plottables.SetMarker(self.markers)
-                    plottables.SetMarkerSize(0.2)
-                plottables.Draw(opts)
+                self.canvas.cd(i+1)
+                try:
+                    self.draw_same(plot, drawopts)
+                except TypeError:
+                    if self.style:
+                        self.set_style(plot, 0)
+                    plot.Draw(drawopts)
         else:
             print(u'# plottables ({}) ≠ # pads ({})!'
                   .format(len(plottables), self.nplots))
