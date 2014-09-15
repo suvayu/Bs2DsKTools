@@ -1,11 +1,6 @@
 #!/usr/bin/python
 # coding=utf-8
-"""Exploratory script for ROOT files.
-
-   Interactively explore a ROOT file with trees and histograms.  This
-   script is meant to be run as `$ python -i <script.py>'
-
-"""
+"""Plotting interface for ROOT objects"""
 
 import sys, os
 from uuid import uuid4
