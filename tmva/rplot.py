@@ -77,6 +77,8 @@ class Rplot(object):
     style = True
 
     def __init__(self, xgrid, ygrid, width=None, height=None, style=None):
+        if gROOT.GetBatch() and width and height:
+            raise ValueError('Width and height specs are compulsory in batch mode!')
         self.grid = (xgrid, ygrid)
         self.nplots = xgrid * ygrid
         self.size = get_optimal_size(xgrid, ygrid, width, height)
