@@ -140,12 +140,12 @@ class Rplot(object):
         if len(plottables) % self.nplots == 0:
             for i, plot in enumerate(plottables):
                 self.canvas.cd(i+1)
-                try:
-                    self.draw_same(plot, drawopts)
-                except TypeError:
+                if isplottable(plot):
                     if self.style:
                         self.set_style(plot, 0)
                     plot.Draw(drawopts)
+                else:
+                    self.draw_same(plot, drawopts)
         else:
             print(u'# plottables ({}) ≠ # pads ({})!'
                   .format(len(plottables), self.nplots))
