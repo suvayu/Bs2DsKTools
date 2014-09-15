@@ -68,10 +68,11 @@ class Rplot(object):
     line_colours = (kRed+2, kAzure-6, kGreen+2, kBlack, kMagenta+2,
                     kOrange+1, kTeal-8, kCyan+1)
 
-    markers = (kDot, kPlus, kStar, kCircle, kMultiply, kFullDotSmall,
-               kFullDotMedium, kFullDotLarge, kFullCircle, kFullSquare,
-               kFullTriangleUp, kFullTriangleDown, kOpenCircle,
-               kOpenSquare, kOpenTriangleUp, kOpenTriangleDown)
+    markers = (kDot, kFullDotSmall, kCircle, kFullTriangleDown,
+               kFullTriangleUp, kFullCircle, kPlus, kStar, kMultiply,
+               kFullDotMedium, kFullDotLarge, kFullSquare,
+               kOpenCircle, kOpenSquare, kOpenTriangleUp,
+               kOpenTriangleDown)
 
     linestyles = {'-':1, '--':2, ':':3, '-.':5}
 
@@ -79,6 +80,7 @@ class Rplot(object):
     size = (400, 400)
     plottables = []
     style = True
+    stats = False
 
     def __init__(self, xgrid, ygrid, width=None, height=None, style=None):
         if gROOT.IsBatch() and width and height:
@@ -93,11 +95,17 @@ class Rplot(object):
             self.canvas.Divide(*self.grid)
         return self.canvas
 
-    def set_style(self, plottable, col):
-        plottable.SetFillColor(self.fill_colours[col])
-        plottable.SetLineColor(self.line_colours[col])
-        # plottable.SetMarker(self.markers)
-        # plottable.SetMarkerSize(0.2)
+    def set_style(self, plottable, num):
+        if isinstance(plottable, ROOT.TAttFill):
+            plottable.SetFillColor(self.fill_colours[num])
+        if isinstance(plottable, ROOT.TAttLine):
+            plottable.SetLineColor(self.line_colours[num])
+        if isinstance(plottable, ROOT.TH1):
+            plottable.SetStats(self.stats)
+        if isinstance(plottable, ROOT.TAttMarker):
+            plottable.SetMarkerSize(0.2)
+            plottable.SetMarkerStyle(self.markers[num])
+            plottable.SetMarkerColor(self.line_colours[num])
 
     def draw_same(self, plottables, drawopts):
         for i, plottable in enumerate(plottables):
