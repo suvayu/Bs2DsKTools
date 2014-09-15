@@ -234,11 +234,18 @@ class rshell(cmd.Cmd):
                     if domatch == 're':
                         import re
                         match = re.compile(pattern).match
-                    _not_dir = lambda key: not key.IsFolder() and matcher(key.GetName())
+                    # _not_dir = lambda key: not key.IsFolder() and match(key.GetName())
+                    _not_dir = lambda key: \
+                               not ROOT.TClass.GetClass(key.GetClassName()) \
+                                              .InheritsFrom(ROOT.TDirectoryFile.Class()) \
+                                              and match(key.GetName())
                 else:
-                    _not_dir = lambda key: not key.IsFolder()
+                    # _not_dir = lambda key: not key.IsFolder()
+                    _not_dir = lambda key: \
+                               not ROOT.TClass.GetClass(key.GetClassName()) \
+                                              .InheritsFrom(ROOT.TDirectoryFile.Class())
                 objs = self.rdir_helper.read(path, robj_p = _not_dir, metainfo = True)
-
+                # save read objects
                 if dest:
                     if domatch or self.rdir_helper.get_dir(path_arg):
                         objs = {dest : objs}
