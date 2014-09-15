@@ -274,6 +274,7 @@ class rshell(cmd.Cmd):
         print('<newobjname>\' semantics are similar to directory.')
 
     def do_python(self, args=None):
+        """Start an interactive Python console"""
         import code, readline, rlcompleter
         myobjs = self.objs
         ROOT_globals = dict([(k,v) for k, v in globals().iteritems()
