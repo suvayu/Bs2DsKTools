@@ -27,6 +27,7 @@ from ROOT import (kDot, kPlus, kStar, kCircle, kMultiply,
                   kOpenTriangleUp, kOpenTriangleDown)
 
 
+# helpers
 def get_screen_size():
     """Get screen size (linux only)"""
     import subprocess
@@ -39,7 +40,6 @@ def get_screen_size():
     xres = min(displays[0][0], displays[1][0])
     yres = min(displays[0][1], displays[1][1])
     return (xres - 50, yres - 50)
-
 
 def get_optimal_size(xgrid, ygrid, width=None, height=None, aspect=4.0/3):
     """Calculate canvas size from grid"""
@@ -59,41 +59,12 @@ def get_optimal_size(xgrid, ygrid, width=None, height=None, aspect=4.0/3):
         height = _height(width)
     return (width, height)
 
-
 def isplottable(plottable):
     plottable_t = (ROOT.TH1, ROOT.TGraph, ROOT.TEfficiency)
     return isinstance(plottable, plottable_t)
 
-def draw_expr(trees, exprs, scheme = None, grid = (1,1), sel = '', cols = None):
-    """Draw expressions from trees"""
-    nhists = len(exprs)
-    _assert_equal(len(trees), nhists, '# trees', '# expressions')
-    if isinstance(sel, str):
-        sel = [sel] * nhists
-    else:
-        _assert_equal(len(sel), nhists, '# selections', '# expressions')
-    _check_cols(cols, nhists)
-    scheme = _valid_scheme(scheme, nhists, grid)
 
-    size = _canvas_size(grid)
-    canvas = TCanvas('canvas-{}'.format(uuid4()), '', size[0], size[1])
-    canvas.Divide(grid[0], grid[1])
-    pad = 0
-    for idx, tree in enumerate(trees):
-        if scheme[idx].find('same') < 0:
-            pad = pad + 1
-        canvas.cd(pad)
-        hname = 'hist-{}'.format(uuid4())
-        expr = '{}>>{}'.format(exprs[idx], hname)
-        print 'Drawing: {}'.format(expr)
-        tree.Draw(expr, sel[idx], scheme[idx])
-        hist = gROOT.FindObject(hname)
-        hist.SetLineColor(cols[idx])
-        hist.SetMarkerColor(cols[idx])
-    canvas.Update()
-    return canvas
-
-
+# ROOT plotter
 class Rplot(object):
     """Plotter class for ROOT"""
 
