@@ -261,7 +261,10 @@ class rshell(cmd.Cmd):
         print
         print('If <objname> is a directory, all objects in that')
         print('directory are read in to memory.  In this case,')
-        print('using the `as <newobjname>\' syntax is not allowed.')
+        print('if `as <newobjname>\' is present, objects are stored')
+        print('in a list of that name.  <objname> can also be a')
+        print('globbing pattern or a regular expression, `as ')
+        print('<newobjname>\' semantics are similar to directory.')
 
     def do_python(self, args=None):
         import code, readline, rlcompleter
