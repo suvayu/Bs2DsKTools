@@ -70,7 +70,7 @@ def get_optimal_size(xgrid, ygrid, width=None, height=None, aspect=4.0/3):
     if not (width or height):
         width, height = get_screen_size()
         if xgrid > ygrid:       # wide
-            height = _height(width))
+            height = _height(width)
         elif ygrid > xgrid:     # tall
             width = _width(height)
         else:                   # square (xgrid == ygrid)
@@ -155,7 +155,7 @@ class Rplot(object):
                 plottables.Draw(opts)
         else:
             print(u'# plottables ({}) ≠ # pads ({})!'
-                  .format(len(plottables), self.nplots)))
+                  .format(len(plottables), self.nplots))
 
     def draw_graph(self, *args, **kwargs):
         """Same as draw_hist(..)."""
