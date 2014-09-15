@@ -97,7 +97,7 @@ class Rplot(object):
 
     def set_style(self, plottable, num):
         if isinstance(plottable, ROOT.TAttFill):
-            plottable.SetFillColor(self.fill_colours[num])
+            plottable.SetFillColorAlpha(self.fill_colours[num], 1-num*0.05)
         if isinstance(plottable, ROOT.TAttLine):
             plottable.SetLineColor(self.line_colours[num])
         if isinstance(plottable, ROOT.TH1):
