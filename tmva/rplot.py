@@ -89,6 +89,7 @@ class Rplot(object):
         self.canvas = ROOT.TCanvas('canvas', '', *self.size)
         if self.nplots > 1:
             self.canvas.Divide(*self.grid)
+        return self.canvas
 
     def set_style(self, plottable, col):
         plottable.SetFillColor(self.fill_colours[col])
