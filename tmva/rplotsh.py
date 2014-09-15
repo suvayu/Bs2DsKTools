@@ -195,7 +195,7 @@ class rshell(cmd.Cmd):
     def complete_cd(self, text, line, begidx, endidx):
         return self.completion_helper(text, line, begidx, endidx, ROOT.TDirectoryFile)
 
-    def read_obj(self, args):
+    def save_obj(self, args):
         """Read objects into shell"""
         self.objs.update(args)
 
@@ -246,7 +246,7 @@ class rshell(cmd.Cmd):
                         objs = {dest : objs[0]} # only one element
                 else:
                     objs = [(obj.GetName(), obj) for obj in objs]
-                self.read_obj(objs)
+                self.save_obj(objs)
             except ValueError:
                 print('Malformed command.')
                 self.help_read()
