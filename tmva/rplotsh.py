@@ -29,6 +29,8 @@ class rshell(cmd.Cmd):
     pwd = gROOT
     prompt = '{}> '.format(pwd.GetName())
 
+    objs = {}
+
     @classmethod
     def _bytes2kb(cls, Bytes):
         unit = 1
@@ -45,14 +47,22 @@ class rshell(cmd.Cmd):
         self.rdir_helper = Rdir(files)
 
     def completion_helper(self, text, line, begidx, endidx, comp_type=None):
+        if line.rfind(':') > 0:
+            pathstr = line.split()[-1]
+        else:
+            pathstr = text
         self.comp_f = map(lambda i: i.GetName() + ':', self.rdir_helper.files) # TFiles
-        if self.pwd == gROOT:
+        if self.pwd == gROOT and pathstr.find(':') < 0:
             completions = self.comp_f
         else:
-            path = os.path.dirname(text)
+            path = os.path.dirname(pathstr)
             completions = self.rdir_helper.ls_names(path, comp_type)
-            path = path.rstrip('/')
-            completions = ['/'.join((path,i)) for i in completions]
+            # NB: Strip trailing slash, and get path without filename.
+            # This is necessary since Cmd for some reason splits at
+            # the colon separator.
+            path = path.rstrip('/').split(':')[-1]
+            if path or text.rfind('/') == 0:
+                completions = ['/'.join((path,i)) for i in completions]
             completions += self.comp_f
         if not text:
             return completions
@@ -60,10 +70,10 @@ class rshell(cmd.Cmd):
             return filter(lambda i : str.startswith(i, text), completions)
 
     def precmd(self, line):
-        self.oldpwd = self.pwd
         return cmd.Cmd.precmd(self, line)
 
     def postcmd(self, stop, line):
+        self.oldpwd = self.pwd.GetDirectory('')
         self.pwd = gDirectory.GetDirectory('')
         dirn = self.pwd.GetName()
         if len(dirn) > 20:
@@ -145,14 +155,83 @@ class rshell(cmd.Cmd):
     def complete_ls(self, text, line, begidx, endidx):
         return self.completion_helper(text, line, begidx, endidx)
 
+    def do_pwd(self, args=None):
+        """Print the name of current working directory"""
+        thisdir = self.pwd.GetDirectory('')
+        pwdname = thisdir.GetName()
+        while not (isinstance(thisdir, ROOT.TFile) or self.pwd == gROOT):
+            thisdir = thisdir.GetDirectory('../')
+            if isinstance(thisdir, ROOT.TFile): break
+            pwdname = '/'.join((thisdir.GetName(),pwdname))
+        if isinstance(self.pwd, ROOT.TFile):
+            print('{}:'.format(pwdname))
+        elif self.pwd == gROOT:
+            print(pwdname)
+        else:
+            print('{}:/{}'.format(thisdir.GetName(), pwdname))
+
     def do_cd(self, args=''):
         """Change directory to specified directory. (see `pathspec')"""
-        success = self.pwd.cd(args)
+        if args.strip() == '-':
+            success = self.oldpwd.cd()
+        else:
+            success = self.pwd.cd(args)
         if not success:
             print('cd: {}: No such file or directory'.format(args))
+        else:
+            if not args.strip(): gROOT.cd()
 
     def complete_cd(self, text, line, begidx, endidx):
         return self.completion_helper(text, line, begidx, endidx, ROOT.TDirectoryFile)
+
+    def read_obj(self, args):
+        """Read objects into global namespace"""
+        self.objs.update(args)
+
+    def do_read(self, args):
+        """Read objects into memory."""
+        if args:
+            import shlex
+            tokens = shlex.split(args)
+            ntoks = len(tokens)
+            try:
+                if not(ntoks == 1 or ntoks == 3):
+                    raise ValueError('Incorrect number of arguments: {}'.format(ntoks))
+                _not_dir = lambda key: \
+                           not ROOT.TClass.GetClass(key.GetClassName()) \
+                                          .InheritsFrom(ROOT.TDirectoryFile.Class())
+                objs = self.rdir_helper.read(tokens[0], robj_p = _not_dir)
+                if ntoks > 1:
+                    if len(objs) > 1:
+                        raise ValueError('{} is a directory; extra arguments: {}'
+                                         .format(tokens[0], tokens[1:]))
+                    if tokens[1] != 'as':
+                        raise ValueError('Unknown command option: {}'.format(tokens[1]))
+                    objs = {tokens[2] : objs[0]}
+                else:
+                    objs = [(obj.GetName(), obj) for obj in objs]
+                self.read_obj(objs)
+            except ValueError:
+                print('Malformed command.')
+                self.help_read()
+        else:
+            print('Nothing to read!')
+
+    def help_read(self):
+        print('Syntax: read <objname> [as <newobjname>]')
+        print
+        print('If <objname> is a directory, all objects in that')
+        print('directory are read in to memory.  In this case,')
+        print('using the `as <newobjname>\' syntax is not allowed.')
+
+    def do_python(self, args=None):
+        import code, readline, rlcompleter
+        myobjs = self.objs
+        # myobjs.update({'ls': self.do_ls, 'cd': self.do_cd, 'read' : self.do_read})
+        readline.set_completer(rlcompleter.Completer(myobjs).complete)
+        readline.parse_and_bind("tab: complete")
+        shell = code.InteractiveConsole(myobjs)
+        shell.interact()
 
     def help_pathspec(self):
         msg  = "Paths inside the current file can be specified in the usual way:\n"
@@ -163,7 +242,7 @@ class rshell(cmd.Cmd):
         msg += "and a colon:\n"
         msg += "- file path: myfile.root:/dir1/dir2\n\n"
 
-        msg += "See: TDirectoryFile::cd(..) in ROOT docs"
+        msg += "See: TDirectoryFile::cd(..) in ROOT docs and rdir.pathspec docs"
         print(msg)
 
 class rplotsh(rshell,empty):

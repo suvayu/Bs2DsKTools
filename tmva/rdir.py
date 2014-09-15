@@ -28,14 +28,26 @@ class pathspec(object):
     ...     rfile = TFile.Open(ps.rfile, 'read')
     ...     obj = rfile.Get(ps.rpath)
 
+    Pathname parsing rules:
+
+    - Colons in file names are not allowed, since it is used to split
+      the path into file path, and root object path.  Probably using
+      some kind of an URL library can improve this.
+
+    - When colons are being used, no other assumption is made about
+      the ROOT file other than the above mentioned
+      limitation. However, when only file paths are given (w/o the
+      trailing colon), it is assumed to be path to a ROOT file if the
+      path ends in `.root', path to a ROOT object inside a ROOT file
+      otherwise.
+
     """
+
     # declare properties for pydoc
-    rfile, rpath = None, None
-    norfile, norpath = None, None
-    relative = None
+    path, rfile, rpath = None, None, None
+    relative, norfile, norpath = None, None, None
     rfile_basename, rfile_dirname, rfile_split = None, None, None
     rpath_basename, rpath_dirname, rpath_split = None, None, None
-
 
     def __init__(self, path):
         self.path = path
