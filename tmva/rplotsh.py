@@ -16,7 +16,18 @@ class empty(cmd.Cmd):
         pass
 
 from fixes import ROOT
-from ROOT import gROOT, gDirectory
+from ROOT import gROOT, gSystem, gDirectory, gPad, gStyle
+# colours
+from ROOT import (kBlack, kWhite, kGray, kViolet, kMagenta, kPink,
+                  kRed, kOrange, kYellow, kSpring, kGreen, kTeal,
+                  kCyan, kAzure, kBlue)
+# markers
+from ROOT import (kDot, kPlus, kStar, kCircle, kMultiply,
+                  kFullDotSmall, kFullDotMedium, kFullDotLarge,
+                  kFullCircle, kFullSquare, kFullTriangleUp,
+                  kFullTriangleDown, kOpenCircle, kOpenSquare,
+                  kOpenTriangleUp, kOpenTriangleDown)
+
 from rdir import pathspec, Rdir, savepwd
 
 class rshell(cmd.Cmd):
@@ -227,6 +238,9 @@ class rshell(cmd.Cmd):
     def do_python(self, args=None):
         import code, readline, rlcompleter
         myobjs = self.objs
+        ROOT_globals = dict([(k,v) for k, v in globals().iteritems()
+                             if k.startswith('g') or k.startswith('k')])
+        myobjs.update(ROOT_globals)
         # myobjs.update({'ls': self.do_ls, 'cd': self.do_cd, 'read' : self.do_read})
         readline.set_completer(rlcompleter.Completer(myobjs).complete)
         readline.parse_and_bind("tab: complete")
