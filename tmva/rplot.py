@@ -19,20 +19,12 @@ from ROOT import (kBlack, kWhite, kGray, kViolet, kMagenta, kPink,
                   kRed, kOrange, kYellow, kSpring, kGreen, kTeal,
                   kCyan, kAzure, kBlue)
 
-_colours = (kBlack, kWhite, kGray, kViolet, kMagenta, kPink, kRed,
-            kOrange, kYellow, kSpring, kGreen, kTeal, kCyan, kAzure,
-            kBlue)
 # markers
 from ROOT import (kDot, kPlus, kStar, kCircle, kMultiply,
                   kFullDotSmall, kFullDotMedium, kFullDotLarge,
                   kFullCircle, kFullSquare, kFullTriangleUp,
                   kFullTriangleDown, kOpenCircle, kOpenSquare,
                   kOpenTriangleUp, kOpenTriangleDown)
-
-_markers = (kDot, kPlus, kStar, kCircle, kMultiply, kFullDotSmall,
-            kFullDotMedium, kFullDotLarge, kFullCircle, kFullSquare,
-            kFullTriangleUp, kFullTriangleDown, kOpenCircle,
-            kOpenSquare, kOpenTriangleUp, kOpenTriangleDown)
 
 
 def _assert_equal(arg1, arg2, str1, str2):
@@ -57,7 +49,7 @@ def _valid_scheme(scheme, nplots, grid):
     return scheme
 
 
-def _screen_size():
+def get_screen_size():
     """Get screen size (linux only)"""
     import subprocess
     xrandr = subprocess.Popen(('xrandr', '-q'), stdout = subprocess.PIPE)
@@ -71,50 +63,23 @@ def _screen_size():
     return (xres - 50, yres - 50)
 
 
-def _canvas_size(grid):
+def get_optimal_size(xgrid, ygrid, width=None, height=None, aspect=4.0/3):
     """Calculate canvas size from grid"""
-    nplots = grid[0]*grid[1]
-    xmax, ymax = _screen_size()
-    wide = grid[0] > grid[1]
-    tall = grid[1] > grid[0]
-    if wide == tall:            # square
-        return (ymax, ymax)
-    if wide:
-        y = int(float(xmax/grid[0]) * 0.75 * grid[1])
-        return (xmax, y)
-    if tall:
-        x = int(float(ymax/grid[1]) * 1.33 * grid[0])
-        return (x, ymax)
-
-
-def _check_cols(cols, nhists):
-    """Check colours"""
-    if cols:
-        _assert_equal(len(cols), nhists, '# colours', '# histograms')
-    else:
-        cols = [kBlack] * nhists
-    return cols
-
-
-def draw(plottables, scheme = None, grid = (1,1), cols = None):
-    """Draw histograms"""
-    cols = _check_cols(cols, len(plottables))
-    scheme = _valid_scheme(scheme, len(plottables), grid)
-    if not scheme: return
-
-    size = _canvas_size(grid)
-    canvas = TCanvas('canvas-{}'.format(uuid4()), '', size[0], size[1])
-    canvas.Divide(grid[0], grid[1])
-    pad = 0
-    for idx, plottable in enumerate(plottables):
-        if scheme[idx].find('same') < 0:
-            pad = pad + 1
-        canvas.cd(pad)
-        plottable.Draw(scheme[idx])
-        plottable.SetLineColor(cols[idx])
-        plottable.SetMarkerColor(cols[idx])
-    canvas.Update()
-    return canvas
+    _width = lambda h: int(float(h/ygrid) * aspect * xgrid)
+    _height = lambda w: int(float(w/xgrid) * (1/aspect) * ygrid)
+    if not (width or height):
+        width, height = get_screen_size()
+        if xgrid > ygrid:       # wide
+            height = _height(width))
+        elif ygrid > xgrid:     # tall
+            width = _width(height)
+        else:                   # square (xgrid == ygrid)
+            width = height
+    elif not width and height:  # get width
+        width = _width(height)
+    elif not height and width:  # get height
+        height = _height(width)
+    return (width, height)
 
 
 def draw_expr(trees, exprs, scheme = None, grid = (1,1), sel = '', cols = None):
@@ -145,3 +110,57 @@ def draw_expr(trees, exprs, scheme = None, grid = (1,1), sel = '', cols = None):
         hist.SetMarkerColor(cols[idx])
     canvas.Update()
     return canvas
+
+
+class Rplot(object):
+    """Plotter class for ROOT"""
+
+    colours = (kRed, kAzure, kGreen, kBlack, kPink, kOrange, kTeal,
+               kCyan)
+
+    markers = (kDot, kPlus, kStar, kCircle, kMultiply, kFullDotSmall,
+               kFullDotMedium, kFullDotLarge, kFullCircle, kFullSquare,
+               kFullTriangleUp, kFullTriangleDown, kOpenCircle,
+               kOpenSquare, kOpenTriangleUp, kOpenTriangleDown)
+
+    grid = (1,1)
+    size = (400, 400)
+    plottables = []
+    style = True
+
+    def __init__(self, xgrid, ygrid, width=None, height=None, style=None):
+        self.grid = (xgrid, ygrid)
+        self.nplots = xgrid * ygrid
+        self.size = get_optimal_size(xgrid, ygrid, width, height)
+
+    def prep_canvas(self):
+        self.canvas = ROOT.Canvas('canvas', '', *self.size)
+        if self.nplots > 1:
+            self.canvas.Divide(*self.grid)
+
+    def draw_hist(self, plottables, drawopts):
+        if len(plottables) % self.nplots == 0:
+            for i, plot in enumerate(plottables):
+                this_plot = i % self.nplots
+                if this_plot == 0:
+                    self.canvas.cd(i/self.nplots + 1)
+                    opts = drawopts
+                else:
+                    opts = '{} same'.format(drawopts)
+                if self.style:
+                    plottables.SetLineColor(self.colours[this_plot] + 1)
+                    plottables.SetFillColor(self.colours[this_plot])
+                    plottables.SetMarker(self.markers)
+                    plottables.SetMarkerSize(0.2)
+                plottables.Draw(opts)
+        else:
+            print(u'# plottables ({}) ≠ # pads ({})!'
+                  .format(len(plottables), self.nplots)))
+
+    def draw_graph(self, *args, **kwargs):
+        """Same as draw_hist(..)."""
+        self.draw_hist(*args, **kwargs)
+
+    def draw_tree(self, trees, exprs):
+        if len(exprs) % len(trees) == 0:
+            pass
