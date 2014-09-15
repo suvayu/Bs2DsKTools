@@ -204,19 +204,46 @@ class rshell(cmd.Cmd):
         if args:
             import shlex
             tokens = shlex.split(args)
-            ntoks = len(tokens)
             try:
-                if not(ntoks == 1 or ntoks == 3):
-                    raise ValueError('Incorrect number of arguments: {}'.format(ntoks))
-                _not_dir = lambda key: not key.IsFolder()
-                objs = self.rdir_helper.read(tokens[0], robj_p = _not_dir, metainfo = True)
-                if ntoks > 1:
-                    if len(objs) > 1:
-                        raise ValueError('{} is a directory; extra arguments: {}'
-                                         .format(tokens[0], tokens[1:]))
-                    if tokens[1] != 'as':
+                # need to match or not
+                if tokens[0] == 're' or tokens[0] == 'glob':
+                    domatch = tokens[0]
+                    path = tokens[1]
+                    tokens = tokens[2:]
+                else:
+                    domatch = None
+                    path = tokens[0]
+                    tokens = tokens[1:]
+                # destination var specified or not
+                if tokens:
+                    if tokens[0] != 'as':
                         raise ValueError('Unknown command option: {}'.format(tokens[1]))
-                    objs = {tokens[2] : objs[0]}
+                    else:
+                        try:
+                            dest = token[1]
+                        except IndexError:
+                            raise ValueError('Missing destination variable')
+                else:
+                    dest = None
+                path_arg = path
+                if domatch:
+                    path, pattern = path.rsplit('/', 1)
+                    if domatch == 'glob':
+                        from fnmatch import fnmatchcase
+                        match = lambda name: fnmatchcase(name, pattern)
+                    if domatch == 're':
+                        import re
+                        match = re.compile(pattern).match
+                    _not_dir = lambda key: not key.IsFolder() and matcher(key.GetName())
+                else:
+                    _not_dir = lambda key: not key.IsFolder()
+                objs = self.rdir_helper.read(path, robj_p = _not_dir, metainfo = True)
+
+                if dest:
+                    if domatch or self.rdir_helper.get_dir(path_arg):
+                        objs = {dest : objs}
+                    else:
+                        objs = {dest : objs[0]} # only one element
                 else:
                     objs = [(obj.GetName(), obj) for obj in objs]
                 self.read_obj(objs)
