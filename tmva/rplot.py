@@ -27,28 +27,6 @@ from ROOT import (kDot, kPlus, kStar, kCircle, kMultiply,
                   kOpenTriangleUp, kOpenTriangleDown)
 
 
-def _assert_equal(arg1, arg2, str1, str2):
-    """Assert the args are equal, raise exception otherwise"""
-    if arg1 != arg2:
-        raise ValueError('Value mismatch: {} != {}'.format(str1, str2))
-
-
-def _valid_scheme(scheme, nplots, grid):
-    """Check plotting scheme"""
-    if len(grid) != 2:
-        raise ValueError('Invalid grid dimensions, expected form: (x,y).')
-    npads = grid[0]*grid[1]
-    if not scheme:
-        _assert_equal(npads, nplots, 'grid size', '# of plottables')
-        scheme = [''] * nplots
-    else:
-        if scheme[0].find('same') >= 0:
-            raise ValueError('First plotting scheme has `same\'!  This is not allowed.')
-        _assert_equal(npads, len([True for opt in scheme if opt.find('same') < 0]),
-                      '# of plots', 'plotting scheme')
-    return scheme
-
-
 def get_screen_size():
     """Get screen size (linux only)"""
     import subprocess
