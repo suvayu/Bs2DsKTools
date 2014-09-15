@@ -209,7 +209,7 @@ class rshell(cmd.Cmd):
                 if not(ntoks == 1 or ntoks == 3):
                     raise ValueError('Incorrect number of arguments: {}'.format(ntoks))
                 _not_dir = lambda key: not key.IsFolder()
-                objs = self.rdir_helper.read(tokens[0], robj_p = _not_dir)
+                objs = self.rdir_helper.read(tokens[0], robj_p = _not_dir, metainfo = True)
                 if ntoks > 1:
                     if len(objs) > 1:
                         raise ValueError('{} is a directory; extra arguments: {}'
