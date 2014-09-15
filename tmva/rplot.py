@@ -63,8 +63,10 @@ def isplottable(plottable):
 class Rplot(object):
     """Plotter class for ROOT"""
 
-    colours = (kRed, kAzure, kGreen, kBlack, kPink, kOrange, kTeal,
-               kCyan)
+    fill_colours = (kRed, kAzure, kGreen, kGray+2, kMagenta, kOrange,
+                    kTeal-9, kCyan-7)
+    line_colours = (kRed+2, kAzure-6, kGreen+2, kBlack, kMagenta+2,
+                    kOrange+1, kTeal-8, kCyan+1)
 
     markers = (kDot, kPlus, kStar, kCircle, kMultiply, kFullDotSmall,
                kFullDotMedium, kFullDotLarge, kFullCircle, kFullSquare,
@@ -89,8 +91,8 @@ class Rplot(object):
             self.canvas.Divide(*self.grid)
 
     def set_style(self, plottable, col):
-        plottable.SetLineColor(self.colours[col] + 1)
-        plottable.SetFillColor(self.colours[col])
+        plottable.SetFillColor(self.fill_colours[col])
+        plottable.SetLineColor(self.line_colours[col])
         # plottable.SetMarker(self.markers)
         # plottable.SetMarkerSize(0.2)
 
