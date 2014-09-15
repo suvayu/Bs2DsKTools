@@ -89,7 +89,7 @@
 - B2DX_withtagging_strip20_DVv33r8_3fb_magdown_BDTG_Bs.root
 - B2DX_withtagging_strip20_DVv33r8_3fb_magup_BDTG_Bs.root
 
-* Tasks [2/4]
+* Tasks [3/6]
 ** TODO Resolve vertex χ² variable disambiguity
 - Vertex χ²/ndof
 - Lifetime vertex χ²/ndof
@@ -105,8 +105,19 @@ Use the functions: =Max$()=, =Min$()=.  However this doesn't work with
 arbitrary branches, only takes a ~TTreeFormula~ argument.  So first
 add a branch with needed variables as a vector, then call the function
 in a formula.
-** TODO Efficiency plots
+** DONE Efficiency plots
+   CLOSED: [2014-09-15 Mon 13:13]
 BDT selection efficiency (for 3 diff arbitrary selections) for:
 - decay time → acceptance
 - decay time error → decay time resolution
 - B_{s} mass → mass fit
+** TODO rplotsh [0/4]
+- [ ] Filename meta information
+- [ ] Read into list
+- [ ] Read from glob
+- [ ] Read from directory
+** TODO Rplot [0/4]
+- [ ] Stack
+- [ ] Line style, width
+- [ ] Marker style, size
+- [ ] Automatic legends w/ smart placement
