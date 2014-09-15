@@ -73,6 +73,8 @@ class Rplot(object):
                kFullTriangleUp, kFullTriangleDown, kOpenCircle,
                kOpenSquare, kOpenTriangleUp, kOpenTriangleDown)
 
+    linestyles = {'-':1, '--':2, ':':3, '-.':5}
+
     grid = (1,1)
     size = (400, 400)
     plottables = []
