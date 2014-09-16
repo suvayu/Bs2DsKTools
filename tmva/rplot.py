@@ -78,10 +78,11 @@ class Rplot(object):
 
     grid = (1,1)
     size = (400, 400)
-    plottables = []
+    plots = []
     canvas = None
     style = True
     stats = False
+    stack = False
 
     def __init__(self, xgrid=None, ygrid=None, width=None, height=None, style=None):
         if gROOT.IsBatch() and width and height:
@@ -98,6 +99,15 @@ class Rplot(object):
             self.canvas.Divide(*self.grid)
         return self.canvas
 
+    def get_stack(self, plots):
+        plots_s = [[] for i in xrange(len(plots))]
+        for i, plot in enumerate(plots):
+            for j, plottable in enumerate(plot):
+                plots_s[i].append(plottable.Clone('{}_s'.format(plottable.GetName())))
+                if j > 0: plots_s[i][-1].Add(plots_s[i][-2])
+            plots_s[i].reverse()
+        return plots_s
+
     def set_style(self, plottable, num):
         if isinstance(plottable, ROOT.TAttFill):
             plottable.SetFillColorAlpha(self.fill_colours[num], 1-num*0.05)
@@ -110,9 +120,9 @@ class Rplot(object):
             plottable.SetMarkerStyle(self.markers[num])
             plottable.SetMarkerColor(self.line_colours[num])
 
-    def get_viewport(self, plottables):
+    def get_viewport(self, plot):
         ymin, ymax = 0, 0
-        for plottable in plottables:
+        for plottable in plot:
             ymin = min(ymin, plottable.GetMinimum())
             ymax = max(ymax, plottable.GetMaximum())
         if ymin < 0:
@@ -121,9 +131,9 @@ class Rplot(object):
             ymax += 0.03*ymax
         return (ymin, ymax)
 
-    def draw_same(self, plottables, drawopts):
-        yrange = self.get_viewport(plottables)
-        for i, plottable in enumerate(plottables):
+    def draw_same(self, plot, drawopts):
+        yrange = self.get_viewport(plot)
+        for i, plottable in enumerate(plot):
             plottable.SetMinimum(yrange[0])
             plottable.SetMaximum(yrange[1])
             if i == 0:
@@ -134,11 +144,17 @@ class Rplot(object):
                 self.set_style(plottable, i)
             plottable.Draw(opts)
 
-    def draw_hist(self, plottables, drawopts):
-        if not self.canvas:
-            self.prep_canvas()
-        if len(plottables) % self.nplots == 0:
-            for i, plot in enumerate(plottables):
+    def draw_hist(self, plots, drawopts):
+        if len(plots) % self.nplots == 0:
+            if not self.canvas:
+                self.prep_canvas()
+            if self.stack:
+                # necessary, goes out of scope otherwise
+                self.plots = self.get_stack(plots)
+            else:
+                # only for consistency with the above
+                self.plots = plots
+            for i, plot in enumerate(self.plots):
                 self.canvas.cd(i+1)
                 if isplottable(plot):
                     if self.style:
@@ -146,9 +162,11 @@ class Rplot(object):
                     plot.Draw(drawopts)
                 else:
                     self.draw_same(plot, drawopts)
+            return self.canvas
         else:
-            print(u'# plottables ({}) ≠ # pads ({})!'
-                  .format(len(plottables), self.nplots))
+            print(u'# plots ({}) ≠ # pads ({})!'
+                  .format(len(plots), self.nplots))
+            return
 
     def draw_graph(self, *args, **kwargs):
         """Same as draw_hist(..)."""
