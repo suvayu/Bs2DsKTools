@@ -117,8 +117,8 @@ BDT selection efficiency (for 3 diff arbitrary selections) for:
 - [X] Read into list
 - [X] Read from glob
 - [X] Read from directory
-** TODO Rplot [0/4]
-- [ ] Stack
+** TODO Rplot [1/4]
+- [X] Stack
 - [ ] Line style, width
 - [ ] Marker style, size
 - [ ] Automatic legends w/ smart placement
