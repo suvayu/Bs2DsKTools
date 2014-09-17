@@ -5,7 +5,7 @@
 * Methods
 - TMVA supports many multivariate methods (see:
   TMVAClassification.C).  We use BDT and it's variants:
-  - BDT :: adaptive boost
+  - BDTA :: adaptive boost
   - BBDT :: ensemble/forest of BDTs
   - BDTG :: gradient boost
   - BDTB :: bagging
