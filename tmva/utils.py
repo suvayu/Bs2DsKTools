@@ -1,10 +1,6 @@
 # coding=utf-8
 """Utilities"""
 
-# pretty print
-from pprint import pprint
-from fixes import ROOT
-
 def _import_args(namespace, d = {}):
     """Import attributes from namespace to local environment.
 
@@ -29,6 +25,7 @@ def path2rootdir(path):
     Returns (file/dir, directory)
 
     """
+    from fixes import ROOT
     rfile, rdir = path.split(':', 1)
     rfile = ROOT.TFile.Open(rfile, 'read')
     rdir = rfile.GetDirectory(rdir) # path in root file: /foo/bar
@@ -45,6 +42,7 @@ def make_paths(node):
             del node['file']
         except KeyError:
             print 'Malformed dict'
+            from pprint import pprint
             pprint(node)
             raise
     try:
