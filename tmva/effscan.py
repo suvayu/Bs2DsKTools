@@ -4,7 +4,7 @@ import argparse
 from utils import _import_args
 
 optparser = argparse.ArgumentParser(description=__doc__)
-optparser.add_argument('filename', nargs='?', default = None, help='ROOT file')
+optparser.add_argument('filename', nargs='+', help='ROOT file')
 optparser.add_argument('-t', dest='tree', default='TestTree', help='Tree name')
 optparser.add_argument('-p', dest='doprint', action='store_true', default=False, help='Print to png/pdf files')
 optparser.add_argument('-b', dest='batch', action='store_true', default=False, help='Batch mode')
