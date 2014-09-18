@@ -29,9 +29,6 @@ gROOT.SetBatch(True)
 from ROOT import TFile, TChain, TMVA
 from tmvaconfig import TMVAType, TMVAconfig, ConfigFile
 
-# ownership
-TFile.Open._creates = True
-
 # read config
 conf = ConfigFile('TMVA.conf')
 if conf.read() > 0:
@@ -62,7 +59,7 @@ ofile = TFile.Open(out, 'recreate')
 # instantiate TMVA
 TMVA.Tools.Instance()
 # TMVA.gConfig.GetIONames().fWeightFileDir = wdir
-factory = TMVA.Factory(session._name, ofile, '!V:' + \
+factory = TMVA.Factory(session._name, ofile, '!V:DrawProgressBar=False:' + \
                        ':'.join(session.factory_opts))
 
 # training variables
