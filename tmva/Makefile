@@ -1,4 +1,5 @@
 PKGCONFIG	:= pkg-config
+PYTHON		:= $(shell which python)
 ROOTCONFIG	:= root-config
 
 CXX		:= $(shell $(ROOTCONFIG) --cxx)
@@ -15,9 +16,13 @@ ROOTLIBS	:= $(shell $(ROOTCONFIG) --libs)
 ROOTGLIBS	:= $(shell $(ROOTCONFIG) --glibs)
 
 SRCS	:= $(wildcard *.cc)
+TESTS	:= $(wildcard test_*.py)
 
 # targets
 $(SRCS:%.cc=%):%:	%.cc
 	$(CXX) $(OPT) $(BOOSTLIBS.CLI) $(ROOTCFLAGS) $(ROOTLIBS) -o $@ $<
 
 -include local.mk
+
+$(TESTS:%.py=%):%:	%.py
+	 $(PYTHON) -m unittest $(OPTS) $@
