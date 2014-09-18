@@ -39,7 +39,6 @@ def make_paths(node):
     except KeyError:
         try:
             pwd = '{}:'.format(node['file'])
-            del node['file']
         except KeyError:
             print 'Malformed dict'
             from pprint import pprint
