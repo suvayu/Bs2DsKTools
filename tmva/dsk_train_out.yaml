@@ -1,15 +1,19 @@
-name: dsk_train_out.root
-title: ROOT file
+file: dsk_train_out.root
+title: Testing
 children:
     - name: InputVariables_PCA
+      title: PCA transformed
       children:
         - name: CorrelationPlots
     - name: InputVariables_Gauss_Deco
+      title: Gaussianised, decorrelated
       children:
         - name: CorrelationPlots
     - name: InputVariables_Id
+      title: Identity transform
       children:
         - name: CorrelationPlots
     - name: InputVariables_Deco
+      title: Decorrelated
       children:
         - name: CorrelationPlots

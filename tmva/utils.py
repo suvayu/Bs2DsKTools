@@ -3,7 +3,7 @@
 
 # pretty print
 from pprint import pprint
-import ROOT
+from fixes import ROOT
 
 def _import_args(namespace, d = {}):
     """Import attributes from namespace to local environment.
@@ -23,15 +23,15 @@ def _import_args(namespace, d = {}):
         d[attr] = getattr(namespace, attr)
     return d
 
-def path2rootdir(path, ext='.root'):
+def path2rootdir(path):
     """Read path string and return ROOT directory
 
     Returns (file/dir, directory)
 
     """
-    res = path.split(ext, 1)
-    rfile = ROOT.TFile.Open('{}{}'.format(res[0], ext), 'read')
-    rdir = rfile.GetDirectory(res[-1]) # path in root file: /foo/bar
+    rfile, rdir = path.split(':', 1)
+    rfile = ROOT.TFile.Open(rfile, 'read')
+    rdir = rfile.GetDirectory(rdir) # path in root file: /foo/bar
     return (rfile, rdir)
 
 def make_paths(node):
@@ -40,9 +40,13 @@ def make_paths(node):
         pwd = node['name']
         del node['name']
     except KeyError:
-        print 'Malformed dict'
-        pprint(node)
-        raise
+        try:
+            pwd = '{}:'.format(node['file'])
+            del node['file']
+        except KeyError:
+            print 'Malformed dict'
+            pprint(node)
+            raise
     try:
         children = node['children']
         del node['children']
