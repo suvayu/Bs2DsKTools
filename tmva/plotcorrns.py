@@ -91,60 +91,60 @@ for transform in transforms:
 canvas.Print('transforms.pdf]')
 del plotter
 
-# ## correlation plots
-# for rdir in rfileconf:
-#     try:
-#         if rdir['key'][:-5] in transforms: # keys for corrn folder end in _corr
-#             def _filter(key):
-#                 isth1 = ROOT.TClass.GetClass(key.GetClassName()) \
-#                                    .InheritsFrom(ROOT.TH1.Class())
-#                 return isth1 and key.GetName().find('Signal') > 0
-#             hists.update({rdir['key']: rpath_tool.read(rdir['path'], robj_p = _filter)})
-#     except KeyError as err:
-#         if str(err) != '\'key\'': raise
+## correlation plots
+for rdir in rfileconf:
+    try:
+        if rdir['key'][:-5] in transforms: # keys for corrn folder end in _corr
+            def _filter(key):
+                isth1 = ROOT.TClass.GetClass(key.GetClassName()) \
+                                   .InheritsFrom(ROOT.TH1.Class())
+                return isth1 and key.GetName().find('Signal') > 0
+            hists.update({rdir['key']: rpath_tool.read(rdir['path'], robj_p = _filter)})
+    except KeyError as err:
+        if str(err) != '\'key\'': raise
 
-# import numpy as np
-# opts = np.empty(shape=(14, 14), dtype=object)
-# tril = np.tril_indices(14)
-# triu = np.triu_indices(14)
+import numpy as np
+opts = np.empty(shape=(14, 14), dtype=object)
+tril = np.tril_indices(14)
+triu = np.triu_indices(14)
 
-# # draw options
-# for idx in zip(*tril): # empty lower triangular
-#     opts[idx] = []
+# draw options
+for idx in zip(*tril): # empty lower triangular
+    opts[idx] = []
 
-# for idx in zip(*triu):
-#     opts[idx] = ['scat', '']
+for idx in zip(*triu):
+    opts[idx] = ['scat', '']
 
-# opts = np.reshape(opts, 14*14)
+opts = np.reshape(opts, 14*14)
 
-# # plots
-# for transform in transforms:
-#     plots = np.empty(shape=(14, 14), dtype=object)
+# plots
+for transform in transforms:
+    plots = np.empty(shape=(14, 14), dtype=object)
 
-#     # empty lower triangular
-#     for idx in zip(*tril):
-#         plots[idx] = []
+    # empty lower triangular
+    for idx in zip(*tril):
+        plots[idx] = []
 
-#     for i, idx in enumerate(zip(*triu)):
-#         plots[idx] = hists[transform+'_corr'][i*2:i*2+2]
+    for i, idx in enumerate(zip(*triu)):
+        plots[idx] = hists[transform+'_corr'][i*2:i*2+2]
 
-#         # plots[idx][0].SetLineColor(ROOT.kBlack)
-#         # plots[idx][0].SetMarkerColor(ROOT.kBlack)
+        # plots[idx][0].SetLineColor(ROOT.kBlack)
+        # plots[idx][0].SetMarkerColor(ROOT.kBlack)
 
-#         # plots[idx][1].SetLineColor(ROOT.kYellow)
-#         # plots[idx][1].SetMarkerColor(ROOT.kYellow)
+        # plots[idx][1].SetLineColor(ROOT.kYellow)
+        # plots[idx][1].SetMarkerColor(ROOT.kYellow)
 
-#     hists[transform+'_corr'] = np.reshape(plots, 14*14)
+    hists[transform+'_corr'] = np.reshape(plots, 14*14)
 
-# plotter = Rplot(14, 14, 5600, 5600)
-# canvas = plotter.prep_canvas('corr_canvas')
+plotter = Rplot(14, 14, 5600, 5600)
+canvas = plotter.prep_canvas('corr_canvas')
 # canvas.Print('correlations.pdf[')
 
-# for transform in transforms:
-#     plotter.draw_hist(hists[transform+'_corr'], opts)
-#     canvas.Update()
-#     # canvas.Print('correlations_{}.pdf'.format(transform))
-#     canvas.Print('correlations.pdf')
+for transform in transforms:
+    plotter.draw_hist(hists[transform+'_corr'], opts)
+    canvas.Update()
+    canvas.Print('correlations_{}.png'.format(transform))
+    # canvas.Print('correlations.pdf')
 
 # canvas.Print('correlations.pdf]')
-# del plotter
+del plotter
