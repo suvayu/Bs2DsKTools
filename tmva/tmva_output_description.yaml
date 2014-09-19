@@ -1,19 +1,46 @@
 file: dsk_train_out.root
 title: Testing
+key: file
 children:
-    - name: InputVariables_PCA
-      title: PCA transformed
-      children:
-        - name: CorrelationPlots
-    - name: InputVariables_Gauss_Deco
-      title: Gaussianised, decorrelated
-      children:
-        - name: CorrelationPlots
     - name: InputVariables_Id
+      key: identity
       title: Identity transform
       children:
-        - name: CorrelationPlots
+      - name: CorrelationPlots
+        key: identity_corr
     - name: InputVariables_Deco
+      key: deco
       title: Decorrelated
       children:
-        - name: CorrelationPlots
+      - name: CorrelationPlots
+        key: deco_corr
+    - name: InputVariables_PCA
+      key: pca
+      title: PCA transformed
+      children:
+      - name: CorrelationPlots
+        key: pca_corr
+    - name: InputVariables_Uniform
+      key: uniform
+      title: Uniform transform
+      children:
+      - name: CorrelationPlots
+        key: uniform_corr
+    - name: InputVariables_Uniform_Deco
+      key: uniform_deco
+      title: Uniform, decorrelated
+      children:
+      - name: CorrelationPlots
+        key: uniform_deco_corr
+    - name: InputVariables_Gauss
+      key: gauss
+      title: Gaussianised
+      children:
+      - name: CorrelationPlots
+        key: gauss_corr
+    - name: InputVariables_Gauss_Deco
+      key: gauss_deco
+      title: Gaussianised, decorrelated
+      children:
+      - name: CorrelationPlots
+        key: gauss_deco_corr
