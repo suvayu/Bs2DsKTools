@@ -65,3 +65,24 @@ def read_yaml(filename):
     stream = open(filename, 'r')
     import yaml
     return yaml.load(stream)
+
+import numpy as np
+
+def thn2array(hist):
+    """Convert ROOT histograms to numpy.array"""
+    xbins = hist.GetNbinsX()
+    ybins = hist.GetNbinsY()
+    zbins = hist.GetNbinsZ()
+    # add overflow, underflow bins
+    if ybins == 1: shape = (xbins + 2)
+    elif zbins == 1: shape = (xbins + 2, ybins + 2)
+    else: shape = (xbins + 2, ybins + 2, zbins + 2)
+    val = np.array([val for val in hist]).reshape(*shape)
+    return val
+
+def thn_print(hist):
+    """Print ROOT histograms of any dimention"""
+    val = thn2array(hist)
+    print('Hist: {}, dim: {}'.format(hist.GetName(), len(np.shape(val))))
+    hist.Print()
+    print np.flipud(val) # flip y axis, FIXME: check what happens for 3D
