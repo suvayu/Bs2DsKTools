@@ -117,7 +117,7 @@ def get_hists(yaml_keys, conf, tool, robj_t = None, robj_p = None):
 
 ## variable distributions
 if distribs:
-    hists = get_hists(transforms, rfileconf, rpath_tool, robj_t = ROOT.TH1)
+    distributions = get_hists(transforms, rfileconf, rpath_tool, robj_t = ROOT.TH1)
 
     from rplot.rplot import arrange
     ROOT.gStyle.SetHatchesLineWidth(1)
@@ -127,7 +127,7 @@ if distribs:
             # l.reverse()
             l[0].SetFillStyle(3345)
             l[1].SetFillStyle(3354)
-        hists[transform] = arrange(hists[transform], 2, pl_p=_style)
+        distributions[transform] = arrange(distributions[transform], 2, pl_p=_style)
 
     from rplot.rplot import Rplot
     plotter = Rplot(5, 3, 2000, 1200)
@@ -136,7 +136,7 @@ if distribs:
     if doprint: canvas.Print('transforms.pdf[')
 
     for transform in transforms:
-        plotter.draw_hist(hists[transform], 'hist')
+        plotter.draw_hist(distributions[transform], 'hist')
         canvas.Update()
         if doprint: canvas.Print('transforms.pdf')
 
@@ -153,10 +153,10 @@ if lcorrns or scatter:
     hists = get_hists(['{}_corr'.format(k) for k in transforms],
                       rfileconf, rpath_tool, robj_p = _filter)
 
-import numpy as np
-opts = np.empty(shape=(14, 14), dtype=object)
-tril = np.tril_indices(14)
-triu = np.triu_indices(14)
+    import numpy as np
+    opts = np.empty(shape=(14, 14), dtype=object)
+    tril = np.tril_indices(14)
+    triu = np.triu_indices(14)
 
 ## covariance matrices
 if lcorrns:
