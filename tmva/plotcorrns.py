@@ -44,15 +44,34 @@ rpath_tool = Rdir(fnames)
 # FIXME: only processes first file
 rfileconf = rfiles[0]
 
-transforms = [
-    'identity',
-    'deco',
-    'pca',
-    'uniform',
-    'uniform_deco',
-    'gauss',
-    'gauss_deco'
-]
+from collections import OrderedDict
+transforms = OrderedDict({
+    'identity' : 'Identity',
+    'deco' : 'Decorrelate',
+    'pca' : 'PCA',
+    'uniform' : 'Uniform',
+    'uniform_deco' : 'Uniform+Decorrelate',
+    'gauss' : 'Gaussianise',
+    'gauss_deco' : 'Gaussianise+Decorrelate',
+})
+
+varmap = {
+    'lab0_DIRA_OWNPV' : 'B_{s} DIRA',
+    'lab0_IPCHI2_OWNPV' : 'B_{s} IP #chi^{2}',
+    'lab1_IPCHI2_OWNPV' : 'h IP #chi^{2}',
+    'lab1_PT' : 'h p_{T}',
+    'lab2_MINIPCHI2' : 'D_{s} IP #chi^{2}',
+    'lab3_IPCHI2_OWNPV' : 'D_{s} dau1 IP #chi^{2}',
+    'lab4_IPCHI2_OWNPV' : 'D_{s} dau2 IP #chi^{2}',
+    'lab5_IPCHI2_OWNPV' : 'D_{s} dau3 IP #chi^{2}',
+    'Bs_vtx_chi2_ndof' : 'B_{s} vtx #chi^{2}',
+    'Bs_radial_fd' : 'B_{s} FD',
+    'Ds_radial_fd' : 'D_{s} FD',
+    'Ds_vtx_chi2_ndof' : 'D_{s} vtx #chi^{2}',
+    'max_ghost_prob' : 'max ghost trk prob',
+    'min_Ds_child_trk_pt' : 'min D_{s} child trk p_{T}',
+    'min_Ds_child_trk_chi2' : 'min D_{s} child trk #chi^{2}',
+}
 
 from fixes import ROOT
 if batch: ROOT.gROOT.SetBatch(True)
@@ -70,6 +89,7 @@ def get_hists(yaml_keys, conf, tool, robj_t = None, robj_p = None):
         except KeyError as err:
             if str(err) != '\'key\'': raise
     return hists
+
 
 ## variable distributions
 hists = get_hists(transforms, rfileconf, rpath_tool, robj_t = ROOT.TH1)
@@ -98,6 +118,7 @@ for transform in transforms:
 canvas.Print('transforms.pdf]')
 del plotter
 
+
 ## correlation plots
 def _filter(key):
     isth1 = ROOT.TClass.GetClass(key.GetClassName()) \
@@ -111,13 +132,61 @@ opts = np.empty(shape=(14, 14), dtype=object)
 tril = np.tril_indices(14)
 triu = np.triu_indices(14)
 
-# draw options
+## covariance matrices
+matrices = {}
+for transform in transforms:
+    corrn = ROOT.TH2I(transform, 'Correlation matrix after {} transform'
+                      .format(transforms[transform]),
+                      14, 0, 14, 14, 0, 14)
+
+    for i, idx in enumerate(zip(*triu)):
+        histo = hists[transform+'_corr'][i*2]
+        if idx[0] == idx[1]:    # set bin label using diagonal
+            name = histo.GetName()
+            name = name[5:name.find('_Signal')]
+            varnames = name.split('_vs_', 1)
+            corrn.GetXaxis().SetBinLabel(idx[0]+1, varmap[varnames[1]])
+            corrn.GetYaxis().SetBinLabel(idx[1]+1, varmap[varnames[0]])
+        corrn.SetBinContent(idx[0]+1, idx[1]+1, int(100*histo.GetCorrelationFactor()))
+
+    matrices[transform] = corrn
+
+# colour palette
+# red = np.array([0.0, 0.0, 1.0])
+# green = np.array([0.0, 1.0, 0.0])
+# blue = np.array([1.0, 0.0, 0.0])
+# stops = np.array([0.00, 0.5, 1.0])
+# ROOT.TColor.CreateGradientColorTable(len(stops), stops, red, green, blue, 50)
+
+canvas = ROOT.TCanvas('canvas', '', 800, 600)
+canvas.SetLeftMargin(0.15)
+canvas.SetBottomMargin(0.11)
+canvas.SetRightMargin(0.11)
+canvas.Print('correlations.pdf[')
+for transform in transforms:
+    matrices[transform].SetStats(False)
+    matrices[transform].SetMaximum(95)
+    matrices[transform].SetMinimum(-95)
+    matrices[transform].Draw('colz text')
+    canvas.Update()
+    canvas.Print('correlations.pdf')
+canvas.Print('correlations.pdf]')
+del canvas
+
+from utils import thn_print
+for transform in transforms:
+    thn_print(matrices[transform])
+
+
+## draw correlation plots
+# options
 for idx in zip(*tril): # empty lower triangular
     opts[idx] = []
 
 for idx in zip(*triu):
     opts[idx] = ['scat', '']
 
+# reshape to match covariance matrix above
 opts = np.reshape(np.flipud(opts.transpose()), 14*14)
 
 # plots
@@ -137,6 +206,7 @@ for transform in transforms:
         # plots[idx][1].SetLineColor(ROOT.kYellow)
         # plots[idx][1].SetMarkerColor(ROOT.kYellow)
 
+    # reshape to match covariance matrix above
     plots = np.flipud(plots.transpose())
     hists[transform+'_corr'] = np.reshape(plots, 14*14)
 
