@@ -44,3 +44,25 @@ children:
       children:
       - name: CorrelationPlots
         key: gauss_deco_corr
+    - name: Method_BDT
+      key: method_bdt
+      title: BDT methods
+      children:
+      - name: BDTA
+        key: BDTA
+        title: BDT w/ adaptive boost
+        children:
+        - name: CorrelationPlots
+          key: BDTA_corr
+      - name: BDTG
+        key: BDTG
+        title: BDT w/ gradient boost
+        children:
+        - name: CorrelationPlots
+          key: BDTG_corr
+      - name: BDTB
+        key: BDTB
+        title: BDT w/ bagging
+        children:
+        - name: CorrelationPlots
+          key: BDTB_corr
