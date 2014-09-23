@@ -126,6 +126,8 @@ canvas.SetRightMargin(0.11)
 canvas.Print('correlations.pdf[')
 for transform in transforms:
     matrices[transform].SetStats(False)
+    matrices[transform].SetMaximum(95)
+    matrices[transform].SetMinimum(-95)
     matrices[transform].Draw('colz text')
     canvas.Update()
     canvas.Print('correlations.pdf')
