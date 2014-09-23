@@ -115,7 +115,7 @@ for idx in zip(*tril): # empty lower triangular
 for idx in zip(*triu):
     opts[idx] = ['scat', '']
 
-opts = np.reshape(opts, 14*14)
+opts = np.reshape(np.flipud(opts.transpose()), 14*14)
 
 # plots
 for transform in transforms:
@@ -134,9 +134,11 @@ for transform in transforms:
         # plots[idx][1].SetLineColor(ROOT.kYellow)
         # plots[idx][1].SetMarkerColor(ROOT.kYellow)
 
+    plots = np.flipud(plots.transpose())
     hists[transform+'_corr'] = np.reshape(plots, 14*14)
 
 plotter = Rplot(14, 14, 5600, 5600)
+plotter.shrink2fit = False
 canvas = plotter.prep_canvas('corr_canvas')
 # canvas.Print('correlations.pdf[')
 
