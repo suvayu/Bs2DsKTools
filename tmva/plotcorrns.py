@@ -1,4 +1,15 @@
 #!/usr/bin/env python
+"""Different input variable plots.
+
+   1) Distributions after different transforms (transforms.pdf).
+
+   2) Linear correlation coefficients for different transforms
+      (correlations.pdf).
+
+   3) Scatter and profile plots for different transforms
+      (correlations_<transform>.png).
+
+"""
 
 import argparse
 from utils import _import_args
@@ -10,12 +21,26 @@ optparser.add_argument('-c', metavar='config', dest='yamlfile',
                        default='tmva_output_description.yaml',
                        help='ROOT file description in yaml format')
 optparser.add_argument('-p', dest='doprint', action='store_true',
-                       default=False, help='Print to png/pdf files')
+                       default=True, help='Print to png/pdf files')
 optparser.add_argument('-b', dest='batch', action='store_true',
                        default=False, help='Batch mode')
+optparser.add_argument('-d', dest='distribs', action='store_true',
+                       default=False, help='Plot input variable distributions')
+optparser.add_argument('-l', dest='lcorrns', action='store_true',
+                       default=False, help='Plot linear correlations')
+optparser.add_argument('-v', dest='verbose', action='store_true',
+                       default=False, help='Print linear correlation matrices')
+optparser.add_argument('-s', dest='scatter', action='store_true',
+                       default=False, help='Make correlation scatter plots')
 options = optparser.parse_args()
 locals().update(_import_args(options))
 
+
+import sys
+if verbose and not lcorrns:
+    print('Error: verbose depends on linear correlations!')
+    optparser.print_help()
+    sys.exit()
 
 from utils import read_yaml, make_paths
 conf = read_yaml(yamlfile)
@@ -32,7 +57,6 @@ else:
 
 
 from pprint import pprint
-import sys
 if not rfiles:
     files = ', '.join(files)
     sys.exit('Could not find file(s) in config: {}'.format(files))
@@ -92,40 +116,42 @@ def get_hists(yaml_keys, conf, tool, robj_t = None, robj_p = None):
 
 
 ## variable distributions
-hists = get_hists(transforms, rfileconf, rpath_tool, robj_t = ROOT.TH1)
+if distribs:
+    hists = get_hists(transforms, rfileconf, rpath_tool, robj_t = ROOT.TH1)
 
-from rplot.rplot import arrange
-ROOT.gStyle.SetHatchesLineWidth(1)
-ROOT.gStyle.SetHatchesSpacing(2.5)
-for transform in transforms:
-    def _style(l):
-        # l.reverse()
-        l[0].SetFillStyle(3345)
-        l[1].SetFillStyle(3354)
-    hists[transform] = arrange(hists[transform], 2, pl_p=_style)
+    from rplot.rplot import arrange
+    ROOT.gStyle.SetHatchesLineWidth(1)
+    ROOT.gStyle.SetHatchesSpacing(2.5)
+    for transform in transforms:
+        def _style(l):
+            # l.reverse()
+            l[0].SetFillStyle(3345)
+            l[1].SetFillStyle(3354)
+        hists[transform] = arrange(hists[transform], 2, pl_p=_style)
 
-from rplot.rplot import Rplot
-plotter = Rplot(5, 3, 2000, 1200)
-plotter.alpha = 0.2
-canvas = plotter.prep_canvas()
-canvas.Print('transforms.pdf[')
+    from rplot.rplot import Rplot
+    plotter = Rplot(5, 3, 2000, 1200)
+    plotter.alpha = 0.2
+    canvas = plotter.prep_canvas()
+    if doprint: canvas.Print('transforms.pdf[')
 
-for transform in transforms:
-    plotter.draw_hist(hists[transform], 'hist')
-    canvas.Update()
-    canvas.Print('transforms.pdf')
+    for transform in transforms:
+        plotter.draw_hist(hists[transform], 'hist')
+        canvas.Update()
+        if doprint: canvas.Print('transforms.pdf')
 
-canvas.Print('transforms.pdf]')
-del plotter
+    if doprint: canvas.Print('transforms.pdf]')
+    del plotter
 
 
 ## correlation plots
-def _filter(key):
-    isth1 = ROOT.TClass.GetClass(key.GetClassName()) \
-                       .InheritsFrom(ROOT.TH1.Class())
-    return isth1 and key.GetName().find('Signal') > 0
-hists = get_hists(['{}_corr'.format(k) for k in transforms],
-                  rfileconf, rpath_tool, robj_p = _filter)
+if lcorrns or scatter:
+    def _filter(key):
+        isth1 = ROOT.TClass.GetClass(key.GetClassName()) \
+                           .InheritsFrom(ROOT.TH1.Class())
+        return isth1 and key.GetName().find('Signal') > 0
+    hists = get_hists(['{}_corr'.format(k) for k in transforms],
+                      rfileconf, rpath_tool, robj_p = _filter)
 
 import numpy as np
 opts = np.empty(shape=(14, 14), dtype=object)
@@ -133,93 +159,96 @@ tril = np.tril_indices(14)
 triu = np.triu_indices(14)
 
 ## covariance matrices
-matrices = {}
-for transform in transforms:
-    corrn = ROOT.TH2I(transform, 'Correlation matrix after {} transform'
-                      .format(transforms[transform]),
-                      14, 0, 14, 14, 0, 14)
+if lcorrns:
+    matrices = {}
+    for transform in transforms:
+        corrn = ROOT.TH2I(transform, 'Correlation matrix after {} transform'
+                          .format(transforms[transform]),
+                          14, 0, 14, 14, 0, 14)
 
-    for i, idx in enumerate(zip(*triu)):
-        histo = hists[transform+'_corr'][i*2]
-        if idx[0] == idx[1]:    # set bin label using diagonal
-            name = histo.GetName()
-            name = name[5:name.find('_Signal')]
-            varnames = name.split('_vs_', 1)
-            corrn.GetXaxis().SetBinLabel(idx[0]+1, varmap[varnames[1]])
-            corrn.GetYaxis().SetBinLabel(idx[1]+1, varmap[varnames[0]])
-        corrn.SetBinContent(idx[0]+1, idx[1]+1, int(100*histo.GetCorrelationFactor()))
+        for i, idx in enumerate(zip(*triu)):
+            histo = hists[transform+'_corr'][i*2]
+            if idx[0] == idx[1]:    # set bin label using diagonal
+                name = histo.GetName()
+                name = name[5:name.find('_Signal')]
+                varnames = name.split('_vs_', 1)
+                corrn.GetXaxis().SetBinLabel(idx[0]+1, varmap[varnames[1]])
+                corrn.GetYaxis().SetBinLabel(idx[1]+1, varmap[varnames[0]])
+            corrn.SetBinContent(idx[0]+1, idx[1]+1, int(100*histo.GetCorrelationFactor()))
 
-    matrices[transform] = corrn
+        matrices[transform] = corrn
 
-# colour palette
-# red = np.array([0.0, 0.0, 1.0])
-# green = np.array([0.0, 1.0, 0.0])
-# blue = np.array([1.0, 0.0, 0.0])
-# stops = np.array([0.00, 0.5, 1.0])
-# ROOT.TColor.CreateGradientColorTable(len(stops), stops, red, green, blue, 50)
+    # colour palette
+    # red = np.array([0.0, 0.0, 1.0])
+    # green = np.array([0.0, 1.0, 0.0])
+    # blue = np.array([1.0, 0.0, 0.0])
+    # stops = np.array([0.00, 0.5, 1.0])
+    # ROOT.TColor.CreateGradientColorTable(len(stops), stops, red, green, blue, 50)
 
-canvas = ROOT.TCanvas('canvas', '', 800, 600)
-canvas.SetLeftMargin(0.15)
-canvas.SetBottomMargin(0.11)
-canvas.SetRightMargin(0.11)
-canvas.Print('correlations.pdf[')
-for transform in transforms:
-    matrices[transform].SetStats(False)
-    matrices[transform].SetMaximum(95)
-    matrices[transform].SetMinimum(-95)
-    matrices[transform].Draw('colz text')
-    canvas.Update()
-    canvas.Print('correlations.pdf')
-canvas.Print('correlations.pdf]')
-del canvas
+    canvas = ROOT.TCanvas('canvas', '', 800, 600)
+    canvas.SetLeftMargin(0.15)
+    canvas.SetBottomMargin(0.11)
+    canvas.SetRightMargin(0.11)
+    if doprint: canvas.Print('correlations.pdf[')
+    for transform in transforms:
+        matrices[transform].SetStats(False)
+        matrices[transform].SetMaximum(95)
+        matrices[transform].SetMinimum(-95)
+        matrices[transform].Draw('colz text')
+        canvas.Update()
+        if doprint: canvas.Print('correlations.pdf')
+    if doprint: canvas.Print('correlations.pdf]')
+    del canvas
 
-from utils import thn_print
-for transform in transforms:
-    thn_print(matrices[transform])
+    if verbose:
+        from utils import thn_print
+        for transform in transforms:
+            thn_print(matrices[transform])
 
 
 ## draw correlation plots
-# options
-for idx in zip(*tril): # empty lower triangular
-    opts[idx] = []
+if scatter:
+    # options
+    for idx in zip(*tril): # empty lower triangular
+        opts[idx] = []
 
-for idx in zip(*triu):
-    opts[idx] = ['scat', '']
-
-# reshape to match covariance matrix above
-opts = np.reshape(np.flipud(opts.transpose()), 14*14)
-
-# plots
-for transform in transforms:
-    plots = np.empty(shape=(14, 14), dtype=object)
-
-    # empty lower triangular
-    for idx in zip(*tril):
-        plots[idx] = []
-
-    for i, idx in enumerate(zip(*triu)):
-        plots[idx] = hists[transform+'_corr'][i*2:i*2+2]
-
-        # plots[idx][0].SetLineColor(ROOT.kBlack)
-        # plots[idx][0].SetMarkerColor(ROOT.kBlack)
-
-        # plots[idx][1].SetLineColor(ROOT.kYellow)
-        # plots[idx][1].SetMarkerColor(ROOT.kYellow)
+    for idx in zip(*triu):
+        opts[idx] = ['scat', '']
 
     # reshape to match covariance matrix above
-    plots = np.flipud(plots.transpose())
-    hists[transform+'_corr'] = np.reshape(plots, 14*14)
+    opts = np.reshape(np.flipud(opts.transpose()), 14*14)
 
-plotter = Rplot(14, 14, 5600, 5600)
-plotter.shrink2fit = False
-canvas = plotter.prep_canvas('corr_canvas')
-# canvas.Print('correlations.pdf[')
+    # plots
+    for transform in transforms:
+        plots = np.empty(shape=(14, 14), dtype=object)
 
-for transform in transforms:
-    plotter.draw_hist(hists[transform+'_corr'], opts)
-    canvas.Update()
-    canvas.Print('correlations_{}.png'.format(transform))
-    # canvas.Print('correlations.pdf')
+        # empty lower triangular
+        for idx in zip(*tril):
+            plots[idx] = []
 
-# canvas.Print('correlations.pdf]')
-del plotter
+        for i, idx in enumerate(zip(*triu)):
+            plots[idx] = hists[transform+'_corr'][i*2:i*2+2]
+
+            # plots[idx][0].SetLineColor(ROOT.kBlack)
+            # plots[idx][0].SetMarkerColor(ROOT.kBlack)
+
+            # plots[idx][1].SetLineColor(ROOT.kYellow)
+            # plots[idx][1].SetMarkerColor(ROOT.kYellow)
+
+        # reshape to match covariance matrix above
+        plots = np.flipud(plots.transpose())
+        hists[transform+'_corr'] = np.reshape(plots, 14*14)
+
+    plotter = Rplot(14, 14, 5600, 5600)
+    plotter.shrink2fit = False
+    canvas = plotter.prep_canvas('corr_canvas')
+    # if doprint: canvas.Print('correlations.pdf[')
+
+    for transform in transforms:
+        plotter.draw_hist(hists[transform+'_corr'], opts)
+        canvas.Update()
+        if doprint: canvas.Print('correlations_{}.png'.format(transform))
+        # if doprint: canvas.Print('correlations.pdf')
+
+    # if doprint: canvas.Print('correlations.pdf]')
+    del plotter
