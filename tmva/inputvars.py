@@ -100,20 +100,7 @@ varmap = {
 from fixes import ROOT
 if batch: ROOT.gROOT.SetBatch(True)
 
-def get_hists(yaml_keys, conf, tool, robj_t = None, robj_p = None):
-    """Read histograms for `keys' for given `conf'"""
-    hists = {}
-    for rdir in conf:
-        try:
-            if rdir['key'] in yaml_keys:
-                hists.update({
-                    rdir['key']:
-                    tool.read(rdir['path'], robj_t = robj_t, robj_p = robj_p)
-                })
-        except KeyError as err:
-            if str(err) != '\'key\'': raise
-    return hists
-
+from utils import get_hists
 
 ## variable distributions
 if distribs:

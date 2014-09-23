@@ -66,6 +66,20 @@ def read_yaml(filename):
     import yaml
     return yaml.load(stream)
 
+def get_hists(yaml_keys, conf, tool, robj_t = None, robj_p = None):
+    """Read histograms for `keys' for given `conf'"""
+    hists = {}
+    for rdir in conf:
+        try:
+            if rdir['key'] in yaml_keys:
+                hists.update({
+                    rdir['key']:
+                    tool.read(rdir['path'], robj_t = robj_t, robj_p = robj_p)
+                })
+        except KeyError as err:
+            if str(err) != '\'key\'': raise
+    return hists
+
 import numpy as np
 
 def thn2array(hist):
