@@ -57,15 +57,22 @@ transforms = [
 from fixes import ROOT
 if batch: ROOT.gROOT.SetBatch(True)
 
-hists = {}
+def get_hists(yaml_keys, conf, tool, robj_t = None, robj_p = None):
+    """Read histograms for `keys' for given `conf'"""
+    hists = {}
+    for rdir in conf:
+        try:
+            if rdir['key'] in yaml_keys:
+                hists.update({
+                    rdir['key']:
+                    tool.read(rdir['path'], robj_t = robj_t, robj_p = robj_p)
+                })
+        except KeyError as err:
+            if str(err) != '\'key\'': raise
+    return hists
 
 ## variable distributions
-for rdir in rfileconf:
-    try:
-        if rdir['key'] in transforms:
-            hists.update({rdir['key']: rpath_tool.read(rdir['path'], robj_t = ROOT.TH1)})
-    except KeyError as err:
-        if str(err) != '\'key\'': raise
+hists = get_hists(transforms, rfileconf, rpath_tool, robj_t = ROOT.TH1)
 
 from rplot.rplot import arrange
 ROOT.gStyle.SetHatchesLineWidth(1)
@@ -92,16 +99,12 @@ canvas.Print('transforms.pdf]')
 del plotter
 
 ## correlation plots
-for rdir in rfileconf:
-    try:
-        if rdir['key'][:-5] in transforms: # keys for corrn folder end in _corr
-            def _filter(key):
-                isth1 = ROOT.TClass.GetClass(key.GetClassName()) \
-                                   .InheritsFrom(ROOT.TH1.Class())
-                return isth1 and key.GetName().find('Signal') > 0
-            hists.update({rdir['key']: rpath_tool.read(rdir['path'], robj_p = _filter)})
-    except KeyError as err:
-        if str(err) != '\'key\'': raise
+def _filter(key):
+    isth1 = ROOT.TClass.GetClass(key.GetClassName()) \
+                       .InheritsFrom(ROOT.TH1.Class())
+    return isth1 and key.GetName().find('Signal') > 0
+hists = get_hists(['{}_corr'.format(k) for k in transforms],
+                  rfileconf, rpath_tool, robj_p = _filter)
 
 import numpy as np
 opts = np.empty(shape=(14, 14), dtype=object)
