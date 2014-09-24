@@ -139,6 +139,7 @@ if lcorrns or scatter:
         return isth1 and key.GetName().find('Signal') > 0
     hists = get_hists(['{}_corr'.format(k) for k in transforms],
                       rfileconf, rpath_tool, robj_p = _filter)
+    ihists = get_hists(['file'], rfileconf, rpath_tool, robj_t = ROOT.TH1)
 
     import numpy as np
     opts = np.empty(shape=(14, 14), dtype=object)
@@ -172,6 +173,7 @@ if lcorrns:
     # stops = np.array([0.00, 0.5, 1.0])
     # ROOT.TColor.CreateGradientColorTable(len(stops), stops, red, green, blue, 50)
 
+    # correlation after various transforms
     canvas = ROOT.TCanvas('canvas', '', 800, 600)
     canvas.SetLeftMargin(0.15)
     canvas.SetBottomMargin(0.11)
@@ -183,6 +185,19 @@ if lcorrns:
         matrices[transform].SetMaximum(95)
         matrices[transform].SetMinimum(-95)
         matrices[transform].Draw('colz text')
+        canvas.Update()
+        if doprint: canvas.Print('correlations.pdf')
+    del canvas
+
+    # correlation in input variables
+    canvas = ROOT.TCanvas('canvas', '', 1200, 600)
+    # need wider margins, as bin labels are longer
+    canvas.SetLeftMargin(0.2)
+    canvas.SetBottomMargin(0.18)
+    canvas.SetRightMargin(0.15)
+    for hist in ihists['file']:
+        hist.SetStats(False)
+        hist.Draw('colz text')
         canvas.Update()
         if doprint: canvas.Print('correlations.pdf')
     if doprint: canvas.Print('correlations.pdf]')
