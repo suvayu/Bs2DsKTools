@@ -133,12 +133,16 @@ if distribs:
 
 ## correlation plots
 if lcorrns or scatter:
-    def _filter(key):
-        isth1 = ROOT.TClass.GetClass(key.GetClassName()) \
-                           .InheritsFrom(ROOT.TH1.Class())
-        return isth1 and key.GetName().find('Signal') > 0
-    hists = get_hists(['{}_corr'.format(k) for k in transforms],
-                      rfileconf, rpath_tool, robj_p = _filter)
+    def get_filter(string):
+        def _filter(key):
+            isth1 = ROOT.TClass.GetClass(key.GetClassName()) \
+                               .InheritsFrom(ROOT.TH1.Class())
+            return isth1 and key.GetName().find(string) > 0
+        return _filter
+    sig_hists = get_hists(['{}_corr'.format(k) for k in transforms],
+                          rfileconf, rpath_tool, robj_p = get_filter('Signal'))
+    bkg_hists = get_hists(['{}_corr'.format(k) for k in transforms],
+                          rfileconf, rpath_tool, robj_p = get_filter('Background'))
     ihists = get_hists(['file'], rfileconf, rpath_tool, robj_t = ROOT.TH1)
 
     import numpy as np
@@ -150,19 +154,32 @@ if lcorrns or scatter:
 if lcorrns:
     matrices = {}
     for transform in transforms:
-        corrn = ROOT.TH2D(transform, 'Correlation matrix after {} transform'
-                          .format(transforms[transform]),
-                          14, 0, 14, 14, 0, 14)
+        corrn = [
+            ROOT.TH2D(transform+'_sig', 'Correlation matrix after {} transform (sig)'
+                      .format(transforms[transform]), 14, 0, 14, 14, 0, 14),
+            ROOT.TH2D(transform+'_bkg', 'Correlation matrix after {} transform (bkg)'
+                      .format(transforms[transform]), 14, 0, 14, 14, 0, 14)
+            ]
 
         for i, idx in enumerate(zip(*triu)):
-            histo = hists[transform+'_corr'][i*2]
+            hist = [
+                sig_hists[transform+'_corr'][i*2],
+                bkg_hists[transform+'_corr'][i*2]
+            ]
+
             if idx[0] == idx[1]:    # set bin label using diagonal
-                name = histo.GetName()
-                name = name[5:name.find('_Signal')]
-                varnames = name.split('_vs_', 1)
-                corrn.GetXaxis().SetBinLabel(idx[0]+1, varmap[varnames[1]])
-                corrn.GetYaxis().SetBinLabel(idx[1]+1, varmap[varnames[0]])
-            corrn.SetBinContent(idx[0]+1, idx[1]+1, 100*histo.GetCorrelationFactor())
+                for i in xrange(len(hist)):
+                    name = hist[i].GetName()
+                    if i == 0:
+                        name = name[5:name.find('_Signal')]
+                    else:
+                        name = name[5:name.find('_Background')]
+                    varnames = name.split('_vs_', 1)
+                    corrn[i].GetXaxis().SetBinLabel(idx[0]+1, varmap[varnames[1]])
+                    corrn[i].GetYaxis().SetBinLabel(idx[1]+1, varmap[varnames[0]])
+
+            for i in xrange(len(corrn)):
+                corrn[i].SetBinContent(idx[0]+1, idx[1]+1, 100*hist[i].GetCorrelationFactor())
 
         matrices[transform] = corrn
 
@@ -181,12 +198,13 @@ if lcorrns:
     ROOT.gStyle.SetPaintTextFormat('2.f')
     if doprint: canvas.Print('correlations.pdf[')
     for transform in transforms:
-        matrices[transform].SetStats(False)
-        matrices[transform].SetMaximum(95)
-        matrices[transform].SetMinimum(-95)
-        matrices[transform].Draw('colz text')
-        canvas.Update()
-        if doprint: canvas.Print('correlations.pdf')
+        for hist in matrices[transform]:
+            hist.SetStats(False)
+            hist.SetMaximum(95)
+            hist.SetMinimum(-95)
+            hist.Draw('colz text')
+            canvas.Update()
+            if doprint: canvas.Print('correlations.pdf')
     del canvas
 
     # correlation in input variables
