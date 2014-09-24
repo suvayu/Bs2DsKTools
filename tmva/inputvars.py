@@ -149,7 +149,7 @@ if lcorrns or scatter:
 if lcorrns:
     matrices = {}
     for transform in transforms:
-        corrn = ROOT.TH2I(transform, 'Correlation matrix after {} transform'
+        corrn = ROOT.TH2D(transform, 'Correlation matrix after {} transform'
                           .format(transforms[transform]),
                           14, 0, 14, 14, 0, 14)
 
@@ -161,7 +161,7 @@ if lcorrns:
                 varnames = name.split('_vs_', 1)
                 corrn.GetXaxis().SetBinLabel(idx[0]+1, varmap[varnames[1]])
                 corrn.GetYaxis().SetBinLabel(idx[1]+1, varmap[varnames[0]])
-            corrn.SetBinContent(idx[0]+1, idx[1]+1, int(100*histo.GetCorrelationFactor()))
+            corrn.SetBinContent(idx[0]+1, idx[1]+1, 100*histo.GetCorrelationFactor())
 
         matrices[transform] = corrn
 
@@ -176,6 +176,7 @@ if lcorrns:
     canvas.SetLeftMargin(0.15)
     canvas.SetBottomMargin(0.11)
     canvas.SetRightMargin(0.11)
+    ROOT.gStyle.SetPaintTextFormat('2.f')
     if doprint: canvas.Print('correlations.pdf[')
     for transform in transforms:
         matrices[transform].SetStats(False)
