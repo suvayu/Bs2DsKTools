@@ -114,7 +114,8 @@ if distribs:
             # l.reverse()
             l[0].SetFillStyle(3345)
             l[1].SetFillStyle(3354)
-        distributions[transform] = arrange(distributions[transform], 2, pl_p=_style)
+        distributions[transform] = arrange(distributions[transform], 2,
+                                           predicate=_style)
 
     from rplot.rplot import Rplot
     plotter = Rplot(5, 3, 2000, 1200)
