@@ -133,16 +133,13 @@ if distribs:
 
 ## correlation plots
 if lcorrns or scatter:
-    def get_filter(string):
-        def _filter(key):
-            isth1 = ROOT.TClass.GetClass(key.GetClassName()) \
-                               .InheritsFrom(ROOT.TH1.Class())
-            return isth1 and key.GetName().find(string) > 0
-        return _filter
+    _filter = lambda string: lambda k: k.GetName().find(string) > 0
     sig_hists = get_hists(['{}_corr'.format(k) for k in transforms],
-                          rfileconf, rpath_tool, robj_p = get_filter('Signal'))
+                          rfileconf, rpath_tool, robj_t = ROOT.TH1,
+                          robj_p = _filter('Signal'))
     bkg_hists = get_hists(['{}_corr'.format(k) for k in transforms],
-                          rfileconf, rpath_tool, robj_p = get_filter('Background'))
+                          rfileconf, rpath_tool, robj_t = ROOT.TH1,
+                          robj_p = _filter('Background'))
     ihists = get_hists(['file'], rfileconf, rpath_tool, robj_t = ROOT.TH1)
 
     import numpy as np
