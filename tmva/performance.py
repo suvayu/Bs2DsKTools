@@ -65,25 +65,25 @@ from fixes import ROOT
 if batch: ROOT.gROOT.SetBatch(True)
 
 from utils import get_hists
+from rplot.rplot import Rplot, arrange
 
 def _filter(string):
-    matches  = ['MVA_{}{}_S'.format(cl, string) for cl in classifiers]
-    matches += ['MVA_{}{}_B'.format(cl, string) for cl in classifiers]
+    matches  = ['MVA_{}{}'.format(cl, string) for cl in classifiers]
     return lambda k: k.GetName() in matches
 
-_filter2 = lambda str1, str2: lambda k: _filter(str1)(k) or _filter(str2)(k)
+_filter1 = lambda string: lambda k: _filter(string+'_S')(k) or _filter(string+'_B')(k)
+_filter2 = lambda str1, str2: lambda k: _filter1(str1)(k) or _filter1(str2)(k)
 
 if distribs:
     distribs = get_hists(classifiers, rfileconf, rpath_tool,
                          robj_t = ROOT.TH1, robj_p = _filter2('', '_Train'))
     if rarity:
         rarity = get_hists(classifiers, rfileconf, rpath_tool,
-                           robj_t = ROOT.TH1, robj_p = _filter('_Rarity'))
+                           robj_t = ROOT.TH1, robj_p = _filter1('_Rarity'))
     if probab:
         probab = get_hists(classifiers, rfileconf, rpath_tool,
-                           robj_t = ROOT.TH1, robj_p = _filter('_Proba'))
+                           robj_t = ROOT.TH1, robj_p = _filter1('_Proba'))
 
-    from rplot.rplot import Rplot, arrange
     plotter = Rplot(1, 1, 800, 600)
     plotter.alpha = 0.2
     plotter.fill_colours = (ROOT.kAzure,   ROOT.kRed,   ROOT.kAzure,   ROOT.kRed)
