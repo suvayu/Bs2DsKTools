@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# set -o xtrace
+
+declare -a sessions=($(./confquery.py -s $@))
+
+for s in ${sessions[@]}; do
+    printf "Running TMVA session: %s\n" $s
+    ./classify.py -s $s -o dsk_train_out.root &> log && mv log $s/log
+done
