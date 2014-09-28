@@ -48,6 +48,16 @@ classifiers = OrderedDict({
     'BDTB': 'BDT w/ bagging'
 })
 
+sessions = OrderedDict({
+    'test.root': 'test',
+    'chitra_three/dsk_train_out.root': 'base',
+    'chitra_less1/dsk_train_out.root': 'base - Bs DIRA',
+    'chitra_less2/dsk_train_out.root': 'base - Bs DIRA & PV #chi^{2}',
+    'chitra_deco1/dsk_train_out.root': 'base + deco (all)',
+    'chitra_deco2/dsk_train_out.root': 'base + 4 vars deco',
+    'chitra_deco3/dsk_train_out.root': 'base + deco - 2 vars'
+})
+
 from fixes import ROOT
 if batch: ROOT.gROOT.SetBatch(True)
 
@@ -58,31 +68,38 @@ def _filter(string):
     matches  = ['MVA_{}{}'.format(cl, string) for cl in classifiers]
     return lambda k: k.GetName() in matches
 
-# roc curve: MVA_<name>_rejBvsS
-roc = get_hists(classifiers, rfileconf, rpath_tool, robj_t = ROOT.TH1,
-                robj_p = _filter('_rejBvsS'))
-
 canvas = ROOT.TCanvas('canvas', '', 800, 600)
 if doprint: canvas.Print('ROC_curves.pdf[')
 
-roc = dict((k, v[0]) for k, v in roc.iteritems()) # cleanup dict
 cols = (ROOT.kAzure, ROOT.kRed, ROOT.kBlack)
-legend = ROOT.TLegend(0.2, 0.2, 0.6, 0.4)
+legend = ROOT.TLegend(0.12, 0.15, 0.8, 0.6)
 legend.SetHeader('MVA classifiers')
 legend.SetBorderSize(0)
 legend.SetFillStyle(0)
 ROOT.gStyle.SetOptStat(False)
-for i, hist in enumerate(roc.iteritems()):
-    # hist.SetFillStyle(0)
-    hist[1].SetLineColor(cols[i])
-    hist[1].GetXaxis().SetRangeUser(0.7, 1.0)
-    hist[1].GetYaxis().SetRangeUser(0.7, 1.0)
-    legend.AddEntry(hist[1], classifiers[hist[0]], 'l')
-    if i == 0:
-        hist[1].SetTitle('MVA classifier ROC curves')
-        hist[1].Draw('c')
-    else:
-        hist[1].Draw('c same')
+
+fnames = [f[0]['file'] for f in rfiles]
+rocs = []
+for i, rfileconf in enumerate(rfiles):
+    # roc curve: MVA_<name>_rejBvsS
+    roc = get_hists(classifiers, rfileconf, rpath_tool, robj_t = ROOT.TH1,
+                    robj_p = _filter('_rejBvsS'))
+    roc = dict((k, v[0]) for k, v in roc.iteritems()) # cleanup dict
+    rocs.append(roc)
+
+    for j, hist in enumerate(roc.iteritems()):
+        hist[1].SetLineStyle(i+1)
+        hist[1].SetLineColor(cols[j])
+        hist[1].GetXaxis().SetRangeUser(0.7, 1.0)
+        hist[1].GetYaxis().SetRangeUser(0.7, 1.0)
+        text = '{} ({})'.format(classifiers[hist[0]], sessions[fnames[i]])
+        legend.AddEntry(hist[1], text, 'l')
+        if i ==0 and j == 0:
+            hist[1].SetTitle('MVA classifier ROC curves')
+            hist[1].Draw('c')
+        else:
+            hist[1].Draw('c same')
+
 legend.Draw()
 canvas.SetGrid(1, 1)
 canvas.Update()
