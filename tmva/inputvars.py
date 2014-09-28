@@ -139,9 +139,10 @@ if lcorrns or scatter:
 
     # triangular matrix indices for use w/ both cov matrices & scatter plots
     import numpy as np
-    opts = np.empty(shape=(14, 14), dtype=object)
-    tril = np.tril_indices(14)
-    triu = np.triu_indices(14)
+    dims = ihists['file'][0].GetXaxis().GetNbins() - 1 # nvars - 1 in corrn matrix
+    opts = np.empty(shape=(dims, dims), dtype=object)
+    tril = np.tril_indices(dims)
+    triu = np.triu_indices(dims)
 
 ## covariance matrices
 if lcorrns:
@@ -149,9 +150,9 @@ if lcorrns:
     for transform in transforms:
         corrn = [
             ROOT.TH2D(transform+'_sig', 'Correlation matrix after {} transform (sig)'
-                      .format(transforms[transform]), 14, 0, 14, 14, 0, 14),
+                      .format(transforms[transform]), dims, 0, dims, dims, 0, dims),
             ROOT.TH2D(transform+'_bkg', 'Correlation matrix after {} transform (bkg)'
-                      .format(transforms[transform]), 14, 0, 14, 14, 0, 14)
+                      .format(transforms[transform]), dims, 0, dims, dims, 0, dims)
             ]
 
         for i, idx in enumerate(zip(*triu)):
@@ -230,12 +231,12 @@ if scatter:
         opts[idx] = ['scat', '']
 
     # reshape to match covariance matrix above
-    opts = np.reshape(np.flipud(opts.transpose()), 14*14)
+    opts = np.reshape(np.flipud(opts.transpose()), dims*dims)
 
     # plots
     hists = {}
     for transform in transforms:
-        plots = np.empty(shape=(14, 14), dtype=object)
+        plots = np.empty(shape=(dims, dims), dtype=object)
 
         # empty lower triangular
         for idx in zip(*tril):
@@ -252,9 +253,9 @@ if scatter:
 
         # reshape to match covariance matrix above
         plots = np.flipud(plots.transpose())
-        hists[transform+'_corr'] = np.reshape(plots, 14*14)
+        hists[transform+'_corr'] = np.reshape(plots, dims*dims)
 
-    plotter = Rplot(14, 14, 5600, 5600)
+    plotter = Rplot(dims, dims, 5600, 5600)
     plotter.shrink2fit = False
     canvas = plotter.prep_canvas('corr_canvas')
     # if doprint: canvas.Print('correlations.pdf[')
