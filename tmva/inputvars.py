@@ -96,12 +96,12 @@ from fixes import ROOT
 if batch: ROOT.gROOT.SetBatch(True)
 
 from utils import get_hists
+from rplot.rplot import Rplot, arrange
 
 ## variable distributions
 if distribs:
     distributions = get_hists(transforms, rfileconf, rpath_tool, robj_t = ROOT.TH1)
 
-    from rplot.rplot import arrange
     ROOT.gStyle.SetHatchesLineWidth(1)
     ROOT.gStyle.SetHatchesSpacing(2.5)
     for transform in transforms:
@@ -112,7 +112,6 @@ if distribs:
         distributions[transform] = arrange(distributions[transform], 2,
                                            predicate=_style)
 
-    from rplot.rplot import Rplot
     plotter = Rplot(5, 3, 2000, 1200)
     plotter.alpha = 0.2
     canvas = plotter.prep_canvas()
@@ -138,6 +137,7 @@ if lcorrns or scatter:
                           robj_p = _filter('Background'))
     ihists = get_hists(['file'], rfileconf, rpath_tool, robj_t = ROOT.TH1)
 
+    # triangular matrix indices for use w/ both cov matrices & scatter plots
     import numpy as np
     opts = np.empty(shape=(14, 14), dtype=object)
     tril = np.tril_indices(14)
@@ -233,6 +233,7 @@ if scatter:
     opts = np.reshape(np.flipud(opts.transpose()), 14*14)
 
     # plots
+    hists = {}
     for transform in transforms:
         plots = np.empty(shape=(14, 14), dtype=object)
 
@@ -241,7 +242,7 @@ if scatter:
             plots[idx] = []
 
         for i, idx in enumerate(zip(*triu)):
-            plots[idx] = hists[transform+'_corr'][i*2:i*2+2]
+            plots[idx] = sig_hists[transform+'_corr'][i*2:i*2+2]
 
             # plots[idx][0].SetLineColor(ROOT.kBlack)
             # plots[idx][0].SetMarkerColor(ROOT.kBlack)
