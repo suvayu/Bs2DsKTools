@@ -31,8 +31,24 @@ def path2rootdir(path):
     rdir = rfile.GetDirectory(rdir) # path in root file: /foo/bar
     return (rfile, rdir)
 
+def get_rpaths(files, conf):
+    """Get ROOT file paths for all files using conf."""
+    rfiles = []
+    if isinstance(files, str): files = [files]
+    from copy import deepcopy
+    for rfile in files:
+        copy = deepcopy(conf)
+        copy.update(file = rfile)
+        rfiles.append(make_paths(copy))
+    return rfiles
+
 def make_paths(node):
-    """Return paths (directory) from dictionary"""
+    """Return paths (directory) from dictionary
+
+    This destroys the dictionary.  Make a deep copy if it needs to be
+    reused.  See get_rpaths for an example.
+
+    """
     try:
         pwd = node['name']
         del node['name']
