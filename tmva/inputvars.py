@@ -123,7 +123,7 @@ if distribs:
         if doprint: canvas.Print('transforms.pdf')
 
     if doprint: canvas.Print('transforms.pdf]')
-    del plotter
+    del plotter, canvas
 
 
 ## correlation plots
@@ -266,4 +266,4 @@ if scatter:
         # if doprint: canvas.Print('correlations.pdf')
 
     # if doprint: canvas.Print('correlations.pdf]')
-    del plotter
+    del plotter, canvas
