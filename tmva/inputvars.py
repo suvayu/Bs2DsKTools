@@ -36,30 +36,25 @@ options = optparser.parse_args()
 locals().update(_import_args(options))
 
 
+from pprint import pprint
 import sys
 if verbose and not lcorrns:
     print('Error: verbose depends on linear correlations!')
     optparser.print_help()
     sys.exit()
 
-from utils import read_yaml, make_paths
+from utils import read_yaml, get_rpaths
 conf = read_yaml(yamlfile)
-rfiles = []
 if isinstance(conf, list):
     for entry in conf:
-        for rfile in files:
-            if entry['file'] == rfile:
-                rfiles.append(make_paths(entry))
+        print entry['file']
+        if entry['file'] != 'TMVA.root': continue
+        rfiles = get_rpaths(files, entry)
 else:
-    for rfile in files:
-        if conf['file'] == rfile:
-            rfiles.append(make_paths(conf))
+    if conf['file'] == 'TMVA.root':
+        rfiles = get_rpaths(files, conf)
 
-
-from pprint import pprint
-if not rfiles:
-    files = ', '.join(files)
-    sys.exit('Could not find file(s) in config: {}'.format(files))
+if not rfiles: sys.exit('Config parsing error.')
 
 from rplot.rdir import Rdir
 fnames = [ rfile[0]['file'] for rfile in rfiles ]

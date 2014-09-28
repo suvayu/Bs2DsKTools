@@ -1,5 +1,4 @@
-file: dsk_train_out.root
-title: Testing
+file: TMVA.root
 key: file
 children:
     - name: InputVariables_Id
