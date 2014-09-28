@@ -15,9 +15,9 @@ optparser.add_argument('-p', dest='doprint', action='store_true',
 optparser.add_argument('-b', dest='batch', action='store_true',
                        default=False, help='Batch mode')
 optparser.add_argument('-r', dest='roc', action='store_true',
-                       default=True, help='Plot ROC curve')
+                       default=False, help='Plot ROC curve')
 optparser.add_argument('-d', dest='distribs', action='store_true',
-                       default=True, help='Plot classifier distributions')
+                       default=False, help='Plot classifier distributions')
 optparser.add_argument('--rarity', action='store_true',
                        default=False, help='Plot rarity distributions')
 optparser.add_argument('--probab', action='store_true',
