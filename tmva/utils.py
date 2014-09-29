@@ -104,7 +104,7 @@ def thn2array(hist):
     ybins = hist.GetNbinsY()
     zbins = hist.GetNbinsZ()
     # add overflow, underflow bins
-    if ybins == 1: shape = (xbins + 2)
+    if ybins == 1: shape = [xbins + 2]
     elif zbins == 1: shape = (xbins + 2, ybins + 2)
     else: shape = (xbins + 2, ybins + 2, zbins + 2)
     val = np.array([val for val in hist]).reshape(*shape)
