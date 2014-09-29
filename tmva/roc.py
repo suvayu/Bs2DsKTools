@@ -12,6 +12,8 @@ optparser.add_argument('-c', metavar='config', dest='yamlfile',
                        help='ROOT file description in yaml format')
 optparser.add_argument('-p', dest='doprint', action='store_true',
                        default=True, help='Print to png/pdf files')
+optparser.add_argument('-m', dest='usempl', action='store_true',
+                       default=False, help='Use Matplotlib')
 optparser.add_argument('-b', dest='batch', action='store_true',
                        default=False, help='Batch mode')
 options = optparser.parse_args()
@@ -68,16 +70,6 @@ def _filter(string):
     matches  = ['MVA_{}{}'.format(cl, string) for cl in classifiers]
     return lambda k: k.GetName() in matches
 
-canvas = ROOT.TCanvas('canvas', '', 800, 600)
-if doprint: canvas.Print('ROC_curves.pdf[')
-
-cols = (ROOT.kAzure, ROOT.kRed, ROOT.kBlack)
-legend = ROOT.TLegend(0.12, 0.15, 0.8, 0.6)
-legend.SetHeader('MVA classifiers')
-legend.SetBorderSize(0)
-legend.SetFillStyle(0)
-ROOT.gStyle.SetOptStat(False)
-
 fnames = [f[0]['file'] for f in rfiles]
 rocs = []
 for i, rfileconf in enumerate(rfiles):
@@ -87,23 +79,37 @@ for i, rfileconf in enumerate(rfiles):
     roc = dict((k, v[0]) for k, v in roc.iteritems()) # cleanup dict
     rocs.append(roc)
 
-    for j, hist in enumerate(roc.iteritems()):
-        hist[1].SetLineStyle(i+1)
-        hist[1].SetLineColor(cols[j])
-        hist[1].GetXaxis().SetRangeUser(0.7, 1.0)
-        hist[1].GetYaxis().SetRangeUser(0.7, 1.0)
-        text = '{} ({})'.format(classifiers[hist[0]], sessions[fnames[i]])
-        legend.AddEntry(hist[1], text, 'l')
-        if i ==0 and j == 0:
-            hist[1].SetTitle('MVA classifier ROC curves')
-            hist[1].Draw('c')
-        else:
-            hist[1].Draw('c same')
+if usempl:
+    pass
+else:
+    canvas = ROOT.TCanvas('canvas', '', 800, 600)
+    if doprint: canvas.Print('ROC_curves.pdf[')
 
-legend.Draw()
-canvas.SetGrid(1, 1)
-canvas.Update()
-if doprint: canvas.Print('ROC_curves.pdf')
+    cols = (ROOT.kAzure, ROOT.kRed, ROOT.kBlack)
+    legend = ROOT.TLegend(0.12, 0.15, 0.8, 0.6)
+    legend.SetHeader('MVA classifiers')
+    legend.SetBorderSize(0)
+    legend.SetFillStyle(0)
+    ROOT.gStyle.SetOptStat(False)
 
-if doprint: canvas.Print('ROC_curves.pdf]')
-del canvas
+    for i, roc in enumerate(rocs):
+        for j, hist in enumerate(roc.iteritems()):
+            hist[1].SetLineStyle(i+1)
+            hist[1].SetLineColor(cols[j])
+            hist[1].GetXaxis().SetRangeUser(0.7, 1.0)
+            hist[1].GetYaxis().SetRangeUser(0.7, 1.0)
+            text = '{} ({})'.format(classifiers[hist[0]], sessions[fnames[i]])
+            legend.AddEntry(hist[1], text, 'l')
+            if i ==0 and j == 0:
+                hist[1].SetTitle('MVA classifier ROC curves')
+                hist[1].Draw('c')
+            else:
+                hist[1].Draw('c same')
+
+    legend.Draw()
+    canvas.SetGrid(1, 1)
+    canvas.Update()
+    if doprint: canvas.Print('ROC_curves.pdf')
+
+    if doprint: canvas.Print('ROC_curves.pdf]')
+    del canvas
