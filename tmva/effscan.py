@@ -41,7 +41,10 @@ for n, fname in enumerate(filenames):
                 heff.Reset('icesm')
                 heff.SetTitle(cuts[i].latex() + '...')
                 heff.Divide(hnumerator, hdenominator)
-                heff.Add(F1('{}'.format(j), 0, 8000)) # offset for visibility
+                # only offset bins with content
+                for b in xrange(heff.GetXaxis().GetNbins()):
+                    content = heff.GetBinContent(b)
+                    if content != 0.: heff.SetBinContent(b, content+j)
 
                 # aesthetics
                 heff.linecolor = colours[j]
