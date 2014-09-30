@@ -7,7 +7,7 @@ from utils import _import_args
 optparser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                     description=__doc__)
 optparser.add_argument('files', metavar='file', nargs='+', help='ROOT file name')
-optparser.add_argument('-c', metavar='config', dest='yamlfile',
+optparser.add_argument('--config', dest='yamlfile',
                        default='tmva_output_description.yaml',
                        help='ROOT file description in yaml format')
 optparser.add_argument('-p', dest='doprint', action='store_true',
