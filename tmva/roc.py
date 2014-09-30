@@ -16,6 +16,8 @@ optparser.add_argument('-m', dest='usempl', action='store_true',
                        default=False, help='Use Matplotlib')
 optparser.add_argument('-b', dest='batch', action='store_true',
                        default=False, help='Batch mode')
+optparser.add_argument('-c', dest='clnameglob', metavar='classifier',
+                       default=False, help='Only plot matching classifiers (globs allowed)')
 options = optparser.parse_args()
 locals().update(_import_args(options))
 
@@ -49,6 +51,11 @@ classifiers = OrderedDict({
     'BDTG': 'BDT w/ gradient boost',
     'BDTB': 'BDT w/ bagging'
 })
+
+# only process matching classifiers
+from fnmatch import fnmatchcase
+for key in classifiers:
+    if not fnmatchcase(key, clnameglob): del classifiers[key]
 
 sessions = OrderedDict({
     'test.root': 'test',

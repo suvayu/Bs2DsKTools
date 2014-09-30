@@ -14,6 +14,8 @@ optparser.add_argument('-p', dest='doprint', action='store_true',
                        default=True, help='Print to png/pdf files')
 optparser.add_argument('-b', dest='batch', action='store_true',
                        default=False, help='Batch mode')
+optparser.add_argument('-c', dest='clnameglob', metavar='classifier',
+                       default=False, help='Only plot matching classifiers (globs allowed)')
 optparser.add_argument('--rarity', action='store_true',
                        default=False, help='Plot rarity distributions')
 optparser.add_argument('--probab', action='store_true',
@@ -51,6 +53,11 @@ classifiers = OrderedDict({
     'BDTG': 'BDT w/ gradient boost',
     'BDTB': 'BDT w/ bagging'
 })
+
+# only process matching classifiers
+from fnmatch import fnmatchcase
+for key in classifiers:
+    if not fnmatchcase(key, clnameglob): del classifiers[key]
 
 from fixes import ROOT
 if batch: ROOT.gROOT.SetBatch(True)
