@@ -2,6 +2,12 @@
 
 # set -o xtrace
 
+[[ $# -eq 0 ]] && { \
+    echo A glob matching session names is required
+    echo "Usage: $0 <glob>"
+    exit 1
+}
+
 for s in $(./confquery.py -s "$@" | tail -n 1); do
     printf "Running TMVA session: %s\n" $s
     ./classify.py -s $s -o dsk_train_out.root &> log && mv log $s/log
