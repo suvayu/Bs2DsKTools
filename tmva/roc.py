@@ -135,7 +135,11 @@ else:
             hist[1].SetLineColor(cols[j])
             hist[1].GetXaxis().SetRangeUser(0.7, 1.0)
             hist[1].GetYaxis().SetRangeUser(0.7, 1.0)
-            text = '{} ({})'.format(classifiers[hist[0]], sessions[fnames[i]])
+            try:
+                info = sessions[fnames[i]]
+            except KeyError:
+                info = fnames[i]
+            text = '{} ({})'.format(classifiers[hist[0]], info)
             legend.AddEntry(hist[1], text, 'l')
             if i ==0 and j == 0:
                 hist[1].SetTitle('MVA classifier ROC curves')
