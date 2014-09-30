@@ -18,6 +18,7 @@ from tmvaconfig import TMVAType, TMVAconfig, ConfigFile
 conf = ConfigFile(conffile)
 n = conf.read()
 
+print '# sessions'
 # print all sessions
 if not session:
     for s in conf.sessions():
@@ -28,8 +29,7 @@ if not session:
 if reduce(lambda i,j: i or j, map(lambda x: x in session, '*?')): # glob
     from fnmatch import fnmatchcase
     for s in conf.sessions():
-        if fnmatchcase(s, session):
-            print s,
+        if fnmatchcase(s, session): print s,
 else:                           # exact
     if session in conf.sessions():
         print session
