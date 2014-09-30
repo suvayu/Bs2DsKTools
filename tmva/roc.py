@@ -61,12 +61,14 @@ if clnameglob:
 sessions = OrderedDict({
     'test.root': 'test',
     'chitra_base/dsk_train_out.root': 'base',
-    'chitra_less0/dsk_train_out.root': 'base - PV #chi^{2}',
-    'chitra_less1/dsk_train_out.root': 'base - Bs DIRA',
-    'chitra_less2/dsk_train_out.root': 'base - Bs DIRA & PV #chi^{2}',
+    'chitra_less1a/dsk_train_out.root': 'base - Ds radial FD',
+    'chitra_less1b/dsk_train_out.root': 'base - Bs radial FD',
+    'chitra_less2/dsk_train_out.root': 'base - Bs & Ds radial FD',
+    'chitra_less3/dsk_train_out.root': 'base - Ds IP #chi^{2}',
+    'chitra_less4/dsk_train_out.root': 'base - radial FD - Ds IP #chi^{2}',
     'chitra_deco1/dsk_train_out.root': 'base + deco (all)',
     'chitra_deco2/dsk_train_out.root': 'base + 4 vars deco',
-    'chitra_deco3/dsk_train_out.root': 'base + deco - 2 vars'
+    'chitra_all/dsk_train_out.root': 'base + deco - 3 vars'
 })
 
 from fixes import ROOT
