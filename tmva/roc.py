@@ -64,11 +64,13 @@ sessions = OrderedDict({
     'chitra_less1a/dsk_train_out.root': 'base - Ds radial FD',
     'chitra_less1b/dsk_train_out.root': 'base - Bs radial FD',
     'chitra_less2/dsk_train_out.root': 'base - Bs & Ds radial FD',
-    'chitra_less3/dsk_train_out.root': 'base - Ds IP #chi^{2}',
-    'chitra_less4/dsk_train_out.root': 'base - radial FD - Ds IP #chi^{2}',
+    'chitra_less3/dsk_train_out.root': 'base - bach IP #chi^{2}',
+    'chitra_less4/dsk_train_out.root': 'base - radial FD - bach IP #chi^{2}',
     'chitra_deco1/dsk_train_out.root': 'base + deco (all)',
     'chitra_deco2/dsk_train_out.root': 'base + 4 vars deco',
-    'chitra_all/dsk_train_out.root': 'base + deco - 3 vars'
+    'chitra_all/dsk_train_out.root': 'base + deco - 3 vars',
+    'chitra_combi1/dsk_train_out.root': 'base + deco - Ds FD',
+    'chitra_combi2/dsk_train_out.root': 'base + deco - bach IP #chi^{2}',
 })
 
 from fixes import ROOT
