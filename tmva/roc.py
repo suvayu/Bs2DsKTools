@@ -80,7 +80,44 @@ for i, rfileconf in enumerate(rfiles):
     rocs.append(roc)
 
 if usempl:
-    pass
+    # Matplotlib
+    import matplotlib.pyplot as plt
+    plt.rc('font', family='Liberation Sans') # choose font
+    plt.rc('mathtext', default='regular')    # use default font for math
+
+    # ROOT to Matplotlib translation layer
+    import rootpy.plotting.root2matplotlib as rplt
+
+    # PDF backend
+    from matplotlib.backends.backend_pdf import PdfPages
+    if doprint: pp = PdfPages('ROC_curves_mpl.pdf')
+
+    # hack
+    from rootpy.plotting.hist import Hist
+    from utils import pycopy, hist_info
+
+    for i, roc in enumerate(rocs):
+        fig = plt.figure('ROC curve')
+        axes = fig.add_subplot(111)
+        axes.grid(axis='both')
+        axes.set_title('ROC curve')
+        axes.set_xlim(0.7, 1)
+        axes.set_ylim(0.7, 1)
+        axes.set_xlabel('Signal selection efficiency')
+        axes.set_ylabel('Background rejection efficiency')
+        axes.xaxis.set_label_coords(0.9,-0.05)
+        for key, hist in roc.iteritems():
+            info = hist_info(hist)
+            hist = pycopy(Hist, ROOT.TH1, hist, *info[0], **info[1])
+            line = rplt.hist(hist, stacked=False)
+            print type(line), line
+        axes.legend(fontsize=10, numpoints=1, frameon=False, ncol=3)
+
+    if doprint:
+        pp.savefig()
+        pp.close()
+    elif not batch:
+        plt.show()
 else:
     canvas = ROOT.TCanvas('canvas', '', 800, 600)
     if doprint: canvas.Print('ROC_curves.pdf[')

@@ -19,6 +19,30 @@ def _import_args(namespace, d = {}):
         d[attr] = getattr(namespace, attr)
     return d
 
+def hist_info(hist):
+    """Return histogram info for using with rootpy"""
+    metainfo = {'name': hist.GetName(), 'title': hist.GetTitle()}
+    dim = hist.GetDimension()
+    # FIXME: only for 1D
+    nbinsx = hist.GetNbinsX()
+    axis = hist.GetXaxis()
+    xmin = axis.GetXmin()
+    xmax = axis.GetXmax()
+    return (nbinsx, xmin, xmax), metainfo
+
+def pycopy(newobj_t, obj_t, obj, *args, **kwargs):
+    """Act as copy constructor for any object.
+
+    Caution: nasty hack, use at your own peril
+
+    """
+    if isinstance(obj, obj_t):
+        newobj = newobj_t(*args, **kwargs)
+        newobj.__dict__.update(obj.__dict__)
+    else:
+        newobj = None
+    return newobj
+
 def path2rootdir(path):
     """Read path string and return ROOT directory
 
