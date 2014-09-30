@@ -52,7 +52,7 @@ classifiers = OrderedDict({
 
 sessions = OrderedDict({
     'test.root': 'test',
-    'chitra_three/dsk_train_out.root': 'base',
+    'chitra_base/dsk_train_out.root': 'base',
     'chitra_less0/dsk_train_out.root': 'base - PV #chi^{2}',
     'chitra_less1/dsk_train_out.root': 'base - Bs DIRA',
     'chitra_less2/dsk_train_out.root': 'base - Bs DIRA & PV #chi^{2}',
