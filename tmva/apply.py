@@ -90,8 +90,6 @@ for method in session.methods:
 
 for i in range(itree.GetEntries()):
     itree.GetEntry(i)
-    allvars[4][0] = allvars[0][0] + allvars[1][0]
-    allvars[5][0] = allvars[0][0] - allvars[1][0]
     for method in session.methods:
         discriminant[method][0] = reader.EvaluateMVA(method)
         hists_discr[method].Fill(discriminant[method][0])
