@@ -120,23 +120,31 @@ def get_hists(yaml_keys, conf, tool, robj_t = None, robj_p = None):
             if str(err) != '\'key\'': raise
     return hists
 
-import numpy as np
+try:
+    import numpy as np
 
-def thn2array(hist):
-    """Convert ROOT histograms to numpy.array"""
-    xbins = hist.GetNbinsX()
-    ybins = hist.GetNbinsY()
-    zbins = hist.GetNbinsZ()
-    # add overflow, underflow bins
-    if ybins == 1: shape = [xbins + 2]
-    elif zbins == 1: shape = (xbins + 2, ybins + 2)
-    else: shape = (xbins + 2, ybins + 2, zbins + 2)
-    val = np.array([val for val in hist]).reshape(*shape)
-    return val
+    def thn2array(hist):
+        """Convert ROOT histograms to numpy.array"""
+        xbins = hist.GetNbinsX()
+        ybins = hist.GetNbinsY()
+        zbins = hist.GetNbinsZ()
+        # add overflow, underflow bins
+        if ybins == 1: shape = [xbins + 2]
+        elif zbins == 1: shape = (xbins + 2, ybins + 2)
+        else: shape = (xbins + 2, ybins + 2, zbins + 2)
+        val = np.array([val for val in hist]).reshape(*shape)
+        return val
 
-def thn_print(hist):
-    """Print ROOT histograms of any dimention"""
-    val = thn2array(hist)
-    print('Hist: {}, dim: {}'.format(hist.GetName(), len(np.shape(val))))
-    hist.Print()
-    print np.flipud(val) # flip y axis, FIXME: check what happens for 3D
+    def thn_print(hist):
+        """Print ROOT histograms of any dimention"""
+        val = thn2array(hist)
+        print('Hist: {}, dim: {}'.format(hist.GetName(), len(np.shape(val))))
+        hist.Print()
+        print np.flipud(val) # flip y axis, FIXME: check what happens for 3D
+
+except ImportError:
+    import warnings
+    # warnings.simplefilter('always')
+    msg = 'Could not import numpy.\n'
+    msg += 'Unavailable functions: thn2array, thn_print.'
+    warnings.warn(msg, ImportWarning)
