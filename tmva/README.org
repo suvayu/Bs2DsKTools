@@ -22,9 +22,6 @@
   :                        ":DrawProgressBar:Transformations=I;D;P;G,D")
 - add variables using factory:
   : factory.AddVariable("myvar1 := var1+var2", "F")
-  Jacco has a nice class in [[file:jdv/myTMVAvars.py][myTMVAvars.py]], that makes it less tedious.
-  : confobj = TMVAvars(<mva_name>)
-  : varlist = confobj.getfullvarlist()
 - can also add spectator variables, not used in training, but will be
   included in output tree.
   : factory.AddSpectator(..)
@@ -89,8 +86,9 @@
 - B2DX_withtagging_strip20_DVv33r8_3fb_magdown_BDTG_Bs.root
 - B2DX_withtagging_strip20_DVv33r8_3fb_magup_BDTG_Bs.root
 
-* Tasks [3/4]
-** TODO Resolve vertex χ² variable disambiguity
+* Tasks [4/4]
+** DONE Resolve vertex χ² variable disambiguity
+   CLOSED: [2014-11-17 Mon 13:30]
 - Vertex χ²/ndof
 - Lifetime vertex χ²/ndof
 ** DONE Radial flight distance
