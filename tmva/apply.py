@@ -9,6 +9,7 @@ optparser.add_argument('filename', help='ROOT file')
 optparser.add_argument('-s', dest='session', help='Session name')
 optparser.add_argument('-o', dest='out', help='ROOT file with output histograms')
 optparser.add_argument('-n', dest='name', help='Input tree name')
+optparser.add_argument('-v', dest='verbose', action='store_true', help='Increase verbosity')
 options = optparser.parse_args()
 locals().update(_import_args(options))
 
@@ -17,6 +18,23 @@ if not os.path.exists(filename):
     sys.exit('File not found: {}'.format(filename))
 
 from array import array
+
+# NOTE: This is to ignore a warning from the call to
+# TTreeFormula::EvalInstance().  One of the default arguments is a
+# char**.  PyROOT does not provide converters for that, leading to the
+# warning.  As long as this feature is not accessed, ignoring is safe.
+import warnings
+warnings.filterwarnings(action='ignore', category=RuntimeWarning,
+                        message='creating converter for unknown type.*')
+
+from logging import basicConfig, getLogger, info, warning, error
+logger = getLogger(__name__)
+if verbose:
+    from logging import INFO as lvl
+else:
+    from logging import ERROR as lvl
+basicConfig(level=lvl, datefmt='%d-%m-%Y %H:%M:%S',
+            format='%(levelname)s:%(asctime)s: %(message)s')
 
 from ROOT import gROOT
 gROOT.SetBatch(True)
@@ -90,7 +108,6 @@ for method in session.methods:
 nentries = itree.GetEntries()
 for i in xrange(nentries):
     itree.GetEntry(i)
-    if i % 10000 == 0: print "{}/{} ({}%)".format(i, nentries, (100. * i) / nentries)
     for var, val in allvars.iteritems():
         val[1].GetNdata()              # load formula data
         val[0][0] = val[1].EvalInstance() # evaluate formula
@@ -99,6 +116,7 @@ for i in xrange(nentries):
         discriminant[method][0] = reader.EvaluateMVA(method)
         discriminant[method][1].Fill(discriminant[method][0])
     otree.Fill()
+    if i % 10000 == 0: info("%d/%d", i, nentries)
 
 for method in session.methods:
     discriminant[method][1].Write()
