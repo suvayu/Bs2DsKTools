@@ -22,7 +22,7 @@ from ROOT import gROOT
 gROOT.SetBatch(True)
 
 from ROOT import gDirectory, gSystem, gPad, gStyle
-from ROOT import TFile, TTree, TH1D, TH2D, TH3D, TCanvas, TPad
+from ROOT import TFile, TTree, TTreeFormula, TH1D, TCanvas, TPad
 
 from ROOT import TMVA
 from tmvaconfig import TMVAconfig, ConfigFile
@@ -49,54 +49,59 @@ print '::: Applying {} MVAs: {}\n{}'.format(len(session.methods),
 print session
 print ':::'
 
-# trained variables
-allvars = []
-for var in session.all_vars():
-    allvars += [array('f', [0.])]
-    reader.AddVariable(var, allvars[-1])
-
-# prepare apply tree
+# input tree
 itree = ifile.Get(name)
-for i, var in enumerate(session.vars):
-    # combined vars at the end (ignored)
-    itree.SetBranchAddress(var, allvars[i])
 
-# prepare output tree
-ofile.cd()
-otree = itree.CloneTree(0)
-for i, var in enumerate(session.all_vars()):
-    # variables for output tree
-    otree.Branch(var, allvars[i], '{}/F'.format(var))
+# trained variables
+allvars = {}                    # varname : (value, expr)
+for var in session.all_vars():
+    var_expr = var.split(':=', 1)
+    simple = (len(var_expr) == 1)
+    if simple: var_expr = var_expr * 2
+    allvars[var_expr[0]] = [array('f', [0.]), TTreeFormula(var_expr[0], var_expr[1], itree)]
+    reader.AddVariable(var, allvars[var_expr[0]][0])
+    if simple: itree.SetBranchAddress(var, allvars[var_expr[0]][0])
 
 # spectators
-spectators = []
 for var in session.spectators:
-    spectators += [array('f', [0.])]
-    reader.AddSpectator(var, spectators[-1])
+    var_expr = var.split(':=', 1)
+    simple = (len(var_expr) == 1)
+    if simple: var_expr = var_expr * 2
+    allvars[var_expr[0]] = [array('f', [0.]), TTreeFormula(var_expr[0], var_expr[1], itree)]
+    reader.AddSpectator(var, allvars[var_expr[0]][0])
+    if simple: itree.SetBranchAddress(var, allvars[var_expr[0]][0])
+
+# output tree
+ofile.cd()
+otree = itree.CloneTree(0)
+for var, val in allvars.iteritems(): # val = (value, expr)
+    otree.Branch(var, val[0], '{}/F'.format(var))
 
 # book methods
-hists_discr = {}
-discriminant = {}
+discriminant = {}               # MVA : (value, histogram)
 for method in session.methods:
     reader.BookMVA(method, '{0}/weights/{0}_{1}.weights.xml'
                    .format(session._name, method))
-    # output histogram
     hname = 'MVA_{}'.format(method)
-    hists_discr[method] = TH1D(hname, hname, 100, -1.0, 1.0 )
-
     # discriminant for output tree
-    discriminant[method] = array('f', [0.])
-    otree.Branch(method, discriminant[method], '{}/F'.format(method))
+    discriminant[method] = [array('f', [0.]), TH1D(hname, hname, 100, -1.0, 1.0 )]
+    otree.Branch(method, discriminant[method][0], '{}/F'.format(method))
 
-for i in range(itree.GetEntries()):
+nentries = itree.GetEntries()
+for i in xrange(nentries):
     itree.GetEntry(i)
+    if i % 10000 == 0: print "{}/{} ({}%)".format(i, nentries, (100. * i) / nentries)
+    for var, val in allvars.iteritems():
+        val[1].GetNdata()              # load formula data
+        val[0][0] = val[1].EvalInstance() # evaluate formula
+        # if i % 1000 == 0: print val[0]
     for method in session.methods:
         discriminant[method][0] = reader.EvaluateMVA(method)
-        hists_discr[method].Fill(discriminant[method][0])
+        discriminant[method][1].Fill(discriminant[method][0])
     otree.Fill()
 
 for method in session.methods:
-    hists_discr[method].Write()
+    discriminant[method][1].Write()
 otree.Write()
 ofile.Close()
 ifile.Close()
