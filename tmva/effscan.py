@@ -5,7 +5,8 @@ from utils import _import_args
 
 optparser = argparse.ArgumentParser(description=__doc__)
 optparser.add_argument('filenames', nargs='+', help='ROOT file')
-optparser.add_argument('-t', dest='tree', default='TestTree', help='Tree name')
+optparser.add_argument('-n', dest='tree', default='TestTree', help='Tree name')
+optparser.add_argument('-t', dest='truthmatch', action='store_true', default=False, help='Enable truth matching for signal')
 optparser.add_argument('-p', dest='doprint', action='store_true', default=False, help='Print to png/pdf files')
 optparser.add_argument('-b', dest='batch', action='store_true', default=False, help='Batch mode')
 options = optparser.parse_args()
@@ -23,6 +24,7 @@ from rootpy.plotting import Canvas, F1
 mva_cuts = [0.1*i for i in [2, 3, 5, 6]]
 colours = ['blue', 'red', 'green', 'black']
 variables = ['time', 'terr', 'lab0_MM']
+truthmatch = Cut('abs(lab0_TRUEID) == 531') if truthmatch else Cut('')
 
 for n, fname in enumerate(filenames):
     rfile = root_open(fname, 'read')
@@ -34,7 +36,10 @@ for n, fname in enumerate(filenames):
         for i in (0, 1):            # sig, bkg
             for j, cut in enumerate(mva_cuts):
                 cuts = [Cut('BDTG>{}'.format(cut)), Cut('BDTG<={}'.format(cut))]
-                allevts = Cut('classID=={}'.format(i))
+                if 0 == i:      # signal
+                    allevts = Cut('classID=={}'.format(i)) & truthmatch
+                else:
+                    allevts = Cut('classID=={}'.format(i))
                 hnumerator = tree.Draw(var, selection = cuts[i] & allevts)
                 hdenominator = tree.Draw(var, selection = allevts)
                 heff = hnumerator.Clone('heff{}_{}_{}'.format(i, var, cut))
