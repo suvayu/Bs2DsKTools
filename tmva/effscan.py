@@ -6,6 +6,8 @@ from utils import _import_args
 optparser = argparse.ArgumentParser(description=__doc__)
 optparser.add_argument('filenames', nargs='+', help='ROOT file')
 optparser.add_argument('-n', dest='tree', default='TestTree', help='Tree name')
+optparser.add_argument('-c', dest='classifier', choices=['BDTA', 'BDTG', 'BDTB'],
+                       default='BDTB', help='Classifier to use.')
 optparser.add_argument('-t', dest='truthmatch', action='store_true', default=False, help='Enable truth matching for signal')
 optparser.add_argument('-p', dest='doprint', action='store_true', default=False, help='Print to png/pdf files')
 optparser.add_argument('-b', dest='batch', action='store_true', default=False, help='Batch mode')
@@ -35,7 +37,8 @@ for n, fname in enumerate(filenames):
     for var in variables:
         for i in (0, 1):            # sig, bkg
             for j, cut in enumerate(mva_cuts):
-                cuts = [Cut('BDTG>{}'.format(cut)), Cut('BDTG<={}'.format(cut))]
+                cuts = [Cut('{}>{}'.format(classifier, cut)),
+                        Cut('{}<={}'.format(classifier, cut))]
                 if 0 == i:      # signal
                     allevts = Cut('classID=={}'.format(i)) & truthmatch
                 else:
@@ -119,7 +122,7 @@ for n, fname in enumerate(filenames):
             axes.xaxis.set_label_coords(0.9,-0.05)
             for k, cut in enumerate(mva_cuts):
                 line = rplt.errorbar(hists[j][i*ncuts + k], xerr=None,
-                                     label='BDTG>{}'.format(cut))[0]
+                                     label='{}>{}'.format(classifier, cut))[0]
             axes.legend(fontsize=10, numpoints=1, frameon=False, ncol=ncuts,
                         handler_map={type(line): HandlerErrorbar()})
 
