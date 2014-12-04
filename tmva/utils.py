@@ -1,6 +1,12 @@
 # coding=utf-8
 """Utilities"""
 
+from argparse import (ArgumentDefaultsHelpFormatter,
+                      RawDescriptionHelpFormatter)
+class RawArgDefaultFormatter(ArgumentDefaultsHelpFormatter,
+                             RawDescriptionHelpFormatter):
+    pass
+
 def _import_args(namespace, d = {}):
     """Import attributes from namespace to local environment.
 
