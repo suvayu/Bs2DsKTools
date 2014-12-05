@@ -29,6 +29,8 @@ optparser.add_argument('filename', help='ROOT files with signal & background eve
 optparser.add_argument('-n', dest='tree', default='DecayTree', help='Tree name.')
 optparser.add_argument('-T', dest='istmva', action='store_true',
                        help='ROOT file is from TMVA output.')
+optparser.add_argument('-s', '--session', help='TMVA training session')
+optparser.add_argument('--conf', default='TMVA.conf', help='TMVA configuration file')
 optparser.add_argument('-r', dest='bkgeff', action='store_true',
                        help='Evaluate background rejection efficiency '
                        'instead of signal selection efficiency.')
@@ -46,11 +48,14 @@ optparser.add_argument('-b', dest='batch', action='store_true', help='Batch mode
 options = optparser.parse_args()
 locals().update(_import_args(options))
 
+errmsg = 'Incompatible options: {}.'
 import sys
 if (bkgeff or istmva) and truthmatch:
-    sys.exit('In compatible options: bkgeff and truthmatch, '
-             'or istmva and truthmatch')
-
+    sys.exit(errmsg.format('bkgeff and truthmatch, or istmva and truthmatch'))
+if istmva and session:
+    sys.exit(errmsg.format('istmva and session'))
+if bool(session) != bool(conf):
+    sys.exit(errmsg.format('both session and conf should be present, or not'))
 
 from rootpy import QROOT
 from ROOT import gROOT
@@ -69,7 +74,13 @@ if istmva:             # TMVA output
 else:
     rfile = root_open(filename, 'read')
     tree = rfile.Get(tree)
-    istmva = Cut('')
+    from tmvaconfig import ConfigFile
+    conf = ConfigFile(conf)
+    if conf.read() > 0:
+        session = conf.get_session_config(session)
+    else:
+        sys.exit('No sesions found!')
+    istmva = Cut(str(session.cut_bkg if bkgeff else session.cut_sig))
 
 # common cuts
 truthmatch = Cut('fabs(lab0_TRUEID) == 531') if truthmatch else Cut('')
