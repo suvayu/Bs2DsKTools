@@ -67,27 +67,24 @@ print '::: Applying {} MVAs: {}\n{}'.format(len(session.methods),
 print session
 print ':::'
 
+def add_var_set_br_addr(varlist, reader_method, intree):
+    """Add variables to TMVA::Reader, and associate to tree branch"""
+    for var in varlist:
+        expr = var.split(':=', 1)
+        simple = (len(expr) == 1)
+        if simple: expr = expr * 2  # expr same as key
+        allvars[expr[0]] = [array('f', [0.]), TTreeFormula(expr[0], expr[1], itree)]
+        reader_method(var, allvars[expr[0]][0])
+        if simple: intree.SetBranchAddress(var, allvars[expr[0]][0])
+
 # input tree
 itree = ifile.Get(name)
-
+# varname : (value, expr)
+allvars = {}
 # trained variables
-allvars = {}                    # varname : (value, expr)
-for var in session.all_vars():
-    expr = var.split(':=', 1)
-    simple = (len(expr) == 1)
-    if simple: expr = expr * 2  # expr same as key
-    allvars[expr[0]] = [array('f', [0.]), TTreeFormula(expr[0], expr[1], itree)]
-    reader.AddVariable(var, allvars[expr[0]][0])
-    if simple: itree.SetBranchAddress(var, allvars[expr[0]][0])
-
+add_var_set_br_addr(session.all_vars(), reader.AddVariable, itree)
 # spectators
-for var in session.spectators:
-    expr = var.split(':=', 1)
-    simple = (len(expr) == 1)
-    if simple: expr = expr * 2  # expr same as key
-    allvars[expr[0]] = [array('f', [0.]), TTreeFormula(expr[0], expr[1], itree)]
-    reader.AddSpectator(var, allvars[expr[0]][0])
-    if simple: itree.SetBranchAddress(var, allvars[expr[0]][0])
+add_var_set_br_addr(session.spectators, reader.AddSpectator, itree)
 
 # output tree
 ofile.cd()
