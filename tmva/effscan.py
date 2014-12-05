@@ -64,7 +64,7 @@ from ROOT import gPad
 
 from rootpy.io import File, root_open
 from rootpy.tree import Tree, Cut
-from rootpy.plotting import Canvas, F1
+from rootpy.plotting import Hist, Canvas
 
 # signal and background trees
 if istmva:             # TMVA output
@@ -95,6 +95,11 @@ def colours(num, default='black'):
 
 # store histograms as value
 variables = {'time': [], 'terr': [], 'lab0_MM': []}
+plots = {
+    'time': [(0, 17), 'time [ps]'],
+    'terr': [(0, 0.18), 'time error ($\delta t$) [ps]'],
+    'lab0_MM': [(4600, 5800), r'$B_{s}$ mass [MeV]']
+}
 
 
 ## make efficiency histograms
@@ -103,8 +108,10 @@ for var in variables:
     for j, cut in enumerate(mva_cuts):
         sel = Cut('{}{}{}'.format(classifier, '<=' if bkgeff else '>', cut))
         base = truthmatch & istmva
-        hnumer = tree.Draw(var, selection = sel & base)
-        hdenom = tree.Draw(var, selection = base)
+        hnumer = Hist(100, *plots[var][0])
+        tree.Draw(var, selection = sel & base, hist = hnumer)
+        hdenom = Hist(100, *plots[var][0])
+        tree.Draw(var, selection = base, hist = hdenom)
         heff = hnumer.Clone('heff_{}_{}'.format(var, cut))
         heff.Reset('icesm')
         heff.SetTitle(sel.latex() + '...')
@@ -169,17 +176,8 @@ else:                           # Matplotlib
             axes.set_title('Signal selection efficiency')
         axes.set_ylim(0, 6)
         axes.set_ylabel('Efficiency (w/ offset)')
-        if var == 'time':
-            xlo, xhi = 0, 20
-            xlabel = 'time [ps]'
-        elif var == 'terr':
-            xlo, xhi = 0, 0.27
-            xlabel = 'time error ($\delta t$) [ps]'
-        elif var == 'lab0_MM':
-            xlo, xhi = 4600, 7000
-            xlabel = r'$B_{s}$ mass [MeV]'
-        axes.set_xlim(xlo, xhi)
-        axes.set_xlabel(xlabel)
+        axes.set_xlim(*plots[var][0])
+        axes.set_xlabel(plots[var][1])
         axes.xaxis.set_label_coords(0.9,-0.05)
         for k, cut in enumerate(mva_cuts):
             if not histos[k].GetEntries(): continue
