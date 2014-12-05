@@ -154,3 +154,9 @@ except ImportError:
     msg = 'Could not import numpy.\n'
     msg += 'Unavailable functions: thn2array, thn_print.'
     warnings.warn(msg, ImportWarning)
+
+    def thn2array(hist):
+        raise NotImplementedError('Not available without numpy')
+
+    def thn_print(hist):
+        raise NotImplementedError('Not available without numpy')
