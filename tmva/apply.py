@@ -110,8 +110,8 @@ for i in xrange(nentries):
         val[0][0] = val[1].EvalInstance() # evaluate formula
         # if i % 1000 == 0: print val[0]
     for method in session.methods:
-        discriminant[method][0] = reader.EvaluateMVA(method)
-        discriminant[method][1].Fill(discriminant[method][0])
+        discriminant[method][0][0] = reader.EvaluateMVA(method)
+        discriminant[method][1].Fill(discriminant[method][0][0])
     otree.Fill()
     if i % 10000 == 0: info("%d/%d", i, nentries)
 
