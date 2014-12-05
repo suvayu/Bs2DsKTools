@@ -73,21 +73,21 @@ itree = ifile.Get(name)
 # trained variables
 allvars = {}                    # varname : (value, expr)
 for var in session.all_vars():
-    var_expr = var.split(':=', 1)
-    simple = (len(var_expr) == 1)
-    if simple: var_expr = var_expr * 2
-    allvars[var_expr[0]] = [array('f', [0.]), TTreeFormula(var_expr[0], var_expr[1], itree)]
-    reader.AddVariable(var, allvars[var_expr[0]][0])
-    if simple: itree.SetBranchAddress(var, allvars[var_expr[0]][0])
+    expr = var.split(':=', 1)
+    simple = (len(expr) == 1)
+    if simple: expr = expr * 2  # expr same as key
+    allvars[expr[0]] = [array('f', [0.]), TTreeFormula(expr[0], expr[1], itree)]
+    reader.AddVariable(var, allvars[expr[0]][0])
+    if simple: itree.SetBranchAddress(var, allvars[expr[0]][0])
 
 # spectators
 for var in session.spectators:
-    var_expr = var.split(':=', 1)
-    simple = (len(var_expr) == 1)
-    if simple: var_expr = var_expr * 2
-    allvars[var_expr[0]] = [array('f', [0.]), TTreeFormula(var_expr[0], var_expr[1], itree)]
-    reader.AddSpectator(var, allvars[var_expr[0]][0])
-    if simple: itree.SetBranchAddress(var, allvars[var_expr[0]][0])
+    expr = var.split(':=', 1)
+    simple = (len(expr) == 1)
+    if simple: expr = expr * 2  # expr same as key
+    allvars[expr[0]] = [array('f', [0.]), TTreeFormula(expr[0], expr[1], itree)]
+    reader.AddSpectator(var, allvars[expr[0]][0])
+    if simple: itree.SetBranchAddress(var, allvars[expr[0]][0])
 
 # output tree
 ofile.cd()
