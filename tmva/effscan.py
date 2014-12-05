@@ -130,6 +130,7 @@ if backend == 'root':           # ROOT
 else:                           # Matplotlib
     ncuts = len(mva_cuts)
 
+    import matplotlib as mpl
     import matplotlib.pyplot as plt
     plt.rc('font', family='Liberation Sans') # choose font
     plt.rc('mathtext', default='regular')    # use default font for math
@@ -170,10 +171,11 @@ else:                           # Matplotlib
         axes.set_xlabel(xlabel)
         axes.xaxis.set_label_coords(0.9,-0.05)
         for k, cut in enumerate(mva_cuts):
+            if not histos[k].GetEntries(): continue
             line = rplt.errorbar(histos[k], xerr=None,
                                  label='{}>{}'.format(classifier, cut))[0]
         axes.legend(fontsize=10, numpoints=1, frameon=False, ncol=ncuts,
-                    handler_map={type(line): HandlerErrorbar()})
+                    handler_map={mpl.lines.Line2D: HandlerErrorbar()})
 
         if doprint:
             pp.savefig()
