@@ -313,9 +313,9 @@ class ConfigFile(object):
       return NotImplemented
 
    def sessions(self):
-      """List of MVAs in config file"""
+      """List of sessions in config file"""
       return self._sessions
 
    def get_session_config(self, session):
-      """Retrun MVA config"""
+      """Return session config"""
       return getattr(self, session)
