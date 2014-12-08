@@ -2,9 +2,9 @@
 """Draw classifier performace plots (distribution)"""
 
 import argparse
-from utils import _import_args
+from utils import _import_args, RawArgDefaultFormatter
 
-optparser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                     description=__doc__)
 optparser.add_argument('files', metavar='file', nargs='+', help='ROOT file name')
 optparser.add_argument('--config', dest='yamlfile',

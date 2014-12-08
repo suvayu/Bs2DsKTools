@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Apply trained MVA"""
 
 import argparse
-from utils import _import_args
+from utils import _import_args, RawArgDefaultFormatter
 
-optparser = argparse.ArgumentParser(description=__doc__)
+optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
+                                    description=__doc__)
 optparser.add_argument('filename', help='ROOT file')
 optparser.add_argument('-s', dest='session', help='Session name')
 optparser.add_argument('-o', dest='out', help='ROOT file with output histograms')

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Train TMVA algorithm"""
 
 import argparse
 from utils import _import_args
@@ -10,6 +11,7 @@ optparser.add_argument('-s', dest='session', required=True, help='Session name')
 optparser.add_argument('--sig', dest='sig_tree', help='Signal tree name (mandatory when filename present)')
 optparser.add_argument('--bkg', dest='bkg_tree', help='Background tree name (mandatory when filename present)')
 optparser.add_argument('-o', dest='out', required=True, help='Output ROOT file')
+optparser.add_argument('-c', dest='conf', default='TMVA.conf', help='TMVA config file')
 options = optparser.parse_args()
 locals().update(_import_args(options))
 # variables for future proofing
@@ -30,7 +32,7 @@ from ROOT import TFile, TChain, TMVA
 from tmvaconfig import TMVAType, TMVAconfig, ConfigFile
 
 # read config
-conf = ConfigFile('TMVA.conf')
+conf = ConfigFile(conf)
 if conf.read() > 0:
     session = conf.get_session_config(session)
 print '::: Training {} MVAs: {}\n{}'.format(len(session.methods),
