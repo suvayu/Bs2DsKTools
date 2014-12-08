@@ -2,14 +2,15 @@
 """Draw classifier comparison plots (ROC curves)"""
 
 import argparse
-from utils import _import_args
+from utils import _import_args, RawArgDefaultFormatter
 
-optparser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                     description=__doc__)
 optparser.add_argument('files', metavar='file', nargs='+', help='ROOT file name')
 optparser.add_argument('--config', dest='yamlfile',
                        default='tmva_output_description.yaml',
                        help='ROOT file description in yaml format')
+optparser.add_argument('-r', dest='axis_range', type=float, default=0.6, help='Axis range')
 optparser.add_argument('-p', dest='doprint', action='store_true',
                        default=True, help='Print to png/pdf files')
 optparser.add_argument('-m', dest='usempl', action='store_true',
@@ -22,7 +23,6 @@ options = optparser.parse_args()
 locals().update(_import_args(options))
 
 
-from pprint import pprint
 import sys
 
 from utils import read_yaml, get_rpaths
@@ -71,13 +71,16 @@ sessions = OrderedDict({
     'chitra_all/dsk_train_out.root': 'base + deco - 3 vars',
     'chitra_combi1/dsk_train_out.root': 'base + deco - Ds FD',
     'chitra_combi2/dsk_train_out.root': 'base + deco - bach IP #chi^{2}',
+    'chitra_combi3/dsk_train_out.root': 'base + deco - B/D RFD',
+    'chitra_log/dsk_train_out.root': 'base + deco + log(IP #chi^{2}/p_{T})',
+    'chitra_log3/dsk_train_out.root': 'base + deco + log(IP #chi^{2})',
 })
 
 from fixes import ROOT
 if batch: ROOT.gROOT.SetBatch(True)
 
 from utils import get_hists
-from rplot.rplot import Rplot, arrange
+from rplot.rplot import Rplot
 
 def _filter(string):
     matches  = ['MVA_{}{}'.format(cl, string) for cl in classifiers]
@@ -114,8 +117,8 @@ if usempl:
         axes = fig.add_subplot(111)
         axes.grid(axis='both')
         axes.set_title('ROC curve')
-        axes.set_xlim(0.7, 1)
-        axes.set_ylim(0.7, 1)
+        axes.set_xlim(axis_range, 1)
+        axes.set_ylim(axis_range, 1)
         axes.set_xlabel('Signal selection efficiency')
         axes.set_ylabel('Background rejection efficiency')
         axes.xaxis.set_label_coords(0.9,-0.05)
@@ -146,8 +149,8 @@ else:
         for j, hist in enumerate(roc.iteritems()):
             hist[1].SetLineStyle(i+1)
             hist[1].SetLineColor(cols[j])
-            hist[1].GetXaxis().SetRangeUser(0.7, 1.0)
-            hist[1].GetYaxis().SetRangeUser(0.7, 1.0)
+            hist[1].GetXaxis().SetRangeUser(axis_range, 1.0)
+            hist[1].GetYaxis().SetRangeUser(axis_range, 1.0)
             try:
                 info = sessions[fnames[i]]
             except KeyError:
