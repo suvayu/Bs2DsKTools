@@ -28,6 +28,7 @@ def _import_args(namespace, d = {}):
 def hist_info(hist):
     """Return histogram info for using with rootpy"""
     metainfo = {'name': hist.GetName(), 'title': hist.GetTitle()}
+    metainfo['type'] = hist.ClassName()[-1]
     dim = hist.GetDimension()
     # FIXME: only for 1D
     nbinsx = hist.GetNbinsX()
