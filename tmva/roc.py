@@ -25,17 +25,8 @@ locals().update(_import_args(options))
 
 import sys
 
-from utils import read_yaml, get_rpaths
-conf = read_yaml(yamlfile)
-if isinstance(conf, list):
-    for entry in conf:
-        print entry['file']
-        if entry['file'] != 'TMVA.root': continue
-        rfiles = get_rpaths(files, entry)
-else:
-    if conf['file'] == 'TMVA.root':
-        rfiles = get_rpaths(files, conf)
-
+from utils import plot_conf
+rfiles = plot_conf(yamlfile, 'TMVA.root', files)
 if not rfiles: sys.exit('Config parsing error.')
 
 from rplot.rdir import Rdir
