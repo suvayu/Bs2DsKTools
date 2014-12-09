@@ -65,24 +65,6 @@ transforms = OrderedDict({
     'gauss_deco' : 'Gaussianise+Decorrelate',
 })
 
-varmap = {
-    'lab0_DIRA_OWNPV' : 'B_{s} DIRA',
-    'lab0_IPCHI2_OWNPV' : 'B_{s} IP #chi^{2}',
-    'lab1_IPCHI2_OWNPV' : 'h IP #chi^{2}',
-    'lab1_PT' : 'h p_{T}',
-    'lab2_MINIPCHI2' : 'D_{s} IP #chi^{2}',
-    'lab3_IPCHI2_OWNPV' : 'D_{s} dau1 IP #chi^{2}',
-    'lab4_IPCHI2_OWNPV' : 'D_{s} dau2 IP #chi^{2}',
-    'lab5_IPCHI2_OWNPV' : 'D_{s} dau3 IP #chi^{2}',
-    'Bs_vtx_chi2_ndof' : 'B_{s} vtx #chi^{2}',
-    'Bs_radial_fd' : 'B_{s} FD',
-    'Ds_radial_fd' : 'D_{s} FD',
-    'Ds_vtx_chi2_ndof' : 'D_{s} vtx #chi^{2}',
-    'max_ghost_prob' : 'max ghost trk prob',
-    'min_Ds_child_trk_pt' : 'min D_{s} child trk p_{T}',
-    'min_Ds_child_trk_chi2' : 'min D_{s} child trk #chi^{2}',
-}
-
 from fixes import ROOT
 if batch: ROOT.gROOT.SetBatch(True)
 
@@ -138,6 +120,7 @@ if lcorrns or scatter:
 ## covariance matrices
 if lcorrns:
     matrices = {}
+    from utils import get_labels
     for transform in transforms:
         corrn = [
             ROOT.TH2D(transform+'_sig', 'Correlation matrix after {} transform (sig)'
@@ -160,8 +143,8 @@ if lcorrns:
                     else:
                         name = name[5:name.find('_Background')]
                     varnames = name.split('_vs_', 1)
-                    corrn[i].GetXaxis().SetBinLabel(idx[0]+1, varmap[varnames[1]])
-                    corrn[i].GetYaxis().SetBinLabel(idx[1]+1, varmap[varnames[0]])
+                    corrn[i].GetXaxis().SetBinLabel(idx[0]+1, get_labels(varnames[1]))
+                    corrn[i].GetYaxis().SetBinLabel(idx[1]+1, get_labels(varnames[0]))
 
             for i in xrange(len(corrn)):
                 corrn[i].SetBinContent(idx[0]+1, idx[1]+1, 100*hist[i].GetCorrelationFactor())
