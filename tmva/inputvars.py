@@ -77,10 +77,12 @@ from fixes import ROOT
 if batch: ROOT.gROOT.SetBatch(True)
 
 from utils import get_hists
-from rplot.rplot import Rplot, arrange
+
+from rplot.rplot import Rplot, arrange, partition
 
 ## variable distributions
 if distribs:
+    # histogram order: signal, background (repeat for diff transforms)
     distributions = get_hists(transforms, rfileconf, rpath_tool, robj_t = ROOT.TH1)
 
     ROOT.gStyle.SetHatchesLineWidth(1)
@@ -93,15 +95,22 @@ if distribs:
         distributions[transform] = arrange(distributions[transform], 2,
                                            predicate=_style)
 
-    plotter = Rplot(5, 3, 2000, 1200)
+    plotter = Rplot(3, 3, 2000, 1200)
     plotter.alpha = 0.2
     canvas = plotter.prep_canvas()
     if doprint: canvas.Print('transforms.pdf[')
 
-    for transform in transforms:
-        plotter.draw_hist(distributions[transform], 'hist')
+    def _plot_n_print(hlist):
+        plotter.draw_hist(hlist, 'hist')
         canvas.Update()
         if doprint: canvas.Print('transforms.pdf')
+
+    for transform in transforms:
+        if len(distributions[transform]) > plotter.nplots:
+            for hists in partition(distributions[transform], plotter.nplots):
+                _plot_n_print(hists)
+        else:
+            _plot_n_print(distributions[transform])
 
     if doprint: canvas.Print('transforms.pdf]')
     del plotter, canvas
