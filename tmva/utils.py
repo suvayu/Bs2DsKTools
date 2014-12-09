@@ -1,6 +1,7 @@
 # coding=utf-8
 """Utilities"""
 
+# argument parsing tools
 from argparse import (ArgumentDefaultsHelpFormatter,
                       RawDescriptionHelpFormatter)
 class RawArgDefaultFormatter(ArgumentDefaultsHelpFormatter,
@@ -25,6 +26,32 @@ def _import_args(namespace, d = {}):
         d[attr] = getattr(namespace, attr)
     return d
 
+# plotting tools
+def get_label(string):
+    """Get label from variable names."""
+    # NOTE: Do not remove leading/trailing spaces in replacement strings
+    # special cases
+    string = string.replace('lab345_MIN_PT', 'min D child trk p_{T}')
+    string = string.replace('lab345_MIN_IPCHI2_OWNPV', 'min D child trk #chi^{2}')
+    string = string.replace('lab1345_TRACK_GhostProb', 'max ghost trk prob')
+    # LHCb tuple prefixes
+    string = string.replace('lab0_', 'B ')
+    string = string.replace('lab1_', 'bach ')
+    string = string.replace('lab2_', 'D ')
+    string = string.replace('lab3_', 'D child 1 ')
+    string = string.replace('lab4_', 'D child 2 ')
+    string = string.replace('lab5_', 'D child 3 ')
+    # variables
+    string = string.replace('_OWNPV', '')
+    string = string.replace('PT', 'p_{T}')
+    string = string.replace('MINIPCHI2', 'min IP #chi^{2}')
+    string = string.replace('IPCHI2', 'IP #chi^{2}')
+    string = string.replace('VCHI2NDOF', 'vtx #chi^{2}/ndof')
+    string = string.replace('TAU', 'decay time')
+    string = string.replace('ERR', ' error')
+    return string
+
+# ROOT -> rootpy tools
 def hist_info(hist):
     """Return histogram info for using with rootpy"""
     metainfo = {'name': hist.GetName(), 'title': hist.GetTitle()}
@@ -50,6 +77,7 @@ def pycopy(newobj_t, obj_t, obj, *args, **kwargs):
         newobj = None
     return newobj
 
+# I/O tools
 def path2rootdir(path):
     """Read path string and return ROOT directory
 
@@ -61,6 +89,18 @@ def path2rootdir(path):
     rfile = ROOT.TFile.Open(rfile, 'read')
     rdir = rfile.GetDirectory(rdir) # path in root file: /foo/bar
     return (rfile, rdir)
+
+def plot_conf(yamlfile, ftype, files):
+    """Read plot config"""
+    conf = read_yaml(yamlfile)
+    if isinstance(conf, list):
+        for entry in conf:
+            if entry['file'] != ftype: continue
+            rfiles = get_rpaths(files, entry)
+    else:
+        if conf['file'] == ftype:
+            rfiles = get_rpaths(files, conf)
+    return rfiles
 
 def get_rpaths(files, conf):
     """Get ROOT file paths for all files using conf."""
@@ -87,7 +127,7 @@ def make_paths(node):
         try:
             pwd = '{}:'.format(node['file'])
         except KeyError:
-            print 'Malformed dict'
+            print('Malformed dict')
             from pprint import pprint
             pprint(node)
             raise
@@ -114,7 +154,12 @@ def read_yaml(filename):
     return yaml.load(stream)
 
 def get_hists(yaml_keys, conf, tool, robj_t = None, robj_p = None):
-    """Read histograms for `keys' for given `conf'"""
+    """Read histograms for `keys' for given `conf'
+
+    conf is a list of dictionaries with rpaths.  The Rdir `tool' is
+    used to read the histograms from the rpaths.
+
+    """
     hists = {}
     for rdir in conf:
         try:
@@ -147,7 +192,7 @@ try:
         val = thn2array(hist)
         print('Hist: {}, dim: {}'.format(hist.GetName(), len(np.shape(val))))
         hist.Print()
-        print np.flipud(val) # flip y axis, FIXME: check what happens for 3D
+        print(np.flipud(val)) # flip y axis, FIXME: check what happens for 3D
 
 except ImportError:
     import warnings
