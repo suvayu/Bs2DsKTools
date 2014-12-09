@@ -24,6 +24,8 @@ optparser.add_argument('-p', dest='doprint', action='store_true',
                        default=True, help='Print to png/pdf files')
 optparser.add_argument('-b', dest='batch', action='store_true',
                        default=False, help='Batch mode')
+optparser.add_argument('-t', dest='transglob', metavar='transform',
+                       default=None, help='Only plot matching transforms (globs allowed)')
 optparser.add_argument('-d', dest='distribs', action='store_true',
                        default=False, help='Plot input variable distributions')
 optparser.add_argument('-l', dest='lcorrns', action='store_true',
@@ -64,6 +66,12 @@ transforms = OrderedDict({
     'gauss' : 'Gaussianise',
     'gauss_deco' : 'Gaussianise+Decorrelate',
 })
+
+if transglob:
+    # only process matching transforms
+    from fnmatch import fnmatchcase
+    for key in transforms:
+        if not fnmatchcase(key, transglob): del transforms[key]
 
 from fixes import ROOT
 if batch: ROOT.gROOT.SetBatch(True)
