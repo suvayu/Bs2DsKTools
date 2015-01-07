@@ -65,6 +65,7 @@ sessions = OrderedDict({
     'chitra_combi3/dsk_train_out.root': 'base + deco - B/D RFD',
     'chitra_log/dsk_train_out.root': 'base + deco + log(IP #chi^{2}/p_{T})',
     'chitra_log3/dsk_train_out.root': 'base + deco + log(IP #chi^{2})',
+    'chitra_max_diff/dsk_train_out.root': 'base + deco + log(IP #chi^{2}) + max p_{T} diff',
 })
 
 from fixes import ROOT
