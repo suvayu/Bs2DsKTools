@@ -86,7 +86,7 @@
 - B2DX_withtagging_strip20_DVv33r8_3fb_magdown_BDTG_Bs.root
 - B2DX_withtagging_strip20_DVv33r8_3fb_magup_BDTG_Bs.root
 
-* Tasks [4/4]
+* Tasks [4/10]
 ** DONE Resolve vertex χ² variable disambiguity
    CLOSED: [2014-11-17 Mon 13:30]
 - Vertex χ²/ndof
@@ -109,3 +109,48 @@ BDT selection efficiency (for 3 diff arbitrary selections) for:
 - decay time → acceptance
 - decay time error → decay time resolution
 - B_{s} mass → mass fit
+** TODO List different training variable configs
+** TODO Compare w/ & w/o log of input vars
+** TODO Efficiencies w/ & w/o truth-matching
+[[notmuch:id:alpine.LRH.2.02.1412102018060.19203@lena.nikhef.nl][Niels's email on truth-matching]]
+** TODO Metric for qualifying ROC curves
+- area under the curve
+- min. distance from the curve to (1,1)
+- make ROC curves myself
+- if not, scan ROC curves from TMVA
+** TODO Decorrelation, w/ or w/o
+time permitting
+** TODO Optimise BDT algorithms
+
+* Notes
+Sets of input variables:
+- base :: variables
+  - B_{s} :: DIRA, IP χ², decay vertex χ²/dof, radial flight distance (RFD)
+  - bachelor :: IP χ², p_{T}
+  - D_{s} :: minimum IP χ², decay vertex χ²/dof, RFD
+  - tracks :: maximum track ghost probability, minimum D_{s} daughter
+       track p_{T} & IP χ²
+- less1a :: w/o D_{s} RFD
+- less1b :: w/o B_{s} RFD
+- less2 :: w/o either RFD variables
+- less3 :: w/o bachelor IP χ²
+- less4 :: w/o either RFD, and bachelor IP χ²
+- deco1 :: w/ decorrelation of all variables
+- deco2 :: w/ decorrelation of selected variables
+  - both RFD
+  - D_{s} minimum IP χ²
+  - minimum D_{s} daughter IP χ²
+- combi1 :: w/ decorrelation (3 vars), w/o D_{s} RFD
+- combi2 :: w/ decorrelation (4 vars), w/o bachelor IP χ²
+- combi3 :: w/ decorrelation (2 vars), w/o either RFD
+- log :: w/ decorrelation (1 var), w/o either RFD, w/ logarithm of IP
+     χ² and p_{T} variables
+  - B_{s} IP χ²
+  - bachelor p_{T}
+  - D_{s} minimum IP χ²
+- log3 :: w/ decorrelation (1 var), w/o either RFD, w/ logarithm of IP
+     χ² variables
+  - B_{s} IP χ²
+  - D_{s} minimum IP χ²
+- max_diff :: same as above, w/ new experimental variable (Rose & me)
+  - maximum difference b/w D_{s} daughter track p_{T}
