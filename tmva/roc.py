@@ -36,12 +36,7 @@ rpath_tool = Rdir(fnames)
 # FIXME: only processes first file
 rfileconf = rfiles[0]
 
-from collections import OrderedDict
-classifiers = OrderedDict({
-    'BDTA': 'BDT w/ adaptive boost',
-    'BDTG': 'BDT w/ gradient boost',
-    'BDTB': 'BDT w/ bagging'
-})
+from config import classifiers, sessions
 
 if clnameglob:
     # only process matching classifiers
@@ -49,30 +44,10 @@ if clnameglob:
     for key in classifiers:
         if not fnmatchcase(key, clnameglob): del classifiers[key]
 
-sessions = OrderedDict({
-    'test.root': 'test',
-    'chitra_base/dsk_train_out.root': 'base',
-    'chitra_less1a/dsk_train_out.root': 'base - Ds radial FD',
-    'chitra_less1b/dsk_train_out.root': 'base - Bs radial FD',
-    'chitra_less2/dsk_train_out.root': 'base - Bs & Ds radial FD',
-    'chitra_less3/dsk_train_out.root': 'base - bach IP #chi^{2}',
-    'chitra_less4/dsk_train_out.root': 'base - radial FD - bach IP #chi^{2}',
-    'chitra_deco1/dsk_train_out.root': 'base + deco (all)',
-    'chitra_deco2/dsk_train_out.root': 'base + 4 vars deco',
-    'chitra_all/dsk_train_out.root': 'base + deco - 3 vars',
-    'chitra_combi1/dsk_train_out.root': 'base + deco - Ds FD',
-    'chitra_combi2/dsk_train_out.root': 'base + deco - bach IP #chi^{2}',
-    'chitra_combi3/dsk_train_out.root': 'base + deco - B/D RFD',
-    'chitra_log/dsk_train_out.root': 'base + deco + log(IP #chi^{2}/p_{T})',
-    'chitra_log3/dsk_train_out.root': 'base + deco + log(IP #chi^{2})',
-    'chitra_max_diff/dsk_train_out.root': 'base + deco + log(IP #chi^{2}) + max p_{T} diff',
-})
-
 from fixes import ROOT
 if batch: ROOT.gROOT.SetBatch(True)
 
 from utils import get_hists
-from rplot.rplot import Rplot
 
 def _filter(string):
     matches  = ['MVA_{}{}'.format(cl, string) for cl in classifiers]
