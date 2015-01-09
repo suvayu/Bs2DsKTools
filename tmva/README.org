@@ -86,7 +86,7 @@
 - B2DX_withtagging_strip20_DVv33r8_3fb_magdown_BDTG_Bs.root
 - B2DX_withtagging_strip20_DVv33r8_3fb_magup_BDTG_Bs.root
 
-* Tasks [4/10]
+* Tasks [8/11]
 ** DONE Resolve vertex χ² variable disambiguity
    CLOSED: [2014-11-17 Mon 13:30]
 - Vertex χ²/ndof
@@ -109,8 +109,12 @@ BDT selection efficiency (for 3 diff arbitrary selections) for:
 - decay time → acceptance
 - decay time error → decay time resolution
 - B_{s} mass → mass fit
-** TODO List different training variable configs
-** TODO Compare w/ & w/o log of input vars
+** DONE List different training variable configs
+   CLOSED: [2015-01-07 Wed 14:33]
+- Include both RFD
+** DONE Compare w/ & w/o log of input vars
+   CLOSED: [2015-01-07 Wed 16:31]
+Better with logarithm of IP χ² (log3a)
 ** TODO Efficiencies w/ & w/o truth-matching
 [[notmuch:id:alpine.LRH.2.02.1412102018060.19203@lena.nikhef.nl][Niels's email on truth-matching]]
 ** TODO Metric for qualifying ROC curves
@@ -118,8 +122,14 @@ BDT selection efficiency (for 3 diff arbitrary selections) for:
 - min. distance from the curve to (1,1)
 - make ROC curves myself
 - if not, scan ROC curves from TMVA
-** TODO Decorrelation, w/ or w/o
-time permitting
+** DONE Own ROC curve
+   CLOSED: [2015-01-09 Fri 14:03]
+- correct scanning
+- variable bins in python
+** DONE Decorrelation, w/ or w/o
+   CLOSED: [2015-01-08 Thu 13:19]
+Do not use.  Too little gain, transformed variables difficult to
+understand.
 ** TODO Optimise BDT algorithms
 
 * Notes
@@ -148,9 +158,14 @@ Sets of input variables:
   - B_{s} IP χ²
   - bachelor p_{T}
   - D_{s} minimum IP χ²
+- loga :: same as above, but w/ both RFD
+- logb :: same as above, but w/o decorrelation
 - log3 :: w/ decorrelation (1 var), w/o either RFD, w/ logarithm of IP
      χ² variables
   - B_{s} IP χ²
   - D_{s} minimum IP χ²
+- log3b :: same as above, but w/o decorrelation
+- log3a :: same as above, but w/o decorrelation, and includes both RFD
 - max_diff :: same as above, w/ new experimental variable (Rose & me)
   - maximum difference b/w D_{s} daughter track p_{T}
+- max_diffb :: same as above, but w/o decorrelation
