@@ -33,6 +33,8 @@ if not rfiles: sys.exit('Config parsing error.')
 rfileconf = rfiles[0]
 
 from config import classifiers, sessions
+# don't use adaptive boost
+del classifiers['BDTA']
 
 if clnameglob:
     # only process matching classifiers
@@ -46,36 +48,51 @@ if batch: ROOT.gROOT.SetBatch(True)
 fnames = [f[0]['file'] for f in rfiles]
 
 def get_hists(classifiers, rfile, name):
-    from ROOT import TFile, TTree, TProfile
+    from ROOT import TFile, TTree, TProfile, TPolyMarker
     from numpy import linspace
     from array import array
     rfile = TFile.Open(rfile)
     tree = rfile.Get(name)
     sig, bkg = 'classID=={}'.format(0), 'classID=={}'.format(1)
-    hists = {}
+    hists, marks = {}, {}
     for cl in classifiers:
         name = '{}_{}'.format(cl, rfile.GetName().split('/',1)[0])
         nsig = float(tree.GetEntries(sig))
         nbkg = float(tree.GetEntries(bkg))
         # variable bin width
-        bins = array('f', [1.0/(-i*0.3-1) + 1 for i in xrange(200)] + [1])
+        bins = array('f', [1.0/(-i*0.5-1) + 1 for i in xrange(100)] + [1])
         hist = TProfile('h_{}'.format(name), 'ROC curve ({})'.format(cl),
-                        200, bins)
+                        100, bins)
         hist.SetDirectory(0)    # otherwise current file owns histogram
+        xmark, ymark = array('f'), array('f')
         for i, cut in enumerate(linspace(-1, 1, 1001)):
-            cut = '{}>{}'.format(cl, cut)
-            eff_s = tree.GetEntries('{}&&{}'.format(sig, cut))/nsig
-            eff_b = 1 - tree.GetEntries('{}&&{}'.format(bkg, cut))/nbkg
+            cutstr = '{}>{}'.format(cl, cut)
+            eff_s = tree.GetEntries('{}&&{}'.format(sig, cutstr))/nsig
+            eff_b = 1 - tree.GetEntries('{}&&{}'.format(bkg, cutstr))/nbkg
             hist.Fill(eff_s, eff_b)
+            if cl == 'BDTB':
+                window = -0.3 <= cut and cut <= 0.3
+                step = not i % 10
+            else:
+                window = -0.9 <= cut and cut <= 0.9
+                step = not i % 50
+            if window and step:
+                xmark.append(eff_s)
+                ymark.append(eff_b)
+        marks[cl] = TPolyMarker(len(xmark), xmark, ymark)
         hists[cl] = hist
-    return hists
+        print '{}: {} marks'.format(cl, len(xmark))
+        for pt in zip(xmark, ymark): print pt,
+        print
+    return hists, marks
 
 from utils import thn_print
-rocs = []
+rocs, marks = [], []
 for i, rfileconf in enumerate(rfiles):
-    roc = get_hists(classifiers, rfileconf[0]['file'], 'TestTree')
+    roc, mark = get_hists(classifiers, rfileconf[0]['file'], 'TestTree')
     # map(lambda k: thn_print(roc[k]), roc)
     rocs.append(roc)
+    marks.append(mark)
 
 if usempl:                      # FIXME: no idea if it works
     # Matplotlib
@@ -121,29 +138,42 @@ else:
     if doprint: canvas.Print('my_ROC_curves.pdf[')
 
     cols = (ROOT.kAzure, ROOT.kRed, ROOT.kBlack)
+    coln = 0
     legend = ROOT.TLegend(0.12, 0.15, 0.8, 0.6)
     legend.SetHeader('MVA classifiers')
     legend.SetBorderSize(0)
     legend.SetFillStyle(0)
     ROOT.gStyle.SetOptStat(False)
 
+    from utils import H1Dintegral, distance
     for i, roc in enumerate(rocs):
-        for j, hist in enumerate(roc.iteritems()):
-            hist[1].SetLineStyle(i+1)
-            hist[1].SetLineColor(cols[j])
-            hist[1].GetXaxis().SetRangeUser(axis_range, 1.05)
-            hist[1].GetYaxis().SetRangeUser(axis_range, 1.05)
+        for cl, hist in roc.iteritems():
+            # metrics & zero cut markers
+            print '=> {}:: integral: {}, distance: {}'.format(
+                cl,
+                H1Dintegral(hist),
+                distance(hist, (1,1))
+            )
+            hist.SetLineStyle(i+1)
+            hist.SetLineColor(cols[coln])
+            hist.GetXaxis().SetRangeUser(axis_range, 1.05)
+            hist.GetYaxis().SetRangeUser(axis_range, 1.05)
             try:
                 info = sessions[fnames[i]]
             except KeyError:
                 info = fnames[i]
-            text = '{} ({})'.format(classifiers[hist[0]], info)
-            legend.AddEntry(hist[1], text, 'l')
-            if i ==0 and j == 0:
-                hist[1].SetTitle('MVA classifier ROC curves')
-                hist[1].Draw('e')
+            text = '{} ({})'.format(classifiers[cl], info)
+            legend.AddEntry(hist, text, 'l')
+            if i == 0 and coln == 0:
+                hist.SetTitle('MVA classifier ROC curves')
+                hist.Draw('e')
             else:
-                hist[1].Draw('e same')
+                hist.Draw('e same')
+            polymarker = marks[i][cl]
+            polymarker.SetMarkerStyle(ROOT.kFullCircle)
+            polymarker.SetMarkerColor(cols[coln])
+            polymarker.Draw()
+            coln += 1           # next colour
 
     legend.Draw()
     canvas.SetGrid(1, 1)
