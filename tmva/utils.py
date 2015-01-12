@@ -172,6 +172,23 @@ def get_hists(yaml_keys, conf, tool, robj_t = None, robj_p = None):
             if str(err) != '\'key\'': raise
     return hists
 
+# ROOT utils
+def H1Dintegral(hist):
+    """Return integral of 1D histogram (exclude overflow & underflow)"""
+    integral = 0.0
+    for bin in xrange(1, hist.GetNbinsX()+1):
+        integral += hist.GetBinContent(bin) * hist.GetBinWidth(bin)
+    return integral
+
+def distance(hist, pt):
+    """Calculate minimum distance from a given point"""
+    dist = hist.GetXaxis().GetXmax()**2 + hist.GetYaxis().GetXmax()**2
+    for bin in xrange(1, hist.GetNbinsX()+1):
+        cpt = hist.GetBinCenter(bin), hist.GetBinContent(bin)
+        dist_t = (cpt[0]-pt[0])**2 + (cpt[1]-pt[1])**2
+        dist = dist_t if dist_t < dist else dist
+    return dist
+
 try:
     import numpy as np
 
