@@ -32,8 +32,9 @@ sessions = OrderedDict({
     'chitra_combi1/dsk_train_out.root': 'base + deco - Ds FD',
     'chitra_combi2/dsk_train_out.root': 'base + deco - bach IP #chi^{2}',
     'chitra_combi3/dsk_train_out.root': 'base + deco - B/D RFD',
-    'chitra_log/dsk_train_out.root': 'base + deco + log(IP #chi^{2}/p_{T})',
-    'chitra_log3/dsk_train_out.root': 'base + deco + log(IP #chi^{2})',
+    'chitra_log/dsk_train_out.root': 'base + deco + log(IP #chi^{2}/p_{T}) - RFD',
+    'chitra_loga/dsk_train_out.root': 'base + log(IP #chi^{2}/p_{T})',
+    'chitra_log3/dsk_train_out.root': 'base + deco + log(IP #chi^{2}) - RFD',
     'chitra_log3a/dsk_train_out.root': 'base + log(IP #chi^{2})',
     'chitra_max_diff/dsk_train_out.root': 'base + deco + log(IP #chi^{2}) + max p_{T} diff',
 })
