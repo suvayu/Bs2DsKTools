@@ -33,8 +33,6 @@ if not rfiles: sys.exit('Config parsing error.')
 rfileconf = rfiles[0]
 
 from config import classifiers, sessions
-# don't use adaptive boost
-del classifiers['BDTA']
 
 if clnameglob:
     # only process matching classifiers

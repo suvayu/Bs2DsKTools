@@ -3,7 +3,7 @@
 from collections import OrderedDict
 
 classifiers = OrderedDict({
-    'BDTA': 'BDT w/ adaptive boost',
+    # 'BDTA': 'BDT w/ adaptive boost',
     'BDTG': 'BDT w/ gradient boost',
     'BDTB': 'BDT w/ bagging'
 })
