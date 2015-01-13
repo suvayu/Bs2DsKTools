@@ -13,12 +13,14 @@ optparser.add_argument('--config', dest='yamlfile',
 optparser.add_argument('-r', dest='axis_range', type=float, default=0.6, help='Axis range')
 optparser.add_argument('-p', dest='doprint', action='store_true',
                        default=True, help='Print to png/pdf files')
-optparser.add_argument('-m', dest='usempl', action='store_true',
+optparser.add_argument('--mpl', dest='usempl', action='store_true',
                        default=False, help='Use Matplotlib')
 optparser.add_argument('-b', dest='batch', action='store_true',
                        default=False, help='Batch mode')
 optparser.add_argument('-c', dest='clnameglob', metavar='classifier',
                        default=None, help='Only plot matching classifiers (globs allowed)')
+optparser.add_argument('-m', dest='marks', action='store_true',
+                       help='Toggle markers')
 options = optparser.parse_args()
 locals().update(_import_args(options))
 
@@ -45,14 +47,15 @@ if batch: ROOT.gROOT.SetBatch(True)
 
 fnames = [f[0]['file'] for f in rfiles]
 
-def get_hists(classifiers, rfile, name):
+def get_hists(classifiers, rfile, name, marks):
     from ROOT import TFile, TTree, TProfile, TPolyMarker
     from numpy import linspace
     from array import array
     rfile = TFile.Open(rfile)
     tree = rfile.Get(name)
     sig, bkg = 'classID=={}'.format(0), 'classID=={}'.format(1)
-    hists, marks = {}, {}
+    hists = {}
+    marks = {} if marks else None
     for cl in classifiers:
         name = '{}_{}'.format(cl, rfile.GetName().split('/',1)[0])
         nsig = float(tree.GetEntries(sig))
@@ -62,35 +65,37 @@ def get_hists(classifiers, rfile, name):
         hist = TProfile('h_{}'.format(name), 'ROC curve ({})'.format(cl),
                         100, bins)
         hist.SetDirectory(0)    # otherwise current file owns histogram
-        xmark, ymark = array('f'), array('f')
+        if isinstance(marks, dict):
+            xmark, ymark = array('f'), array('f')
         for i, cut in enumerate(linspace(-1, 1, 1001)):
             cutstr = '{}>{}'.format(cl, cut)
             eff_s = tree.GetEntries('{}&&{}'.format(sig, cutstr))/nsig
             eff_b = 1 - tree.GetEntries('{}&&{}'.format(bkg, cutstr))/nbkg
             hist.Fill(eff_s, eff_b)
-            if cl == 'BDTB':
-                window = -0.3 <= cut and cut <= 0.3
-                step = not i % 10
-            else:
-                window = -0.9 <= cut and cut <= 0.9
-                step = not i % 50
-            if window and step:
-                xmark.append(eff_s)
-                ymark.append(eff_b)
-        marks[cl] = TPolyMarker(len(xmark), xmark, ymark)
+            if isinstance(marks, dict):
+                if cl == 'BDTB':
+                    window = -0.3 <= cut and cut <= 0.3
+                    step = not i % 10
+                else:
+                    window = -0.9 <= cut and cut <= 0.9
+                    step = not i % 50
+                if window and step:
+                    xmark.append(eff_s)
+                    ymark.append(eff_b)
         hists[cl] = hist
-        print '{}: {} marks'.format(cl, len(xmark))
-        for pt in zip(xmark, ymark): print pt,
-        print
+        if isinstance(marks, dict):
+            marks[cl] = TPolyMarker(len(xmark), xmark, ymark)
+            print '{}: {} marks'.format(cl, len(xmark))
+            for pt in zip(xmark, ymark): print pt,
+            print
     return hists, marks
 
 from utils import thn_print
-rocs, marks = [], []
+rocs, markers = [], []
 for i, rfileconf in enumerate(rfiles):
-    roc, mark = get_hists(classifiers, rfileconf[0]['file'], 'TestTree')
-    # map(lambda k: thn_print(roc[k]), roc)
+    roc, marks = get_hists(classifiers, rfileconf[0]['file'], 'TestTree', marks)
     rocs.append(roc)
-    marks.append(mark)
+    markers.append(marks)
 
 if usempl:                      # FIXME: no idea if it works
     # Matplotlib
@@ -146,7 +151,7 @@ else:
     from utils import H1Dintegral, distance
     for i, roc in enumerate(rocs):
         for cl, hist in roc.iteritems():
-            # metrics & zero cut markers
+            # metrics
             print '=> {}:: integral: {}, distance: {}'.format(
                 cl,
                 H1Dintegral(hist),
@@ -167,10 +172,11 @@ else:
                 hist.Draw('e')
             else:
                 hist.Draw('e same')
-            polymarker = marks[i][cl]
-            polymarker.SetMarkerStyle(ROOT.kFullCircle)
-            polymarker.SetMarkerColor(cols[coln])
-            polymarker.Draw()
+            if marks:
+                polymarker = markers[i][cl]
+                polymarker.SetMarkerStyle(ROOT.kFullCircle)
+                polymarker.SetMarkerColor(cols[coln])
+                polymarker.Draw()
             coln += 1           # next colour
 
     legend.Draw()
