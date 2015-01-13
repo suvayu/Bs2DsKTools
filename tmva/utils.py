@@ -201,7 +201,13 @@ try:
         if ybins == 1: shape = [xbins + 2]
         elif zbins == 1: shape = (xbins + 2, ybins + 2)
         else: shape = (xbins + 2, ybins + 2, zbins + 2)
-        val = np.array([val for val in hist]).reshape(*shape)
+        try:
+            from fixes import ROOT
+            from ROOT import TH1
+            if isinstance(hist, TH1):
+                val = np.array([val for val in hist]).reshape(*shape)
+        except ImportError as err:
+            val = np.array([val.value for val in hist]).reshape(*shape)
         return val
 
     def thn_print(hist):
