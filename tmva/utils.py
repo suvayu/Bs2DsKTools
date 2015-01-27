@@ -77,6 +77,43 @@ def pycopy(newobj_t, obj_t, obj, *args, **kwargs):
         newobj = None
     return newobj
 
+def th1fill(hist, dim=1):
+    """Return a TH1.Fill wrapper for use with map(..)."""
+    if 1 == dim:
+        fill = lambda i: hist.Fill(i)
+    elif 2 == dim:
+        fill = lambda i, j: hist.Fill(i, j)
+    elif 3 == dim:
+        fill = lambda i, j, k: hist.Fill(i, j, k)
+    else:
+        fill = None
+    return fill
+
+# Generic range scanning tools
+class Cut(object):
+    """Cut object"""
+    def __init__(self, val, var):
+        self.val, self.var = val, var
+        self.greater = '{}>={}'.format(var, val)
+        self.lesser = '{}<{}'.format(var, val)
+
+def crange(stops, var, tree):
+    """Generator of cuts for a given list of stops"""
+    for stop in stops:
+        yield Cut(stop, var)
+
+def scan_range(predicates, stops, var, tree):
+    """Create cuts at stops, and run predicates over given tree.
+
+       Returns the result in a nested list: [cut1_res, cut2_res, ...]
+       Where, cutn_res: [res1, res2, ...]]
+
+    """
+    res = []
+    for cut in crange(stops, var, tree):
+        res.append(map(lambda fn: fn(tree, cut), predicates))
+    return res
+
 # I/O tools
 def path2rootdir(path):
     """Read path string and return ROOT directory
