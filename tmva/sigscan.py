@@ -51,11 +51,11 @@ def get_sig(nevts1, nevts3, lo=5300, mid=5445, up=5800):
 from utils import scan_range
 
 nevts_passed = [
-    # lambda tree, cut: tree.GetEntries('{}&&{}'.format(sig, cut.greater)), # TMVA
-    # lambda tree, cut: tree.GetEntries('{}&&{}'.format(bkg, cut.greater))
-    lambda tree, cut: tree.GetEntries('{}&&{}'.format(region1, cut.greater)), # TMVA
-    lambda tree, cut: tree.GetEntries('{}&&{}'.format(region2, cut.greater)),
-    lambda tree, cut: tree.GetEntries('{}&&{}'.format(region3, cut.greater))
+    # lambda tree, cut: tree.GetEntries('{}&&{}'.format(sig, cut.greaterequal)), # TMVA
+    # lambda tree, cut: tree.GetEntries('{}&&{}'.format(bkg, cut.greaterequal))
+    lambda tree, cut: tree.GetEntries('{}&&{}'.format(region1, cut.greaterequal)), # TMVA
+    lambda tree, cut: tree.GetEntries('{}&&{}'.format(region2, cut.greaterequal)),
+    lambda tree, cut: tree.GetEntries('{}&&{}'.format(region3, cut.greaterequal))
 ]
 
 from numpy import linspace, array

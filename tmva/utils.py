@@ -94,8 +94,10 @@ class Cut(object):
     """Cut object"""
     def __init__(self, val, var):
         self.val, self.var = val, var
-        self.greater = '{}>={}'.format(var, val)
+        self.greater = '{}>{}'.format(var, val)
+        self.greaterequal = '{}>={}'.format(var, val)
         self.lesser = '{}<{}'.format(var, val)
+        self.lesserequal = '{}<={}'.format(var, val)
 
 def crange(stops, var, tree):
     """Generator of cuts for a given list of stops"""
