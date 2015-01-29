@@ -109,13 +109,17 @@ for var in variables:
         sel = Cut('{}{}{}'.format(classifier, '<=' if bkgeff else '>', cut))
         base = truthmatch & istmva
         hnumer = Hist(100, *plots[var][0])
+        hnumer.Sumw2()
         tree.Draw(var, selection = sel & base, hist = hnumer)
         hdenom = Hist(100, *plots[var][0])
+        hdenom.Sumw2()
         tree.Draw(var, selection = base, hist = hdenom)
         heff = hnumer.Clone('heff_{}_{}'.format(var, cut))
         heff.Reset('icesm')
         heff.SetTitle(sel.latex() + '...')
-        heff.Divide(hnumer, hdenom)
+        heff.Sumw2()
+        heff.Divide(hnumer, hdenom, 1, 1, 'B')
+
         # only offset bins with content
         for b in xrange(heff.GetXaxis().GetNbins()):
             content = heff.GetBinContent(b)
