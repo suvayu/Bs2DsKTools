@@ -231,25 +231,34 @@ def distance(hist, pt):
 try:
     import numpy as np
 
-    def thn2array(hist):
+    def thn2array(hist, err=False):
         """Convert ROOT histograms to numpy.array"""
         xbins = hist.GetNbinsX()
         ybins = hist.GetNbinsY()
         zbins = hist.GetNbinsZ()
         # add overflow, underflow bins
         if ybins == 1: shape = [xbins + 2]
-        elif zbins == 1: shape = (xbins + 2, ybins + 2)
-        else: shape = (xbins + 2, ybins + 2, zbins + 2)
+        elif zbins == 1: shape = [xbins + 2, ybins + 2]
+        else: shape = [xbins + 2, ybins + 2, zbins + 2]
+        if err: shape.append(2)
         # FIXME: isinstance doesn't work (same type, diff id(..))
         if str(type(hist)) == '<class \'rootpy.plotting.hist.Hist\'>':
-            val = np.array([val.value for val in hist]).reshape(*shape)
+            if err:
+                val = np.array([(val.value, val.error)
+                                for val in hist]).reshape(*shape)
+            else:
+                val = np.array([val.value for val in hist]).reshape(*shape)
         else:
-            val = np.array([val for val in hist]).reshape(*shape)
+            if err:
+                val = np.array([(hist.GetBinContent(i), hist.GetBinError(i))
+                                for i in xrange(len(hist))]).reshape(*shape)
+            else:
+                val = np.array([val for val in hist]).reshape(*shape)
         return val
 
-    def thn_print(hist):
+    def thn_print(hist, err=False):
         """Print ROOT histograms of any dimention"""
-        val = thn2array(hist)
+        val = thn2array(hist, err)
         print('Hist: {}, dim: {}'.format(hist.GetName(), len(np.shape(val))))
         hist.Print()
         print(np.flipud(val)) # flip y axis, FIXME: check what happens for 3D
@@ -261,8 +270,8 @@ except ImportError:
     msg += 'Unavailable functions: thn2array, thn_print.'
     warnings.warn(msg, ImportWarning)
 
-    def thn2array(hist):
+    def thn2array(hist, err):
         raise NotImplementedError('Not available without numpy')
 
-    def thn_print(hist):
+    def thn_print(hist, err):
         raise NotImplementedError('Not available without numpy')
