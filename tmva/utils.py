@@ -240,13 +240,11 @@ try:
         if ybins == 1: shape = [xbins + 2]
         elif zbins == 1: shape = (xbins + 2, ybins + 2)
         else: shape = (xbins + 2, ybins + 2, zbins + 2)
-        try:
-            from fixes import ROOT
-            from ROOT import TH1
-            if isinstance(hist, TH1):
-                val = np.array([val for val in hist]).reshape(*shape)
-        except ImportError as err:
+        # FIXME: isinstance doesn't work (same type, diff id(..))
+        if str(type(hist)) == '<class \'rootpy.plotting.hist.Hist\'>':
             val = np.array([val.value for val in hist]).reshape(*shape)
+        else:
+            val = np.array([val for val in hist]).reshape(*shape)
         return val
 
     def thn_print(hist):
