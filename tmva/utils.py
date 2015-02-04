@@ -261,7 +261,12 @@ try:
                 val = np.array([(hist.GetBinContent(i), hist.GetBinError(i))
                                 for i in xrange(len(hist))]).reshape(*shape)
             else:
-                val = np.array([val for val in hist]).reshape(*shape)
+                from ROOT import TProfile
+                if isinstance(hist, TProfile):
+                    val = np.array([hist.GetBinContent(i)
+                                    for i in xrange(len(hist))]).reshape(*shape)
+                else:
+                    val = np.array([val for val in hist]).reshape(*shape)
         return val
 
     def thn_print(hist, err=False, pair=False):
