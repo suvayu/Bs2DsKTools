@@ -135,10 +135,17 @@ def scan_range(predicates, stops, var, tree, plotvar=''):
        Returns the result in a nested list: [cut1_res, cut2_res, ...]
        Where, cutn_res: [res1, res2, ...]]
 
+       When only one predicate is applied during the loop, simplify
+       the output to return a simple list (no nesting).
+
     """
+    from collections import Iterable
+    if not isinstance(predicates, Iterable): predicates = [predicates]
     res = []
     for cut in crange(stops, var, tree, plotvar):
-        res.append(map(lambda fn: fn(tree, cut), predicates))
+        res_i = map(lambda fn: fn(tree, cut), predicates)
+        if len(res_i) == 1: res.append(res_i[0])
+        else: res.append(res_i)
     return res
 
 def make_varefffn(hist, refcut):
