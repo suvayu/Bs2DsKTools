@@ -27,6 +27,14 @@ def _import_args(namespace, d = {}):
     return d
 
 # plotting tools
+def colours(num, default=1):    # 1 == ROOT.kBlack
+    from fixes import ROOT
+    cols = [ROOT.kAzure, ROOT.kRed, ROOT.kGreen, ROOT.kBlack]
+    try:
+        return cols[num]
+    except IndexError:
+        return default
+
 def get_label(string):
     """Get label from variable names."""
     # NOTE: Do not remove leading/trailing spaces in replacement strings
