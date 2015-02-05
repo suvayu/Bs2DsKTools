@@ -141,6 +141,26 @@ def scan_range(predicates, stops, var, tree, plotvar=''):
         res.append(map(lambda fn: fn(tree, cut), predicates))
     return res
 
+def make_varefffn(hist, refcut):
+    """Return a function to pass to scan_range.
+
+       The returned function does a histogram based efficiency
+       calculation for given plotvar.
+
+         cuts, plotvar → efficiency histograms
+
+    """
+    def efffn(tree, cut):
+        hnumer = th1clonereset(hist, 'hnumer')
+        hdenom = th1clonereset(hist, 'hdenom')
+        heff = th1clonereset(hist, 'heff_{}_{}'.format(cut.plotvar, cut.val))
+        tree.Draw('{}>>hnumer'.format(cut.plotvar),
+                  '{}&&{}'.format(refcut, cut.greaterequal))
+        tree.Draw('{}>>{}'.format(cut.plotvar, hdenom.GetName()), refcut)
+        heff.Divide(hnumer, hdenom, 1, 1, 'B')
+        return heff
+    return efffn
+
 # I/O tools
 def path2rootdir(path):
     """Read path string and return ROOT directory
