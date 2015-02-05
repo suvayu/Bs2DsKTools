@@ -261,8 +261,8 @@ try:
                 val = np.array([(hist.GetBinContent(i), hist.GetBinError(i))
                                 for i in xrange(len(hist))]).reshape(*shape)
             else:
-                from ROOT import TProfile
-                if isinstance(hist, TProfile):
+                from fixes import ROOT
+                if isinstance(hist, ROOT.TProfile):
                     val = np.array([hist.GetBinContent(i)
                                     for i in xrange(len(hist))]).reshape(*shape)
                 else:
