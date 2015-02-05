@@ -107,6 +107,13 @@ def th1offset(hist, offset):
         if content != 0.: hist.SetBinContent(b, content+offset)
     return hist
 
+def th1clonereset(hist, name):
+    """Clone and reset ROOT histogram"""
+    res = hist.Clone(name)
+    res.Reset('icesm')
+    res.Sumw2()
+    return res
+
 # Generic range scanning tools
 class Cut(object):
     """Cut object"""
