@@ -48,6 +48,7 @@ optparser.add_argument('-b', dest='batch', action='store_true', help='Batch mode
 options = optparser.parse_args()
 locals().update(_import_args(options))
 
+# option consistency checks
 errmsg = 'Incompatible options: {}.'
 import sys
 if (bkgeff or istmva) and truthmatch:
@@ -57,22 +58,19 @@ if istmva and session:
 if bool(session) != bool(conf):
     sys.exit(errmsg.format('both session and conf should be present, or not'))
 
-from rootpy import QROOT
-from ROOT import gROOT
-gROOT.SetBatch(batch)
-from ROOT import gPad
+# batch mode
+from fixes import ROOT
+ROOT.gROOT.SetBatch(batch)
 
-from rootpy.io import File, root_open
-from rootpy.tree import Tree, Cut
-from rootpy.plotting import Hist, Canvas
 
-# signal and background trees
+## read signal and background trees, define cuts
+from ROOT import TFile
 if istmva:             # TMVA output
-    rfile = root_open(filename, 'read')
+    rfile = TFile.Open(filename, 'read')
     tree = rfile.Get(tree)
-    istmva = Cut('classID=={}'.format(int(bkgeff)))
+    istmva = 'classID=={}'.format(int(bkgeff))
 else:
-    rfile = root_open(filename, 'read')
+    rfile = TFile.Open(filename, 'read')
     tree = rfile.Get(tree)
     from tmvaconfig import ConfigFile
     conf = ConfigFile(conf)
@@ -80,66 +78,55 @@ else:
         session = conf.get_session_config(session)
     else:
         sys.exit('No sesions found!')
-    istmva = Cut(str(session.cut_bkg if bkgeff else session.cut_sig))
+    istmva = str(session.cut_bkg if bkgeff else session.cut_sig)
 
 # common cuts
-truthmatch = Cut('fabs(lab0_TRUEID) == 531') if truthmatch else Cut('')
-# different colour for each cut
-mva_cuts = [0.1*i for i in intervals]
-def colours(num, default='black'):
-    cols = ['blue', 'red', 'green', 'black']
-    try:
-        return cols[num]
-    except IndexError:
-        return default
+truthmatch = 'abs(lab0_TRUEID) == 531' if truthmatch else ''
+refcut = '{}&&{}'.format(truthmatch, istmva)
 
-# store histograms as value
-variables = {'time': [], 'terr': [], 'lab0_MM': []}
-plots = {
-    'time': [(0, 17), 'time [ps]'],
-    'terr': [(0, 0.18), 'time error ($\delta t$) [ps]'],
-    'lab0_MM': [(4600, 5800), r'$B_{s}$ mass [MeV]']
+# classifier cuts
+mva_cuts = [0.1*i for i in intervals]
+
+# per-variable efficiency histograms, ranges, and titles
+variables = {
+    # var : [histograms, var-range, matplotlib title, ROOT title]
+    'time': [[], (0, 17), 'time [ps]', 'time [ps]'],
+    'terr': [[], (0, 0.18), 'time error ($\delta t$) [ps]', 'time error (#delta t) [ps]'],
+    'lab0_MM': [[], (4600, 5800), r'$B_{s}$ mass [MeV]', 'B_{s} mass [MeV]']
 }
 
 
 ## make efficiency histograms
-tmp = Canvas(400, 400)          # temporary canvas
+from ROOT import TH1D, TCanvas
+tmp = TCanvas('c', '', 400, 400)          # temporary canvas
+from utils import scan_range, th1offset, make_varefffn, colours
 for var in variables:
-    for j, cut in enumerate(mva_cuts):
-        sel = Cut('{}{}{}'.format(classifier, '<=' if bkgeff else '>', cut))
-        base = truthmatch & istmva
-        hnumer = Hist(100, *plots[var][0])
-        hnumer.Sumw2()
-        tree.Draw(var, selection = sel & base, hist = hnumer)
-        hdenom = Hist(100, *plots[var][0])
-        hdenom.Sumw2()
-        tree.Draw(var, selection = base, hist = hdenom)
-        heff = hnumer.Clone('heff_{}_{}'.format(var, cut))
-        heff.Reset('icesm')
-        heff.SetTitle(sel.latex() + '...')
-        heff.Sumw2()
-        heff.Divide(hnumer, hdenom, 1, 1, 'B')
+    htemp = TH1D('htemp', '', 100, *variables[var][1])
+    # iterates over mva_cuts, returns list of efficiency histograms
+    variables[var][0] = scan_range(make_varefffn(htemp, refcut),
+                                   mva_cuts, classifier, tree, var)
+    del htemp
 
-        # only offset bins with content
-        for b in xrange(heff.GetXaxis().GetNbins()):
-            content = heff.GetBinContent(b)
-            if content != 0.: heff.SetBinContent(b, content+j)
-
-        # aesthetics
-        heff.linecolor = colours(j)
-        heff.markercolor = colours(j)
-        heff.markersize = 0.2
-        heff.SetMaximum(6)
+    # aesthetics
+    for j in xrange(len(mva_cuts)):
+        heff = variables[var][0][j]
+        if j > 0: th1offset(heff, j)
+        heff.SetYTitle('Efficiency')
+        heff.SetXTitle(variables[var][3])
+        heff.SetLineColor(colours(j))
+        heff.SetMarkerColor(colours(j))
+        heff.SetMarkerSize(0.2)
+        heff.SetMaximum(3.5)
         heff.SetMinimum(0)
         heff.SetStats(False)
-        variables[var].append(heff)
 del tmp
 
 
 ## Plots
 if backend == 'root':           # ROOT
-    canvas = Canvas(400, 400, 500, 10)
+    canvas = TCanvas('canvas', '', 800, 550)
     for var, histos in variables.iteritems():
+        histos = histos[0]      # drop metadata
         for k, cut in enumerate(mva_cuts):
             opts = 'e1' if k == 0 else 'e1 same'
             histos[k].Draw(opts)
@@ -171,6 +158,7 @@ else:                           # Matplotlib
 
     # Plots
     for var, histos in variables.iteritems():
+        histos = histos[0]      # drop metadata
         fig = plt.figure(var)                # one figure per variable
         axes = fig.add_subplot(111)          # row, col, id (121+j, when plotting both)
         axes.grid(axis='y')
