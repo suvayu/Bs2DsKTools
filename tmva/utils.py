@@ -92,19 +92,19 @@ def th1fill(hist, dim=1):
 # Generic range scanning tools
 class Cut(object):
     """Cut object"""
-    def __init__(self, val, var):
-        self.val, self.var = val, var
+    def __init__(self, val, var, plotvar):
+        self.val, self.var, self.plotvar = val, var, plotvar
         self.greater = '{}>{}'.format(var, val)
         self.greaterequal = '{}>={}'.format(var, val)
         self.lesser = '{}<{}'.format(var, val)
         self.lesserequal = '{}<={}'.format(var, val)
 
-def crange(stops, var, tree):
+def crange(stops, var, tree, plotvar):
     """Generator of cuts for a given list of stops"""
     for stop in stops:
-        yield Cut(stop, var)
+        yield Cut(stop, var, plotvar)
 
-def scan_range(predicates, stops, var, tree):
+def scan_range(predicates, stops, var, tree, plotvar=''):
     """Create cuts at stops, and run predicates over given tree.
 
        Returns the result in a nested list: [cut1_res, cut2_res, ...]
@@ -112,7 +112,7 @@ def scan_range(predicates, stops, var, tree):
 
     """
     res = []
-    for cut in crange(stops, var, tree):
+    for cut in crange(stops, var, tree, plotvar):
         res.append(map(lambda fn: fn(tree, cut), predicates))
     return res
 
