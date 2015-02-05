@@ -77,6 +77,7 @@ def pycopy(newobj_t, obj_t, obj, *args, **kwargs):
         newobj = None
     return newobj
 
+# ROOT utilities
 def th1fill(hist, dim=1):
     """Return a TH1.Fill wrapper for use with map(..)."""
     if 1 == dim:
@@ -88,6 +89,15 @@ def th1fill(hist, dim=1):
     else:
         fill = None
     return fill
+
+def th1offset(hist, offset):
+    """Offset non-empty histogram bins"""
+    # only offset bins with content
+    for b in xrange(hist.GetXaxis().GetNbins()):
+        content = hist.GetBinContent(b)
+        # FIXME: shouldn't work'
+        if content != 0.: hist.SetBinContent(b, content+offset)
+    return hist
 
 # Generic range scanning tools
 class Cut(object):
