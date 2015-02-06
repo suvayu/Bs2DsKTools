@@ -327,7 +327,7 @@ try:
         if pair: return val
         else: return val.transpose()
 
-    def thn_print(hist, err=False, asym=False, pair=False, shaped=True):
+    def thnprint(hist, err=False, asym=False, pair=False, shaped=True):
         """Print ROOT histograms of any dimention"""
         val = thn2array(hist, err=err, asym=asym, pair=pair, shaped=shaped)
         print('Hist: {}, dim: {}'.format(hist.GetName(), len(np.shape(val))))
@@ -338,11 +338,11 @@ except ImportError:
     import warnings
     # warnings.simplefilter('always')
     msg = 'Could not import numpy.\n'
-    msg += 'Unavailable functions: thn2array, thn_print.'
+    msg += 'Unavailable functions: thn2array, thnprint.'
     warnings.warn(msg, ImportWarning)
 
-    def thn2array(hist, err, pair):
+    def thn2array(hist, err, asym, pair, shaped):
         raise NotImplementedError('Not available without numpy')
 
-    def thn_print(hist, err, pair):
+    def thnprint(hist, err, asym, pair, shaped):
         raise NotImplementedError('Not available without numpy')
