@@ -317,16 +317,8 @@ try:
         elif zbins == 1: shape = [xbins + 2, ybins + 2]
         else: shape = [xbins + 2, ybins + 2, zbins + 2]
         if err: shape.append(3 if asym else 2)
-        # FIXME: isinstance doesn't work (same type, diff id(..))
-        if str(type(hist)) == '<class \'rootpy.plotting.hist.Hist\'>':
-            if err:             # FIXME: doesn't handle asymmetric errors
-                val = np.array([(val.value, val.error)
-                                for val in hist]).reshape(*shape)
-            else:
-                val = np.array([val.value for val in hist]).reshape(*shape)
-        else:
-            val = np.array([th1bincontent(hist, i, err, asym)
-                            for i in xrange(len(hist))]).reshape(*shape)
+        val = np.array([th1bincontent(hist, i, err, asym)
+                        for i in xrange(len(hist))]).reshape(*shape)
         if pair: return val
         else: return val.transpose()
 
