@@ -148,13 +148,13 @@ else:
     legend.SetFillStyle(0)
     ROOT.gStyle.SetOptStat(False)
 
-    from utils import H1Dintegral, distance
+    from utils import th1integral, distance
     for i, roc in enumerate(rocs):
         for cl, hist in roc.iteritems():
             # metrics
             print '=> {}:: integral: {}, distance: {}'.format(
                 cl,
-                H1Dintegral(hist),
+                th1integral(hist),
                 distance(hist, (1,1))
             )
             hist.SetLineStyle(i+1)

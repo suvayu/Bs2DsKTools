@@ -89,7 +89,7 @@ def th1bincentre(hist, i, edges=False):
     else:
         return centre
 
-def H1Dintegral(hist):
+def th1integral(hist):
     """Return integral of 1D histogram (exclude overflow & underflow)"""
     integral = 0.0
     for bin in xrange(1, hist.GetNbinsX()+1):
