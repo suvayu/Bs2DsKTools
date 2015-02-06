@@ -300,7 +300,7 @@ def distance(hist, pt):
 try:
     import numpy as np
 
-    def thn2array(hist, err=False, asym=False, pair=False):
+    def thn2array(hist, err=False, asym=False, pair=False, shaped=False):
         """Convert ROOT histograms to numpy.array
 
            hist -- histogram to convert
@@ -308,23 +308,28 @@ try:
            asym -- Asymmetric errors
            pair -- pair bin errors with bin content, by default errors
                    are put in a similarly shaped array in res[1]
+         shaped -- return an array with appropriate dimensions, 1-D
+                   array is returned normally
         """
-        xbins = hist.GetNbinsX()
-        ybins = hist.GetNbinsY()
-        zbins = hist.GetNbinsZ()
-        # add overflow, underflow bins
-        if ybins == 1: shape = [xbins + 2]
-        elif zbins == 1: shape = [xbins + 2, ybins + 2]
-        else: shape = [xbins + 2, ybins + 2, zbins + 2]
+        if shaped:
+            xbins = hist.GetNbinsX()
+            ybins = hist.GetNbinsY()
+            zbins = hist.GetNbinsZ()
+            # add overflow, underflow bins
+            if ybins == 1: shape = [xbins + 2]
+            elif zbins == 1: shape = [xbins + 2, ybins + 2]
+            else: shape = [xbins + 2, ybins + 2, zbins + 2]
+        else:
+            shape = [len(hist)]
         if err: shape.append(3 if asym else 2)
         val = np.array([th1bincontent(hist, i, err, asym)
                         for i in xrange(len(hist))]).reshape(*shape)
         if pair: return val
         else: return val.transpose()
 
-    def thn_print(hist, err=False, asym=False, pair=False):
+    def thn_print(hist, err=False, asym=False, pair=False, shaped=True):
         """Print ROOT histograms of any dimention"""
-        val = thn2array(hist, err=err, asym=asym, pair=pair)
+        val = thn2array(hist, err=err, asym=asym, pair=pair, shaped=shaped)
         print('Hist: {}, dim: {}'.format(hist.GetName(), len(np.shape(val))))
         hist.Print()
         print(np.flipud(val)) # flip y axis, FIXME: check what happens for 3D
