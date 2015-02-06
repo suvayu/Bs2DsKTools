@@ -300,11 +300,12 @@ def distance(hist, pt):
 try:
     import numpy as np
 
-    def thn2array(hist, err=False, pair=False):
+    def thn2array(hist, err=False, asym=False, pair=False):
         """Convert ROOT histograms to numpy.array
 
            hist -- histogram to convert
            err  -- include bin errors
+           asym -- Asymmetric errors
            pair -- pair bin errors with bin content, by default errors
                    are put in a similarly shaped array in res[1]
         """
@@ -315,32 +316,23 @@ try:
         if ybins == 1: shape = [xbins + 2]
         elif zbins == 1: shape = [xbins + 2, ybins + 2]
         else: shape = [xbins + 2, ybins + 2, zbins + 2]
-        if err:
-            if pair: shape.append(2)
-            else: shape.insert(0, 2)
+        if err: shape.append(3 if asym else 2)
         # FIXME: isinstance doesn't work (same type, diff id(..))
         if str(type(hist)) == '<class \'rootpy.plotting.hist.Hist\'>':
-            if err:
+            if err:             # FIXME: doesn't handle asymmetric errors
                 val = np.array([(val.value, val.error)
                                 for val in hist]).reshape(*shape)
             else:
                 val = np.array([val.value for val in hist]).reshape(*shape)
         else:
-            if err:
-                val = np.array([(hist.GetBinContent(i), hist.GetBinError(i))
-                                for i in xrange(len(hist))]).reshape(*shape)
-            else:
-                from fixes import ROOT
-                if isinstance(hist, ROOT.TProfile):
-                    val = np.array([hist.GetBinContent(i)
-                                    for i in xrange(len(hist))]).reshape(*shape)
-                else:
-                    val = np.array([val for val in hist]).reshape(*shape)
-        return val
+            val = np.array([th1bincontent(hist, i, err, asym)
+                            for i in xrange(len(hist))]).reshape(*shape)
+        if pair: return val
+        else: return val.transpose()
 
-    def thn_print(hist, err=False, pair=False):
+    def thn_print(hist, err=False, asym=False, pair=False):
         """Print ROOT histograms of any dimention"""
-        val = thn2array(hist, err, pair)
+        val = thn2array(hist, err=err, asym=asym, pair=pair)
         print('Hist: {}, dim: {}'.format(hist.GetName(), len(np.shape(val))))
         hist.Print()
         print(np.flipud(val)) # flip y axis, FIXME: check what happens for 3D
