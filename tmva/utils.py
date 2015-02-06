@@ -1,7 +1,7 @@
 # coding=utf-8
 """Utilities"""
 
-# argument parsing tools
+## argument parsing tools
 from argparse import (ArgumentDefaultsHelpFormatter,
                       RawDescriptionHelpFormatter)
 class RawArgDefaultFormatter(ArgumentDefaultsHelpFormatter,
@@ -26,66 +26,8 @@ def _import_args(namespace, d = {}):
         d[attr] = getattr(namespace, attr)
     return d
 
-# plotting tools
-def colours(num, default=1):    # 1 == ROOT.kBlack
-    from fixes import ROOT
-    cols = [ROOT.kAzure, ROOT.kRed, ROOT.kGreen, ROOT.kBlack]
-    try:
-        return cols[num]
-    except IndexError:
-        return default
 
-def get_label(string):
-    """Get label from variable names."""
-    # NOTE: Do not remove leading/trailing spaces in replacement strings
-    # special cases
-    string = string.replace('lab345_MIN_PT', 'min D child trk p_{T}')
-    string = string.replace('lab345_MIN_IPCHI2_OWNPV', 'min D child trk #chi^{2}')
-    string = string.replace('lab1345_TRACK_GhostProb', 'max ghost trk prob')
-    # LHCb tuple prefixes
-    string = string.replace('lab0_', 'B ')
-    string = string.replace('lab1_', 'bach ')
-    string = string.replace('lab2_', 'D ')
-    string = string.replace('lab3_', 'D child 1 ')
-    string = string.replace('lab4_', 'D child 2 ')
-    string = string.replace('lab5_', 'D child 3 ')
-    # variables
-    string = string.replace('_OWNPV', '')
-    string = string.replace('PT', 'p_{T}')
-    string = string.replace('MINIPCHI2', 'min IP #chi^{2}')
-    string = string.replace('IPCHI2', 'IP #chi^{2}')
-    string = string.replace('VCHI2NDOF', 'vtx #chi^{2}/ndof')
-    string = string.replace('TAU', 'decay time')
-    string = string.replace('ERR', ' error')
-    return string
-
-# ROOT -> rootpy tools
-def hist_info(hist):
-    """Return histogram info for using with rootpy"""
-    metainfo = {'name': hist.GetName(), 'title': hist.GetTitle()}
-    metainfo['type'] = hist.ClassName()[-1]
-    dim = hist.GetDimension()
-    # FIXME: only for 1D
-    nbinsx = hist.GetNbinsX()
-    axis = hist.GetXaxis()
-    xmin = axis.GetXmin()
-    xmax = axis.GetXmax()
-    return (nbinsx, xmin, xmax), metainfo
-
-def pycopy(newobj_t, obj_t, obj, *args, **kwargs):
-    """Act as copy constructor for any object.
-
-    Caution: nasty hack, use at your own peril
-
-    """
-    if isinstance(obj, obj_t):
-        newobj = newobj_t(*args, **kwargs)
-        newobj.__dict__.update(obj.__dict__)
-    else:
-        newobj = None
-    return newobj
-
-# ROOT utilities
+## ROOT utilities
 def th1fill(hist, dim=1):
     """Return a TH1.Fill wrapper for use with map(..)."""
     if 1 == dim:
@@ -147,6 +89,83 @@ def th1bincentre(hist, i, edges=False):
     else:
         return centre
 
+def H1Dintegral(hist):
+    """Return integral of 1D histogram (exclude overflow & underflow)"""
+    integral = 0.0
+    for bin in xrange(1, hist.GetNbinsX()+1):
+        integral += hist.GetBinContent(bin) * hist.GetBinWidth(bin)
+    return integral
+
+def distance(hist, pt):
+    """Calculate minimum distance from a given point"""
+    dist = hist.GetXaxis().GetXmax()**2 + hist.GetYaxis().GetXmax()**2
+    for bin in xrange(1, hist.GetNbinsX()+1):
+        cpt = hist.GetBinCenter(bin), hist.GetBinContent(bin)
+        dist_t = (cpt[0]-pt[0])**2 + (cpt[1]-pt[1])**2
+        dist = dist_t if dist_t < dist else dist
+    return dist
+
+# Numpy based utilities
+try:
+    import numpy as np
+
+    def thn2array(hist, err=False, asym=False, pair=False, shaped=False):
+        """Convert ROOT histograms to numpy.array
+
+           hist -- histogram to convert
+           err  -- include bin errors
+           asym -- Asymmetric errors
+           pair -- pair bin errors with bin content, by default errors
+                   are put in a similarly shaped array in res[1]
+         shaped -- return an array with appropriate dimensions, 1-D
+                   array is returned normally
+        """
+        if shaped:
+            xbins = hist.GetNbinsX()
+            ybins = hist.GetNbinsY()
+            zbins = hist.GetNbinsZ()
+            # add overflow, underflow bins
+            if ybins == 1: shape = [xbins + 2]
+            elif zbins == 1: shape = [xbins + 2, ybins + 2]
+            else: shape = [xbins + 2, ybins + 2, zbins + 2]
+        else:
+            shape = [len(hist)]
+        if err: shape.append(3 if asym else 2)
+        val = np.array([th1bincontent(hist, i, err, asym)
+                        for i in xrange(len(hist))]).reshape(*shape)
+        if pair: return val
+        else: return val.transpose()
+
+    def thnbins(hist, edges=False, pair=False):
+        """Return histogram bin centre or edges"""
+        val = np.array([th1bincentre(hist, i, edges)
+                        for i in xrange(len(hist))])
+        if pair: return val
+        else: return val.transpose()
+
+    def thnprint(hist, err=False, asym=False, pair=False, shaped=True):
+        """Print ROOT histograms of any dimention"""
+        val = thn2array(hist, err=err, asym=asym, pair=pair, shaped=shaped)
+        print('Hist: {}, dim: {}'.format(hist.GetName(), len(np.shape(val))))
+        hist.Print()
+        print(np.flipud(val)) # flip y axis, FIXME: check what happens for 3D
+
+except ImportError:
+    import warnings
+    # warnings.simplefilter('always')
+    msg = 'Could not import numpy.\n'
+    msg += 'Unavailable functions: thn2array, thnbins, thnprint.'
+    warnings.warn(msg, ImportWarning)
+
+    def thn2array(hist, err, asym, pair, shaped):
+        raise NotImplementedError('Not available without numpy')
+
+    def thnbins(hist, edges, pair):
+        raise NotImplementedError('Not available without numpy')
+
+    def thnprint(hist, err, asym, pair, shaped):
+        raise NotImplementedError('Not available without numpy')
+
 # Generic range scanning tools
 class Cut(object):
     """Cut object"""
@@ -201,7 +220,68 @@ def make_varefffn(hist, refcut):
         return heff
     return efffn
 
-# I/O tools
+# plotting tools
+def colours(num, default=1):    # 1 == ROOT.kBlack
+    from fixes import ROOT
+    cols = [ROOT.kAzure, ROOT.kRed, ROOT.kGreen, ROOT.kBlack]
+    try:
+        return cols[num]
+    except IndexError:
+        return default
+
+def get_label(string):
+    """Get label from variable names."""
+    # NOTE: Do not remove leading/trailing spaces in replacement strings
+    # special cases
+    string = string.replace('lab345_MIN_PT', 'min D child trk p_{T}')
+    string = string.replace('lab345_MIN_IPCHI2_OWNPV', 'min D child trk #chi^{2}')
+    string = string.replace('lab1345_TRACK_GhostProb', 'max ghost trk prob')
+    # LHCb tuple prefixes
+    string = string.replace('lab0_', 'B ')
+    string = string.replace('lab1_', 'bach ')
+    string = string.replace('lab2_', 'D ')
+    string = string.replace('lab3_', 'D child 1 ')
+    string = string.replace('lab4_', 'D child 2 ')
+    string = string.replace('lab5_', 'D child 3 ')
+    # variables
+    string = string.replace('_OWNPV', '')
+    string = string.replace('PT', 'p_{T}')
+    string = string.replace('MINIPCHI2', 'min IP #chi^{2}')
+    string = string.replace('IPCHI2', 'IP #chi^{2}')
+    string = string.replace('VCHI2NDOF', 'vtx #chi^{2}/ndof')
+    string = string.replace('TAU', 'decay time')
+    string = string.replace('ERR', ' error')
+    return string
+
+
+## ROOT -> rootpy tools
+def hist_info(hist):
+    """Return histogram info for using with rootpy"""
+    metainfo = {'name': hist.GetName(), 'title': hist.GetTitle()}
+    metainfo['type'] = hist.ClassName()[-1]
+    dim = hist.GetDimension()
+    # FIXME: only for 1D
+    nbinsx = hist.GetNbinsX()
+    axis = hist.GetXaxis()
+    xmin = axis.GetXmin()
+    xmax = axis.GetXmax()
+    return (nbinsx, xmin, xmax), metainfo
+
+def pycopy(newobj_t, obj_t, obj, *args, **kwargs):
+    """Act as copy constructor for any object.
+
+    Caution: nasty hack, use at your own peril
+
+    """
+    if isinstance(obj, obj_t):
+        newobj = newobj_t(*args, **kwargs)
+        newobj.__dict__.update(obj.__dict__)
+    else:
+        newobj = None
+    return newobj
+
+
+## I/O tools
 def path2rootdir(path):
     """Read path string and return ROOT directory
 
@@ -295,80 +375,3 @@ def get_hists(yaml_keys, conf, tool, robj_t = None, robj_p = None):
         except KeyError as err:
             if str(err) != '\'key\'': raise
     return hists
-
-# ROOT utils
-def H1Dintegral(hist):
-    """Return integral of 1D histogram (exclude overflow & underflow)"""
-    integral = 0.0
-    for bin in xrange(1, hist.GetNbinsX()+1):
-        integral += hist.GetBinContent(bin) * hist.GetBinWidth(bin)
-    return integral
-
-def distance(hist, pt):
-    """Calculate minimum distance from a given point"""
-    dist = hist.GetXaxis().GetXmax()**2 + hist.GetYaxis().GetXmax()**2
-    for bin in xrange(1, hist.GetNbinsX()+1):
-        cpt = hist.GetBinCenter(bin), hist.GetBinContent(bin)
-        dist_t = (cpt[0]-pt[0])**2 + (cpt[1]-pt[1])**2
-        dist = dist_t if dist_t < dist else dist
-    return dist
-
-try:
-    import numpy as np
-
-    def thn2array(hist, err=False, asym=False, pair=False, shaped=False):
-        """Convert ROOT histograms to numpy.array
-
-           hist -- histogram to convert
-           err  -- include bin errors
-           asym -- Asymmetric errors
-           pair -- pair bin errors with bin content, by default errors
-                   are put in a similarly shaped array in res[1]
-         shaped -- return an array with appropriate dimensions, 1-D
-                   array is returned normally
-        """
-        if shaped:
-            xbins = hist.GetNbinsX()
-            ybins = hist.GetNbinsY()
-            zbins = hist.GetNbinsZ()
-            # add overflow, underflow bins
-            if ybins == 1: shape = [xbins + 2]
-            elif zbins == 1: shape = [xbins + 2, ybins + 2]
-            else: shape = [xbins + 2, ybins + 2, zbins + 2]
-        else:
-            shape = [len(hist)]
-        if err: shape.append(3 if asym else 2)
-        val = np.array([th1bincontent(hist, i, err, asym)
-                        for i in xrange(len(hist))]).reshape(*shape)
-        if pair: return val
-        else: return val.transpose()
-
-    def thnbins(hist, edges=False, pair=False):
-        """Return histogram bin centre or edges"""
-        val = np.array([th1bincentre(hist, i, edges)
-                        for i in xrange(len(hist))])
-        if pair: return val
-        else: return val.transpose()
-
-    def thnprint(hist, err=False, asym=False, pair=False, shaped=True):
-        """Print ROOT histograms of any dimention"""
-        val = thn2array(hist, err=err, asym=asym, pair=pair, shaped=shaped)
-        print('Hist: {}, dim: {}'.format(hist.GetName(), len(np.shape(val))))
-        hist.Print()
-        print(np.flipud(val)) # flip y axis, FIXME: check what happens for 3D
-
-except ImportError:
-    import warnings
-    # warnings.simplefilter('always')
-    msg = 'Could not import numpy.\n'
-    msg += 'Unavailable functions: thn2array, thnbins, thnprint.'
-    warnings.warn(msg, ImportWarning)
-
-    def thn2array(hist, err, asym, pair, shaped):
-        raise NotImplementedError('Not available without numpy')
-
-    def thnbins(hist, edges, pair):
-        raise NotImplementedError('Not available without numpy')
-
-    def thnprint(hist, err, asym, pair, shaped):
-        raise NotImplementedError('Not available without numpy')
