@@ -114,6 +114,23 @@ def th1clonereset(hist, name):
     res.Sumw2()
     return res
 
+def th1bincontent(hist, i, err=False, asym=False):
+    """Get histogram bin content.
+
+       hist -- histogram
+       i    -- bin number
+       err  -- also return error
+       asym -- return asymmetric error
+
+    """
+    content = hist.GetBinContent(i)
+    if err and asym:
+        return (content, hist.GetBinErrorUp(i), hist.GetBinErrorLow(i))
+    elif err:
+        return (content, hist.GetBinError(i))
+    else:
+        return content
+
 # Generic range scanning tools
 class Cut(object):
     """Cut object"""
