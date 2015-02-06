@@ -131,6 +131,22 @@ def th1bincontent(hist, i, err=False, asym=False):
     else:
         return content
 
+def th1bincentre(hist, i, edges=False):
+    """Get histogram bin centre.
+
+       hist  -- histogram
+       i     -- bin number
+       edges -- also return bin edges
+
+    """
+    centre = hist.GetBinCenter(i)
+    if edges:
+        lo = hist.GetBinLowEdge(i)
+        hi = lo + hist.GetBinWidth(i)
+        return (centre, lo, hi)
+    else:
+        return centre
+
 # Generic range scanning tools
 class Cut(object):
     """Cut object"""
@@ -327,6 +343,13 @@ try:
         if pair: return val
         else: return val.transpose()
 
+    def thnbins(hist, edges=False, pair=False):
+        """Return histogram bin centre or edges"""
+        val = np.array([th1bincentre(hist, i, edges)
+                        for i in xrange(len(hist))])
+        if pair: return val
+        else: return val.transpose()
+
     def thnprint(hist, err=False, asym=False, pair=False, shaped=True):
         """Print ROOT histograms of any dimention"""
         val = thn2array(hist, err=err, asym=asym, pair=pair, shaped=shaped)
@@ -338,10 +361,13 @@ except ImportError:
     import warnings
     # warnings.simplefilter('always')
     msg = 'Could not import numpy.\n'
-    msg += 'Unavailable functions: thn2array, thnprint.'
+    msg += 'Unavailable functions: thn2array, thnbins, thnprint.'
     warnings.warn(msg, ImportWarning)
 
     def thn2array(hist, err, asym, pair, shaped):
+        raise NotImplementedError('Not available without numpy')
+
+    def thnbins(hist, edges, pair):
         raise NotImplementedError('Not available without numpy')
 
     def thnprint(hist, err, asym, pair, shaped):
