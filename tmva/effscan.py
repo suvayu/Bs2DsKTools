@@ -90,9 +90,9 @@ mva_cuts = [0.1*i for i in intervals]
 # per-variable efficiency histograms, ranges, and titles
 variables = {
     # var : [histograms, var-range, matplotlib title, ROOT title]
-    'time': [[], (0, 17), 'time [ps]', 'time [ps]'],
-    'terr': [[], (0, 0.18), 'time error ($\delta t$) [ps]', 'time error (#delta t) [ps]'],
-    'lab0_MM': [[], (4600, 5800), r'$B_{s}$ mass [MeV]', 'B_{s} mass [MeV]']
+    'time': [[], (0, 15), 'time [ps]', 'time [ps]'],
+    'terr': [[], (0, 0.12), 'time error ($\delta t$) [ps]', 'time error (#delta t) [ps]'],
+    'lab0_MM': [[], (4700, 5700), r'$B_{s}$ mass [MeV]', 'B_{s} mass [MeV]']
 }
 
 
@@ -111,7 +111,7 @@ for var in variables:
     for j in xrange(len(mva_cuts)):
         heff = variables[var][0][j]
         if j > 0: th1offset(heff, j)
-        heff.SetYTitle('Efficiency')
+        heff.SetYTitle('Efficiency (w/ offset)')
         heff.SetXTitle(variables[var][3])
         heff.SetLineColor(colours(j))
         heff.SetMarkerColor(colours(j))
