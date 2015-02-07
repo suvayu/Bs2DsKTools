@@ -56,38 +56,68 @@ def th1clonereset(hist, name):
     res.Sumw2()
     return res
 
-def th1bincontent(hist, i, err=False, asym=False):
+def thnbincontent(hist, x, y=0, z=0, err=False, asym=False):
     """Get histogram bin content.
 
        hist -- histogram
-       i    -- bin number
+       x    -- bin x coordinates
+       y    -- bin y coordinates (only for 2D)
+       z    -- bin z coordinates (only for 3D)
        err  -- also return error
        asym -- return asymmetric error
 
     """
-    content = hist.GetBinContent(i)
+    dim = hist.GetDimension()
+    if dim == 1:
+        xyz = [x]
+    elif dim == 2:
+        xyz = [x, y]
+    else:
+        xyz = [x, y, z]
+    content = hist.GetBinContent(*xyz)
     if err and asym:
-        return (content, hist.GetBinErrorUp(i), hist.GetBinErrorLow(i))
+        return (content, hist.GetBinErrorUp(*xyz), hist.GetBinErrorLow(*xyz))
     elif err:
-        return (content, hist.GetBinError(i))
+        return (content, hist.GetBinError(*xyz))
     else:
         return content
 
-def th1bincentre(hist, i, edges=False):
-    """Get histogram bin centre.
+def taxisbincentre(axis, i, edges=False, width=False):
+    """Get histogram bin centre (X-axis).
+
+       axis  -- axis instance
+       i     -- bin number
+       edges -- also return bin low edges
+       width -- also return bin width
+    """
+    if edges and width:
+        return (axis.GetBinCenter(i), axis.GetBinLowEdge(i),
+                axis.GetBinWidth(i))
+    elif edges:
+        return (axis.GetBinCenter(i), axis.GetBinLowEdge(i))
+    elif width:
+        return (axis.GetBinCenter(i), axis.GetBinWidth(i))
+    else:
+        return axis.GetBinCenter(i)
+
+def thnbincentre(hist, i, edges=False, width=False):
+    """Get histogram bin centre (X, Y, Z).
 
        hist  -- histogram
        i     -- bin number
-       edges -- also return bin edges
-
+       edges -- also return bin low edges
+       width -- also return bin width
     """
-    centre = hist.GetBinCenter(i)
-    if edges:
-        lo = hist.GetBinLowEdge(i)
-        hi = lo + hist.GetBinWidth(i)
-        return (centre, lo, hi)
+    dim = hist.GetDimension()
+    axes = []
+    if dim == 1:
+        axes.append(hist.GetXaxis())
+    elif dim == 2:
+        axes.append(hist.GetYaxis())
     else:
-        return centre
+        axes.append(hist.GetZaxis())
+    res = map(lambda ax: taxisbincentre(ax, i, edges, width), axes)
+    return res[0] if len(res) == 1 else res
 
 def th1integral(hist):
     """Return integral of 1D histogram (exclude overflow & underflow)"""
@@ -131,14 +161,14 @@ try:
         else:
             shape = [len(hist)]
         if err: shape.append(3 if asym else 2)
-        val = np.array([th1bincontent(hist, i, err, asym)
+        val = np.array([thnbincontent(hist, i, err=err, asym=asym)
                         for i in xrange(len(hist))]).reshape(*shape)
         if pair: return val
         else: return val.transpose()
 
-    def thnbins(hist, edges=False, pair=False):
+    def thnbins(hist, edges=False, width=False, pair=False):
         """Return histogram bin centre or edges"""
-        val = np.array([th1bincentre(hist, i, edges)
+        val = np.array([thnbincentre(hist, i, edges, width)
                         for i in xrange(len(hist))])
         if pair: return val
         else: return val.transpose()
@@ -160,7 +190,7 @@ except ImportError:
     def thn2array(hist, err, asym, pair, shaped):
         raise NotImplementedError('Not available without numpy')
 
-    def thnbins(hist, edges, pair):
+    def thnbins(hist, edges, width, pair):
         raise NotImplementedError('Not available without numpy')
 
     def thnprint(hist, err, asym, pair, shaped):
