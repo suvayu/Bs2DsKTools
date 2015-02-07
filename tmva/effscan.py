@@ -140,47 +140,48 @@ else:                           # Matplotlib
     ncuts = len(mva_cuts)
 
     import matplotlib as mpl
-    import matplotlib.pyplot as plt
-    plt.rc('font', family='Liberation Sans') # choose font
-    plt.rc('mathtext', default='regular')    # use default font for math
-
-    # ROOT to Matplotlib translation layer
-    import rootpy.plotting.root2matplotlib as rplt
+    if batch: mpl.use('pdf')    # plotting w/o X11
+    mpl.rc('font', family='Liberation Sans') # choose font
+    mpl.rc('mathtext', default='regular')    # use default font for math
 
     # PDF backend
-    from matplotlib.backends.backend_pdf import PdfPages
+    from matplotlib.backends.backend_pdf import PdfPages, FigureCanvasPdf
     if doprint: pp = PdfPages('{}_eff_{}_{}.pdf'.format(
             'bkg' if bkgeff else 'sig', classifier,
             '_'.join(variables.iterkeys())))
 
+    # use the API
+    from matplotlib.figure import Figure
     # Style
     from matplotlib.legend_handler import HandlerErrorbar
+    from utils import th12errorbar
 
     # Plots
     for var, histos in variables.iteritems():
-        histos = histos[0]      # drop metadata
-        fig = plt.figure(var)                # one figure per variable
-        axes = fig.add_subplot(111)          # row, col, id (121+j, when plotting both)
+        histos = histos[0]          # drop metadata
+        fig = Figure()              # one figure per variable
+        fig.suptitle(var)
+        canvas = FigureCanvasPdf(fig)
+        axes = fig.add_subplot(111) # row, col, id (121+j, when plotting both)
         axes.grid(axis='y')
         if bkgeff:
             axes.set_title('Background rejection efficiency')
         else:
             axes.set_title('Signal selection efficiency')
-        axes.set_ylim(0, 6)
+        axes.set_ylim(0, 3.5)
         axes.set_ylabel('Efficiency (w/ offset)')
-        axes.set_xlim(*plots[var][0])
-        axes.set_xlabel(plots[var][1])
+        axes.set_xlim(*variables[var][1])
+        axes.set_xlabel(variables[var][2])
         axes.xaxis.set_label_coords(0.9,-0.05)
         for k, cut in enumerate(mva_cuts):
             if not histos[k].GetEntries(): continue
-            line = rplt.errorbar(histos[k], xerr=None,
-                                 label='{}>{}'.format(classifier, cut))[0]
+            x, y, yerr = th12errorbar(histos[k], yerr=True, asym=True)
+            axes.errorbar(x, y, yerr=yerr, xerr=None, fmt=None,
+                          label='{}>{}'.format(classifier, cut))
         axes.legend(fontsize=10, numpoints=1, frameon=False, ncol=ncuts,
                     handler_map={mpl.lines.Line2D: HandlerErrorbar()})
 
-        if doprint:
-            pp.savefig()
-        elif not batch:
-            plt.show()
+        if doprint: pp.savefig(fig) # pp.savefig() for current fig
 
     if doprint: pp.close()
+
