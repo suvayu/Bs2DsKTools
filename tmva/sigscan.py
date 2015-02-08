@@ -199,42 +199,54 @@ map(th1fill(hist_b, 2), cuts, eff_b)
 map(th1fill(hsigma, 2), cuts, sigs)
 # map(th1fill(hagns, 2), cuts, agns)
 
-from ROOT import TCanvas, gPad, gStyle
-from ROOT import kBlack, kViolet, kAzure, kRed
-c1 = TCanvas('c1', '', 800, 500)
-hist_s.SetLineColor(kAzure)
-hist_b.SetLineColor(kRed)
-hsigma.SetLineColor(kBlack)
-# hagns.SetLineColor(kViolet)
+import matplotlib as mpl
+mpl.rc('font', family='Liberation Sans') # choose font
+mpl.rc('mathtext', default='regular')    # use default font for math
 
-gStyle.SetOptStat(0)
-# hist_s.SetTitle('Significance') # FIXME: plot in correct order instead
-hist_s.SetXTitle(cltitle[classifier])
-hist_s.SetYTitle('Efficiency')
-hist_s.Draw('e1')
-hist_b.Draw('e1 same')
-# print hist_s.GetYmax(), hagns.GetYmax()
-# scale = hist_s.GetYmax()/hagns.GetYmax()
-# hagns.Scale(scale)
-# hagns.Draw('e1 same')
-# print hist_s.GetYmax(), hsigma.GetYmax()
-# scale = hist_s.GetYmax()/hsigma.GetYmax()
-# hsigma.Scale(scale)
-# hsigma.Draw('e1 same')
+if batch: mpl.use('pdf')    # plotting w/o X11
+else: import matplotlib.pyplot as plt
 
-from ROOT import TGaxis
-eaxis = TGaxis(hsigma.GetXaxis().GetXmin(), 0.962,
-               hsigma.GetXaxis().GetXmax(), 0.962,
-               0, 0, 0, 'U')
-eaxis.Draw()
+# PDF backend
+from matplotlib.backends.backend_pdf import PdfPages, FigureCanvasPdf
+if doprint: pp = PdfPages('significance_{}.pdf'.format(classifier))
+
+# use the API
+from matplotlib.figure import Figure
+from utils import th12errorbar
+
+fig = Figure()
+canvas = FigureCanvasPdf(fig)
+axes = fig.add_subplot(111)
+if eff and sig:
+    axes.set_title('Efficiency & significance')
+else:
+    axes.set_title('Efficiency' if eff else 'Significance')
+axes.grid()
+axes.set_xlabel(cltitle[classifier])
+axes.set_xlim(clrange[0]-0.05, clrange[1]+0.05)
+axes.set_ylabel('Efficiency' if eff else 'Significance')
+if eff and sig:
+    axes2 = axes.twinx()
+    axes2.set_ylabel('Significance')
+
+for hist in [hist_s, hist_b]:
+    x, y, yerr = th12errorbar(hist, yerr=True)
+    col = 'blue' if 'Signal' in hist.GetTitle() else 'red'
+    axes.errorbar(x, y, yerr=yerr, xerr=None, fmt=None, ecolor=col,
+                  label=hist.GetTitle())
+x, y, yerr = th12errorbar(hsigma, yerr=True)
+axes2.errorbar(x, y, yerr=yerr, xerr=None, fmt=None, ecolor='black',
+               label=hist.GetTitle())
 
 diff, idx = 1., None
 for i, eff in enumerate(eff_s):
     diff_t = abs(eff-0.962)
     if diff > diff_t: diff, idx = diff_t, i
+axes.text(cuts[idx], 0.9, 'Old working pt.', rotation=-90)
 
-caxis = TGaxis(cuts[idx], 0, cuts[idx], 1.05, 0, 0, 0, 'U')
-caxis.Draw()
-c1.Update()
+if doprint:
+    pp.savefig(fig)
+    pp.close()
 
-if doprint: c1.Print('significance_{}.pdf'.format(classifier))
+if not batch:
+    plt.show()
