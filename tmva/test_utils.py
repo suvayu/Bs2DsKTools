@@ -4,7 +4,8 @@ import unittest
 
 from fixes import ROOT
 from utils import read_yaml, make_paths, path2rootdir
-class test_utils(unittest.TestCase):
+
+class test_io(unittest.TestCase):
     def setUp(self):
         self.yamlfile = 'tmva_output_description.yaml'
 
@@ -24,3 +25,12 @@ class test_utils(unittest.TestCase):
             rfile, rdir = path2rootdir(path['path'])
             self.assertTrue(not rfile.IsZombie())
             self.assertTrue(rdir)
+
+class test_hist(unittest.TestCase):
+    def setUp(self):
+        self.hist1 = ROOT.TH1D('hist1', '', 20, -3, 3)
+        self.hist1.FillRandom('gaus', 1000)
+
+    def test_th1integral(self):
+        from utils import th1integral
+        self.assertEqual(th1integral(self.hist1), 1000)
