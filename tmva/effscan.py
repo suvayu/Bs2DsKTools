@@ -99,7 +99,8 @@ variables = {
 ## make efficiency histograms
 from ROOT import TH1D, TCanvas
 tmp = TCanvas('c', '', 400, 400)          # temporary canvas
-from utils import scan_range, th1offset, make_varefffn, colours
+from utils import scan_range, make_varefffn, colours
+from rplot.utils import th1offset
 for var in variables:
     htemp = TH1D('htemp', '', 100, *variables[var][1])
     # iterates over mva_cuts, returns list of efficiency histograms
@@ -154,7 +155,7 @@ else:                           # Matplotlib
     from matplotlib.figure import Figure
     # Style
     from matplotlib.legend_handler import HandlerErrorbar
-    from utils import th12errorbar
+    from rplot.r2mpl import th12errorbar
 
     # Plots
     for var, histos in variables.iteritems():

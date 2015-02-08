@@ -193,7 +193,7 @@ hist_b = TProfile('hist_b', 'Background rejection efficiency', nbins, bins)
 hsigma = TProfile('hsigma', 'Significance', nbins, bins)
 # hagns  = TProfile('hagns', '#epsilon_{s}*purity = s/(s+b)', nbins, bins)
 
-from utils import th1fill
+from rplot.utils import th1fill
 map(th1fill(hist_s, 2), cuts, eff_s)
 map(th1fill(hist_b, 2), cuts, eff_b)
 map(th1fill(hsigma, 2), cuts, sigs)
@@ -212,7 +212,7 @@ if doprint: pp = PdfPages('significance_{}.pdf'.format(classifier))
 
 # use the API
 from matplotlib.figure import Figure
-from utils import th12errorbar
+from rplot.r2mpl import th12errorbar
 
 fig = Figure()
 canvas = FigureCanvasPdf(fig)
