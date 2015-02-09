@@ -62,9 +62,9 @@ eff = what in ['eff', 'both']   # efficiency
 sig = what in ['sig', 'both']   # significance
 mc = bool(session)
 cltitle = {
-    'BDTB': 'BDT (w/ bagging) cuts',
-    'BDTG': 'BDT (w/ gradient boost) cuts',
-    'BDTGResponse_1': 'Old BDT (w/ gradient boost) cuts'
+    'BDTB': 'BDT cuts (w/ bagging)',
+    'BDTG': 'BDT cuts (w/ gradient boost)',
+    'BDTGResponse_1': 'Old BDT cuts (w/ gradient boost)'
 }
 
 # option consistency checks
@@ -223,7 +223,7 @@ else:
     axes.set_title('Efficiency' if eff else 'Significance')
 axes.grid()
 axes.set_xlabel(cltitle[classifier])
-axes.set_xlim(clrange[0]-0.05, clrange[1]+0.05)
+axes.set_xlim(clrange[0], clrange[1])
 axes.set_ylabel('Efficiency' if eff else 'Significance')
 if eff and sig:
     axes2 = axes.twinx()
@@ -238,11 +238,25 @@ x, y, yerr = th12errorbar(hsigma, yerr=True)
 axes2.errorbar(x, y, yerr=yerr, xerr=None, fmt=None, ecolor='black',
                label=hist.GetTitle())
 
-diff, idx = 1., None
-for i, eff in enumerate(eff_s):
-    diff_t = abs(eff-0.962)
-    if diff > diff_t: diff, idx = diff_t, i
-axes.text(cuts[idx], 0.9, 'Old working pt.', rotation=-90)
+## annotations
+if classifier == 'BDTGResponse_1':
+    axes.plot([0.3, 0.3], [0, 1], color='black', linewidth=2)
+    axes.text(0.35, 0.3, 'Old working pt ($\geq 0.3$)',
+              bbox=dict(boxstyle='larrow', fc='white', ec='black'))
+    oeff_s = hist_s.GetBinContent(hist_s.FindBin(0.3))
+    axes.annotate('(0.3,{:.3f})'.format(oeff_s), xy=(0.3,oeff_s), xytext=(-0.1,0.75),
+                  arrowprops=dict(facecolor='black', shrink=0.1, width=2,
+                                  headwidth=5))
+if classifier == 'BDTB':
+    diff, idx = 1., None
+    for i, eff in enumerate(eff_s):
+        diff_t = abs(eff-0.842)     # eff_s @ old BDTG >= 0.3
+        if diff > diff_t: diff, idx = diff_t, i
+    axes.plot(clrange, [0.842, 0.842], color='black', linewidth=2)
+    axes.annotate('Working pt @ old eff {}'.format((cuts[idx], 0.842)),
+                  xy=(cuts[idx], 0.842), xytext=(0.0, 1.1), ha='right',
+                  arrowprops=dict(facecolor='black', shrink=0.05,
+                                  width=2, headwidth=5))
 
 if doprint:
     pp.savefig(fig)
