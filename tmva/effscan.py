@@ -161,7 +161,6 @@ else:                           # Matplotlib
     for var, histos in variables.iteritems():
         histos = histos[0]          # drop metadata
         fig = Figure()              # one figure per variable
-        fig.suptitle(var)
         canvas = FigureCanvasPdf(fig)
         axes = fig.add_subplot(111) # row, col, id (121+j, when plotting both)
         axes.grid(axis='y')
