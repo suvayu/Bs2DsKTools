@@ -100,11 +100,6 @@ def make_varefffn(hist, refcut):
     return efffn
 
 # plotting tools
-def th12hist(hist, edges=True):
-    """Convert 1D histogram to Axes.hist"""
-    assert (hist.GetDimension() == 1)
-    return (thn2array(hist), thnbins(hist, edges=edges)[1])
-
 def colours(num, default=1):    # 1 == ROOT.kBlack
     from fixes import ROOT
     cols = [ROOT.kAzure, ROOT.kRed, ROOT.kGreen, ROOT.kBlack]
