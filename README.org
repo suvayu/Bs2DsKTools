@@ -1,15 +1,13 @@
 # -*- mode: org; default-input-method: TeX; -*-
 
 * Intro
-Just a collection of tools and classes for the Bs⁰ → DsK/Dsπ analysis.
-The different tree readers, =readMCTree=, =readDataTree= and
-=lifetime= inherit from a purely virtual class, =readTree=. There are
-several overloaded =readTree::Loop()= methods for different types of
-output.
+This is a collection of tools and classes for the Bs⁰ → DsK/Dsπ
+analysis.  
 
 _Studies:_
 1. Bs⁰ time acceptance
 2. Bs⁰ and bachelor particle opening angle as PID
+3. Develop a multi-variate selection for Bs⁰ using TMVA.
 
 
 * Classes
@@ -18,9 +16,12 @@ _Tree reader:_
 + =readDataTree= reads data ntuples
 + =readMCTree= reads Monte Carlo ntuples
 + =lifetime= reads Monte Carlo ntuples for lifetime acceptance studies
++ There are several overloaded =readTree::Loop()= methods for
+  different types of output.
 
-_Opening angle:_
-=oanglePID= implements a DLL like PID variable from opening angle
+_Opening angle:_ 
++ =oangle= implements a DLL like PID variable using the D-meson and
+  bachelor opening angle.
 
 
 * Utilities
@@ -28,3 +29,10 @@ _Opening angle:_
   reader for lifetime acceptance studies
 + =resolution.cc=: make residual and pull plots from Monte Carlo
 + =ltFit.py=: fit for the trigger lifetime acceptance function
+
+
+* TMVA
+The =tmva/= directory has a whole sleuth of scripts to train and apply
+MVA classifiers, and to make corresponding plots.  For some of the
+plotting, it uses the [[https://github.com/suvayu/rplot][rplot]] library.  It also uses =numpy= here and
+there.
