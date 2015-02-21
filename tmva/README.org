@@ -86,7 +86,19 @@
 - B2DX_withtagging_strip20_DVv33r8_3fb_magdown_BDTG_Bs.root
 - B2DX_withtagging_strip20_DVv33r8_3fb_magup_BDTG_Bs.root
 
-* Tasks [8/11]
+* Tasks [10/14]
+** WInP Optimise BDT algorithms
+   :LOGBOOK:
+   - State "WInP"       from "TODO"       [2015-02-18 Wed 23:56]
+   :END:
+- Optimise by training on MC signal, but under performs on data
+- Try s-weighted data, or reweighted MC
+- Investigate old BDTG, vs new BDTG, vs BDTB.  As in, does the type of
+  MVA have anything to do with it, or is it training samples.
+** TODO Add event weights
+** TODO Implement cross-validation
+** TODO Easy MVA application
+- Use friend trees/event lists
 ** DONE Resolve vertex χ² variable disambiguity
    CLOSED: [2014-11-17 Mon 13:30]
 - Vertex χ²/ndof
@@ -115,9 +127,11 @@ BDT selection efficiency (for 3 diff arbitrary selections) for:
 ** DONE Compare w/ & w/o log of input vars
    CLOSED: [2015-01-07 Wed 16:31]
 Better with logarithm of IP χ² (log3a)
-** TODO Efficiencies w/ & w/o truth-matching
+** DONE Efficiencies w/ & w/o truth-matching
+   CLOSED: [2015-02-18 Wed 23:54]
 [[notmuch:id:alpine.LRH.2.02.1412102018060.19203@lena.nikhef.nl][Niels's email on truth-matching]]
-** TODO Metric for qualifying ROC curves
+** DONE Metric for qualifying ROC curves
+   CLOSED: [2015-02-18 Wed 23:55]
 - area under the curve
 - min. distance from the curve to (1,1)
 - make ROC curves myself
@@ -130,9 +144,9 @@ Better with logarithm of IP χ² (log3a)
    CLOSED: [2015-01-08 Thu 13:19]
 Do not use.  Too little gain, transformed variables difficult to
 understand.
-** TODO Optimise BDT algorithms
 
 * Notes
+** Training config
 Sets of input variables:
 - base :: variables
   - B_{s} :: DIRA, IP χ², decay vertex χ²/dof, radial flight distance (RFD)
@@ -169,3 +183,69 @@ Sets of input variables:
 - max_diff :: same as above, w/ new experimental variable (Rose & me)
   - maximum difference b/w D_{s} daughter track p_{T}
 - max_diffb :: same as above, but w/o decorrelation
+
+*** Dependent variables (log3a)
+Training:
+- lab0_ENDVERTEX_CHI2
+- lab0_ENDVERTEX_NDOF
+- lab2_ENDVERTEX_CHI2
+- lab2_ENDVERTEX_NDOF
+- lab0_IPCHI2_OWNPV
+- lab2_MINIPCHI2
+- lab0_OWNPV_X
+- lab0_ENDVERTEX_X
+- lab0_OWNPV_Y
+- lab0_ENDVERTEX_Y
+- lab2_OWNPV_X
+- lab2_ENDVERTEX_X
+- lab2_OWNPV_Y
+- lab2_ENDVERTEX_Y
+- lab1_TRACK_GhostProb
+- lab3_TRACK_GhostProb
+- lab4_TRACK_GhostProb
+- lab5_TRACK_GhostProb
+- lab3_PT
+- lab4_PT
+- lab5_PT
+- lab3_IPCHI2_OWNPV
+- lab4_IPCHI2_OWNPV
+- lab5_IPCHI2_OWNPV
+- lab0_DIRA_OWNPV
+- lab1_PT
+
+Preselection:
+- lab1_ID
+- lab2_TAU
+- lab2_FDCHI2_ORIVX
+- lab0_Hlt1TrackAllL0Decision_TOS
+- lab0_Hlt2Topo2BodyBBDTDecision_TOS
+- lab0_Hlt2Topo3BodyBBDTDecision_TOS
+- lab0_Hlt2Topo4BodyBBDTDecision_TOS
+- lab0_Hlt2IncPhiDecision_TOS
+- lab0_MM
+
+Spectators:
+- lab0_LifetimeFit_ctau
+- lab0_TAU
+- lab1_PIDK
+- lab0_LifetimeFit_ctauErr
+- lab0_TAUERR
+- lab0_P
+- lab0_PT
+- lab0_PE
+- lab0_PX
+- lab0_PY
+- lab0_PZ
+- lab1_P
+- lab1_PT
+- lab1_PE
+- lab1_PX
+- lab1_PY
+- lab1_PZ
+- lab2_P
+- lab2_PT
+- lab2_PE
+- lab2_PX
+- lab2_PY
+- lab2_PZ
+- lab2_MM
