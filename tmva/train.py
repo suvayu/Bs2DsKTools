@@ -6,31 +6,30 @@ import argparse
 from utils import _import_args
 
 optparser = argparse.ArgumentParser(description=__doc__)
-optparser.add_argument('filename', nargs='?', default = None, help='ROOT file')
-optparser.add_argument('-s', dest='session', required=True, help='Session name')
-optparser.add_argument('--sig', dest='sig_tree', help='Signal tree name (mandatory when filename present)')
-optparser.add_argument('--bkg', dest='bkg_tree', help='Background tree name (mandatory when filename present)')
-optparser.add_argument('-o', dest='out', required=True, help='Output ROOT file')
-optparser.add_argument('-c', dest='conf', default='TMVA.conf', help='TMVA config file')
+optparser.add_argument('filename', nargs='?', default=None, help='ROOT file')
+optparser.add_argument('-s', dest='session', required=True,
+                       help='Session name')
+optparser.add_argument('--sig', dest='sig_tree', help='Signal tree name '
+                       '(mandatory when filename present)')
+optparser.add_argument('--bkg', dest='bkg_tree', help='Background tree name '
+                       '(mandatory when filename present)')
+optparser.add_argument('-o', dest='out', required=True, help='Output file')
+optparser.add_argument('-c', dest='conf', default='TMVA.conf',
+                       help='TMVA config file')
 options = optparser.parse_args()
 locals().update(_import_args(options))
 # variables for future proofing
 wdir = 'weights'                # weights directory
 
-import sys, os
+import sys
+import os
 if filename and not os.path.exists(filename):
     sys.exit('File not found: {}'.format(filename))
 if filename and not (sig_tree and bkg_tree):
     # required when input file is provided as positional argument
     sys.exit('Missing signal and background tree names')
 
-from fixes import ROOT
-from ROOT import gROOT
-gROOT.SetBatch(True)
-
-from ROOT import TFile, TChain, TMVA
-from tmvaconfig import TMVAType, TMVAconfig, ConfigFile
-
+from tmvaconfig import TMVAType, ConfigFile
 # read config
 conf = ConfigFile(conf)
 if conf.read() > 0:
@@ -40,37 +39,33 @@ print '::: Training {} MVAs: {}\n{}'.format(len(session.methods),
 print session
 print ':::'
 
+from fixes import ROOT
+ROOT.gROOT.SetBatch(True)
+
 # files & trees
 if not filename:                # config file
-    tree_s = TChain(sig_tree if sig_tree else 'TreeSig')
-    for f in session.sig_file:
-        tree_s.Add(f)
-    tree_b = TChain(bkg_tree if bkg_tree else 'TreeBkg')
-    for f in session.bkg_file:
-        tree_b.Add(f)
+    tree_s = ROOT.TChain(sig_tree if sig_tree else 'TreeSig')
+    map(lambda f: tree_s.Add(f), session.sig_file)
+    tree_b = ROOT.TChain(bkg_tree if bkg_tree else 'TreeBkg')
+    map(lambda f: tree_b.Add(f), session.bkg_file)
 else:                           # CLI options
-    ifile = TFile.Open(filename)
+    ifile = ROOT.TFile.Open(filename)
     tree_s = ifile.Get(sig_tree)
     tree_b = ifile.Get(bkg_tree)
 
 if not tree_s or not tree_b:
     sys.exit('Unable to read input trees.')
 
-ofile = TFile.Open(out, 'recreate')
+ofile = ROOT.TFile.Open(out, 'recreate')
 
 # instantiate TMVA
-TMVA.Tools.Instance()
+ROOT.TMVA.Tools.Instance()
 # TMVA.gConfig.GetIONames().fWeightFileDir = wdir
-factory = TMVA.Factory(session._name, ofile, '!V:DrawProgressBar=False:' + \
-                       ':'.join(session.factory_opts))
+factory = ROOT.TMVA.Factory(session._name, ofile, '!V:DrawProgressBar=False:' +
+                            ':'.join(session.factory_opts))
 
-# training variables
-for var in session.all_vars():
-    factory.AddVariable(var, 'F')
-
-# spectator variables
-for var in session.spectators:
-    factory.AddSpectator(var, 'F')
+map(lambda var: factory.AddVariable(var, 'F'))   # training variables
+map(lambda var: factory.AddSpectator(var, 'F'))  # spectator variables
 
 # get tree and perform branch name mappings if necessary
 factory.AddSignalTree(tree_s, 1.0)
@@ -84,9 +79,9 @@ factory.PrepareTrainingAndTestTree(session.cut_sig, session.cut_bkg,
                                    '!V:' + ':'.join(session.training_opts))
 
 # book methods
-for method in session.methods:
-    opts = ':'.join(getattr(session, method))
-    factory.BookMethod(TMVAType(method), method, '!H:!V:' + opts)
+map(lambda method: factory.BookMethod(TMVAType(method), method, '!H:!V:' +
+                                      ':'.join(getattr(session, method))),
+    session.methods)
 
 # train, test, evaluate
 factory.TrainAllMethods()
