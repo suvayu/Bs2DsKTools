@@ -30,6 +30,26 @@ def _import_args(namespace, d={}):
     return d
 
 
+def cacheobj(name, obj):
+    import os
+    import errno
+    import pickle
+    cachedir, cachefile = '.cache', '{}.pickle'.format(name)
+    try:
+        os.mkdir(cachedir)
+    except OSError as err:
+        if err.errno == errno.EEXIST:
+            pass
+    if obj:
+        with open('{}/{}'.format(cachedir, cachefile), 'w') as cfile:
+            pickle.dump(obj, cfile)
+    elif os.path.exists('{}/{}'.format(cachedir, cachefile)):
+        with open('{}/{}'.format(cachedir, cachefile), 'r') as cfile:
+            return pickle.load(cfile)
+    else:
+        print 'No cached file: {}/{}'.format(cachedir, cachefile)
+
+
 # ROOT utilities
 def th1integral(hist):
     """Return integral of 1D histogram (exclude overflow & underflow)"""
