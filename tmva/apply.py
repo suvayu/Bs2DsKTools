@@ -8,7 +8,8 @@ from utils import _import_args, RawArgDefaultFormatter
 optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                     description=__doc__)
 optparser.add_argument('filename', help='ROOT file')
-optparser.add_argument('-s', dest='session', help='Session name')
+optparser.add_argument('-s', dest='session',  required=True,
+                       help='Session name')
 optparser.add_argument('-o', dest='out', help='ROOT file with output')
 optparser.add_argument('-n', dest='name', help='Input tree name')
 optparser.add_argument('-v', dest='verbose', action='store_true',

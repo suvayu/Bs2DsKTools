@@ -3,9 +3,10 @@
 """Train TMVA algorithm"""
 
 import argparse
-from utils import _import_args
+from utils import _import_args, RawArgDefaultFormatter
 
-optparser = argparse.ArgumentParser(description=__doc__)
+optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
+                                    description=__doc__)
 optparser.add_argument('filename', nargs='?', default=None, help='ROOT file')
 optparser.add_argument('-s', dest='session', required=True,
                        help='Session name')
