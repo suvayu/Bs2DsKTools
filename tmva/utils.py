@@ -1,14 +1,17 @@
 # coding=utf-8
 """Utilities"""
 
-## argument parsing tools
+# argument parsing tools
 from argparse import (ArgumentDefaultsHelpFormatter,
                       RawDescriptionHelpFormatter)
+
+
 class RawArgDefaultFormatter(ArgumentDefaultsHelpFormatter,
                              RawDescriptionHelpFormatter):
     pass
 
-def _import_args(namespace, d = {}):
+
+def _import_args(namespace, d={}):
     """Import attributes from namespace to local environment.
 
     namespace -- namespace to import attributes from
@@ -27,13 +30,14 @@ def _import_args(namespace, d = {}):
     return d
 
 
-## ROOT utilities
+# ROOT utilities
 def th1integral(hist):
     """Return integral of 1D histogram (exclude overflow & underflow)"""
     integral = 0.0
     for bin in xrange(1, hist.GetNbinsX()+1):
         integral += hist.GetBinContent(bin) * hist.GetBinWidth(bin)
     return integral
+
 
 def distance(hist, pt):
     """Calculate minimum distance from a given point"""
@@ -43,6 +47,7 @@ def distance(hist, pt):
         dist_t = (cpt[0]-pt[0])**2 + (cpt[1]-pt[1])**2
         dist = dist_t if dist_t < dist else dist
     return dist
+
 
 # Generic range scanning tools
 class Cut(object):
@@ -54,10 +59,12 @@ class Cut(object):
         self.lesser = '{}<{}'.format(var, val)
         self.lesserequal = '{}<={}'.format(var, val)
 
+
 def crange(stops, var, tree, plotvar):
     """Generator of cuts for a given list of stops"""
     for stop in stops:
         yield Cut(stop, var, plotvar)
+
 
 def scan_range(predicates, stops, var, tree, plotvar=''):
     """Create cuts at stops, and run predicates over given tree.
@@ -70,13 +77,17 @@ def scan_range(predicates, stops, var, tree, plotvar=''):
 
     """
     from collections import Iterable
-    if not isinstance(predicates, Iterable): predicates = [predicates]
+    if not isinstance(predicates, Iterable):
+        predicates = [predicates]
     res = []
     for cut in crange(stops, var, tree, plotvar):
         res_i = map(lambda fn: fn(tree, cut), predicates)
-        if len(res_i) == 1: res.append(res_i[0])
-        else: res.append(res_i)
+        if len(res_i) == 1:
+            res.append(res_i[0])
+        else:
+            res.append(res_i)
     return res
+
 
 def make_varefffn(hist, refcut):
     """Return a function to pass to scan_range.
@@ -88,6 +99,7 @@ def make_varefffn(hist, refcut):
 
     """
     from rplot.utils import th1clonereset
+
     def efffn(tree, cut):
         hnumer = th1clonereset(hist, 'hnumer')
         hdenom = th1clonereset(hist, 'hdenom')
@@ -99,6 +111,7 @@ def make_varefffn(hist, refcut):
         return heff
     return efffn
 
+
 # plotting tools
 def colours(num, default=1):    # 1 == ROOT.kBlack
     from fixes import ROOT
@@ -107,6 +120,7 @@ def colours(num, default=1):    # 1 == ROOT.kBlack
         return cols[num]
     except IndexError:
         return default
+
 
 def get_label(string):
     """Get label from variable names."""
@@ -133,11 +147,11 @@ def get_label(string):
     return string
 
 
-## ROOT -> rootpy tools
+# ROOT -> rootpy tools
 def hist_info(hist):
     """Return histogram info for using with rootpy"""
     metainfo = {'name': hist.GetName(), 'title': hist.GetTitle()}
-    metainfo['type'] = hist.ClassName()[-1]
+    metainfo['type'] = hist.ClassName()
     dim = hist.GetDimension()
     # FIXME: only for 1D
     nbinsx = hist.GetNbinsX()
@@ -145,6 +159,7 @@ def hist_info(hist):
     xmin = axis.GetXmin()
     xmax = axis.GetXmax()
     return (nbinsx, xmin, xmax), metainfo
+
 
 def pycopy(newobj_t, obj_t, obj, *args, **kwargs):
     """Act as copy constructor for any object.
@@ -160,7 +175,7 @@ def pycopy(newobj_t, obj_t, obj, *args, **kwargs):
     return newobj
 
 
-## I/O tools
+# I/O tools
 def path2rootdir(path):
     """Read path string and return ROOT directory
 
@@ -170,31 +185,36 @@ def path2rootdir(path):
     from fixes import ROOT
     rfile, rdir = path.split(':', 1)
     rfile = ROOT.TFile.Open(rfile, 'read')
-    rdir = rfile.GetDirectory(rdir) # path in root file: /foo/bar
+    rdir = rfile.GetDirectory(rdir)  # path in root file: /foo/bar
     return (rfile, rdir)
+
 
 def plot_conf(yamlfile, ftype, files):
     """Read plot config"""
     conf = read_yaml(yamlfile)
     if isinstance(conf, list):
         for entry in conf:
-            if entry['file'] != ftype: continue
+            if entry['file'] != ftype:
+                continue
             rfiles = get_rpaths(files, entry)
     else:
         if conf['file'] == ftype:
             rfiles = get_rpaths(files, conf)
     return rfiles
 
+
 def get_rpaths(files, conf):
     """Get ROOT file paths for all files using conf."""
     rfiles = []
-    if isinstance(files, str): files = [files]
+    if isinstance(files, str):
+        files = [files]
     from copy import deepcopy
     for rfile in files:
         copy = deepcopy(conf)
-        copy.update(file = rfile)
+        copy.update(file=rfile)
         rfiles.append(make_paths(copy))
     return rfiles
+
 
 def make_paths(node):
     """Return paths (directory) from dictionary
@@ -220,7 +240,7 @@ def make_paths(node):
     except KeyError:
         children = None         # leaf node
 
-    node.update(path = pwd)
+    node.update(path=pwd)
     paths = [node]
     if children:
         for child in children:
@@ -230,13 +250,15 @@ def make_paths(node):
                 paths.append(i)
     return paths
 
+
 def read_yaml(filename):
     """Read yaml"""
     stream = open(filename, 'r')
     import yaml
     return yaml.load(stream)
 
-def get_hists(yaml_keys, conf, tool, robj_t = None, robj_p = None):
+
+def get_hists(yaml_keys, conf, tool, robj_t=None, robj_p=None):
     """Read histograms for `keys' for given `conf'
 
     conf is a list of dictionaries with rpaths.  The Rdir `tool' is
@@ -249,8 +271,9 @@ def get_hists(yaml_keys, conf, tool, robj_t = None, robj_p = None):
             if rdir['key'] in yaml_keys:
                 hists.update({
                     rdir['key']:
-                    tool.read(rdir['path'], robj_t = robj_t, robj_p = robj_p)
+                    tool.read(rdir['path'], robj_t=robj_t, robj_p=robj_p)
                 })
         except KeyError as err:
-            if str(err) != '\'key\'': raise
+            if str(err) != '\'key\'':
+                raise
     return hists

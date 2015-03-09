@@ -43,21 +43,22 @@ if clnameglob:
         if not fnmatchcase(key, clnameglob): del classifiers[key]
 
 from fixes import ROOT
-if batch: ROOT.gROOT.SetBatch(True)
+ROOT.gROOT.SetBatch(batch)
 
 fnames = [f[0]['file'] for f in rfiles]
 
+
 def get_hists(classifiers, rfile, name, marks):
-    from ROOT import TFile, TTree, TProfile, TPolyMarker
+    from ROOT import TProfile, TPolyMarker
     from numpy import linspace
     from array import array
-    rfile = TFile.Open(rfile)
+    rfile = ROOT.TFile.Open(rfile)
     tree = rfile.Get(name)
     sig, bkg = 'classID=={}'.format(0), 'classID=={}'.format(1)
     hists = {}
     marks = {} if marks else None
     for cl in classifiers:
-        name = '{}_{}'.format(cl, rfile.GetName().split('/',1)[0])
+        name = '{}_{}'.format(cl, rfile.GetName().split('/', 1)[0])
         nsig = float(tree.GetEntries(sig))
         nbkg = float(tree.GetEntries(bkg))
         # variable bin width
@@ -90,7 +91,7 @@ def get_hists(classifiers, rfile, name, marks):
             print
     return hists, marks
 
-from utils import thn_print
+# from utils import thn_print
 rocs, markers = [], []
 for i, rfileconf in enumerate(rfiles):
     roc, marks = get_hists(classifiers, rfileconf[0]['file'], 'TestTree', marks)
@@ -123,7 +124,7 @@ if usempl:                      # FIXME: no idea if it works
         axes.set_ylim(axis_range, 1)
         axes.set_xlabel('Signal selection efficiency')
         axes.set_ylabel('Background rejection efficiency')
-        axes.xaxis.set_label_coords(0.9,-0.05)
+        axes.xaxis.set_label_coords(0.9, -0.05)
         for key, hist in roc.iteritems():
             info = hist_info(hist)
             hist = pycopy(Hist, ROOT.TH1, hist, *info[0], **info[1])
