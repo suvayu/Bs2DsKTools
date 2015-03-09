@@ -95,6 +95,8 @@
 - Try s-weighted data, or reweighted MC
 - Investigate old BDTG, vs new BDTG, vs BDTB.  As in, does the type of
   MVA have anything to do with it, or is it training samples.
+- Check where MC deviates from data
+  - compare base, less2, less3, logb, log3a, log3b
 ** TODO Add event weights
 ** TODO Implement cross-validation
 ** TODO Easy MVA application
