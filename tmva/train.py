@@ -65,8 +65,8 @@ ROOT.TMVA.Tools.Instance()
 factory = ROOT.TMVA.Factory(session._name, ofile, '!V:DrawProgressBar=False:' +
                             ':'.join(session.factory_opts))
 
-map(lambda var: factory.AddVariable(var, 'F'))   # training variables
-map(lambda var: factory.AddSpectator(var, 'F'))  # spectator variables
+map(lambda var: factory.AddVariable(var, 'F'), session.all_vars())
+map(lambda var: factory.AddSpectator(var, 'F'), session.spectators)
 
 # get tree and perform branch name mappings if necessary
 factory.AddSignalTree(tree_s, 1.0)
