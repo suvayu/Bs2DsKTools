@@ -24,60 +24,46 @@ is read from an ntuple and fitted to the model otherwise.
 """
 
 
-## Python modules
-import os
 import sys
-from datetime import datetime
 
-## Option parsing
-import optparse
-usage='Usage: $ %s [options] <ratiofn>' % sys.argv[0]
-description = ''
-description += ('<ratiofn> - type of acceptance ratio function to use:'
-                ' flat, linear, quadratic, and exponential (default).')
-parser = optparse.OptionParser(description=description, usage=usage)
-
-parser.add_option('-s', '--save', action='store_true', default=False,
-                  help='Save the fitresult in a ROOT file (default: False).')
-options, args = parser.parse_args()
+import argparse
+from rplot.utils import RawArgDefaultFormatter
+parser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
+                                 description=__doc__)
+parser.add_argument('rationfn', default='exponential',
+                    choices=['flat', 'linear', 'quadratic', 'exponential'],
+                    help='Type of acceptance ratio (default: exponential).')
+parser.add_argument('-s', '--save', action='store_true',
+                    help='Save the fitresult in a ROOT file.')
+options = parser.parse_args()
+ratiofn = options.ratiofn
 save = options.save
-if not args:
-    ratiofn = 'exponential'
-else:
-    ratiofn = args[0]
 
 
-## ROOT global variables
-# FIXME: Batch running fails on importing anything but gROOT
-from ROOT import gROOT
-gROOT.SetBatch(True)
+from rplot.fixes import ROOT
+ROOT.gROOT.SetBatch(True)
 
-from ROOT import gStyle, gPad, gSystem
+from ROOT import gSystem
 gSystem.Load('libRooFit')
 
-## ROOT colours and styles
+# ROOT colours and styles
 from ROOT import kGreen, kRed, kBlack, kBlue, kAzure, kYellow
 from ROOT import kFullTriangleUp, kOpenTriangleDown
 
-## ROOT classes
-from ROOT import TTree, TFile, TCanvas, TPad, TClass
+from ROOT import TFile, TCanvas
 
-## RooFit classes
-from ROOT import RooFit, RooPlot, RooWorkspace, RooFitResult
-from ROOT import RooArgSet, RooArgList # containers
-from ROOT import RooAbsReal, RooAbsPdf # abstract classes
-# variables and pdfs
-from ROOT import RooRealVar, RooRealConstant, RooFormulaVar, RooGaussian
-from ROOT import RooEffProd, RooAddPdf, RooProdPdf, RooProduct # operations
-from ROOT import RooDataSet, RooDataHist, RooHistPdf, RooKeysPdf # data
-from ROOT import RooDecay, RooBDecay, RooGaussModel # models
-from ROOT import RooSimultaneous, RooCategory
+from ROOT import (RooFit, RooArgSet, RooArgList, RooAbsReal,
+                  RooRealVar, RooRealConstant, RooFormulaVar,
+                  RooDataSet, RooBDecay, RooGaussModel,
+                  RooSimultaneous, RooCategory, RooEffProd,
+                  RooProduct)
 
-## my stuff
-from factory import *           # FIXME: clean up, do not use *
+# my stuff
+from factory import (load_library, set_integrator_config, get_dataset,
+                     get_file, get_object, get_timestamp,
+                     save_in_workspace)
+
 set_integrator_config()
-
-# execfile('rootlogon.py')
 # Load custom ROOT classes
 load_library('libacceptance.so')
 from ROOT import PowLawAcceptance, AcceptanceRatio
@@ -116,7 +102,7 @@ time = RooRealVar('time', 'B_{s} decay time in ps', epsilon, 15.0)
 # # cache binning
 # dt.setBins(100, 'cache')
 
-varlist += [ time ]
+varlist += [time]
 
 
 ## Read dataset, apply trigger and decay mode selection
@@ -140,9 +126,10 @@ cut += '&& BDTG > 0.5 '
 time.setBins(150)
 dsetlist = []
 weights = []
-for mode, pidcut in [ ('DsPi', 'PIDK < 0') , ('DsK', 'PIDK > 10') ]:
+for mode, pidcut in [('DsPi', 'PIDK < 0'), ('DsK', 'PIDK > 10')]:
     # Get tree
-    rfile = get_file('data/smalltree-really-new-MC-pre-PID-%s.root' % mode, 'read')
+    rfile = get_file('data/smalltree-really-new-MC-pre-PID-%s.root' % mode,
+                     'read')
     ftree = get_object('ftree', rfile)
     print 'Reading from file: %s' % rfile.GetName()
 
@@ -180,7 +167,7 @@ decaycat = RooCategory('decaycat', 'Decay mode category')
 decaycat.defineType('DsPi')
 decaycat.defineType('DsK')
 
-varlist += [ decaycat ]
+varlist += [decaycat]
 
 for idx, mode in enumerate(['DsPi', 'DsK']):
     decaycat.setLabel(mode)
@@ -218,7 +205,7 @@ Bdecay = RooBDecay('Bdecay', 'Decay function for the B_{s} (heavy + light)',
                    RooRealConstant.value(0.0),       # Δm
                    resmodel, RooBDecay.SingleSided)
 
-pdflist += [ Bdecay ]
+pdflist += [Bdecay]
 
 
 ## Acceptance model: [1 - 1/(1 + (a*t)ⁿ - b)]*(1 - β*t)
@@ -244,8 +231,8 @@ dspi_acceptance = PowLawAcceptance('dspi_acceptance',
 DsPi_Model = RooEffProd('DsPi_Model', 'DsPi acceptance model B_{s}',
                         Bdecay, dspi_acceptance)
 
-varlist += [ turnon, exponent, offset, beta ]
-pdflist += [ dspi_acceptance, DsPi_Model ]
+varlist += [turnon, exponent, offset, beta]
+pdflist += [dspi_acceptance, DsPi_Model]
 
 # fit to Dsπ only
 print '=' * 5, ' 2-step fit: Dsπ ', '=' * 5
@@ -271,7 +258,7 @@ if ratiofn == 'exponential':
     # rbeta = RooRealConstant.value(0.0)
     ratio = AcceptanceRatio('ratio', 'Acceptance ratio',
                             time, rturnon, roffset, rbeta)
-    varlist += [ rturnon, roffset, rbeta ]
+    varlist += [rturnon, roffset, rbeta]
 elif ratiofn == 'quadratic':
     rquad = RooRealVar('rquad', 'rquad', 1.0, -10.0, 10.0)
     rlinear = RooRealVar('rlinear', 'rlinear', 1.0, -10.0, 10.0)
@@ -279,16 +266,16 @@ elif ratiofn == 'quadratic':
     roffset = RooRealConstant.value(0.0)
     ratio = RooFormulaVar('ratio', '@2*(@0-@1)**2 + @3*(@0-@1) - @4',
                           RooArgList(time, dsk_time_avg, rquad, rlinear, roffset))
-    varlist += [ rquad, rlinear, roffset ]
+    varlist += [rquad, rlinear, roffset]
 elif ratiofn == 'linear':
     rslope = RooRealVar('rslope', 'rslope', 0.01, -0.2, 0.2)
     roffset = RooRealConstant.value(0.9)
     ratio = RooFormulaVar('ratio', '@2*(@0-@1) - @3',
                           RooArgList(time, dsk_time_avg, rslope, roffset))
-    varlist += [ rslope, roffset ]
+    varlist += [rslope, roffset]
 elif ratiofn == 'flat':
     ratio = RooRealVar('ratio', 'ratio', 1.0, 0.0, 2.0)
-    varlist += [ ratio ]
+    varlist += [ratio]
 else:
     sys.exit('Unknown acceptance type. Aborting')
 dsk_acceptance = RooProduct('dsk_acceptance', 'DsK Acceptance with ratio',
@@ -297,7 +284,7 @@ dsk_acceptance = RooProduct('dsk_acceptance', 'DsK Acceptance with ratio',
 DsK_Model = RooEffProd('DsK_Model', 'DsK acceptance model B_{s}',
                        Bdecay, dsk_acceptance)
 
-pdflist += [ dsk_acceptance, DsK_Model ]
+pdflist += [dsk_acceptance, DsK_Model]
 
 # fit to DsK only
 turnon.setConstant(True)
@@ -326,7 +313,7 @@ PDF = RooSimultaneous('PDF', 'Simultaneous PDF', decaycat)
 PDF.addPdf(DsPi_Model, 'DsPi')
 PDF.addPdf(DsK_Model, 'DsK')
 
-pdflist += [ PDF ]
+pdflist += [PDF]
 
 # #errorPdf = RooHistPdf('errorPdf', 'Time error Hist PDF',
 # #                       RooArgSet(dt), datahist)
@@ -407,7 +394,7 @@ dsk_acceptance.plotOn(tframe2, RooFit.LineColor(kGreen+2),
                       RooFit.Normalization(100, RooAbsReal.Relative))
 
 canvas = TCanvas('canvas', 'canvas', 1600, 600)
-canvas.Divide(2,1)
+canvas.Divide(2, 1)
 canvas.cd(1)
 tframe1.Draw()
 canvas.cd(2)

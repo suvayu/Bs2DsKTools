@@ -4,17 +4,13 @@
 
 """
 
-# Python modules
-import os
-import sys
-
 # option parsing
 import argparse
 optparser = argparse.ArgumentParser(description=__doc__)
 optparser.add_argument('filename', help='ROOT file with saved fit result')
 optparser.add_argument('-p', '--print', dest='doPrint', action='store_true',
                        help='Print to multi-page pdf file')
-optparser.add_argument( '-l','--log', action='store_true',
+optparser.add_argument('-l', '--log', action='store_true',
                        help='Print final plot in logscale')
 
 options = optparser.parse_args()
@@ -26,38 +22,23 @@ fname = options.filename
 fnametokens = fname.split('-')
 ratiofn = fnametokens[3]
 
-# FIXME: Batch running fails on importing anything but gROOT
-# ROOT global variables
-from ROOT import gROOT
-if doPrint: gROOT.SetBatch(True)
-
-from ROOT import gStyle, gPad, gSystem
+from rplot.fixes import ROOT
+if doPrint:
+    ROOT.gROOT.SetBatch(True)
 
 # ROOT colours and styles
 from ROOT import kGreen, kRed, kBlack, kBlue, kAzure, kYellow
 from ROOT import kFullTriangleUp, kOpenTriangleDown
 
-# ROOT classes
-from ROOT import TTree, TFile, TCanvas, TPad, TClass, TLatex
+from ROOT import gPad, TCanvas
 
-## RooFit classes
-from ROOT import RooFit, RooPlot, RooWorkspace, RooFitResult
-from ROOT import RooArgSet, RooArgList # containers
-from ROOT import RooAbsReal, RooAbsPdf # abstract classes
-# variables and pdfs
-from ROOT import RooRealVar, RooRealConstant, RooFormulaVar, RooGaussian
-from ROOT import RooEffProd, RooAddPdf, RooProdPdf, RooProduct # operations
-from ROOT import RooDataSet, RooDataHist, RooHistPdf, RooKeysPdf # data
-from ROOT import RooDecay, RooBDecay, RooGaussModel # models
-from ROOT import RooCategory, RooList, RooCurve, RooHist
+from ROOT import RooFit, RooAbsReal, RooRealConstant
 
 # my stuff
-from factory import *
+from factory import load_library, set_integrator_config, get_workspace
 
 # Load custom ROOT classes
 load_library('libacceptance.so')
-from ROOT import PowLawAcceptance, AcceptanceRatio
-
 set_integrator_config()
 epsilon = 0.2
 tmax = 15.0
@@ -157,8 +138,8 @@ dspi_pullhist = tframe2.pullHist('hdspi_dataset', 'hdspi_model') # equivalent
 dsk_pullhist = tframe2.pullHist('hdsk_dataset', 'hdsk_model')
 
 # fit pulls
-tblhdr='| {0:<{width}} | {1:<{width}} |'
-tblrow='| {0:>{sign}{width}e} | {1:>{sign}{width}e} |'
+tblhdr = '| {0:<{width}} | {1:<{width}} |'
+tblrow = '| {0:>{sign}{width}e} | {1:>{sign}{width}e} |'
 print 'Power law acceptance with %s ratio:' % ratiofn
 print tblhdr.format('Mean', 'RMS', width=13)
 print tblrow.format(dspi_pullhist.GetMean(2), dspi_pullhist.GetRMS(2),
@@ -184,30 +165,37 @@ tframe4.addPlotable(dsk_pullhist, 'P')
 ## Draw and print
 # filenames
 timestamp = str(workspace.GetTitle())[19:]
-if logscale: plotfile = 'plots/savedcanvas_%s_%s_%s.pdf' % ('log', ratiofn, timestamp)
-else: plotfile = 'plots/savedcanvas_%s_%s.pdf' % (ratiofn, timestamp)
+if logscale:
+    plotfile = 'plots/savedcanvas_%s_%s_%s.pdf' % ('log', ratiofn, timestamp)
+else:
+    plotfile = 'plots/savedcanvas_%s_%s.pdf' % (ratiofn, timestamp)
 
 # 16:10 canvas
 canvas = TCanvas('canvas', 'canvas', 1024, 640)
 
 # open pdf file
-if doPrint: canvas.Print(plotfile + '[')
-gPad.SetGrid(1,1)
+if doPrint:
+    canvas.Print(plotfile + '[')
+gPad.SetGrid(1, 1)
 # ultra zoomed
 tframe0.Draw()
-if doPrint: canvas.Print(plotfile)
-gPad.SetGrid(0,0)
+if doPrint:
+    canvas.Print(plotfile)
+gPad.SetGrid(0, 0)
 # zoomed
 tframe1.Draw()
-if doPrint: canvas.Print(plotfile)
+if doPrint:
+    canvas.Print(plotfile)
 # full range
 tframe2.Draw()
-if doPrint: canvas.Print(plotfile)
+if doPrint:
+    canvas.Print(plotfile)
 # full range log scale
 if logscale:
     gPad.SetLogy(1)
     tframe2.Draw()
-    if doPrint: canvas.Print(plotfile)
+    if doPrint:
+        canvas.Print(plotfile)
     gPad.SetLogy(0)
 # pull distributions
 gPad.Clear()
