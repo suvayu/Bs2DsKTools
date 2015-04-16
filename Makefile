@@ -2,179 +2,72 @@
 # a variable contains parameters which are to be expanded later, then
 # use `='.
 
-#-----------------------------------------------------
-# shell utilities
-#-----------------------------------------------------
 SHELL        := /bin/bash
-ROOTCONFIG   := root-config
-PKGCONFIG    := pkg-config
+ROOTCONFIG   := $(shell which root-config)
+ROOTCINT     := $(shell which rootcint)
 
-#-----------------------------------------------------
 # compiler flags and options
-#-----------------------------------------------------
-# debug
-ifneq ($(findstring debug, $(strip $(shell $(ROOTCONFIG) --config))),)
-OPT           = -g
-endif
+OPTS	     := -g -Wall
 
 # compile with g++
 CXX          := $(shell $(ROOTCONFIG) --cxx)
-OPT          += -Wall -fPIC $(DEBUG)
-CXXFLAGS     := -c $(OPT)
+CXXFLAGS     := -fPIC $(shell $(ROOTCONFIG) --cflags)
 
 # link
 LD           := $(shell $(ROOTCONFIG) --ld)
-LDFLAGS      := $(shell $(ROOTCONFIG) --ldflags) $(OPT)
-SOFLAGS       = -shared
+LDFLAGS      := $(shell $(ROOTCONFIG) --ldflags)
 # SOFLAGS       = -shared -Wl,-soname,$@ # not needed, default is fine
-
-# ROOT compile flags
-ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
 
 # linking to ROOT
 ROOTLIBS     := $(shell $(ROOTCONFIG) --libs)
 ROOFITLIBS   := -lRooFitCore -lRooFit
 ROOTGLIBS    := $(shell $(ROOTCONFIG) --glibs)
 
-# others
-HASTHREAD    := $(shell $(ROOTCONFIG) --has-thread)
-ROOTDICTTYPE := $(shell $(ROOTCONFIG) --dicttype)
-ROOTCINT     := $(shell $(ROOTCONFIG) --bindir)/rootcint
+LIBS          = libreadTree.so libacceptance.so
+LINKDEFS      = $(wildcard dict/*LinkDef.h)
+LIBSRC        = $(wildcard src/*.cxx)
+ACCSRC        = $(wildcard src/*Acceptance*.cxx)
+TREESRC       = $(filter-out $(ACCSRC),$(LIBSRC))
+BINSRC        = $(wildcard src/*.cc)
+BINS          = $(BINSRC:src/%.cc=%)
+TESTDIR       = tests
 
-#-----------------------------------------------------
-# directories
-#-----------------------------------------------------
-# PROJROOT      = $(PWD)
-PROJROOT      = .
-INCDIR        = $(PROJROOT)/include
-SRCDIR        = $(PROJROOT)/src
-LIBDIR        = $(PROJROOT)/lib
-DICTDIR       = $(PROJROOT)/dict
-DOCDIR        = $(PROJROOT)/docs
-BINDIR        = $(PROJROOT)/bin
-PYDIR         = $(PROJROOT)/python
-TESTDIR       = $(PROJROOT)/tests
+# rules
+.PHONY:		all $(LIBS) $(BINS) clean cleanall
 
-#-----------------------------------------------------
-# project source, object, dictionary and lib filenames
-#-----------------------------------------------------
-# libraries
-LIBS          =
-LIBS         += libreadTree.so
-LIBS         += libutils.so
-LIBS         += libacceptance.so
+all:		$(LIBS) $(BINS)
 
-# libraries with multiple source files need special handling
-# libreadTree.so
-TREESRC       =
-TREESRC      += readMCTree.cxx
-TREESRC      += readDataTree.cxx
-TREESRC      += lifetime.cxx
+# dicts
+dict/readTreeDict.cxx:	$(TREESRC:%.cxx=%.hxx) dict/readTreeLinkDef.h
+	$(ROOTCINT) -f $@ -c -p $^
 
-# libacceptance.so
-ACCSRC        =
-ACCSRC       += PowLawAcceptance.cxx
-ACCSRC       += AcceptanceRatio.cxx
-# ACCSRC       += ErfAcceptance.cxx
-# ACCSRC       += BdPTAcceptance.cxx
+dict/acceptanceDict.cxx:	$(ACCSRC:%.cxx=%.hxx) dict/acceptanceLinkDef.h
+	$(ROOTCINT) -f $@ -c -p $^
 
-# linkdef files for dictionaries
-LINKDEFS     =
-LINKDEFS     += readTreeLinkDef.h
-LINKDEFS     += utilsLinkDef.h
+dict/%.o:	dict/%.cxx
+	$(CXX) -c $(OPTS) $(CXXFLAGS) -Idict -I. $< -o $@
+
+# sources
+src/%.o:	src/%.cxx
+	$(CXX) -c $(OPTS) $(CXXFLAGS) -Isrc $< -o $@
+
+# link
+libreadTree.so:	$(TREESRC:%.cxx=%.o) dict/readTreeDict.o
+	$(LD) -shared $(OPTS) $(LDFLAGS) $(ROOTLIBS) $^ -o $@
+
+libacceptance.so:	$(ACCSRC:%.cxx=%.o) dict/acceptanceDict.o
+	$(LD) -shared $(OPTS) $(LDFLAGS) $(ROOTLIBS) $(ROOFITLIBS) $^ -o $@
 
 # binaries
-BINSRC        =
-BINSRC       += accept.cc
-BINSRC       += resolution.cc
-BINSRC       += addTreeBranch.cc
+$(BINS):%:	src/%.cc $(LIBS)
+	$(CXX) $(OPTS) $(CXXFLAGS) -Isrc $(ROOTLIBS) $(ROOFITLIBS) -L. -lreadTree -lacceptance src/utils.cc $< -o $@
 
-BINS          = $(BINSRC:%.cc=%)
-BINFILES      = $(BINSRC:%.cc=$(BINDIR)/%)
+# FIXME: test binaries
+tests/%:%:	%.cc $(LIBS)
+	$(CXX) $(OPTS) $(CXXFLAGS) -Isrc -Itests $(ROOTLIBS) $(ROOFITLIBS) -L. -lreadTree -lacceptance src/utils.cc $< -o $@
 
-#-----------------------------------------------------
-# canned recipes
-#-----------------------------------------------------
-LINKLIBS = $(LD) $(LDFLAGS) $(SOFLAGS) $(ROOTLIBS)
+cleanall:	clean
+	rm -f {dict,src}/*.o dict/*Dict.*
 
-define DICTNAMES =
-$(foreach NAME,$(LIBS),$(NAME:lib%.so=$(DICTDIR)/%Dict.cxx))
-endef
-
-# getting linkdef name $(patsubst %Dict.cxx,%LinkDef.h,$@)
-MAKEDICT = $(ROOTCINT) -f $@ -c -p $^
-
-#------------------------------------------------------------------------------
-# Rules
-#------------------------------------------------------------------------------
-.PHONY:		all libs $(LIBS) $(BINS) cleanall clean bin-clean so-clean obj-clean docs
-
-all:		libs $(BINS)
-
-# Libraries
-libs:		$(LIBS)
-
-$(LIBS): %:	$(LIBDIR)/%
-	@echo "$@ done"
-
-$(LIBDIR)/libreadTree.so:	$(TREESRC:%.cxx=$(LIBDIR)/%.o) $(DICTDIR)/readTreeDict.o | $(LIBDIR)
-	$(LINKLIBS) $^ -o $@
-
-$(LIBDIR)/libutils.so:		$(LIBDIR)/utils.o | $(LIBDIR)
-	$(LINKLIBS) $^ -o $@
-
-$(LIBDIR)/libacceptance.so:	$(ACCSRC:%.cxx=$(LIBDIR)/%.o) $(DICTDIR)/acceptanceDict.o | $(LIBDIR)
-	$(LINKLIBS) $(ROOFITLIBS) $^ -o $@
-
-$(LIBDIR)/%.o:	$(SRCDIR)/%.cxx | $(LIBDIR)
-	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -I$(INCDIR) $< -o $@
-
-$(LIBDIR):
-	mkdir -p $(LIBDIR)
-
-# Dictionaries
-$(DICTDIR)/readTreeDict.cxx:	$(TREESRC:%.cxx=$(INCDIR)/%.hxx) $(DICTDIR)/readTreeLinkDef.h
-	$(MAKEDICT)
-
-$(DICTDIR)/acceptanceDict.cxx:	$(ACCSRC:%.cxx=$(INCDIR)/%.hxx) $(DICTDIR)/acceptanceLinkDef.h
-	$(MAKEDICT)
-
-# $(DICTDIR)/utilsDict.cxx:	$(INCDIR)/utils.hxx $(DICTDIR)/utilsLinkDef.h
-# 	$(MAKEDICT)
-
-$(DICTDIR)/%.o:	$(DICTDIR)/%.cxx
-	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -I$(PROJROOT) $< -o $@
-
-# Binaries
-$(BINS): %:	$(SRCDIR)/%.cc $(LIBS) | $(BINDIR)
-	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) $(ROOFITLIBS) -L$(LIBDIR) -lreadTree -lutils $< -o $(BINDIR)/$@
-
-$(BINDIR):
-	mkdir -p $(BINDIR)
-
-# generic rule to build a test binary
-# $(TESTDIR)/%: %:	%.cc
-# 	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) -L$(LIBDIR) -lreadTree -lutils $< -o $(TESTDIR)/$@
-
-$(TESTDIR)/acctest:	$(TESTDIR)/acctest.cc $(LIBDIR)/libacceptance.so
-	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) -L$(LIBDIR) -lacceptance $< -o $@
-
-$(TESTDIR)/treetest:	$(TESTDIR)/treetest.cc
-	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) $(ROOFITLIBS) $< -o $@
-
-cleanall:	obj-clean so-clean dict-clean bin-clean
-
-clean:		obj-clean so-clean
-
-bin-clean:
-	rm -f $(foreach FILE,$(BINS),$(BINDIR)/$(FILE))
-
-obj-clean:
-	rm -f $(LIBDIR)/*.o
-
-dict-clean:
-	rm -f $(DICTDIR)/*.cxx
-	rm -f $(DICTDIR)/*.o
-
-so-clean:
-	rm -f $(LIBDIR)/*.so
+clean:
+	rm -f $(LIBS) $(BINS)
