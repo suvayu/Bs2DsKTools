@@ -1,5 +1,5 @@
 # coding=utf-8
-import sys, os
+import sys
 
 # Config script for TMVA Classification and Application
 # _vars entries have format varname_in_tree (float assumed)
@@ -10,240 +10,240 @@ from collections import Iterable
 
 
 def TMVAType(name):
-   """Mapping from MVA text string to TMVA.Types"""
-   from ROOT import TMVA
-   name = name.lower()
-   if name.find('bdt') >= 0:
-      return TMVA.Types.kBDT
-   elif name.find('llh') >= 0:
-      return TMVA.Types.kLikelihood
-   else:
-      raise ValueError('Unsupported TMVA classifier type')
+    """Mapping from MVA text string to TMVA.Types"""
+    from ROOT import TMVA
+    name = name.lower()
+    if name.find('bdt') >= 0:
+        return TMVA.Types.kBDT
+    elif name.find('llh') >= 0:
+        return TMVA.Types.kLikelihood
+    else:
+        raise ValueError('Unsupported TMVA classifier type')
 
 
 class TMVAconfig(object):
-   """Config class for TMVA Classification and Application"""
+    """Config class for TMVA Classification and Application"""
 
-   def __init__(self, name):
-      self._name = name
-      self._cut_sig = ''
-      self._cut_bkg = ''
+    def __init__(self, name):
+        self._name = name
+        self._cut_sig = ''
+        self._cut_bkg = ''
 
-   def __str__(self):
-      text  = 'Training session : {}\n{}\n'.format(self._name, '-'*50)
-      props = [prop for prop in vars(TMVAconfig) if prop.find('_') != 0]
-      props += [method for method in self.methods]
-      props.sort()
-      for opt in props:
-         text += '{0:<{width}s} : {1:<s}\n'\
-            .format(opt, getattr(self, opt), width = 16)
-      return text
+    def __str__(self):
+        text = 'Training session : {}\n{}\n'.format(self._name, '-'*50)
+        props = [prop for prop in vars(TMVAconfig) if prop.find('_') != 0]
+        props += [method for method in self.methods]
+        props.sort()
+        for opt in props:
+            text += '{0:<{width}s} : {1:<s}\n'\
+                    .format(opt, getattr(self, opt), width = 16)
+        return text
 
-   def _return_if(self, prop):
-      if hasattr(self, prop):
-         return getattr(self, prop)
+    def _return_if(self, prop):
+        if hasattr(self, prop):
+            return getattr(self, prop)
 
-   @property
-   def methods(self):
-      """MVA training methods"""
-      return self._methods
+    @property
+    def methods(self):
+        """MVA training methods"""
+        return self._methods
 
-   @methods.setter
-   def methods(self, value):
-      if isinstance(value, Iterable):
-         self._methods = value
-      else:
-         self._methods = [value]
+    @methods.setter
+    def methods(self, value):
+        if isinstance(value, Iterable):
+            self._methods = value
+        else:
+            self._methods = [value]
 
-   @methods.deleter
-   def methods(self):
-      del self._methods
+    @methods.deleter
+    def methods(self):
+        del self._methods
 
-   @property
-   def factory_opts(self):
-      """TMVA factory options"""
-      return self._factory_opts
+    @property
+    def factory_opts(self):
+        """TMVA factory options"""
+        return self._factory_opts
 
-   @factory_opts.setter
-   def factory_opts(self, value):
-      if isinstance(value, Iterable):
-         self._factory_opts = value
-      else:
-         self._factory_opts = [value]
+    @factory_opts.setter
+    def factory_opts(self, value):
+        if isinstance(value, Iterable):
+            self._factory_opts = value
+        else:
+            self._factory_opts = [value]
 
-   @factory_opts.deleter
-   def factory_opts(self):
-      del self._factory_opts
+    @factory_opts.deleter
+    def factory_opts(self):
+        del self._factory_opts
 
-   @property
-   def training_opts(self):
-      """MVA training & testing options"""
-      return self._training_opts
+    @property
+    def training_opts(self):
+        """MVA training & testing options"""
+        return self._training_opts
 
-   @training_opts.setter
-   def training_opts(self, value):
-      if isinstance(value, Iterable):
-         self._training_opts = value
-      else:
-         self._training_opts = [value]
+    @training_opts.setter
+    def training_opts(self, value):
+        if isinstance(value, Iterable):
+            self._training_opts = value
+        else:
+            self._training_opts = [value]
 
-   @training_opts.deleter
-   def training_opts(self):
-      del self._training_opts
+    @training_opts.deleter
+    def training_opts(self):
+        del self._training_opts
 
-   @property
-   def sig_file(self):
-      """File with signal events"""
-      return self._return_if('_sig_file')
+    @property
+    def sig_file(self):
+        """File with signal events"""
+        return self._return_if('_sig_file')
 
-   @sig_file.setter
-   def sig_file(self, value):
-      if isinstance(value, Iterable):
-         self._sig_file = value
-      else:
-         self._sig_file = [value]
+    @sig_file.setter
+    def sig_file(self, value):
+        if isinstance(value, Iterable):
+            self._sig_file = value
+        else:
+            self._sig_file = [value]
 
-   @sig_file.deleter
-   def sig_file(self):
-      del self._sig_file
+    @sig_file.deleter
+    def sig_file(self):
+        del self._sig_file
 
-   @property
-   def bkg_file(self):
-      """File with background events"""
-      return self._return_if('_bkg_file')
+    @property
+    def bkg_file(self):
+        """File with background events"""
+        return self._return_if('_bkg_file')
 
-   @bkg_file.setter
-   def bkg_file(self, value):
-      if isinstance(value, Iterable):
-         self._bkg_file = value
-      else:
-         self._bkg_file = [value]
+    @bkg_file.setter
+    def bkg_file(self, value):
+        if isinstance(value, Iterable):
+            self._bkg_file = value
+        else:
+            self._bkg_file = [value]
 
-   @bkg_file.deleter
-   def bkg_file(self):
-      del self._bkg_file
+    @bkg_file.deleter
+    def bkg_file(self):
+        del self._bkg_file
 
-   @property
-   def vars(self):
-      """Normal training MVA variables"""
-      return self._return_if('_vars')
+    @property
+    def vars(self):
+        """Normal training MVA variables"""
+        return self._return_if('_vars')
 
-   @vars.setter
-   def vars(self, value):
-      if isinstance(value, Iterable):
-         self._vars = value
-      else:
-         self._vars = [value]
+    @vars.setter
+    def vars(self, value):
+        if isinstance(value, Iterable):
+            self._vars = value
+        else:
+            self._vars = [value]
 
-   @vars.deleter
-   def vars(self):
-      del self._vars
+    @vars.deleter
+    def vars(self):
+        del self._vars
 
-   @property
-   def combined_vars(self):
-      """Combined training MVA variables"""
-      return self._return_if('_combined_vars')
+    @property
+    def combined_vars(self):
+        """Combined training MVA variables"""
+        return self._return_if('_combined_vars')
 
-   @combined_vars.setter
-   def combined_vars(self, value):
-      if isinstance(value, Iterable):
-         self._combined_vars = value
-      else:
-         self._combined_vars = [value]
-   
-   @combined_vars.deleter
-   def combined_vars(self):
-      del self._combined_vars
-   
-   def all_vars(self):
-      all_vars = []
-      all_vars += self._return_if('_vars')
-      all_vars += self._return_if('_combined_vars')
-      return all_vars
+    @combined_vars.setter
+    def combined_vars(self, value):
+        if isinstance(value, Iterable):
+            self._combined_vars = value
+        else:
+            self._combined_vars = [value]
 
-   @property
-   def spectators(self):
-      """Spectator variables (not trained)"""
-      return self._return_if('_spectators')
+    @combined_vars.deleter
+    def combined_vars(self):
+        del self._combined_vars
 
-   @spectators.setter
-   def spectators(self, value):
-      if isinstance(value, Iterable):
-         self._spectators = value
-      else:
-         self._spectators = [value]
+    def all_vars(self):
+        all_vars = []
+        all_vars += self._return_if('_vars')
+        all_vars += self._return_if('_combined_vars')
+        return all_vars
 
-   @spectators.deleter
-   def spectators(self):
-      del self._spectators
+    @property
+    def spectators(self):
+        """Spectator variables (not trained)"""
+        return self._return_if('_spectators')
 
-   @property
-   def cut_both(self):
-      """Common cuts on signal and background sample"""
-      return TCut(self._return_if('_cut_both'))
+    @spectators.setter
+    def spectators(self, value):
+        if isinstance(value, Iterable):
+            self._spectators = value
+        else:
+            self._spectators = [value]
 
-   @cut_both.setter
-   def cut_both(self, value) :
-      if isinstance(value, str) or isinstance(value, TCut):
-         self._cut_both = TCut(value)
-      else:
-         raise ValueError('Expecting a cut string or TCut')
+    @spectators.deleter
+    def spectators(self):
+        del self._spectators
 
-   @cut_both.deleter
-   def cut_both(self):
-      del self._cut_both
+    @property
+    def cut_both(self):
+        """Common cuts on signal and background sample"""
+        return TCut(self._return_if('_cut_both'))
 
-   @property
-   def cut_sig(self):
-      """Cuts on signal sample, including common cuts (cut_both)"""
-      c = TCut(self.cut_both)
-      c += TCut(self._return_if('_cut_sig'))
-      return c
+    @cut_both.setter
+    def cut_both(self, value) :
+        if isinstance(value, str) or isinstance(value, TCut):
+            self._cut_both = TCut(value)
+        else:
+            raise ValueError('Expecting a cut string or TCut')
 
-   @cut_sig.setter
-   def cut_sig(self, value) :
-      if isinstance(value, str) or isinstance(value, TCut):
-         self._cut_sig = TCut(value)
-      else:
-         raise ValueError('Expecting a cut string or TCut')
+    @cut_both.deleter
+    def cut_both(self):
+        del self._cut_both
 
-   @cut_sig.deleter
-   def cut_sig(self):
-      del self._cut_sig
+    @property
+    def cut_sig(self):
+        """Cuts on signal sample, including common cuts (cut_both)"""
+        c = TCut(self.cut_both)
+        c += TCut(self._return_if('_cut_sig'))
+        return c
 
-   @property
-   def cut_bkg(self):
-      """Cuts on background sample, including common cuts (cut_both)"""
-      c = TCut(self.cut_both)
-      c += TCut(self._return_if('_cut_bkg'))
-      return c
+    @cut_sig.setter
+    def cut_sig(self, value) :
+        if isinstance(value, str) or isinstance(value, TCut):
+            self._cut_sig = TCut(value)
+        else:
+            raise ValueError('Expecting a cut string or TCut')
 
-   @cut_bkg.setter
-   def cut_bkg(self, value) :
-      if isinstance(value, str) or isinstance(value, TCut):
-         self._cut_bkg = TCut(value)
-      else:
-         raise ValueError('Expecting a cut string or TCut')
+    @cut_sig.deleter
+    def cut_sig(self):
+        del self._cut_sig
 
-   @cut_bkg.deleter
-   def cut_bkg(self):
-      del self._cut_bkg
+    @property
+    def cut_bkg(self):
+        """Cuts on background sample, including common cuts (cut_both)"""
+        c = TCut(self.cut_both)
+        c += TCut(self._return_if('_cut_bkg'))
+        return c
 
-   @property
-   def branch_mappings(self):
-      """Input tree branch name mappings"""
-      return self._return_if('_branch_mappings')
+    @cut_bkg.setter
+    def cut_bkg(self, value) :
+        if isinstance(value, str) or isinstance(value, TCut):
+            self._cut_bkg = TCut(value)
+        else:
+            raise ValueError('Expecting a cut string or TCut')
 
-   @branch_mappings.setter
-   def branch_mappings(self, value) :
-      if isinstance(value, Iterable):
-         self._branch_mappings = value
-      else:
-         self._branch_mappings = [value]
+    @cut_bkg.deleter
+    def cut_bkg(self):
+        del self._cut_bkg
 
-   @branch_mappings.deleter
-   def branch_mappings(self):
-      del self._branch_mappings
+    @property
+    def branch_mappings(self):
+        """Input tree branch name mappings"""
+        return self._return_if('_branch_mappings')
+
+    @branch_mappings.setter
+    def branch_mappings(self, value) :
+        if isinstance(value, Iterable):
+            self._branch_mappings = value
+        else:
+            self._branch_mappings = [value]
+
+    @branch_mappings.deleter
+    def branch_mappings(self):
+        del self._branch_mappings
 
 
 from ConfigParser import ConfigParser, ParsingError
@@ -251,71 +251,71 @@ from ROOT import TCut
 
 
 class ConfigFile(object):
-   """TMVA configuration file object, used to read/write to a file"""
-   def __init__(self, filenames):
-      self._parser = ConfigParser()
-      self._parser.optionxform = str
-      self._filenames = filenames
+    """TMVA configuration file object, used to read/write to a file"""
+    def __init__(self, filenames):
+        self._parser = ConfigParser()
+        self._parser.optionxform = str
+        self._filenames = filenames
 
-   def read(self):
-      """Read config file"""
-      try:
-         self._conf = self._parser.read(self._filenames)
-      except:
-         exc = sys.exc_info()
-         print '{}: {}'.format(exc[0].__name__, exc[1])
-      if not self._conf:
-         raise ValueError('No file(s) found: {}!'.format(self._filenames))
+    def read(self):
+        """Read config file"""
+        try:
+            self._conf = self._parser.read(self._filenames)
+        except:
+            exc = sys.exc_info()
+            print '{}: {}'.format(exc[0].__name__, exc[1])
+        if not self._conf:
+            raise ValueError('No file(s) found: {}!'.format(self._filenames))
 
-      # parse and return number of MVA configs read successfully
-      self._parse_opts()
-      return len(self._sessions)
+        # parse and return number of MVA configs read successfully
+        self._parse_opts()
+        return len(self._sessions)
 
-   def _parse_opts(self):
-      "The config file parser"
-      # parse options
-      self._sessions = self._parser.sections()
-      for session in self._sessions:
-         options = {}
-         if 'methods' in self._parser.options(session):
-            method_opts = [el.strip(',') for el in
-                           self._parser.get(session, 'methods').split()]
-         else:
-            raise ParsingError('Mandatory field, methods, is absent.')
-         for opt in self._parser.options(session):
-            value = self._parser.get(session, opt)
-            if opt.find('cut') >= 0:
-               options[opt] = TCut(value.replace('\n','')) # remove newlines
+    def _parse_opts(self):
+        "The config file parser"
+        # parse options
+        self._sessions = self._parser.sections()
+        for session in self._sessions:
+            options = {}
+            if 'methods' in self._parser.options(session):
+                method_opts = [el.strip(',') for el in
+                               self._parser.get(session, 'methods').split()]
             else:
-               options[opt] = [el.strip(',') for el in value.split()]
-               if opt.find('mappings') >= 0:
-                  options[opt] = [m.split(':') for m in options[opt]]
+                raise ParsingError('Mandatory field, methods, is absent.')
+            for opt in self._parser.options(session):
+                value = self._parser.get(session, opt)
+                if opt.find('cut') >= 0:
+                    options[opt] = TCut(value.replace('\n','')) # remove newlines
+                else:
+                    options[opt] = [el.strip(',') for el in value.split()]
+                    if opt.find('mappings') >= 0:
+                        options[opt] = [m.split(':') for m in options[opt]]
 
-         # check if mandatory properties are present
-         def _test_(key1, key2):
-            if key1 == True: return True
-            mandatory = ['factory_opts', 'training_opts']
-            return key1 in mandatory or key2 in mandatory
-         if not reduce(_test_, options.keys()):
-            raise ParsingError('Mandatory option field missing')
+            # check if mandatory properties are present
+            def _test_(key1, key2):
+                if key1 == True: return True
+                mandatory = ['factory_opts', 'training_opts']
+                return key1 in mandatory or key2 in mandatory
+            if not reduce(_test_, options.keys()):
+                raise ParsingError('Mandatory option field missing')
 
-         # make & set TMVAconfig object
-         session_conf = TMVAconfig(session)
-         map(lambda kv : setattr(session_conf, kv[0], kv[1]), options.items())
-         setattr(self, session, session_conf)
+            # make & set TMVAconfig object
+            session_conf = TMVAconfig(session)
+            map(lambda kv : setattr(session_conf, kv[0], kv[1]), options.items())
+            setattr(self, session, session_conf)
 
-   def write(self, filename):
-      """Write config file"""
-      return NotImplemented
+    def write(self, filename):
+        """Write config file"""
+        return NotImplemented
 
-   def append(self, filename):
-      """Update config file"""
-      return NotImplemented
+    def append(self, filename):
+        """Update config file"""
+        return NotImplemented
 
-   def sessions(self):
-      """List of sessions in config file"""
-      return self._sessions
+    def sessions(self):
+        """List of sessions in config file"""
+        return self._sessions
 
-   def get_session_config(self, session):
-      """Return session config"""
-      return getattr(self, session)
+    def get_session_config(self, session):
+        """Return session config"""
+        return getattr(self, session)
