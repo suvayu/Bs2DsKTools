@@ -1,7 +1,3 @@
-* Files
-- path to root files
-- tree name
-
 * Methods
 - TMVA supports many multivariate methods (see:
   TMVAClassification.C).  We use BDT and it's variants:
@@ -86,7 +82,7 @@
 - B2DX_withtagging_strip20_DVv33r8_3fb_magdown_BDTG_Bs.root
 - B2DX_withtagging_strip20_DVv33r8_3fb_magup_BDTG_Bs.root
 
-* Tasks [10/14]
+* Tasks [10/18]
 ** WInP Optimise BDT algorithms
    :LOGBOOK:
    - State "WInP"       from "TODO"       [2015-02-18 Wed 23:56]
@@ -97,7 +93,14 @@
   MVA have anything to do with it, or is it training samples.
 - Check where MC deviates from data
   - compare base, less2, less3, logb, log3a, log3b
-** TODO Add event weights
+*** TODO Try sweighted data [0/4]
+**** TODO Add event weights
+**** TODO B_{s} mass window
+**** TODO sweights > 0
+**** TODO whole dataset
+*** TODO Optimisation
+- Does the last optimised BDT still work?
+- If not, start from a larger input variable list again.
 ** TODO Implement cross-validation
 ** TODO Easy MVA application
 - Use friend trees/event lists
