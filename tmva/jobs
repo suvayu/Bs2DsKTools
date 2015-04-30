@@ -10,5 +10,5 @@
 
 for s in $(./confquery.py -l "$@" | tail -n 1); do
     printf "Running TMVA session: %s\n" $s
-    ./classify.py -s $s -o dsk_train_out.root &> log && mv log $s/log
+    ./train.py -s $s -o dsk_train_out.root |& tee log && mv log $s/log || exit $?
 done
