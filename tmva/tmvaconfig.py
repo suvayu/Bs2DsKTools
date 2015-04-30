@@ -230,6 +230,38 @@ class TMVAconfig(object):
         del self._cut_bkg
 
     @property
+    def bkgwt(self):
+        """Weight expression for background sample"""
+        return self._return_if('_bkgwt')
+
+    @bkgwt.setter
+    def bkgwt(self, value):
+        if isinstance(value, str):
+            self._bkgwt = value
+        else:
+            raise TypeError('Expecting a string as weight expression')
+
+    @bkgwt.deleter
+    def bkgwt(self):
+        del self._bkgwt
+
+    @property
+    def sigwt(self):
+        """Weight expression for signal sample"""
+        return self._return_if('_sigwt')
+
+    @sigwt.setter
+    def sigwt(self, value):
+        if isinstance(value, str):
+            self._sigwt = value
+        else:
+            raise TypeError('Expecting a string as weight expression')
+
+    @sigwt.deleter
+    def sigwt(self):
+        del self._sigwt
+
+    @property
     def branch_mappings(self):
         """Input tree branch name mappings"""
         return self._return_if('_branch_mappings')
@@ -287,6 +319,8 @@ class ConfigFile(object):
                 if opt.find('cut') >= 0:
                     # remove newlines
                     options[opt] = TCut(value.replace('\n', ''))
+                elif opt.find('wt') > 0:
+                    options[opt] = value.replace('\n', '')
                 else:
                     options[opt] = [el.strip(',') for el in value.split()]
                     if opt.find('mappings') >= 0:
