@@ -35,6 +35,10 @@ from tmvaconfig import TMVAType, ConfigFile
 conf = ConfigFile(conf)
 if conf.read() > 0:
     session = conf.get_session_config(session)
+else:
+    sys.exit('No usable sessions in config file')
+if not session:
+    sys.exit('Couldn\'t find session in config file')
 print '::: Training {} MVAs: {}\n{}'.format(len(session.methods),
                                             session.methods, '='*50)
 print session
