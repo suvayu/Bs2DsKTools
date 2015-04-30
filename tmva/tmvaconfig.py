@@ -183,7 +183,7 @@ class TMVAconfig(object):
         return TCut(self._return_if('_cut_both'))
 
     @cut_both.setter
-    def cut_both(self, value) :
+    def cut_both(self, value):
         if isinstance(value, str) or isinstance(value, TCut):
             self._cut_both = TCut(value)
         else:
@@ -201,7 +201,7 @@ class TMVAconfig(object):
         return c
 
     @cut_sig.setter
-    def cut_sig(self, value) :
+    def cut_sig(self, value):
         if isinstance(value, str) or isinstance(value, TCut):
             self._cut_sig = TCut(value)
         else:
@@ -219,7 +219,7 @@ class TMVAconfig(object):
         return c
 
     @cut_bkg.setter
-    def cut_bkg(self, value) :
+    def cut_bkg(self, value):
         if isinstance(value, str) or isinstance(value, TCut):
             self._cut_bkg = TCut(value)
         else:
@@ -235,7 +235,7 @@ class TMVAconfig(object):
         return self._return_if('_branch_mappings')
 
     @branch_mappings.setter
-    def branch_mappings(self, value) :
+    def branch_mappings(self, value):
         if isinstance(value, Iterable):
             self._branch_mappings = value
         else:
@@ -285,7 +285,8 @@ class ConfigFile(object):
             for opt in self._parser.options(session):
                 value = self._parser.get(session, opt)
                 if opt.find('cut') >= 0:
-                    options[opt] = TCut(value.replace('\n','')) # remove newlines
+                    # remove newlines
+                    options[opt] = TCut(value.replace('\n', ''))
                 else:
                     options[opt] = [el.strip(',') for el in value.split()]
                     if opt.find('mappings') >= 0:
@@ -293,7 +294,8 @@ class ConfigFile(object):
 
             # check if mandatory properties are present
             def _test_(key1, key2):
-                if key1 == True: return True
+                if key1:
+                    return key1
                 mandatory = ['factory_opts', 'training_opts']
                 return key1 in mandatory or key2 in mandatory
             if not reduce(_test_, options.keys()):
@@ -301,7 +303,7 @@ class ConfigFile(object):
 
             # make & set TMVAconfig object
             session_conf = TMVAconfig(session)
-            map(lambda kv : setattr(session_conf, kv[0], kv[1]), options.items())
+            map(lambda kv: setattr(session_conf, kv[0], kv[1]), options.items())
             setattr(self, session, session_conf)
 
     def write(self, filename):
@@ -318,4 +320,7 @@ class ConfigFile(object):
 
     def get_session_config(self, session):
         """Return session config"""
-        return getattr(self, session)
+        try:
+            return getattr(self, session)
+        except AttributeError:
+            return
