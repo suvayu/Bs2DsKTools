@@ -30,6 +30,19 @@ def _import_args(namespace, d={}):
     return d
 
 
+def is_glob(glob):
+    """True if `glob' has `*' or `?'."""
+    return reduce(lambda i, j: i or j, map(lambda x: x in glob, '*?'))
+
+
+def is_match(data, globs):
+    """True if `data' matches one of `globs'."""
+    from fnmatch import fnmatchcase
+    for glob in globs:
+        if fnmatchcase(data, glob):
+            return True
+
+
 def cacheobj(name, obj):
     import os
     import errno
