@@ -1,66 +1,56 @@
 #!/usr/bin/env python
 
 import argparse
-from utils import _import_args
+from utils import RawArgDefaultFormatter, is_match
 
-optparser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                     description=__doc__)
-optparser.add_argument('conffile', nargs='?', default='TMVA.conf', help='TMVA config file')
-optparser.add_argument('-l', dest='sglob', help='Session name glob for listing')
-optparser.add_argument('-s', dest='session', default=None, help='Session name')
-optparser.add_argument('--nvars', action='store_true', default=False, help='Normal variables')
-optparser.add_argument('--cvars', action='store_true', default=False, help='Combined variables')
+optparser.add_argument('sessions', nargs='+',  help='Session names (or globs)')
+optparser.add_argument('--conf', default='TMVA.conf', help='TMVA config file')
+optparser.add_argument('--nvars', action='store_true', default=False,
+                       help='Normal variables')
+optparser.add_argument('--cvars', action='store_true', default=False,
+                       help='Combined variables')
 group = optparser.add_mutually_exclusive_group()
-group.add_argument('--cuts_both', action='store_true', default=False, help='Common cuts')
-group.add_argument('--cuts_bkg', action='store_true', default=False, help='Background only cuts')
-group.add_argument('--cuts_sig', action='store_true', default=False, help='Signal only cuts')
-options = optparser.parse_args()
-locals().update(_import_args(options))
+group.add_argument('--cuts_both', action='store_true', default=False,
+                   help='Cuts common to both signal & background')
+group.add_argument('--cuts_bkg', action='store_true', help='Background only cuts')
+group.add_argument('--cuts_sig', action='store_true', help='Signal only cuts')
+opts = optparser.parse_args()
 
-import sys, os
-if conffile and not os.path.exists(conffile):
-    sys.exit('File not found: {}'.format(conffile))
+import sys
+import os
+if not os.path.exists(opts.conf):
+    sys.exit('File not found: {}'.format(opts.conf))
 
-from tmvaconfig import TMVAType, TMVAconfig, ConfigFile
-conf = ConfigFile(conffile)
+from tmvaconfig import ConfigFile
+conf = ConfigFile(opts.conf)
 n = conf.read()
 
-res = ''
-valid_sessions = conf.sessions()
+# filter out when not a match or invalid
+sessions = filter(lambda s: is_match(s, opts.sessions), conf.sessions())
 
-## list sessions
-if sglob:                       # find requested session
-    if reduce(lambda i,j: i or j, map(lambda x: x in sglob, '*?')): # glob
-        from fnmatch import fnmatchcase
-        for s in valid_sessions:
-            if fnmatchcase(s, sglob): res = ' '.join([res, s])
-    else:                           # exact
-        if sglob in valid_sessions: res = ' '.join([res, sglob])
-elif not session:               # print all sessions
-    for s in valid_sessions: res = ' '.join([res, s])
-
+res = ' '.join(sessions)
 if res:
-    print '# sessions\n{}'.format(res)
+    print res
+
+if not (opts.cvars or opts.nvars or opts.cuts_both or opts.cuts_sig
+        or opts.cuts_bkg):
     sys.exit(0)
 
 # helper
 one_per_line = lambda i: '\n'.join(i)
 
-## list session specifics
-assert(session)
-if session in valid_sessions:
+for session in sessions:
     config = conf.get_session_config(session)
-    if nvars: res = one_per_line(config.vars)
-    if cvars:
-        if res: res += '\n'
-        res += one_per_line(config.combined_vars)
-    if cuts_both: res = config.cut_both
-    if cuts_sig: res = config.cut_sig
-    if cuts_bkg: res = config.cut_bkg
-else:
-    sys.exit('Could not find session')
-
-if res:
-    print '# session: {}'.format(session)
-    print res
-    sys.exit(0)
+    print '\n{}:'.format(config._name)
+    if opts.nvars:
+        print one_per_line(config.vars)
+    if opts.cvars:
+        print one_per_line(config.combined_vars)
+    if opts.cuts_both:
+        print config.cut_both
+    if opts.cuts_sig:
+        print config.cut_sig
+    if opts.cuts_bkg:
+        print config.cut_bkg
