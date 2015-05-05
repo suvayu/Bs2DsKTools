@@ -8,7 +8,7 @@
     exit 1
 }
 
-for s in $(./confquery.py -l "$@" | tail -n 1); do
+for s in $(./confquery.py "$@"); do
     printf "Running TMVA session: %s\n" $s
     ./train.py -s $s -o dsk_train_out.root |& tee log && mv log $s/log || exit $?
 done
