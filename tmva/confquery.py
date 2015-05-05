@@ -30,9 +30,9 @@ n = conf.read()
 # filter out when not a match or invalid
 sessions = filter(lambda s: is_match(s, opts.sessions), conf.sessions())
 
-res = ' '.join(sessions)
-if res:
-    print res
+if not sessions:
+    sys.exit('No matching sessions!')
+print ' '.join(sessions)
 
 if not (opts.cvars or opts.nvars or opts.cuts_both or opts.cuts_sig
         or opts.cuts_bkg):
