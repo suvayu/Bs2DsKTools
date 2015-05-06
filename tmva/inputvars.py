@@ -248,15 +248,15 @@ if options.scatter:
     plotter.shrink2fit = False
     canvas = plotter.prep_canvas('corr_canvas')
     # if options.doprint:
-    #     canvas.Print('correlations.pdf[')
+    #     canvas.Print('correlation_grid.pdf[')
 
     for transform in transforms:
         plotter.draw_hist(hists[transform+'_corr'], opts)
         canvas.Update()
         if options.doprint:
-            canvas.Print('correlations_{}.png'.format(transform))
-            # canvas.Print('correlations.pdf')
+            canvas.Print('correlation_grid_{}.png'.format(transform))
+            # canvas.Print('correlation_grid.pdf')
 
     # if options.doprint:
-    #     canvas.Print('correlations.pdf]')
+    #     canvas.Print('correlation_grid.pdf]')
     del plotter, canvas
