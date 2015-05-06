@@ -90,6 +90,11 @@ ROOT.gStyle.SetHatchesSpacing(1)
 def _style(l):
     l[0].SetFillStyle(3345)
     l[1].SetFillStyle(3354)
+    try:
+        l[2].SetLineWidth(2)
+        l[3].SetLineWidth(2)
+    except IndexError:          # fails for probab & rarity
+        pass
 
 def _plot(plots, opts):
     plotter.draw_hist(plots, opts)
