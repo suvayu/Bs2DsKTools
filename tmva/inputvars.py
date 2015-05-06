@@ -56,16 +56,7 @@ rpath_tool = Rdir(fnames)
 # FIXME: only processes first file
 rfileconf = rfiles[0]
 
-from collections import OrderedDict
-transforms = OrderedDict({
-    'identity' : 'Identity',
-    'deco' : 'Decorrelate',
-    'pca' : 'PCA',
-    'uniform' : 'Uniform',
-    'uniform_deco' : 'Uniform+Decorrelate',
-    'gauss' : 'Gaussianise',
-    'gauss_deco' : 'Gaussianise+Decorrelate',
-})
+from config import transforms
 
 if transglob:
     # only process matching transforms

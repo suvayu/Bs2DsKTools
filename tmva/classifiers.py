@@ -47,12 +47,7 @@ rpath_tool = Rdir(fnames)
 # FIXME: only processes first file
 rfileconf = rfiles[0]
 
-from collections import OrderedDict
-classifiers = OrderedDict({
-    'BDTA': 'BDT w/ adaptive boost',
-    'BDTG': 'BDT w/ gradient boost',
-    'BDTB': 'BDT w/ bagging'
-})
+from config import classifiers
 
 if clnameglob:
     # only process matching classifiers
