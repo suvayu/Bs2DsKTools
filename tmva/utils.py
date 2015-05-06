@@ -32,7 +32,7 @@ def _import_args(namespace, d={}):
 
 def is_glob(glob):
     """True if `glob' has `*' or `?'."""
-    return reduce(lambda i, j: i or j, map(lambda x: x in glob, '*?'))
+    return '*' in glob or '?' in glob
 
 
 def is_match(data, globs):
