@@ -64,10 +64,16 @@ def cacheobj(name, obj):
 
 
 # ROOT utilities
-def th1integral(hist):
-    """Return integral of 1D histogram (exclude overflow & underflow)"""
+def th1integral(hist, bins=None):
+    """Return integral of 1D histogram (excludes overflow & underflow)
+
+       bins -- bin range to itegrate over (all bins when None)
+
+    """
     integral = 0.0
-    for bin in xrange(1, hist.GetNbinsX()+1):
+    if not bins:
+        bins = (1, hist.GetNbinsX())
+    for bin in xrange(bins[0], bins[1]+1):
         integral += hist.GetBinContent(bin) * hist.GetBinWidth(bin)
     return integral
 
