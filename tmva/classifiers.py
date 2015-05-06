@@ -99,9 +99,9 @@ def _plot(plots, opts):
 for classifier in classifiers:
     # TODO: KS test b/w train & test
     _plot(arrange(distribs[classifier], 4, predicate = _style),
-          arrange(['hist', 'hist', 'e1', 'e1'], 4))
+          [['hist', 'hist', 'e1', 'e1']])  # same as arrange(.., 4)
     if rarity or probab:
-        opts = arrange(['hist', 'hist'], 2)
+        opts = [['hist', 'hist']]  # same as arrange(.., 2)
     if rarity:
         _plot(arrange(rarity[classifier], 2, predicate = _style), opts)
     if probab:
