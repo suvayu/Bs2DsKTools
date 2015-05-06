@@ -78,6 +78,23 @@ def th1integral(hist, bins=None):
     return integral
 
 
+def th1signedsum(hist, bins=None):
+    """Return sum of bin contents of a 1D histogram
+
+       This is akin to a sum which respects the signs (+/-) of the bin
+       centres (excludes overflow & underflow).
+
+       bins -- bin range to sum over (all bins when None)
+
+    """
+    sum = 0.0
+    if not bins:
+        bins = (1, hist.GetNbinsX())
+    for bin in xrange(bins[0], bins[1]+1):
+        sum += hist.GetBinContent(bin) * hist.GetBinCenter(bin)
+    return sum
+
+
 def distance(hist, pt):
     """Calculate minimum distance from a given point"""
     dist = hist.GetXaxis().GetXmax()**2 + hist.GetYaxis().GetXmax()**2
