@@ -12,69 +12,69 @@
 """
 
 import argparse
-from utils import _import_args, RawArgDefaultFormatter
+from utils import RawArgDefaultFormatter
 
 optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                     description=__doc__)
-optparser.add_argument('files', metavar='file', nargs='+', help='ROOT file name')
+optparser.add_argument('files', metavar='file', nargs='+', help='ROOT file')
 optparser.add_argument('--config', dest='yamlfile',
                        default='tmva_output_description.yaml',
                        help='ROOT file description in yaml format')
 optparser.add_argument('-p', dest='doprint', action='store_true',
                        default=True, help='Print to png/pdf files')
-optparser.add_argument('-b', dest='batch', action='store_true',
-                       default=False, help='Batch mode')
+optparser.add_argument('-b', '--batch', action='store_true', help='Batch mode')
 optparser.add_argument('-t', dest='transglob', metavar='transform',
-                       default=None, help='Only plot matching transforms (globs allowed)')
+                       help='Only plot matching transforms (globs allowed)')
 optparser.add_argument('-d', dest='distribs', action='store_true',
-                       default=False, help='Plot input variable distributions')
+                       help='Plot input variable distributions')
 optparser.add_argument('-l', dest='lcorrns', action='store_true',
-                       default=False, help='Plot linear correlations')
+                       help='Plot linear correlations')
 optparser.add_argument('-v', dest='verbose', action='store_true',
-                       default=False, help='Print linear correlation matrices')
+                       help='Print linear correlation matrices')
 optparser.add_argument('-s', dest='scatter', action='store_true',
-                       default=False, help='Make correlation scatter plots')
+                       help='Make correlation scatter plots')
 options = optparser.parse_args()
-locals().update(_import_args(options))
 
 
 from pprint import pprint
 import sys
-if verbose and not lcorrns:
+if options.verbose and not options.lcorrns:
     print('Error: verbose depends on linear correlations!')
     optparser.print_help()
     sys.exit()
 
 from utils import plot_conf
-rfiles = plot_conf(yamlfile, 'TMVA.root', files)
-if not rfiles: sys.exit('Config parsing error.')
+rfiles = plot_conf(options.yamlfile, 'TMVA.root', options.files)
+if not rfiles:
+    sys.exit('Config parsing error.')
 
 from rplot.rdir import Rdir
-fnames = [ rfile[0]['file'] for rfile in rfiles ]
-rpath_tool = Rdir(fnames)
+fnames = [rfile[0]['file'] for rfile in rfiles]
+pathtool = Rdir(fnames)
 
 # FIXME: only processes first file
 rfileconf = rfiles[0]
 
 from config import transforms
 
-if transglob:
+if options.transglob:
     # only process matching transforms
     from fnmatch import fnmatchcase
     for key in transforms:
-        if not fnmatchcase(key, transglob): del transforms[key]
+        if not fnmatchcase(key, options.transglob):
+            del transforms[key]
 
 from fixes import ROOT
-if batch: ROOT.gROOT.SetBatch(True)
+ROOT.gROOT.SetBatch(options.batch)
 
 from utils import get_hists
 
 from rplot.rplot import Rplot, arrange, partition
 
 ## variable distributions
-if distribs:
+if options.distribs:
     # histogram order: signal, background (repeat for diff transforms)
-    distributions = get_hists(transforms, rfileconf, rpath_tool, robj_t = ROOT.TH1)
+    distributions = get_hists(transforms, rfileconf, pathtool, robj_t=ROOT.TH1)
 
     ROOT.gStyle.SetHatchesLineWidth(1)
     ROOT.gStyle.SetHatchesSpacing(2.5)
@@ -89,12 +89,14 @@ if distribs:
     plotter = Rplot(3, 3, 2000, 1200)
     plotter.alpha = 0.2
     canvas = plotter.prep_canvas()
-    if doprint: canvas.Print('transforms.pdf[')
+    if options.doprint:
+        canvas.Print('transforms.pdf[')
 
     def _plot_n_print(hlist):
         plotter.draw_hist(hlist, 'hist')
         canvas.Update()
-        if doprint: canvas.Print('transforms.pdf')
+        if options.doprint:
+            canvas.Print('transforms.pdf')
 
     for transform in transforms:
         if len(distributions[transform]) > plotter.nplots:
@@ -103,30 +105,31 @@ if distribs:
         else:
             _plot_n_print(distributions[transform])
 
-    if doprint: canvas.Print('transforms.pdf]')
+    if options.doprint:
+        canvas.Print('transforms.pdf]')
     del plotter, canvas
 
 
 ## correlation plots
-if lcorrns or scatter:
+if options.lcorrns or options.scatter:
     _filter = lambda string: lambda k: k.GetName().find(string) > 0
     sig_hists = get_hists(['{}_corr'.format(k) for k in transforms],
-                          rfileconf, rpath_tool, robj_t = ROOT.TH1,
-                          robj_p = _filter('Signal'))
+                          rfileconf, pathtool, robj_t=ROOT.TH1,
+                          robj_p=_filter('Signal'))
     bkg_hists = get_hists(['{}_corr'.format(k) for k in transforms],
-                          rfileconf, rpath_tool, robj_t = ROOT.TH1,
-                          robj_p = _filter('Background'))
-    ihists = get_hists(['file'], rfileconf, rpath_tool, robj_t = ROOT.TH1)
+                          rfileconf, pathtool, robj_t=ROOT.TH1,
+                          robj_p=_filter('Background'))
+    ihists = get_hists(['file'], rfileconf, pathtool, robj_t=ROOT.TH1)
 
     # triangular matrix indices for use w/ both cov matrices & scatter plots
     import numpy as np
-    dims = ihists['file'][0].GetXaxis().GetNbins() - 1 # nvars - 1 in corrn matrix
+    dims = ihists['file'][0].GetXaxis().GetNbins() - 1  # nvars - 1 in corrn matrix
     opts = np.empty(shape=(dims, dims), dtype=object)
     tril = np.tril_indices(dims)
     triu = np.triu_indices(dims)
 
 ## covariance matrices
-if lcorrns:
+if options.lcorrns:
     matrices = {}
     from utils import get_label
     for transform in transforms:
@@ -172,7 +175,8 @@ if lcorrns:
     canvas.SetBottomMargin(0.11)
     canvas.SetRightMargin(0.11)
     ROOT.gStyle.SetPaintTextFormat('2.f')
-    if doprint: canvas.Print('correlations.pdf[')
+    if options.doprint:
+        canvas.Print('correlations.pdf[')
     for transform in transforms:
         for hist in matrices[transform]:
             hist.SetStats(False)
@@ -180,7 +184,8 @@ if lcorrns:
             hist.SetMinimum(-95)
             hist.Draw('colz text')
             canvas.Update()
-            if doprint: canvas.Print('correlations.pdf')
+            if options.doprint:
+                canvas.Print('correlations.pdf')
     del canvas
 
     # correlation in input variables
@@ -193,20 +198,22 @@ if lcorrns:
         hist.SetStats(False)
         hist.Draw('colz text')
         canvas.Update()
-        if doprint: canvas.Print('correlations.pdf')
-    if doprint: canvas.Print('correlations.pdf]')
+        if options.doprint:
+            canvas.Print('correlations.pdf')
+    if options.doprint:
+        canvas.Print('correlations.pdf]')
     del canvas
 
-    if verbose:
+    if options.verbose:
         from utils import thn_print
         for transform in transforms:
             thn_print(matrices[transform])
 
 
 ## draw correlation plots
-if scatter:
+if options.scatter:
     # options
-    for idx in zip(*tril): # empty lower triangular
+    for idx in zip(*tril):  # empty lower triangular
         opts[idx] = []
 
     for idx in zip(*triu):
@@ -240,13 +247,16 @@ if scatter:
     plotter = Rplot(dims, dims, 5600, 5600)
     plotter.shrink2fit = False
     canvas = plotter.prep_canvas('corr_canvas')
-    # if doprint: canvas.Print('correlations.pdf[')
+    # if options.doprint:
+    #     canvas.Print('correlations.pdf[')
 
     for transform in transforms:
         plotter.draw_hist(hists[transform+'_corr'], opts)
         canvas.Update()
-        if doprint: canvas.Print('correlations_{}.png'.format(transform))
-        # if doprint: canvas.Print('correlations.pdf')
+        if options.doprint:
+            canvas.Print('correlations_{}.png'.format(transform))
+            # canvas.Print('correlations.pdf')
 
-    # if doprint: canvas.Print('correlations.pdf]')
+    # if options.doprint:
+    #     canvas.Print('correlations.pdf]')
     del plotter, canvas
