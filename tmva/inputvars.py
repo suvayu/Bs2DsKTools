@@ -128,7 +128,7 @@ if lcorrns or scatter:
 ## covariance matrices
 if lcorrns:
     matrices = {}
-    from utils import get_labels
+    from utils import get_label
     for transform in transforms:
         corrn = [
             ROOT.TH2D(transform+'_sig', 'Correlation matrix after {} transform (sig)'
@@ -151,8 +151,8 @@ if lcorrns:
                     else:
                         name = name[5:name.find('_Background')]
                     varnames = name.split('_vs_', 1)
-                    corrn[i].GetXaxis().SetBinLabel(idx[0]+1, get_labels(varnames[1]))
-                    corrn[i].GetYaxis().SetBinLabel(idx[1]+1, get_labels(varnames[0]))
+                    corrn[i].GetXaxis().SetBinLabel(idx[0]+1, get_label(varnames[1]))
+                    corrn[i].GetYaxis().SetBinLabel(idx[1]+1, get_label(varnames[0]))
 
             for i in xrange(len(corrn)):
                 corrn[i].SetBinContent(idx[0]+1, idx[1]+1, 100*hist[i].GetCorrelationFactor())
