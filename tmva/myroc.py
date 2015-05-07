@@ -1,25 +1,32 @@
 #!/usr/bin/env python
-"""Draw classifier comparison plots (ROC curves)"""
+"""Draw ROC (Receiver Operating Characteristic) curves
+
+Draws ROC curves for different MVA classifiers from the TMVA output
+files.  It generates the curves by looking at efficiencies for
+different MVA classifier cuts from a ROOT tree where the classifier
+variable is present as a branch.
+
+"""
 
 import argparse
 from utils import _import_args, RawArgDefaultFormatter
 
 optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                     description=__doc__)
-optparser.add_argument('files', metavar='file', nargs='+', help='ROOT file name')
+optparser.add_argument('files', metavar='file', nargs='+', help='ROOT file')
 optparser.add_argument('--config', dest='yamlfile',
                        default='tmva_output_description.yaml',
                        help='ROOT file description in yaml format')
-optparser.add_argument('-r', dest='axis_range', type=float, default=0.6, help='Axis range')
+optparser.add_argument('-r', dest='axis_range', type=float, default=0.6,
+                       help='Axis range')
 optparser.add_argument('-p', dest='doprint', action='store_true',
-                       default=True, help='Print to png/pdf files')
+                       help='Print to png/pdf files')
 optparser.add_argument('--mpl', dest='usempl', action='store_true',
-                       default=False, help='Use Matplotlib')
-optparser.add_argument('-b', dest='batch', action='store_true',
-                       default=False, help='Batch mode')
+                       help='Use Matplotlib')
+optparser.add_argument('-b', '--batch', action='store_true', help='Batch mode')
 optparser.add_argument('-c', dest='clnameglob', metavar='classifier',
-                       default=None, help='Only plot matching classifiers (globs allowed)')
-optparser.add_argument('-m', dest='marks', action='store_true',
+                       help='Only plot matching classifiers (globs allowed)')
+optparser.add_argument('-m', '--marks', action='store_true',
                        help='Toggle markers')
 options = optparser.parse_args()
 locals().update(_import_args(options))
@@ -28,22 +35,24 @@ locals().update(_import_args(options))
 import sys
 
 from utils import plot_conf
-rfiles = plot_conf(yamlfile, 'TMVA.root', files)
-if not rfiles: sys.exit('Config parsing error.')
+rfiles = plot_conf(options.yamlfile, 'TMVA.root', options.files)
+if not rfiles:
+    sys.exit('Config parsing error.')
 
 # FIXME: only processes first file
 rfileconf = rfiles[0]
 
 from config import classifiers, sessions
 
-if clnameglob:
+if options.clnameglob:
     # only process matching classifiers
     from fnmatch import fnmatchcase
     for key in classifiers:
-        if not fnmatchcase(key, clnameglob): del classifiers[key]
+        if not fnmatchcase(key, options.clnameglob):
+            del classifiers[key]
 
 from fixes import ROOT
-ROOT.gROOT.SetBatch(batch)
+ROOT.gROOT.SetBatch(options.batch)
 
 fnames = [f[0]['file'] for f in rfiles]
 
@@ -94,22 +103,28 @@ def get_hists(classifiers, rfile, name, marks):
 # from utils import thn_print
 rocs, markers = [], []
 for i, rfileconf in enumerate(rfiles):
-    roc, marks = get_hists(classifiers, rfileconf[0]['file'], 'TestTree', marks)
+    roc, marks = get_hists(classifiers, rfileconf[0]['file'], 'TestTree',
+                           options.marks)
     rocs.append(roc)
     markers.append(marks)
 
-if usempl:                      # FIXME: no idea if it works
+# config
+axis_range = options.axis_range
+doprint = options.doprint
+
+if options.usempl:                      # FIXME: no idea if it works
     # Matplotlib
     import matplotlib.pyplot as plt
-    plt.rc('font', family='Liberation Sans') # choose font
-    plt.rc('mathtext', default='regular')    # use default font for math
+    plt.rc('font', family='Liberation Sans')  # choose font
+    plt.rc('mathtext', default='regular')     # use default font for math
 
     # ROOT to Matplotlib translation layer
     import rootpy.plotting.root2matplotlib as rplt
 
     # PDF backend
     from matplotlib.backends.backend_pdf import PdfPages
-    if doprint: pp = PdfPages('ROC_curves_mpl.pdf')
+    if doprint:
+        pp = PdfPages('ROC_curves_mpl.pdf')
 
     # hack
     from rootpy.plotting.hist import Hist
@@ -135,11 +150,12 @@ if usempl:                      # FIXME: no idea if it works
     if doprint:
         pp.savefig()
         pp.close()
-    elif not batch:
+    elif not options.batch:
         plt.show()
 else:
     canvas = ROOT.TCanvas('canvas', '', 800, 600)
-    if doprint: canvas.Print('my_ROC_curves.pdf[')
+    if doprint:
+        canvas.Print('my_ROC_curves.pdf[')
 
     cols = (ROOT.kAzure, ROOT.kRed, ROOT.kBlack)
     coln = 0
@@ -156,7 +172,7 @@ else:
             print '=> {}:: integral: {}, distance: {}'.format(
                 cl,
                 th1integral(hist),
-                distance(hist, (1,1))
+                distance(hist, (1, 1))
             )
             hist.SetLineStyle(i+1)
             hist.SetLineColor(cols[coln])
@@ -183,7 +199,7 @@ else:
     legend.Draw()
     canvas.SetGrid(1, 1)
     canvas.Update()
-    if doprint: canvas.Print('my_ROC_curves.pdf')
-
-    if doprint: canvas.Print('my_ROC_curves.pdf]')
+    if doprint:
+        canvas.Print('my_ROC_curves.pdf')
+        canvas.Print('my_ROC_curves.pdf]')
     del canvas

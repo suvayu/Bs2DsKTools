@@ -1,24 +1,29 @@
 #!/usr/bin/env python
-"""Draw classifier comparison plots (ROC curves)"""
+"""Draw ROC (Receiver Operating Characteristic) curves
+
+Draws ROC curves for different MVA classifiers from the TMVA output
+files.  It just reads and plots the histograms from the file.
+
+"""
 
 import argparse
 from utils import _import_args, RawArgDefaultFormatter
 
 optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                     description=__doc__)
-optparser.add_argument('files', metavar='file', nargs='+', help='ROOT file name')
+optparser.add_argument('files', metavar='file', nargs='+', help='ROOT file')
 optparser.add_argument('--config', dest='yamlfile',
                        default='tmva_output_description.yaml',
                        help='ROOT file description in yaml format')
-optparser.add_argument('-r', dest='axis_range', type=float, default=0.6, help='Axis range')
+optparser.add_argument('-r', dest='axis_range', type=float, default=0.6,
+                       help='Axis range lower bound')
 optparser.add_argument('-p', dest='doprint', action='store_true',
-                       default=True, help='Print to png/pdf files')
+                       help='Print to png/pdf files')
 optparser.add_argument('-m', dest='usempl', action='store_true',
-                       default=False, help='Use Matplotlib')
-optparser.add_argument('-b', dest='batch', action='store_true',
-                       default=False, help='Batch mode')
+                       help='Use Matplotlib')
+optparser.add_argument('-b', '--batch', action='store_true', help='Batch mode')
 optparser.add_argument('-c', dest='clnameglob', metavar='classifier',
-                       default=None, help='Only plot matching classifiers (globs allowed)')
+                       help='Only plot matching classifiers (globs allowed)')
 options = optparser.parse_args()
 locals().update(_import_args(options))
 
@@ -26,11 +31,12 @@ locals().update(_import_args(options))
 import sys
 
 from utils import plot_conf
-rfiles = plot_conf(yamlfile, 'TMVA.root', files)
-if not rfiles: sys.exit('Config parsing error.')
+rfiles = plot_conf(options.yamlfile, 'TMVA.root', options.files)
+if not rfiles:
+    sys.exit('Config parsing error.')
 
 from rplot.rdir import Rdir
-fnames = [ rfile[0]['file'] for rfile in rfiles ]
+fnames = [rfile[0]['file'] for rfile in rfiles]
 rpath_tool = Rdir(fnames)
 
 # FIXME: only processes first file
@@ -38,42 +44,49 @@ rfileconf = rfiles[0]
 
 from config import classifiers, sessions
 
-if clnameglob:
+if options.clnameglob:
     # only process matching classifiers
     from fnmatch import fnmatchcase
     for key in classifiers:
-        if not fnmatchcase(key, clnameglob): del classifiers[key]
+        if not fnmatchcase(key, options.clnameglob):
+            del classifiers[key]
 
 from fixes import ROOT
-if batch: ROOT.gROOT.SetBatch(True)
+ROOT.gROOT.SetBatch(options.batch)
 
 from utils import get_hists
 
+
 def _filter(string):
-    matches  = ['MVA_{}{}'.format(cl, string) for cl in classifiers]
+    matches = ['MVA_{}{}'.format(cl, string) for cl in classifiers]
     return lambda k: k.GetName() in matches
 
 fnames = [f[0]['file'] for f in rfiles]
 rocs = []
 for i, rfileconf in enumerate(rfiles):
     # roc curve: MVA_<name>_rejBvsS
-    roc = get_hists(classifiers, rfileconf, rpath_tool, robj_t = ROOT.TH1,
-                    robj_p = _filter('_rejBvsS'))
-    roc = dict((k, v[0]) for k, v in roc.iteritems()) # cleanup dict
+    roc = get_hists(classifiers, rfileconf, rpath_tool, robj_t=ROOT.TH1,
+                    robj_p=_filter('_rejBvsS'))
+    roc = dict((k, v[0]) for k, v in roc.iteritems())  # cleanup dict
     rocs.append(roc)
 
-if usempl:
+# config
+axis_range = options.axis_range
+doprint = options.doprint
+
+if options.usempl:
     # Matplotlib
     import matplotlib.pyplot as plt
-    plt.rc('font', family='Liberation Sans') # choose font
-    plt.rc('mathtext', default='regular')    # use default font for math
+    plt.rc('font', family='Liberation Sans')  # choose font
+    plt.rc('mathtext', default='regular')     # use default font for math
 
     # ROOT to Matplotlib translation layer
     import rootpy.plotting.root2matplotlib as rplt
 
     # PDF backend
     from matplotlib.backends.backend_pdf import PdfPages
-    if doprint: pp = PdfPages('ROC_curves_mpl.pdf')
+    if doprint:
+        pp = PdfPages('ROC_curves_mpl.pdf')
 
     # hack
     from rootpy.plotting.hist import Hist
@@ -88,7 +101,7 @@ if usempl:
         axes.set_ylim(axis_range, 1)
         axes.set_xlabel('Signal selection efficiency')
         axes.set_ylabel('Background rejection efficiency')
-        axes.xaxis.set_label_coords(0.9,-0.05)
+        axes.xaxis.set_label_coords(0.9, -0.05)
         for key, hist in roc.iteritems():
             info = hist_info(hist)
             hist = pycopy(Hist, ROOT.TH1, hist, *info[0], **info[1])
@@ -99,11 +112,12 @@ if usempl:
     if doprint:
         pp.savefig()
         pp.close()
-    elif not batch:
+    elif not options.batch:
         plt.show()
 else:
     canvas = ROOT.TCanvas('canvas', '', 800, 600)
-    if doprint: canvas.Print('ROC_curves.pdf[')
+    if doprint:
+        canvas.Print('ROC_curves.pdf[')
 
     cols = (ROOT.kAzure, ROOT.kRed, ROOT.kBlack)
     legend = ROOT.TLegend(0.12, 0.15, 0.8, 0.6)
@@ -124,7 +138,7 @@ else:
                 info = fnames[i]
             text = '{} ({})'.format(classifiers[hist[0]], info)
             legend.AddEntry(hist[1], text, 'l')
-            if i ==0 and j == 0:
+            if i == 0 and j == 0:
                 hist[1].SetTitle('MVA classifier ROC curves')
                 hist[1].Draw('c')
             else:
@@ -133,7 +147,9 @@ else:
     legend.Draw()
     canvas.SetGrid(1, 1)
     canvas.Update()
-    if doprint: canvas.Print('ROC_curves.pdf')
+    if doprint:
+        canvas.Print('ROC_curves.pdf')
 
-    if doprint: canvas.Print('ROC_curves.pdf]')
+    if doprint:
+        canvas.Print('ROC_curves.pdf]')
     del canvas
