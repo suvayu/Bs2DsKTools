@@ -3,38 +3,29 @@
 """Train TMVA algorithm"""
 
 import argparse
-from utils import _import_args, RawArgDefaultFormatter
+from utils import RawArgDefaultFormatter
 
 optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                     description=__doc__)
-optparser.add_argument('filename', nargs='?', default=None, help='ROOT file')
-optparser.add_argument('-s', dest='session', required=True,
-                       help='Session name')
-optparser.add_argument('--sig', dest='sig_tree', help='Signal tree name '
-                       '(mandatory when filename present)')
-optparser.add_argument('--bkg', dest='bkg_tree', help='Background tree name '
-                       '(mandatory when filename present)')
+optparser.add_argument('session', required=True, help='Session name')
+optparser.add_argument('--sigtree', default='SigTree',
+                       help='Signal tree name')
+optparser.add_argument('--bkgtree', default='BkgTree',
+                       help='Background tree name')
 optparser.add_argument('-o', dest='out', required=True, help='Output file')
 optparser.add_argument('-c', dest='conf', default='TMVA.conf',
                        help='TMVA config file')
 options = optparser.parse_args()
-locals().update(_import_args(options))
+
 # variables for future proofing
 wdir = 'weights'                # weights directory
 
 import sys
-import os
-if filename and not os.path.exists(filename):
-    sys.exit('File not found: {}'.format(filename))
-if filename and not (sig_tree and bkg_tree):
-    # required when input file is provided as positional argument
-    sys.exit('Missing signal and background tree names')
-
 from tmvaconfig import TMVAType, ConfigFile
 # read config
-conf = ConfigFile(conf)
+conf = ConfigFile(options.conf)
 if conf.read() > 0:
-    session = conf.get_session_config(session)
+    session = conf.get_session_config(options.session)
 else:
     sys.exit('No usable sessions in config file')
 if not session:
@@ -48,15 +39,10 @@ from fixes import ROOT
 ROOT.gROOT.SetBatch(True)
 
 # files & trees
-if not filename:                # config file
-    tree_s = ROOT.TChain(sig_tree if sig_tree else 'TreeSig')
-    map(lambda f: tree_s.Add(f), session.sig_file)
-    tree_b = ROOT.TChain(bkg_tree if bkg_tree else 'TreeBkg')
-    map(lambda f: tree_b.Add(f), session.bkg_file)
-else:                           # CLI options
-    ifile = ROOT.TFile.Open(filename)
-    tree_s = ifile.Get(sig_tree)
-    tree_b = ifile.Get(bkg_tree)
+tree_s = ROOT.TChain(options.sigtree)
+map(lambda f: tree_s.Add(f), session.sig_file)
+tree_b = ROOT.TChain(options.bkgtree)
+map(lambda f: tree_b.Add(f), session.bkg_file)
 
 if not tree_s or not tree_b:
     sys.exit('Unable to read input trees.')
@@ -76,16 +62,16 @@ tmpfile = ROOT.TFile.Open('{}-{}.root'.format(
 # will fail.  So copy selection to a tree in a temporary file, and
 # pass that to TMVA::Factory(..).
 clone_tree_s = tree_s.CopyTree(str(session.cut_sig))
-clone_tree_s.SetName('SigTree')
+clone_tree_s.SetName(options.sigtree)
 clone_tree_s.Write()
 clone_tree_b = tree_b.CopyTree(str(session.cut_bkg))
-clone_tree_b.SetName('BkgTree')
+clone_tree_b.SetName(options.bkgtree)
 clone_tree_b.Write()
 
 del tree_s, tree_b
 tree_s, tree_b = clone_tree_s, clone_tree_b
 
-ofile = ROOT.TFile.Open(out, 'recreate')
+ofile = ROOT.TFile.Open(options.out, 'recreate')
 
 # instantiate TMVA
 ROOT.TMVA.Tools.Instance()
@@ -141,4 +127,4 @@ import shutil
 oldwdir = '{}/{}'.format(session._name, wdir)
 shutil.rmtree(oldwdir, True)
 os.rename(wdir, oldwdir)
-os.rename(out, '{}/{}'.format(session._name, out))
+os.rename(options.out, '{}/{}'.format(session._name, options.out))
