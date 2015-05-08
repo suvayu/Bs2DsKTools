@@ -61,16 +61,28 @@ else:                           # CLI options
 if not tree_s or not tree_b:
     sys.exit('Unable to read input trees.')
 
+# NOTE: This is to ignore the security warning from os.tmpnam.  There
+# is no risk since I `recreate' the TFile.
+import warnings
+warnings.filterwarnings(action='ignore', category=RuntimeWarning,
+                        message='tmpnam is a potential security risk.*')
+from time import strftime, gmtime
+tmpfile = ROOT.TFile.Open('{}-{}.root'.format(
+    os.tmpnam(), strftime('%y-%m-%d-%H%M%S', gmtime())), 'recreate')
+
 # Apply selection cuts here instead of PrepareTrainingAndTestTree().
 # If selection involves a branch present in only one of the trees, it
-# will fail.  So use entrylist to enable only selected entries before
-# hand.
-tree_s.Draw('>>entries_s', session.cut_sig, 'entrylist')
-tree_b.Draw('>>entries_b', session.cut_bkg, 'entrylist')
-entries_s = ROOT.gROOT.FindObject('entries_s')
-entries_b = ROOT.gROOT.FindObject('entries_b')
-tree_s.SetEntryList(entries_s)
-tree_b.SetEntryList(entries_b)
+# will fail.  So copy selection to a tree in a temporary file, and
+# pass that to TMVA::Factory(..).
+clone_tree_s = tree_s.CopyTree(str(session.cut_sig))
+clone_tree_s.SetName('SigTree')
+clone_tree_s.Write()
+clone_tree_b = tree_b.CopyTree(str(session.cut_bkg))
+clone_tree_b.SetName('BkgTree')
+clone_tree_b.Write()
+
+del tree_s, tree_b
+tree_s, tree_b = clone_tree_s, clone_tree_b
 
 ofile = ROOT.TFile.Open(out, 'recreate')
 
@@ -109,6 +121,10 @@ factory.EvaluateAllMethods()
 ofile.Close()
 
 print '::: Training MVAs done!'
+
+# remove temporary file
+tmpfile.Close()
+os.remove(tmpfile.GetName())
 
 # move output to session directory
 print '::: Moving all output to {}'.format(session._name)
