@@ -64,8 +64,6 @@ def add_var_set_br_addr(varlist, reader_method, intree):
         allvars[expr[0]] = [array('f', [0.]), TTreeFormula(expr[0], expr[1],
                                                            itree)]
         reader_method(var, allvars[expr[0]][0])
-        if simple:
-            intree.SetBranchAddress(var, allvars[expr[0]][0])
 
 # input tree
 itree = ifile.Get(name)
