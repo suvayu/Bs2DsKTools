@@ -61,6 +61,17 @@ else:                           # CLI options
 if not tree_s or not tree_b:
     sys.exit('Unable to read input trees.')
 
+# Apply selection cuts here instead of PrepareTrainingAndTestTree().
+# If selection involves a branch present in only one of the trees, it
+# will fail.  So use entrylist to enable only selected entries before
+# hand.
+tree_s.Draw('>>entries_s', session.cut_sig, 'entrylist')
+tree_b.Draw('>>entries_b', session.cut_bkg, 'entrylist')
+entries_s = ROOT.gROOT.FindObject('entries_s')
+entries_b = ROOT.gROOT.FindObject('entries_b')
+tree_s.SetEntryList(entries_s)
+tree_b.SetEntryList(entries_b)
+
 ofile = ROOT.TFile.Open(out, 'recreate')
 
 # instantiate TMVA
@@ -83,7 +94,7 @@ if session.sigwt:
     factory.SetSignalWeightExpression(session.sigwt)
 
 # selection cuts, if any
-factory.PrepareTrainingAndTestTree(session.cut_sig, session.cut_bkg,
+factory.PrepareTrainingAndTestTree(ROOT.TCut(''),
                                    '!V:' + ':'.join(session.training_opts))
 
 # book methods
