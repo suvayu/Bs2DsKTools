@@ -316,10 +316,8 @@ class ConfigFile(object):
                 raise ParsingError('Mandatory field, methods, is absent.')
             for opt in self._parser.options(session):
                 value = self._parser.get(session, opt)
-                if opt.find('cut') >= 0:
-                    # remove newlines
-                    options[opt] = TCut(value.replace('\n', ''))
-                elif opt.find('wt') > 0:
+                if opt.find('cut') == 0 or opt.find('wt') > 0:
+                    # remove newlines from selection string
                     options[opt] = value.replace('\n', '')
                 else:
                     options[opt] = [el.strip(',') for el in value.split()]
