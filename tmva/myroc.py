@@ -158,7 +158,6 @@ else:
         canvas.Print('my_ROC_curves.pdf[')
 
     cols = (ROOT.kAzure, ROOT.kRed, ROOT.kBlack)
-    coln = 0
     legend = ROOT.TLegend(0.12, 0.15, 0.8, 0.6)
     legend.SetHeader('MVA classifiers')
     legend.SetBorderSize(0)
@@ -167,6 +166,7 @@ else:
 
     from utils import th1integral, distance
     for i, roc in enumerate(rocs):
+        coln = 0
         for cl, hist in roc.iteritems():
             # metrics
             print '=> {}:: integral: {}, distance: {}'.format(
