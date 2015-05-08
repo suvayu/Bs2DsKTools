@@ -3,29 +3,25 @@
 """Apply trained MVA"""
 
 import argparse
-from utils import _import_args, RawArgDefaultFormatter
+from utils import RawArgDefaultFormatter
 
 optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                     description=__doc__)
-optparser.add_argument('filename', help='ROOT file')
-optparser.add_argument('-s', dest='session',  required=True,
-                       help='Session name')
-optparser.add_argument('-o', dest='out', help='ROOT file with output')
-optparser.add_argument('-n', dest='name', help='Input tree name')
-optparser.add_argument('-v', dest='verbose', action='store_true',
-                       help='Increase verbosity')
+optparser.add_argument('filename', help='Input ROOT file')
+optparser.add_argument('-s', '--session', required=True, help='Session name')
+optparser.add_argument('-o', '--out', required=True, help='Output ROOT file')
+optparser.add_argument('-n', '--name', required=True, help='Input tree name')
 options = optparser.parse_args()
-locals().update(_import_args(options))
 
 import sys
 import os
-if not os.path.exists(filename):
-    sys.exit('File not found: {}'.format(filename))
+if not os.path.exists(options.filename):
+    sys.exit('File not found: {}'.format(options.filename))
 
 from tmvaconfig import ConfigFile
 conf = ConfigFile('TMVA.conf')
 if conf.read() > 0:             # read config
-    session = conf.get_session_config(session)
+    session = conf.get_session_config(options.session)
 print '::: Applying {} MVAs: {}\n{}'.format(len(session.methods),
                                             session.methods, '='*50)
 print session
@@ -40,8 +36,8 @@ ROOT.TMVA.Tools.Instance()
 reader = ROOT.TMVA.Reader('!Color:!Silent')
 
 # files
-ifile = ROOT.TFile.Open(filename, 'read')
-ofile = ROOT.TFile.Open(out, 'recreate')
+ifile = ROOT.TFile.Open(options.filename, 'read')
+ofile = ROOT.TFile.Open(options.out, 'recreate')
 
 from ROOT import TTreeFormula, TH1D
 from array import array
@@ -61,12 +57,14 @@ def add_var_set_br_addr(varlist, reader_method, intree):
         simple = (len(expr) == 1)
         if simple:
             expr = expr * 2  # expr same as key
-        allvars[expr[0]] = [array('f', [0.]), TTreeFormula(expr[0], expr[1],
-                                                           itree)]
+        allvars[expr[0]] = [
+            array('f', [0.]),
+            TTreeFormula(expr[0], expr[1], itree)
+        ]
         reader_method(var, allvars[expr[0]][0])
 
 # input tree
-itree = ifile.Get(name)
+itree = ifile.Get(options.name)
 allvars = {}                    # varname : (value, expr)
 # trained variables
 add_var_set_br_addr(session.all_vars(), reader.AddVariable, itree)
