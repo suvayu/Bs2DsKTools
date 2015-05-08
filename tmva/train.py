@@ -66,9 +66,10 @@ if not tree_s or not tree_b:
 import warnings
 warnings.filterwarnings(action='ignore', category=RuntimeWarning,
                         message='tmpnam is a potential security risk.*')
-from time import strftime, gmtime
+import os
+from time import strftime, localtime
 tmpfile = ROOT.TFile.Open('{}-{}.root'.format(
-    os.tmpnam(), strftime('%y-%m-%d-%H%M%S', gmtime())), 'recreate')
+    os.tmpnam(), strftime('%y-%m-%d-%H%M%S%Z', localtime())), 'recreate')
 
 # Apply selection cuts here instead of PrepareTrainingAndTestTree().
 # If selection involves a branch present in only one of the trees, it
