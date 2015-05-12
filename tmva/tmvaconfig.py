@@ -324,6 +324,14 @@ class ConfigFile(object):
                     if opt.find('mappings') >= 0:
                         options[opt] = [m.split(':') for m in options[opt]]
 
+            try:
+                if options['xvalidate'][0].lower() in ['true', 'on', 'yes']:
+                    options['xvalidate'] = True
+                else:
+                    options['xvalidate'] = False
+            except KeyError:
+                options['xvalidate'] = False
+
             # check if mandatory properties are present
             def _test_(key1, key2):
                 if key1:
