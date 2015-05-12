@@ -32,11 +32,15 @@ class TMVAconfig(object):
     def __str__(self):
         text = 'Training session : {}\n{}\n'.format(self._name, '-'*50)
         props = [prop for prop in vars(TMVAconfig) if prop.find('_') != 0]
-        props += [method for method in self.methods]
+        props += [prop for prop in vars(self) if prop.find('_') != 0]
         props.sort()
         for opt in props:
-            text += '{0:<{width}s} : {1:<s}\n'\
-                    .format(opt, getattr(self, opt), width = 16)
+            value = getattr(self, opt)
+            if opt.find('cut') == 0:
+                value = str(value)
+            else:
+                value = value
+            text += '{:<{width}s} : {:<}\n'.format(opt, value, width=16)
         return text
 
     def _return_if(self, prop):
