@@ -308,13 +308,16 @@ class ConfigFile(object):
         # parse options
         self._sessions = self._parser.sections()
         for session in self._sessions:
+            optkeys = self._parser.options(session)
             options = {}
-            if 'methods' in self._parser.options(session):
-                method_opts = [el.strip(',') for el in
-                               self._parser.get(session, 'methods').split()]
+            if 'methods' in optkeys:
+                methods = [el.strip(',') for el in
+                           self._parser.get(session, 'methods').split()]
+                if not reduce(lambda res, i: res and i in optkeys, methods):
+                    raise ParsingError('No options for one of the MVA methods')
             else:
                 raise ParsingError('Mandatory field, methods, is absent.')
-            for opt in self._parser.options(session):
+            for opt in optkeys:
                 value = self._parser.get(session, opt)
                 if opt.find('cut') == 0 or opt.find('wt') > 0:
                     # remove newlines from selection string
