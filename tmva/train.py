@@ -7,7 +7,7 @@ from utils import RawArgDefaultFormatter
 
 optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                     description=__doc__)
-optparser.add_argument('session', required=True, help='Session name')
+optparser.add_argument('session', help='Session name')
 optparser.add_argument('--sigtree', default='SigTree',
                        help='Signal tree name')
 optparser.add_argument('--bkgtree', default='BkgTree',
