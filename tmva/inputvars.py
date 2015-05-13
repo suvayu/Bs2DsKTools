@@ -55,6 +55,11 @@ pathtool = Rdir(fnames)
 # FIXME: only processes first file
 rfileconf = rfiles[0]
 
+# guess session from file name
+from utils import session_from_path
+session = session_from_path(rfileconf[0]['file'])
+prefix = 'plots/{}'.format(session)
+
 from config import transforms
 
 if options.transglob:
@@ -90,13 +95,13 @@ if options.distribs:
     plotter.alpha = 0.2
     canvas = plotter.prep_canvas()
     if options.doprint:
-        canvas.Print('transforms.pdf[')
+        canvas.Print('{}_transforms.pdf['.format(prefix))
 
     def _plot_n_print(hlist):
         plotter.draw_hist(hlist, 'hist')
         canvas.Update()
         if options.doprint:
-            canvas.Print('transforms.pdf')
+            canvas.Print('{}_transforms.pdf'.format(prefix))
 
     for transform in transforms:
         if len(distributions[transform]) > plotter.nplots:
@@ -106,7 +111,7 @@ if options.distribs:
             _plot_n_print(distributions[transform])
 
     if options.doprint:
-        canvas.Print('transforms.pdf]')
+        canvas.Print('{}_transforms.pdf]'.format(prefix))
     del plotter, canvas
 
 
@@ -176,7 +181,7 @@ if options.lcorrns:
     canvas.SetRightMargin(0.11)
     ROOT.gStyle.SetPaintTextFormat('2.f')
     if options.doprint:
-        canvas.Print('correlations.pdf[')
+        canvas.Print('{}_correlations.pdf['.format(prefix))
     for transform in transforms:
         for hist in matrices[transform]:
             hist.SetStats(False)
@@ -185,7 +190,7 @@ if options.lcorrns:
             hist.Draw('colz text')
             canvas.Update()
             if options.doprint:
-                canvas.Print('correlations.pdf')
+                canvas.Print('{}_correlations.pdf'.format(prefix))
     del canvas
 
     # correlation in input variables
@@ -199,9 +204,9 @@ if options.lcorrns:
         hist.Draw('colz text')
         canvas.Update()
         if options.doprint:
-            canvas.Print('correlations.pdf')
+            canvas.Print('{}_correlations.pdf'.format(prefix))
     if options.doprint:
-        canvas.Print('correlations.pdf]')
+        canvas.Print('{}_correlations.pdf]'.format(prefix))
     del canvas
 
     if options.verbose:
@@ -248,15 +253,15 @@ if options.scatter:
     plotter.shrink2fit = False
     canvas = plotter.prep_canvas('corr_canvas')
     # if options.doprint:
-    #     canvas.Print('correlation_grid.pdf[')
+    #     canvas.Print('{}_correlation_grid.pdf['.format(prefix))
 
     for transform in transforms:
         plotter.draw_hist(hists[transform+'_corr'], opts)
         canvas.Update()
         if options.doprint:
-            canvas.Print('correlation_grid_{}.png'.format(transform))
-            # canvas.Print('correlation_grid.pdf')
+            canvas.Print('{}_correlation_grid_{}.png'.format(prefix, transform))
+            # canvas.Print('{}_correlation_grid.pdf'.format(prefix))
 
     # if options.doprint:
-    #     canvas.Print('correlation_grid.pdf]')
+    #     canvas.Print('{}_correlation_grid.pdf]'.format(prefix))
     del plotter, canvas

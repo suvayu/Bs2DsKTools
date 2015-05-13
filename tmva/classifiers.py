@@ -53,6 +53,11 @@ rpath_tool = Rdir(fnames)
 # FIXME: only processes first file
 rfileconf = rfiles[0]
 
+# guess session from file name
+from utils import session_from_path
+session = session_from_path(rfileconf[0]['file'])
+prefix = 'plots/{}'.format(session)
+
 from config import classifiers
 
 if options.clnameglob:
@@ -96,7 +101,7 @@ plotter.line_colours = (ROOT.kAzure-6, ROOT.kRed+2, ROOT.kAzure-6, ROOT.kRed+2)
 plotter.markers = (ROOT.kPlus, ROOT.kPlus, ROOT.kPlus, ROOT.kPlus)
 canvas = plotter.prep_canvas()
 if options.doprint:
-    canvas.Print('overtraining.pdf[')
+    canvas.Print('{}_overtraining.pdf['.format(prefix))
 
 ROOT.gStyle.SetHatchesLineWidth(1)
 ROOT.gStyle.SetHatchesSpacing(1)
@@ -116,7 +121,7 @@ def _plot(plots, opts):
     plotter.draw_hist(plots, opts)
     canvas.Update()
     if options.doprint:
-        canvas.Print('overtraining.pdf')
+        canvas.Print('{}_overtraining.pdf'.format(prefix))
 
 for classifier in classifiers:
     # TODO: KS test b/w train & test
@@ -130,5 +135,5 @@ for classifier in classifiers:
         _plot(arrange(probab[classifier], 2, predicate=_style), opts)
 
 if options.doprint:
-    canvas.Print('overtraining.pdf]')
+    canvas.Print('{}_overtraining.pdf]'.format(prefix))
 del canvas

@@ -42,6 +42,11 @@ rpath_tool = Rdir(fnames)
 # FIXME: only processes first file
 rfileconf = rfiles[0]
 
+# guess session from file name
+from utils import session_from_path
+session = session_from_path(rfileconf[0]['file'])
+prefix = 'plots/{}'.format(session)
+
 from config import classifiers, sessions
 
 if options.clnameglob:
@@ -86,7 +91,7 @@ if options.usempl:
     # PDF backend
     from matplotlib.backends.backend_pdf import PdfPages
     if doprint:
-        pp = PdfPages('ROC_curves_mpl.pdf')
+        pp = PdfPages('{}_ROC_curves_mpl.pdf'.format(prefix))
 
     # hack
     from rootpy.plotting.hist import Hist
@@ -117,7 +122,7 @@ if options.usempl:
 else:
     canvas = ROOT.TCanvas('canvas', '', 800, 600)
     if doprint:
-        canvas.Print('ROC_curves.pdf[')
+        canvas.Print('{}_ROC_curves.pdf['.format(prefix))
 
     cols = (ROOT.kAzure, ROOT.kRed, ROOT.kBlack)
     legend = ROOT.TLegend(0.12, 0.15, 0.8, 0.6)
@@ -148,8 +153,8 @@ else:
     canvas.SetGrid(1, 1)
     canvas.Update()
     if doprint:
-        canvas.Print('ROC_curves.pdf')
+        canvas.Print('{}_ROC_curves.pdf'.format(prefix))
 
     if doprint:
-        canvas.Print('ROC_curves.pdf]')
+        canvas.Print('{}_ROC_curves.pdf]'.format(prefix))
     del canvas
