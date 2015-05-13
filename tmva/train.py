@@ -15,6 +15,8 @@ optparser.add_argument('--bkgtree', default='BkgTree',
 optparser.add_argument('-o', dest='out', required=True, help='Output file')
 optparser.add_argument('-c', dest='conf', default='TMVA.conf',
                        help='TMVA config file')
+optparser.add_argument('-n', dest='norm', action='store_true',
+                       help='Normalise (ensure similar order) sample sizes')
 options = optparser.parse_args()
 
 # variables for future proofing
@@ -46,6 +48,19 @@ map(lambda f: tree_b.Add(f), session.bkg_file)
 
 if not tree_s or not tree_b:
     sys.exit('Unable to read input trees.')
+
+nentries_s = tree_s.GetEntries(str(session.cut_sig))
+nentries_b = tree_b.GetEntries(str(session.cut_bkg))
+
+# NOTE: normalise: create option like
+# nTrain_Signal=num:nTrain_Background=num:...
+if options.norm:
+    size = nentries_b if nentries_s > nentries_b else nentries_s
+
+    from itertools import product
+    get_optstr = lambda i: '{1}_{2}={0}'.format(int(size/2), *i)
+    samples = product(('nTrain', 'nTest'), ('Background', 'Signal'))
+    session.training_opts += map(get_optstr, samples)
 
 # NOTE: This is to ignore the security warning from os.tmpnam.  There
 # is no risk since I `recreate' the TFile.
