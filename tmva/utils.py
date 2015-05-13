@@ -333,3 +333,12 @@ def get_hists(yaml_keys, conf, tool, robj_t=None, robj_p=None):
             if str(err) != '\'key\'':
                 raise
     return hists
+
+
+def session_from_path(path):
+    """Guess training session from ROOT file path"""
+    tokens = path.split('/')
+    if tokens[0].find('.root') > 0:
+        return tokens[0].rsplit('.', 1)[0]
+    else:
+        return tokens[0]
