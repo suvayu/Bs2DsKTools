@@ -62,6 +62,9 @@ if options.norm:
     samples = product(('nTrain', 'nTest'), ('Background', 'Signal'))
     session.training_opts += map(get_optstr, samples)
 
+# TODO: x-validate
+
+
 # NOTE: This is to ignore the security warning from os.tmpnam.  There
 # is no risk since I `recreate' the TFile.
 import warnings
@@ -105,6 +108,8 @@ factory.AddBackgroundTree(tree_b, 1.0)
 if session.bkgwt:
     factory.SetBackgroundWeightExpression(session.bkgwt)
 if session.sigwt:
+    # FIXME: correct weights for ignored events, since sweights:
+    # MVA weight = sw - (∑sw(M<5310 && M>5430))/entries(M<5310 && M>5430)
     factory.SetSignalWeightExpression(session.sigwt)
 
 # selection cuts, if any
