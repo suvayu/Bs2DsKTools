@@ -65,75 +65,64 @@ if options.norm:
 # TODO: x-validate
 
 
-# NOTE: This is to ignore the security warning from os.tmpnam.  There
-# is no risk since I `recreate' the TFile.
-import warnings
-warnings.filterwarnings(action='ignore', category=RuntimeWarning,
-                        message='tmpnam is a potential security risk.*')
-import os
-from time import strftime, localtime
-tmpfile = ROOT.TFile.Open('{}-{}.root'.format(
-    os.tmpnam(), strftime('%y-%m-%d-%H%M%S%Z', localtime())), 'recreate')
+from rplot.utils import Rtmpfile
+with Rtmpfile() as tmpfile:
+    # Apply selection cuts here instead of PrepareTrainingAndTestTree().
+    # If selection involves a branch present in only one of the trees, it
+    # will fail.  So copy selection to a tree in a temporary file, and
+    # pass that to TMVA::Factory(..).
+    clone_tree_s = tree_s.CopyTree(str(session.cut_sig))
+    clone_tree_s.SetName(options.sigtree)
+    clone_tree_s.Write()
+    clone_tree_b = tree_b.CopyTree(str(session.cut_bkg))
+    clone_tree_b.SetName(options.bkgtree)
+    clone_tree_b.Write()
 
-# Apply selection cuts here instead of PrepareTrainingAndTestTree().
-# If selection involves a branch present in only one of the trees, it
-# will fail.  So copy selection to a tree in a temporary file, and
-# pass that to TMVA::Factory(..).
-clone_tree_s = tree_s.CopyTree(str(session.cut_sig))
-clone_tree_s.SetName(options.sigtree)
-clone_tree_s.Write()
-clone_tree_b = tree_b.CopyTree(str(session.cut_bkg))
-clone_tree_b.SetName(options.bkgtree)
-clone_tree_b.Write()
+    del tree_s, tree_b
+    tree_s, tree_b = clone_tree_s, clone_tree_b
 
-del tree_s, tree_b
-tree_s, tree_b = clone_tree_s, clone_tree_b
+    ofile = ROOT.TFile.Open(options.out, 'recreate')
 
-ofile = ROOT.TFile.Open(options.out, 'recreate')
+    # instantiate TMVA
+    ROOT.TMVA.Tools.Instance()
+    # TMVA.gConfig.GetIONames().fWeightFileDir = wdir
+    factory = ROOT.TMVA.Factory(session._name, ofile, '!V:DrawProgressBar=False:' +
+                                ':'.join(session.factory_opts))
 
-# instantiate TMVA
-ROOT.TMVA.Tools.Instance()
-# TMVA.gConfig.GetIONames().fWeightFileDir = wdir
-factory = ROOT.TMVA.Factory(session._name, ofile, '!V:DrawProgressBar=False:' +
-                            ':'.join(session.factory_opts))
+    map(lambda var: factory.AddVariable(var, 'F'), session.all_vars())
+    map(lambda var: factory.AddSpectator(var, 'F'), session.spectators)
 
-map(lambda var: factory.AddVariable(var, 'F'), session.all_vars())
-map(lambda var: factory.AddSpectator(var, 'F'), session.spectators)
+    # get tree and perform branch name mappings if necessary
+    factory.AddSignalTree(tree_s, 1.0)
+    factory.AddBackgroundTree(tree_b, 1.0)
 
-# get tree and perform branch name mappings if necessary
-factory.AddSignalTree(tree_s, 1.0)
-factory.AddBackgroundTree(tree_b, 1.0)
+    # apply event weights if necessary
+    if session.bkgwt:
+        factory.SetBackgroundWeightExpression(session.bkgwt)
+    if session.sigwt:
+        # FIXME: correct weights for ignored events, since sweights:
+        # MVA weight = sw - (∑sw(M<5310 && M>5430))/entries(M<5310 && M>5430)
+        factory.SetSignalWeightExpression(session.sigwt)
 
-# apply event weights if necessary
-if session.bkgwt:
-    factory.SetBackgroundWeightExpression(session.bkgwt)
-if session.sigwt:
-    # FIXME: correct weights for ignored events, since sweights:
-    # MVA weight = sw - (∑sw(M<5310 && M>5430))/entries(M<5310 && M>5430)
-    factory.SetSignalWeightExpression(session.sigwt)
+    # selection cuts, if any
+    factory.PrepareTrainingAndTestTree(ROOT.TCut(''),
+                                       '!V:' + ':'.join(session.training_opts))
 
-# selection cuts, if any
-factory.PrepareTrainingAndTestTree(ROOT.TCut(''),
-                                   '!V:' + ':'.join(session.training_opts))
+    # book methods
+    map(lambda method: factory.BookMethod(TMVAType(method), method, '!H:!V:' +
+                                          ':'.join(getattr(session, method))),
+        session.methods)
 
-# book methods
-map(lambda method: factory.BookMethod(TMVAType(method), method, '!H:!V:' +
-                                      ':'.join(getattr(session, method))),
-    session.methods)
+    # train, test, evaluate
+    factory.TrainAllMethods()
+    factory.TestAllMethods()
+    factory.EvaluateAllMethods()
+    ofile.Close()
 
-# train, test, evaluate
-factory.TrainAllMethods()
-factory.TestAllMethods()
-factory.EvaluateAllMethods()
-ofile.Close()
-
-print '::: Training MVAs done!'
-
-# remove temporary file
-tmpfile.Close()
-os.remove(tmpfile.GetName())
+    print '::: Training MVAs done!'
 
 # move output to session directory
+import os
 print '::: Moving all output to {}'.format(session._name)
 try:
     os.makedirs(session._name)
