@@ -81,9 +81,13 @@ distribs = get_hists(classifiers, rfileconf, rpath_tool,
 if options.rarity:
     rarity = get_hists(classifiers, rfileconf, rpath_tool,
                        robj_t=ROOT.TH1, robj_p=_filter1('_Rarity'))
+else:
+    rarity = None
 if options.probab:
     probab = get_hists(classifiers, rfileconf, rpath_tool,
                        robj_t=ROOT.TH1, robj_p=_filter1('_Proba'))
+else:
+    probab = None
 
 plotter = Rplot(1, 1, 800, 600)
 plotter.alpha = 0.2
