@@ -2,13 +2,25 @@
 
 # set -o xtrace
 
-[[ $# -eq 0 ]] && { \
+declare -a opts globs
+
+for arg in "$@";		# protect globs from expanding
+do
+    if [[ "$arg" =~ -([a-z]|-[a-z]+)$ ]]; then
+	opts+=("$arg")
+    else
+	globs+=("$arg")
+    fi
+    shift 1
+done
+
+[[ "${#globs[@]}" -eq 0 ]] && { \
     echo A glob matching session names is required
-    echo "Usage: $0 <glob>"
+    echo "Usage: $0 [options] <globs> ..."
     exit 1
 }
 
-for s in $(./confquery.py "$@"); do
+for s in $(./confquery.py "${globs[@]}"); do
     printf "Running TMVA session: %s\n" $s
-    ./train.py -s $s -o dsk_train_out.root |& tee log && mv log $s/log || exit $?
+    ./train.py ${opts[@]} $s -o dsk_train_out.root |& tee log && mv log $s/log || exit $?
 done
