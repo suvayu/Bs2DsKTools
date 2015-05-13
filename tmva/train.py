@@ -86,7 +86,8 @@ with Rtmpfile() as tmpfile:
     # instantiate TMVA
     ROOT.TMVA.Tools.Instance()
     # TMVA.gConfig.GetIONames().fWeightFileDir = wdir
-    factory = ROOT.TMVA.Factory(session._name, ofile, '!V:DrawProgressBar=False:' +
+    session.factory_opts += ['!V', 'DrawProgressBar=False']
+    factory = ROOT.TMVA.Factory(session._name, ofile,
                                 ':'.join(session.factory_opts))
 
     map(lambda var: factory.AddVariable(var, 'F'), session.all_vars())
@@ -105,8 +106,9 @@ with Rtmpfile() as tmpfile:
         factory.SetSignalWeightExpression(session.sigwt)
 
     # selection cuts, if any
+    session.training_opts += ['!V']
     factory.PrepareTrainingAndTestTree(ROOT.TCut(''),
-                                       '!V:' + ':'.join(session.training_opts))
+                                       ':'.join(session.training_opts))
 
     # book methods
     map(lambda method: factory.BookMethod(TMVAType(method), method, '!H:!V:' +
