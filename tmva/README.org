@@ -82,7 +82,7 @@
 - B2DX_withtagging_strip20_DVv33r8_3fb_magdown_BDTG_Bs.root
 - B2DX_withtagging_strip20_DVv33r8_3fb_magup_BDTG_Bs.root
 
-* Tasks [10/18]
+* Tasks [17/22]
 ** WInP Optimise BDT algorithms
    :LOGBOOK:
    - State "WInP"       from "TODO"       [2015-02-18 Wed 23:56]
@@ -93,15 +93,30 @@
   MVA have anything to do with it, or is it training samples.
 - Check where MC deviates from data
   - compare base, less2, less3, logb, log3a, log3b
-*** TODO Try sweighted data [0/4]
-**** TODO Add event weights
-**** TODO B_{s} mass window
-**** TODO sweights > 0
-**** TODO whole dataset
+*** TODO Try sweighted data [5/5]
+**** DONE Offset sweights to compensate for mass window
+     CLOSED: [2015-05-13 Wed 20:45]
+**** DONE Add event weights
+     CLOSED: [2015-05-12 Tue 02:04]
+**** DONE B_{s} mass window
+     CLOSED: [2015-05-12 Tue 02:03]
+Equivalent to sweights > 0
+**** DONE sweights > 0
+     CLOSED: [2015-05-12 Tue 02:03]
+Equivalent to B_{s} mass window
+**** DONE whole dataset
+     CLOSED: [2015-05-12 Tue 02:04]
+-ve weights ignored by BDTG, equivalent to sweights > 0
 *** TODO Optimisation
 - Does the last optimised BDT still work?
 - If not, start from a larger input variable list again.
 ** TODO Implement cross-validation
+*** DONE Train on multiple files
+    CLOSED: [2015-05-12 Tue 02:18]
+*** DONE Normalise training samples
+    CLOSED: [2015-05-13 Wed 20:44]
+- Approx similar # of events
+- All available events
 ** TODO Easy MVA application
 - Use friend trees/event lists
 ** DONE Resolve vertex χ² variable disambiguity
