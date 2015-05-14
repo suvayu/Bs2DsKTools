@@ -17,6 +17,8 @@ optparser.add_argument('files', metavar='file', nargs='+', help='ROOT file')
 optparser.add_argument('--config', dest='yamlfile',
                        default='tmva_output_description.yaml',
                        help='ROOT file description in yaml format')
+optparser.add_argument('--schema', default='TMVA_Id.root',
+                       help='ROOT file schema to choose from config file')
 optparser.add_argument('-r', dest='axis_range', type=float, default=0.6,
                        help='Axis range')
 optparser.add_argument('-p', dest='doprint', action='store_true',
@@ -35,7 +37,7 @@ locals().update(_import_args(options))
 import sys
 
 from utils import plot_conf
-rfiles = plot_conf(options.yamlfile, 'TMVA.root', options.files)
+rfiles = plot_conf(options.yamlfile, options.schema, options.files)
 if not rfiles:
     sys.exit('Config parsing error.')
 

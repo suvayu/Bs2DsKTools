@@ -16,6 +16,8 @@ optparser.add_argument('files', metavar='file', nargs='+', help='ROOT file')
 optparser.add_argument('--config', dest='yamlfile',
                        default='tmva_output_description.yaml',
                        help='ROOT file description in yaml format')
+optparser.add_argument('--schema', default='TMVA_Id.root',
+                       help='ROOT file schema to choose from config file')
 optparser.add_argument('-p', dest='doprint', action='store_true',
                        help='Print to png/pdf files')
 optparser.add_argument('-b', '--batch', action='store_true', help='Batch mode')
@@ -31,18 +33,8 @@ options = optparser.parse_args()
 from pprint import pprint
 import sys
 
-from utils import read_yaml, get_rpaths
-conf = read_yaml(options.yamlfile)
-if isinstance(conf, list):
-    for entry in conf:
-        print entry['file']
-        if entry['file'] != 'TMVA.root':
-            continue
-        rfiles = get_rpaths(options.files, entry)
-else:
-    if conf['file'] == 'TMVA.root':
-        rfiles = get_rpaths(options.files, conf)
-
+from utils import plot_conf
+rfiles = plot_conf(options.yamlfile, options.schema, options.files)
 if not rfiles:
     sys.exit('Config parsing error.')
 
