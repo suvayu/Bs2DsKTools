@@ -109,7 +109,7 @@ def _style(l):
         pass
 
 
-def _plot(plots, opts):
+def _plot(plots, opts, plotter=plotter, canvas=canvas):
     plotter.draw_hist(plots, opts)
     canvas.Update()
     if options.doprint:

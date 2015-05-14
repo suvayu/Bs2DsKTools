@@ -99,7 +99,7 @@ if options.distribs:
     if options.doprint:
         canvas.Print('{}_transforms.pdf['.format(prefix))
 
-    def _plot_n_print(hlist):
+    def _plot_n_print(hlist, plotter=plotter, canvas=canvas):
         plotter.draw_hist(hlist, 'hist')
         canvas.Update()
         if options.doprint:
