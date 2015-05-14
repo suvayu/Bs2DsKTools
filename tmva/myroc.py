@@ -23,6 +23,7 @@ optparser.add_argument('-r', dest='axis_range', type=float, default=0.6,
                        help='Axis range')
 optparser.add_argument('-p', dest='doprint', action='store_true',
                        help='Print to png/pdf files')
+optparser.add_argument('--prefix', default='', help='Plot file name prefix')
 optparser.add_argument('--mpl', dest='usempl', action='store_true',
                        help='Use Matplotlib')
 optparser.add_argument('-b', '--batch', action='store_true', help='Batch mode')
@@ -41,13 +42,7 @@ rfiles = plot_conf(options.yamlfile, options.schema, options.files)
 if not rfiles:
     sys.exit('Config parsing error.')
 
-# FIXME: only processes first file
-rfileconf = rfiles[0]
-
-# guess session from file name
-from utils import session_from_path
-session = session_from_path(rfileconf[0]['file'])
-prefix = 'plots/{}'.format(session)
+prefix = 'plots/{}'.format(options.prefix)
 
 from config import classifiers, sessions
 

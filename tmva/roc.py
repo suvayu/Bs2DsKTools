@@ -21,7 +21,8 @@ optparser.add_argument('-r', dest='axis_range', type=float, default=0.6,
                        help='Axis range lower bound')
 optparser.add_argument('-p', dest='doprint', action='store_true',
                        help='Print to png/pdf files')
-optparser.add_argument('-m', dest='usempl', action='store_true',
+optparser.add_argument('--prefix', default='', help='Plot file name prefix')
+optparser.add_argument('--mpl', dest='usempl', action='store_true',
                        help='Use Matplotlib')
 optparser.add_argument('-b', '--batch', action='store_true', help='Batch mode')
 optparser.add_argument('-c', dest='clnameglob', metavar='classifier',
@@ -37,17 +38,7 @@ rfiles = plot_conf(options.yamlfile, options.schema, options.files)
 if not rfiles:
     sys.exit('Config parsing error.')
 
-from rplot.rdir import Rdir
-fnames = [rfile[0]['file'] for rfile in rfiles]
-rpath_tool = Rdir(fnames)
-
-# FIXME: only processes first file
-rfileconf = rfiles[0]
-
-# guess session from file name
-from utils import session_from_path
-session = session_from_path(rfileconf[0]['file'])
-prefix = 'plots/{}'.format(session)
+prefix = 'plots/{}'.format(options.prefix)
 
 from config import classifiers, sessions
 
@@ -62,13 +53,15 @@ from fixes import ROOT
 ROOT.gROOT.SetBatch(options.batch)
 
 from utils import get_hists
+from rplot.rdir import Rdir
+fnames = [f[0]['file'] for f in rfiles]
+rpath_tool = Rdir(fnames)
 
 
 def _filter(string):
     matches = ['MVA_{}{}'.format(cl, string) for cl in classifiers]
     return lambda k: k.GetName() in matches
 
-fnames = [f[0]['file'] for f in rfiles]
 rocs = []
 for i, rfileconf in enumerate(rfiles):
     # roc curve: MVA_<name>_rejBvsS
