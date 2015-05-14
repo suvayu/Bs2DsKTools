@@ -35,9 +35,13 @@ sessions = OrderedDict({
     'chitra_log/dsk_train_out.root': 'base + deco + log(IP #chi^{2}/p_{T}) - RFD',
     'chitra_loga/dsk_train_out.root': 'base + log(IP #chi^{2}/p_{T})',
     'chitra_log3/dsk_train_out.root': 'base + deco + log(IP #chi^{2}) - RFD',
-    'chitra_log3a/dsk_train_out.root': 'base + log(IP #chi^{2})',
+    # 'chitra_log3a/dsk_train_out.root': 'base + log(IP #chi^{2})',
+    'chitra_log3a/dsk_train_out.root': 'BDTv1',
     'chitra_max_diff/dsk_train_out.root': 'base + deco + log(IP #chi^{2}) + max p_{T} diff',
-    'chitra_tune/dsk_train_out.root': 'BDT tuning',
+    'chitra_tune/dsk_train_out.root': 'BDTv2',
+    'chitra_tune_sw/dsk_train_out.root': 'BDT tuning (sig: sw)',
+    'chitra_tune_sw1/dsk_train_out.root': 'BDTv1 (sig: sw, mass window)',
+    'chitra_tune_sw2/dsk_train_out.root': 'BDTv2 (sig: sw, mass window)',
 })
 
 varnames = [
