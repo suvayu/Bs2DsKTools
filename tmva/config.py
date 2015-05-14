@@ -9,13 +9,13 @@ classifiers = OrderedDict({
 })
 
 transforms = OrderedDict({
-    'identity' : 'Identity',
-    'deco' : 'Decorrelate',
-    'pca' : 'PCA',
-    'uniform' : 'Uniform',
-    'uniform_deco' : 'Uniform+Decorrelate',
-    'gauss' : 'Gaussianise',
-    'gauss_deco' : 'Gaussianise+Decorrelate',
+    'identity': 'Identity',
+    'deco': 'Decorrelate',
+    'pca': 'PCA',
+    'uniform': 'Uniform',
+    'uniform_deco': 'Uniform+Decorrelate',
+    'gauss': 'Gaussianise',
+    'gauss_deco': 'Gaussianise+Decorrelate',
 })
 
 sessions = OrderedDict({
