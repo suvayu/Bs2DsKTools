@@ -1,67 +1,99 @@
-file: TMVA.root
-key: file
-children:
-    - name: InputVariables_Id
-      key: identity
-      title: Identity transform
-      children:
-      - name: CorrelationPlots
-        key: identity_corr
-    - name: InputVariables_Deco
-      key: deco
-      title: Decorrelated
-      children:
-      - name: CorrelationPlots
-        key: deco_corr
-    - name: InputVariables_PCA
-      key: pca
-      title: PCA transformed
-      children:
-      - name: CorrelationPlots
-        key: pca_corr
-    - name: InputVariables_Uniform
-      key: uniform
-      title: Uniform transform
-      children:
-      - name: CorrelationPlots
-        key: uniform_corr
-    - name: InputVariables_Uniform_Deco
-      key: uniform_deco
-      title: Uniform, decorrelated
-      children:
-      - name: CorrelationPlots
-        key: uniform_deco_corr
-    - name: InputVariables_Gauss
-      key: gauss
-      title: Gaussianised
-      children:
-      - name: CorrelationPlots
-        key: gauss_corr
-    - name: InputVariables_Gauss_Deco
-      key: gauss_deco
-      title: Gaussianised, decorrelated
-      children:
-      - name: CorrelationPlots
-        key: gauss_deco_corr
-    - name: Method_BDT
-      key: method_bdt
-      title: BDT methods
-      children:
-      - name: BDTA
-        key: BDTA
-        title: BDT w/ adaptive boost
+- file: TMVA_all.root
+  key: file
+  children:
+      - name: InputVariables_Id
+        key: identity
+        title: Identity transform
         children:
         - name: CorrelationPlots
-          key: BDTA_corr
-      - name: BDTG
-        key: BDTG
-        title: BDT w/ gradient boost
+          key: identity_corr
+      - name: InputVariables_Deco
+        key: deco
+        title: Decorrelated
         children:
         - name: CorrelationPlots
-          key: BDTG_corr
-      - name: BDTB
-        key: BDTB
-        title: BDT w/ bagging
+          key: deco_corr
+      - name: InputVariables_PCA
+        key: pca
+        title: PCA transformed
         children:
         - name: CorrelationPlots
-          key: BDTB_corr
+          key: pca_corr
+      - name: InputVariables_Uniform
+        key: uniform
+        title: Uniform transform
+        children:
+        - name: CorrelationPlots
+          key: uniform_corr
+      - name: InputVariables_Uniform_Deco
+        key: uniform_deco
+        title: Uniform, decorrelated
+        children:
+        - name: CorrelationPlots
+          key: uniform_deco_corr
+      - name: InputVariables_Gauss
+        key: gauss
+        title: Gaussianised
+        children:
+        - name: CorrelationPlots
+          key: gauss_corr
+      - name: InputVariables_Gauss_Deco
+        key: gauss_deco
+        title: Gaussianised, decorrelated
+        children:
+        - name: CorrelationPlots
+          key: gauss_deco_corr
+      - name: Method_BDT
+        key: method_bdt
+        title: BDT methods
+        children:
+        - name: BDTA
+          key: BDTA
+          title: BDT w/ adaptive boost
+          children:
+          - name: CorrelationPlots
+            key: BDTA_corr
+        - name: BDTG
+          key: BDTG
+          title: BDT w/ gradient boost
+          children:
+          - name: CorrelationPlots
+            key: BDTG_corr
+        - name: BDTB
+          key: BDTB
+          title: BDT w/ bagging
+          children:
+          - name: CorrelationPlots
+            key: BDTB_corr
+
+- file: TMVA_Id.root
+  key: file
+  children:
+      - name: InputVariables_Id
+        key: identity
+        title: Identity transform
+        children:
+        - name: CorrelationPlots
+          key: identity_corr
+      - name: Method_BDT
+        key: method_bdt
+        title: BDT methods
+        children:
+        - name: BDTA
+          key: BDTA
+          title: BDT w/ adaptive boost
+          children:
+          - name: CorrelationPlots
+            key: BDTA_corr
+        - name: BDTG
+          key: BDTG
+          title: BDT w/ gradient boost
+          children:
+          - name: CorrelationPlots
+            key: BDTG_corr
+        - name: BDTB
+          key: BDTB
+          title: BDT w/ bagging
+          children:
+          - name: CorrelationPlots
+            key: BDTB_corr
