@@ -114,6 +114,11 @@ class Cut(object):
         self.greaterequal = '{}>={}'.format(var, val)
         self.lesser = '{}<{}'.format(var, val)
         self.lesserequal = '{}<={}'.format(var, val)
+        # aliases
+        self.gt = self.greater
+        self.ge = self.greaterequal
+        self.lt = self.lesser
+        self.le = self.lesserequal
 
 
 def crange(stops, var, tree, plotvar):
