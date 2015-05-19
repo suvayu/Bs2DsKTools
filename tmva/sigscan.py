@@ -178,6 +178,13 @@ cuts = linspace(clrange[0], clrange[1], 101)
 from utils import scan_range
 res = array(scan_range(nevts_passed, cuts, classifier, tree))
 
+# NOTE: filter runtime warning due do NaNs.  These entries are
+# filtered away before filling the histograms.  They occur due to 0
+# efficiency for very large classifier cuts.
+import warnings
+warnings.filterwarnings(action='ignore', category=RuntimeWarning,
+                        message='invalid value encountered in divide.*')
+
 from math import sqrt
 if istmva:
     if eff:
