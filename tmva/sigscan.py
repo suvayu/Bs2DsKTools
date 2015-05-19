@@ -286,19 +286,17 @@ if classifier == 'BDTGResponse_1':
     axes.annotate('(0.3,{:.3f})'.format(oeff_s), xy=(0.3, oeff_s),
                   xytext=(-0.1, 0.75), arrowprops=dict(
                       facecolor='black', shrink=0.1, width=2, headwidth=5))
-elif classifier == 'BDTB':
+elif classifier in ('BDTB', 'BDTG'):
     diff, idx = 1., None
     for i, eff in enumerate(eff_s):
         diff_t = abs(eff-0.842)     # eff_s @ old BDTG >= 0.3
         if diff > diff_t:
             diff, idx = diff_t, i
     axes.plot(clrange, [0.842, 0.842], color='black', linewidth=2)
-    axes.annotate('Working pt @ old eff {}'.format((cuts[idx], 0.842)),
-                  xy=(cuts[idx], 0.842), xytext=(0.0, 1.1), ha='right',
+    axes.annotate('Working pt @ old eff {}'.format((round(cuts[idx], 3), 0.842)),
+                  xy=(cuts[idx], 0.842), xytext=(0.0, 0.4), ha='center',
                   arrowprops=dict(facecolor='black', shrink=0.05,
                                   width=2, headwidth=5))
-elif classifier == 'BDTG':
-    print 'FIXME: implement me: annotations for BDTG'
 else:
     print 'Shouldn\'t get here!'
 
