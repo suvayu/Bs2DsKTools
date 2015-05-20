@@ -79,8 +79,11 @@ int main (int argc, char **argv)
   TCut cut;
   // cleaning cut versions (apply in reverse order, w/o using break statements)
   switch (cleaning_v) {
-    case 2: cut = cut && TCut("lab2_FDCHI2_ORIVX>=2");
-    case 1: cut = cut && TCut("lab2_TAU>0");
+    case 2:
+      cut = cut && TCut("lab0_MM>5200");
+    case 1:
+      cut = cut && TCut("lab2_FDCHI2_ORIVX>=2");
+      cut = cut && TCut("lab2_TAU>0");
     }
 
   // trigger
