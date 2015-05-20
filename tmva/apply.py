@@ -50,35 +50,36 @@ warnings.filterwarnings(action='ignore', category=RuntimeWarning,
                         message='creating converter for unknown type.*')
 
 
-def add_var_set_br_addr(varlist, reader_method, intree):
+def add_var_set_br_addr(varlist, reader_method, intree, allvars):
     """Add variables to TMVA::Reader, and associate to tree branch"""
     for var in varlist:
-        expr = var.split(':=', 1)
-        simple = (len(expr) == 1)
+        expr = var.split(':=', 1)  # split var:=var1+var2 -> (var, var1+var2)
+        simple = (len(expr) == 1)  # if simple, (var,)
         if simple:
-            expr = expr * 2  # expr same as key
+            expr = expr * 2        # expr same as key: (var,) -> (var, var)
         allvars[expr[0]] = [
-            array('f', [0.]),
-            TTreeFormula(expr[0], expr[1], itree)
+            array('f', [0.]),      # array for TMVA::Reader
+            TTreeFormula(expr[0], expr[1], intree)
         ]
         reader_method(var, allvars[expr[0]][0])
 
 # input tree
 itree = ifile.Get(options.name)
-allvars = {}                    # varname : (value, expr)
-# trained variables
-add_var_set_br_addr(session.all_vars(), reader.AddVariable, itree)
+allvars = {}                    # {varname: (value, expr)}
+# training variables
+add_var_set_br_addr(session.all_vars(), reader.AddVariable, itree, allvars)
 # spectators
-add_var_set_br_addr(session.spectators, reader.AddSpectator, itree)
+add_var_set_br_addr(session.spectators, reader.AddSpectator, itree, allvars)
 
 # output tree
 ofile.cd()
 otree = itree.CloneTree(0)
-for var, val in allvars.iteritems():  # val = (value, expr)
+# FIXME: I think the following two lines are redundant
+for var, val in allvars.iteritems():  # var, val = varname, (value, expr)
     otree.Branch(var, val[0], '{}/F'.format(var))
 
 # book methods
-discriminant = {}               # MVA : (value, histogram)
+discriminant = {}               # {MVA: (value, histogram)}
 for method in session.methods:
     reader.BookMVA(method, '{0}/weights/{0}_{1}.weights.xml'
                    .format(session._name, method))
