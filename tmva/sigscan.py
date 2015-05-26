@@ -31,7 +31,7 @@ Features:
 """
 
 import argparse
-from utils import _import_args, RawArgDefaultFormatter
+from utils import RawArgDefaultFormatter
 
 optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                     description=__doc__)
@@ -65,7 +65,7 @@ import sys
 mandatory = [getattr(options, i) for i in vars(options) if i.startswith('is')]
 if True not in mandatory:
     # \b or \x08 = backspace
-    sys.exit('one of {} mandatory'.format(
+    sys.exit('one of {} is mandatory'.format(
         reduce(lambda i, j: '{} --{}'.format(i, j), mandatory, '\b')))
 
 if options.ismc and not options.session:
@@ -112,7 +112,7 @@ tree = rfile.Get(tree)
 
 # sig, bkg, and other cuts
 if istmva:
-    sig, bkg = 'classID=={}'.format(0), 'classID=={}'.format(1) # TMVA
+    sig, bkg = 'classID=={}'.format(0), 'classID=={}'.format(1)  # TMVA
     nbkg = float(tree.GetEntries(bkg))
     nsig = float(tree.GetEntries(sig))
 elif ismc:
