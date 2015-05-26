@@ -236,8 +236,8 @@ map(th1fill(hsigma, 2), cuts, sgfs)
 
 # plot
 import matplotlib as mpl
-mpl.rc('font', family='Liberation Sans') # choose font
-mpl.rc('mathtext', default='regular')    # use default font for math
+mpl.rc('font', family='Liberation Sans')  # choose font
+mpl.rc('mathtext', default='regular')     # use default font for math
 
 if options.batch:
     mpl.use('pdf')    # plotting w/o X11
