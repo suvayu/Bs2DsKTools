@@ -74,10 +74,10 @@ if options.ismc and not options.session:
 
 # what to calculate
 eff = options.what in ['eff', 'both']   # efficiency
-sig = options.what in ['sig', 'both']   # significance
-if options.ismc and sig:        # consistency check
+sgf = options.what in ['sig', 'both']   # significance
+if options.ismc and sgf:        # consistency check
     print 'Cannot calculate significance with MC, will calc only eff'
-    sig = False
+    sgf = False
 
 # for convenience
 istmva = options.istmva
@@ -192,9 +192,9 @@ if istmva:
         effs = array([0, 1]) + res / array([nsig, -nbkg])
         eff_s, eff_b = effs[:, 0], effs[:, 1]
 
-    if sig:
+    if sgf:
         res /= array([16.0, 1.0])                      # Dsπ/DsK ~ 16
-        sigs = res[:, 0] / map(sqrt, res.sum(axis=1))  # σ = s/sqrt(s+b)
+        sgfs = res[:, 0] / map(sqrt, res.sum(axis=1))  # σ = s/sqrt(s+b)
 elif ismc:
     effs = res/nsig
 else:                        # isdata
@@ -209,13 +209,13 @@ else:                        # isdata
         eff_s = evt_s / get_sig(nregion1, nregion3)
         eff_b = 1 - evt_b / get_bkg(nregion2)
 
-    if sig:
+    if sgf:
         evt_s /= 16.0
-        sigs = evt_s / map(sqrt, evt_s + evt_b)
+        sgfs = evt_s / map(sqrt, evt_s + evt_b)
         # agns = eff_s * evt_s / (evt_s + evt_b)  # FIXME: requires eff_s
 
 from numpy import isnan                      # clean NaNs
-sigs = map(lambda i: 0 if isnan(i) else i, sigs)
+sgfs = map(lambda i: 0 if isnan(i) else i, sgfs)
 # agns = map(lambda i: 0 if isnan(i) else i, agns)
 
 
@@ -231,7 +231,7 @@ hsigma = TProfile('hsigma', 'Significance', nbins, bins)
 from rplot.utils import th1fill
 map(th1fill(hist_s, 2), cuts, eff_s)
 map(th1fill(hist_b, 2), cuts, eff_b)
-map(th1fill(hsigma, 2), cuts, sigs)
+map(th1fill(hsigma, 2), cuts, sgfs)
 # map(th1fill(hagns, 2), cuts, agns)
 
 # plot
@@ -256,7 +256,7 @@ from rplot.r2mpl import th12errorbar
 fig = Figure()
 canvas = FigureCanvasPdf(fig)
 axes = fig.add_subplot(111)
-if eff and sig:
+if eff and sgf:
     axes.set_title('Efficiency & significance')
 else:
     axes.set_title('Efficiency' if eff else 'Significance')
@@ -264,7 +264,7 @@ axes.grid()
 axes.set_xlabel(cltitle[classifier])
 axes.set_xlim(clrange[0], clrange[1])
 axes.set_ylabel('Efficiency' if eff else 'Significance')
-if eff and sig:
+if eff and sgf:
     axes2 = axes.twinx()
     axes2.set_ylabel('Significance')
 
