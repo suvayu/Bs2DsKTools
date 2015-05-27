@@ -69,9 +69,27 @@ if options.combi:
             integrals[mo] = pdf.createIntegral(iset, RooFit.NormSet(iset),
                                                RooFit.Range('full'))
 elif options.signal:
-    sys.exit('signal: not implemented')
+    variables += [wsp.var('Signal_mean'), wsp.var('Signal_sigmas')]
+    variables += [wsp.var('Signal_{}{}'.format(*i))
+                  for i in product(('alpha', 'n'), (1, 2))]
+    for mo in modes:
+        iset = RooArgSet(mass)
+        pdf_t = wsp.pdf('pre_prior_TotPdf_{}'.format(mo))
+        pdf = pdf_t.pdfList().at(0)
+        pdfs.append(pdf)
+
+        if options.range:
+            mass.setRange('win', *options.range)
+            integrals[mo] = pdf.createIntegral(iset, RooFit.NormSet(iset),
+                                               RooFit.Range('win'))
+        else:
+            integrals[mo] = pdf.createIntegral(iset, RooFit.NormSet(iset),
+                                               RooFit.Range('full'))
 
 for mo, i in integrals.iteritems():
-    evts = wsp.var('NComb_{}'.format(mo))
+    if options.combi:
+        evts = wsp.var('NComb_{}'.format(mo))
+    elif options.signal:
+        evts = wsp.var('NBsDsPi_{}'.format(mo))
     variables.append(evts)
     print '{}: {}'.format(i.GetName(), evts.getValV() * i.getValV())
