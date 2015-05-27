@@ -15,17 +15,12 @@ parser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
 parser.add_argument('rfile', metavar='file', help='Input ROOT file')
 parser.add_argument('-w', '--workspace', required=True,
                     help='Name of workspace')
-parser.add_argument('-c', '--combi', action='store_true',
-                    help='Summarise combinatorial background')
-parser.add_argument('-s', '--signal', action='store_true',
-                    help='Summarise signal')
 parser.add_argument('-d', '--decay', choices=['BsDsPi', 'BsDsK'],
                     default='BsDsPi', help='Decay type to summarise')
 parser.add_argument('-r', '--range', nargs=2, type=float,
                     help='Mass range to summarise')
 options = parser.parse_args()
 
-import sys
 import os
 assert(os.path.exists(options.rfile))
 
@@ -39,57 +34,73 @@ wsp = rfile.Get(options.workspace)
 
 from itertools import product
 from ROOT import RooFit, RooArgSet
+
+
+def get_pdf(wsp, mode, signal):
+    """Return pdfs as per mode and sig/bkg"""
+    if signal:
+        pdf_t = wsp.pdf('pre_prior_TotPdf_{}'.format(mode))
+        pdf = pdf_t.pdfList().at(0)
+    else:
+        pdf = wsp.pdf('Comb_{}'.format(mode))
+    return pdf
+
+
+def get_integral(pdf, var, varrange):
+    """Return the integral of pdf over var for the given range
+
+       NOTE: normalisation and integration sets are the same for us as
+       we want to integrate over the pdf, the integration ranges are
+       different however.
+
+         ∫ pdf(range) = ∫dm pdf(range) / ∫dm pdf(full)
+
+    """
+    iset = RooArgSet(var)
+    var.setRange('window', *varrange)
+    return pdf.createIntegral(iset, RooFit.NormSet(iset),
+                              RooFit.Range('window'))
+
+
 mass = wsp.var('lab0_MM')
-mass.setRange('full', mass.getMin(), mass.getMax())
+if options.range:
+    massrange = options.range
+else:
+    massrange = (mass.getMin(), mass.getMax())
+
+norms = {'sig': 'N{}_{{}}'.format(options.decay), 'bkg': 'NComb_{}'}
+integrals = {'sig': [], 'bkg': []}
+mag_modes = ('up', 'down')
 
 # hold on to objects so that python does not garbage collect
 variables, pdfs = [], []
 
-integrals = {}
-modes = ('up', 'down')
+# combinatorial params
+variables += map(lambda i: wsp.var('{}_{}'.format(*i)),
+                 product(('p1', 'p0'), mag_modes))
 
-if options.combi:
-    variables += map(lambda i: wsp.var('{}_{}'.format(*i)),
-                     product(('p1', 'p0'), modes))
-    for mo in modes:
-        # NOTE: normalisation and integration sets are the same for us
-        # as we want to integrate over the pdf, the integration ranges
-        # are different however.
-        #
-        #   ∫ pdf(range) = ∫dm pdf(range) / ∫dm pdf(full)
-        iset = RooArgSet(mass)
-        pdf = wsp.pdf('Comb_{}'.format(mo))
+# signal params
+variables += [wsp.var('Signal_mean'), wsp.var('Signal_sigmas')]
+variables += [wsp.var('Signal_{}{}'.format(*i))
+              for i in product(('alpha', 'n'), (1, 2))]
+
+# normalisation variables
+for key in integrals:
+    norms[key] = [wsp.var(norms[key].format(mode)) for mode in mag_modes]
+
+# integrals
+for key in integrals:
+    for mode in mag_modes:
+        pdf = get_pdf(wsp, mode, signal=True if key == 'sig' else False)
         pdfs.append(pdf)
+        integrals[key].append(get_integral(pdf, mass, massrange))
 
-        if options.range:
-            mass.setRange('win', *options.range)
-            integrals[mo] = pdf.createIntegral(iset, RooFit.NormSet(iset),
-                                               RooFit.Range('win'))
-        else:
-            integrals[mo] = pdf.createIntegral(iset, RooFit.NormSet(iset),
-                                               RooFit.Range('full'))
-elif options.signal:
-    variables += [wsp.var('Signal_mean'), wsp.var('Signal_sigmas')]
-    variables += [wsp.var('Signal_{}{}'.format(*i))
-                  for i in product(('alpha', 'n'), (1, 2))]
-    for mo in modes:
-        iset = RooArgSet(mass)
-        pdf_t = wsp.pdf('pre_prior_TotPdf_{}'.format(mo))
-        pdf = pdf_t.pdfList().at(0)
-        pdfs.append(pdf)
-
-        if options.range:
-            mass.setRange('win', *options.range)
-            integrals[mo] = pdf.createIntegral(iset, RooFit.NormSet(iset),
-                                               RooFit.Range('win'))
-        else:
-            integrals[mo] = pdf.createIntegral(iset, RooFit.NormSet(iset),
-                                               RooFit.Range('full'))
-
-for mo, i in integrals.iteritems():
-    if options.combi:
-        evts = wsp.var('NComb_{}'.format(mo))
-    elif options.signal:
-        evts = wsp.var('NBsDsPi_{}'.format(mo))
-    variables.append(evts)
-    print '{}: {}'.format(i.GetName(), evts.getValV() * i.getValV())
+# print the table
+print '|{}'.format(' {:^5} |'*4).format('type', 'up', 'down', 'total') # header
+print '|{}\b|'.format('{}+'.format('-'*7)*4)
+fmt = '| {{:<5}} |{}'.format(' {:>5.0f} |'*3)
+for key in integrals:
+    # mag_modes = ('up', 'down')
+    up_evts = norms[key][0].getValV() * integrals[key][0].getValV()
+    down_evts = norms[key][1].getValV() * integrals[key][1].getValV()
+    print fmt.format(key,  up_evts, down_evts, up_evts + down_evts)
