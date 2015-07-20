@@ -1,34 +1,6 @@
 # coding=utf-8
 """Utilities"""
 
-# argument parsing tools
-from argparse import (ArgumentDefaultsHelpFormatter,
-                      RawDescriptionHelpFormatter)
-
-
-class RawArgDefaultFormatter(ArgumentDefaultsHelpFormatter,
-                             RawDescriptionHelpFormatter):
-    pass
-
-
-def _import_args(namespace, d={}):
-    """Import attributes from namespace to local environment.
-
-    namespace -- namespace to import attributes from
-    d         -- dictionary that is returned with attributes
-                 and values (default: empty dict, leave it
-                 this way unless you know what you are doing)
-
-    Usage:
-      >>> opts = parser.parse_args(['foo', '-o', 'bar'])
-      >>> locals().update(_import_args(opts))
-
-    """
-    attrs = vars(namespace)
-    for attr in attrs:
-        d[attr] = getattr(namespace, attr)
-    return d
-
 
 def is_glob(glob):
     """True if `glob' has `*' or `?'."""

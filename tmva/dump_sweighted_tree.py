@@ -2,7 +2,7 @@
 """Output a tree with sweights reading from an sweigted dataset"""
 
 import argparse
-from utils import RawArgDefaultFormatter
+from rplot.utils import RawArgDefaultFormatter
 
 parser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter)
 parser.add_argument('rfile', help='ROOT file')

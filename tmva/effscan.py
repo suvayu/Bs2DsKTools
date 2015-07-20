@@ -21,7 +21,7 @@ Features:
 """
 
 import argparse
-from utils import _import_args, RawArgDefaultFormatter
+from rplot.utils import _import_args, RawArgDefaultFormatter
 
 optparser = argparse.ArgumentParser(description=__doc__)
 optparser.formatter_class = RawArgDefaultFormatter

@@ -3,7 +3,7 @@
 """Train TMVA algorithm"""
 
 import argparse
-from utils import RawArgDefaultFormatter
+from rplot.utils import RawArgDefaultFormatter
 
 optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                     description=__doc__)

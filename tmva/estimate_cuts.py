@@ -11,7 +11,7 @@ classifiers based on the number of selected events.
 """
 
 import argparse
-from utils import RawArgDefaultFormatter
+from rplot.utils import RawArgDefaultFormatter
 
 parser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                  description=__doc__)

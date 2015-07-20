@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import argparse
-from utils import RawArgDefaultFormatter, is_match
+from rplot.utils import RawArgDefaultFormatter
+from utils import is_match
 
 optparser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                     description=__doc__)
