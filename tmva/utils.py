@@ -170,6 +170,7 @@ def get_label(string):
     string = string.replace('lab4_', 'D child 2 ')
     string = string.replace('lab5_', 'D child 3 ')
     # variables
+    string = string.replace('MM', 'mass')
     string = string.replace('_OWNPV', '')
     string = string.replace('PT', 'p_{T}')
     string = string.replace('MINIPCHI2', 'min IP #chi^{2}')
@@ -177,6 +178,12 @@ def get_label(string):
     string = string.replace('VCHI2NDOF', 'vtx #chi^{2}/ndof')
     string = string.replace('TAU', 'decay time')
     string = string.replace('ERR', ' error')
+    if string.find('time') >= 0:
+        string = '{} {}'.format(string, '[ps]')
+    if string.find('mass') >= 0:
+        string = '{} {}'.format(string, '[MeV/c^{2}]')
+    if string.find('p_{T}') >= 0:
+        string = '{} {}'.format(string, '[MeV/c]')
     return string
 
 
