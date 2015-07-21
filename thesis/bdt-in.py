@@ -103,4 +103,4 @@ for var, tup in hists.iteritems():
             arr.SetLineColor(ROOT.kRed)
             arr.SetFillColor(ROOT.kRed)
             arr.Draw()
-    ROOT.gPad.Print('bdt_in_{}_{}.png'.format(options.ntuple, var))
+    ROOT.gPad.Print('bdt_in_{}_{}.pdf'.format(options.ntuple, var))
