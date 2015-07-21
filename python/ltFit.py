@@ -30,7 +30,7 @@ import argparse
 from rplot.utils import RawArgDefaultFormatter
 parser = argparse.ArgumentParser(formatter_class=RawArgDefaultFormatter,
                                  description=__doc__)
-parser.add_argument('rationfn', default='exponential',
+parser.add_argument('ratiofn', default='exponential',
                     choices=['flat', 'linear', 'quadratic', 'exponential'],
                     help='Type of acceptance ratio (default: exponential).')
 parser.add_argument('-s', '--save', action='store_true',
