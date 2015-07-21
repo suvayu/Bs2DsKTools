@@ -80,7 +80,8 @@ for var, mark in zip(variables, marks):
     tree.Draw('{}>>{}'.format(var, hname), wt, 'goff')
     hist = ROOT.gROOT.FindObject(hname)
     hist.SetLineColor(ROOT.kBlack)
-    # hist.SetMarkerStyle(ROOT.kFullDotLarge)
+    hist.SetMarkerStyle(ROOT.kFullDotLarge)
+    hist.SetMarkerSize(0.4)
     # hist.SetMarkerColor(ROOT.kBlack)
     hist.SetXTitle(get_label(var))
     hists[var] = (hist, mark)
@@ -89,7 +90,7 @@ for var, mark in zip(variables, marks):
 from utils import get_mark, get_arrow
 for var, tup in hists.iteritems():
     hist, mark = tup
-    hist.Draw('e1')
+    hist.Draw('e')
     if mark:
         axis = get_mark(hist, mark, options.yaxis)
         axis.SetLineWidth(2)
