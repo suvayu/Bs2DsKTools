@@ -17,7 +17,7 @@ parser.add_argument('--vars', nargs='+', help='Variables to plot')
 parser.add_argument('--marks', nargs='+', type=float,
                     help='Marker positions along plot axis')
 parser.add_argument('-a', '--arrow', nargs=2, type=float,
-                    help='Coordinates for arrow head')
+                    help='Coordinates for arrow head (only for single plots)')
 parser.add_argument('-y', '--yaxis', action='store_true', help='Mark Y-axis')
 parser.add_argument('-b', '--batch', action='store_true', help='Batch mode')
 options = parser.parse_args()
@@ -67,6 +67,11 @@ nvars, nmarks = len(variables), len(marks) if marks else 0
 if nvars > nmarks:
     marks += [None] * (nvars - nmarks)
 hists = {}
+# check
+if options.arrow and nvars > 1:
+    print '{}: annotating with arrows supported only for single plots, ' \
+        'ignoring option'.format(__file__)
+    options.arrow = None
 
 # histograms
 import uuid
