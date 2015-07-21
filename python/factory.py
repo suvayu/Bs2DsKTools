@@ -28,7 +28,9 @@ from ROOT import RooRealVar
 from ROOT import RooDataSet, RooDataHist
 
 # Hack around RooWorkspace.import() and python keyword import clash
-_import = getattr(RooWorkspace, 'import')
+# _import = getattr(RooWorkspace, 'import')  # ROOT 6 bug
+def _import(wsp, obj):
+    getattr(wsp, 'import')(obj)
 
 
 # Python wrappers
@@ -145,7 +147,12 @@ def save_in_workspace(rfile, **argsets):
     keys = argsets.keys()
     for key in keys:
         print 'Importing RooFit objects in %s list.' % key
-        for arg in argsets[key]: _import(workspace, arg)
+        for arg in argsets[key]:
+            try:
+                _import(workspace, arg)
+            except TypeError as err:
+                print err
+                print type(arg), arg
     rfile.WriteTObject(workspace)
     print 'Saving arguments to file: %s' % rfile.GetName()
 
