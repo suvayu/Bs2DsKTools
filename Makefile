@@ -2,72 +2,31 @@
 # a variable contains parameters which are to be expanded later, then
 # use `='.
 
-SHELL        := /bin/bash
-ROOTCONFIG   := $(shell which root-config)
-ROOTCINT     := $(shell which rootcint)
-
-# compiler flags and options
-OPTS	     := -g -Wall
-
-# compile with g++
-CXX          := $(shell $(ROOTCONFIG) --cxx)
-CXXFLAGS     := -fPIC $(shell $(ROOTCONFIG) --cflags)
-
-# link
-LD           := $(shell $(ROOTCONFIG) --ld)
-LDFLAGS      := $(shell $(ROOTCONFIG) --ldflags)
-# SOFLAGS       = -shared -Wl,-soname,$@ # not needed, default is fine
-
-# linking to ROOT
-ROOTLIBS     := $(shell $(ROOTCONFIG) --libs)
-ROOFITLIBS   := -lRooFitCore -lRooFit
-ROOTGLIBS    := $(shell $(ROOTCONFIG) --glibs)
-
-LIBS          = libreadTree.so libacceptance.so
-LINKDEFS      = $(wildcard dict/*LinkDef.h)
-LIBSRC        = $(wildcard src/*.cxx)
-ACCSRC        = $(wildcard src/*Acceptance*.cxx)
-TREESRC       = $(filter-out $(ACCSRC),$(LIBSRC))
-BINSRC        = $(wildcard src/*.cc)
-BINS          = $(BINSRC:src/%.cc=%)
-TESTDIR       = tests
+LIBS	:= readTree acceptance
+BINS    := $(patsubst src/%.cc,bin/%,$(wildcard src/*.cc))
 
 # rules
-.PHONY:		all $(LIBS) $(BINS) clean cleanall
+.PHONY:		all libs $(LIBS) bins clean cleanall
 
-all:		$(LIBS) $(BINS)
+all:		libs bins
 
-# dicts
-dict/readTreeDict.cxx:	$(TREESRC:%.cxx=%.hxx) dict/readTreeLinkDef.h
-	$(ROOTCINT) -f $@ -c -p $^
+libs:	$(LIBS)
 
-dict/acceptanceDict.cxx:	$(ACCSRC:%.cxx=%.hxx) dict/acceptanceLinkDef.h
-	$(ROOTCINT) -f $@ -c -p $^
+$(LIBS):%:	| lib inc
+	make -C $@ lib$@.so
+	ln -sf ../$@/lib$@.so lib/
+	cd inc && ln -sf ../$@/*.hxx .
 
-dict/%.o:	dict/%.cxx
-	$(CXX) -c $(OPTS) $(CXXFLAGS) -Idict -I. $< -o $@
+lib inc bin:%:
+	mkdir -p $@
 
-# sources
-src/%.o:	src/%.cxx
-	$(CXX) -c $(OPTS) $(CXXFLAGS) -Isrc $< -o $@
+# # binaries
+# $(BINS):%:	src/%.cc $(LIBS)
+# 	$(CXX) $(OPTS) $(CXXFLAGS) -Isrc $(ROOTLIBS) $(ROOFITLIBS) -L. -lreadTree -lacceptance src/utils.cc $< -o $@
 
-# link
-libreadTree.so:	$(TREESRC:%.cxx=%.o) dict/readTreeDict.o
-	$(LD) -shared $(OPTS) $(LDFLAGS) $(ROOTLIBS) $^ -o $@
+# # FIXME: test binaries
+# tests/%:%:	%.cc $(LIBS)
+# 	$(CXX) $(OPTS) $(CXXFLAGS) -Isrc -Itests $(ROOTLIBS) $(ROOFITLIBS) -L. -lreadTree -lacceptance src/utils.cc $< -o $@
 
-libacceptance.so:	$(ACCSRC:%.cxx=%.o) dict/acceptanceDict.o
-	$(LD) -shared $(OPTS) $(LDFLAGS) $(ROOTLIBS) $(ROOFITLIBS) $^ -o $@
-
-# binaries
-$(BINS):%:	src/%.cc $(LIBS)
-	$(CXX) $(OPTS) $(CXXFLAGS) -Isrc $(ROOTLIBS) $(ROOFITLIBS) -L. -lreadTree -lacceptance src/utils.cc $< -o $@
-
-# FIXME: test binaries
-tests/%:%:	%.cc $(LIBS)
-	$(CXX) $(OPTS) $(CXXFLAGS) -Isrc -Itests $(ROOTLIBS) $(ROOFITLIBS) -L. -lreadTree -lacceptance src/utils.cc $< -o $@
-
-cleanall:	clean
-	rm -f {dict,src}/*.o dict/*Dict.*
-
-clean:
-	rm -f $(LIBS) $(BINS)
+cleanall clean:%:
+	@for dir in $(LIBS); do make -C $$dir $@; done
