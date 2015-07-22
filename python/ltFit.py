@@ -410,7 +410,7 @@ canvas.Print(plotfile)
 print 'Plotting to file: %s' % plotfile
 
 if save:
-    hfile = TFile(rootfile, 'recreate')
+    hfile = TFile(rootfile, 'recreate', rootfile.rsplit('/', 1)[-1])
     # Persistify variables, PDFs and datasets
     save_in_workspace(hfile, var=varlist, pdf=[PDF], data=[dataset],
                       fit=[fitresult])

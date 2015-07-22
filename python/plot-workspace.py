@@ -18,10 +18,6 @@ doPrint = options.doPrint
 logscale = options.log
 fname = options.filename
 
-# sample filename fitresult-cpowerlaw-w-flat-ratio-2013-02-22-Fri-20-27.root
-fnametokens = fname.split('-')
-ratiofn = fnametokens[3]
-
 from rplot.fixes import ROOT
 if doPrint:
     ROOT.gROOT.SetBatch(True)
@@ -45,6 +41,10 @@ tmax = 15.0
 
 # Get objects from workspace
 workspace, rfile = get_workspace(fname, 'workspace')
+
+# sample filename: fitresult-cpowerlaw-w-flat-ratio-2013-02-22-Fri-20-27.root
+fnametokens = rfile.GetTitle().split('-')
+ratiofn = fnametokens[3]
 
 # variables
 time = workspace.var('time')
