@@ -102,9 +102,9 @@ dsk_dataset.plotOn(tframe1, RooFit.MarkerStyle(kFullTriangleUp),
                    RooFit.CutRange('zoom'))
 DsK_Model.plotOn(tframe1, RooFit.LineColor(kBlue+2))
 dspi_acceptance.plotOn(tframe1, RooFit.LineColor(kGreen),
-                       RooFit.Normalization(100, RooAbsReal.Relative))
+                       RooFit.Normalization(40, RooAbsReal.Relative))
 dsk_acceptance.plotOn(tframe1, RooFit.LineColor(kGreen+2),
-                      RooFit.Normalization(100, RooAbsReal.Relative))
+                      RooFit.Normalization(40, RooAbsReal.Relative))
 
 # full range: 0.2 - 15 ps
 time.setRange('fullrange', epsilon, tmax)
@@ -121,10 +121,10 @@ DsK_Model.plotOn(tframe2, RooFit.Name('hdsk_model'),
                  RooFit.LineColor(kBlue+2))
 dspi_acceptance.plotOn(tframe2, RooFit.Name('hdspi_acceptance'),
                        RooFit.LineColor(kGreen),
-                       RooFit.Normalization(500, RooAbsReal.Relative))
+                       RooFit.Normalization(100, RooAbsReal.Relative))
 dsk_acceptance.plotOn(tframe2, RooFit.Name('hdsk_acceptance'),
                       RooFit.LineColor(kGreen+2),
-                      RooFit.Normalization(500, RooAbsReal.Relative))
+                      RooFit.Normalization(100, RooAbsReal.Relative))
 
 
 ## Pull distributions
@@ -200,7 +200,7 @@ if logscale:
 # pull distributions
 gPad.Clear()
 gPad.Update()
-canvas.Divide(2, 1)
+canvas.Divide(1, 2)
 canvas.cd(1)
 tframe3.Draw()
 canvas.cd(2)
