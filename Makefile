@@ -14,7 +14,7 @@ libs:	$(LIBS)
 
 $(LIBS):%:	| lib inc
 	make -C $@ lib$@.so
-	ln -sf ../$@/lib$@.so lib/
+	ln -sf ../$@/{lib$@.so,dict/$@Dict_rdict.pcm} lib/
 	cd inc && ln -sf ../$@/*.hxx .
 
 lib inc bin:%:
