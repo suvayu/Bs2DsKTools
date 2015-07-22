@@ -29,3 +29,16 @@ def sanitise_str_src(string):
     "Sanitise strings for use in names in source code."
 
     return re.sub('[-%.+*?=()\[\]{} ^]', '_', string)
+
+
+class FitStatus(object):
+    """Fit status from Minuit"""
+    fmt = '\033[3{};1mFit status: {} ({})\033[0m'
+
+    def __init__(self, status):
+        self.status = 'fail' if status else 'pass'
+        self.code = status
+        self.col = 1 if status else 2
+
+    def __repr__(self):
+        return self.fmt.format(self.col, self.status, self.code)

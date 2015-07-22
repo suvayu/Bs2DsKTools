@@ -343,6 +343,8 @@ fitresult = PDF.fitTo(dataset, RooFit.Optimize(0), RooFit.Strategy(2),
                       RooFit.SumW2Error(True), RooFit.Offset(True),
                       RooFit.Verbose(True))
 fitresult.Print()
+from helpers import FitStatus
+print FitStatus(fitresult.status())
 
 
 ## Plot results
