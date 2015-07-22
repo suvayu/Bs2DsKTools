@@ -14,7 +14,7 @@ libs:	$(LIBS)
 
 $(LIBS):%:	| lib inc
 	make -C $@ lib$@.so
-	ln -sf ../$@/{lib$@.so,dict/$@Dict_rdict.pcm} lib/
+	cp -f $@/*.{so,pcm} lib/
 	cd inc && ln -sf ../$@/*.hxx .
 
 lib inc bin:%:
@@ -29,4 +29,5 @@ lib inc bin:%:
 # 	$(CXX) $(OPTS) $(CXXFLAGS) -Isrc -Itests $(ROOTLIBS) $(ROOFITLIBS) -L. -lreadTree -lacceptance src/utils.cc $< -o $@
 
 cleanall clean:%:
+	rm -r lib/*
 	@for dir in $(LIBS); do make -C $$dir $@; done
