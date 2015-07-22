@@ -141,6 +141,7 @@ def save_in_workspace(rfile, **argsets):
 
     """
 
+    import traceback
     # Persistify variables, PDFs and datasets
     workspace = RooWorkspace('workspace',
                              'Workspace saved at %s' % get_timestamp())
@@ -150,9 +151,9 @@ def save_in_workspace(rfile, **argsets):
         for arg in argsets[key]:
             try:
                 _import(workspace, arg)
-            except TypeError as err:
-                print err
+            except TypeError:
                 print type(arg), arg
+                traceback.print_exc()
     rfile.WriteTObject(workspace)
     print 'Saving arguments to file: %s' % rfile.GetName()
 
