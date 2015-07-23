@@ -153,6 +153,8 @@ def fill_dataset(varargset, ftree, wt, wtvar, cut=''):
 
     from rplot.fixes import ROOT
     from ROOT import RooDataSet, RooFit, TTreeFormula
+    from helpers import suppress_warnings
+    suppress_warnings()
     from rplot.tselect import Tsplice
     splice = Tsplice(ftree)
     splice.make_splice('sel', cut)

@@ -6,6 +6,7 @@
 
 import re
 
+
 def sanitise_str(string, splchars=True):
     "Sanitise string for use as labels or filenames (as per flag)."
 
@@ -42,3 +43,14 @@ class FitStatus(object):
 
     def __repr__(self):
         return self.fmt.format(self.col, self.status, self.code)
+
+
+def suppress_warnings():
+    """Suppress known annoying warnings"""
+    # NOTE: This is to ignore a warning from the call to
+    # TTreeFormula::EvalInstance().  One of the default arguments is a
+    # char**.  PyROOT does not provide converters for that, leading to the
+    # warning.  As long as this feature is not accessed, ignoring is safe.
+    import warnings
+    warnings.filterwarnings(action='ignore', category=RuntimeWarning,
+                            message='creating converter for unknown type.*')
