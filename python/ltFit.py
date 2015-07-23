@@ -166,8 +166,8 @@ dataset = RooDataSet('dataset', 'Combined dataset (DsK + DsPi)',
 dataset.append(dsetlist[1])
 
 for dset in dsetlist:
-    dset.Print('v')
-dataset.Print('v')
+    dset.Print()
+dataset.Print()
 
 ## Basic B decay pdf with time resolution
 # Resolution model
