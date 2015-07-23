@@ -160,9 +160,10 @@ def fill_dataset(varargset, ftree, wt, wtvar, cut=''):
     splice.make_splice('sel', cut)
 
     formulae = {}
+    wtname = wtvar.GetName()
     for var in varargset:
         name = var.GetName()
-        expr = wt if var == wtvar else name
+        expr = wt if name == wtname else name
         formulae[name] = TTreeFormula(name, expr, ftree)
 
     dataset = RooDataSet('dataset', 'Dataset', varargset,
@@ -172,7 +173,7 @@ def fill_dataset(varargset, ftree, wt, wtvar, cut=''):
         for var, expr in formulae.iteritems():
             realvar = varargset.find(var)
             realvar.setVal(expr.EvalInstance())
-        dataset.fill()
+        dataset.add(varargset, varargset[wtname].getVal())
     return dataset
 
 
