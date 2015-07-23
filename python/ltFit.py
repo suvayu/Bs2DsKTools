@@ -95,7 +95,7 @@ pdflist = []
 
 
 ## Observables
-time = RooRealVar('time', 'B_{s} decay time in ps', epsilon, 15.0)
+time = RooRealVar('time', 'B_{s} decay time [ps]', epsilon, 15.0)
 # # Limits determined from tree
 # dt = RooRealVar('dt', 'Error in decay time measurement (ps)', 1E-2, 9E-2)
 # dt.setBins(100)             # default binning (since empty name)
