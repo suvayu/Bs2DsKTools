@@ -59,7 +59,7 @@ from ROOT import (RooFit, RooArgSet, RooArgList, RooAbsReal,
                   RooProduct)
 
 # my stuff
-from factory import (load_library, set_integrator_config, get_dataset,
+from factory import (load_library, set_integrator_config, fill_dataset,
                      get_file, get_object, get_timestamp,
                      save_in_workspace)
 
@@ -114,10 +114,6 @@ tlist = [
     'HLT2Topo4BodyTOS'
 ]
 
-triggerVars = []
-for var in tlist:
-    triggerVars += [RooRealVar(var, var, 0, 2)]
-
 cut = '(%s > 0) && (%s > 0 || %s > 0 || %s > 0) ' % (
     tlist[0], tlist[1], tlist[2], tlist[3])
 cut += '&& BDTG > 0.5 '
@@ -134,34 +130,24 @@ for mode, pidcut in [('DsPi', 'PIDK < 0'), ('DsK', 'PIDK > 10')]:
     print 'Reading from file: %s' % rfile.GetName()
 
     cutstr = cut + ' && ' + pidcut
-    cutVars = triggerVars[:]
-    cutVars += [RooRealVar('PIDK', 'PIDK', -200, 200)]
-    cutVars += [RooRealVar('BDTG', 'BDTG', -1, 1)]
 
     if pidcut.find(' -5') > 0:
-        wtvar = 'wt0'
+        wt = 'wt0'
     elif pidcut.find(' 0') > 0:
-        wtvar = 'wt1'
+        wt = 'wt1'
     elif pidcut.find(' 5') > 0:
-        wtvar = 'wt2'
+        wt = 'wt2'
     elif pidcut.find(' 10') > 0:
-        wtvar = 'wt3'
-
-    try:
-        wt = RooRealVar(wtvar, 'weight', 0.0, 1.0)
-        cutVars += [wt]
-        weights += [wt]
-    except NameError:
+        wt = 'wt3'
+    else:
         print 'Unknown PID selection. Weights not applied.'
+    wtvar = RooRealVar('wt', 'weight', 0.0, 1.0)
+    varlist += [wtvar]
 
-    try:
-        dataset = get_dataset(RooArgSet(time), ftree, cutstr, cutVars,
-                              RooFit.WeightVar(wt, True))
-        dataset.SetName('%s_%s' % (dataset.GetName(), mode))
-        print '%s is weighted: %s' % (dataset.GetName(), dataset.isWeighted())
-        dsetlist += [dataset]
-    except TypeError, IOError:
-        print sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
+    dataset = fill_dataset(RooArgSet(time, wtvar), ftree, wt, wtvar, cutstr)
+    dataset.SetName('%s_%s' % (dataset.GetName(), mode))
+    print '%s is weighted: %s' % (dataset.GetName(), dataset.isWeighted())
+    dsetlist += [dataset]
 
 decaycat = RooCategory('decaycat', 'Decay mode category')
 decaycat.defineType('DsPi')
@@ -180,8 +166,7 @@ dataset.append(dsetlist[1])
 
 for dset in dsetlist:
     dset.Print('v')
-
-# assert(False)
+dataset.Print('v')
 
 ## Basic B decay pdf with time resolution
 # Resolution model
