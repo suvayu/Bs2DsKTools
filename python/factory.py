@@ -12,20 +12,6 @@ import os
 import sys
 from datetime import datetime
 
-# # FIXME: Batch running fails on importing anything but gROOT
-# ROOT global variables
-from ROOT import gROOT, gSystem
-
-# ROOT classes
-from ROOT import TTree, TFile, TCanvas, TPad, TClass
-
-# RooFit classes
-from ROOT import RooFit
-from ROOT import RooPlot, RooWorkspace
-from ROOT import RooArgSet, RooArgList
-from ROOT import RooAbsArg, RooAbsReal, RooAbsPdf, RooAbsData
-from ROOT import RooRealVar
-from ROOT import RooDataSet, RooDataHist
 
 # Hack around RooWorkspace.import() and python keyword import clash
 # _import = getattr(RooWorkspace, 'import')  # ROOT 6 bug
@@ -41,45 +27,56 @@ def get_timestamp(fmt='%Y-%m-%d-%a-%H-%M'):
 
 # ROOT wrappers
 def load_library(library):
-    loadstatus = { 0: 'loaded',
-                   1: 'already loaded',
-                   -1: 'does not exist',
-                   -2: 'version mismatch' }
-    status = gSystem.Load(library)
+    from rplot.fixes import ROOT
+    loadstatus = {
+        0: 'loaded',
+        1: 'already loaded',
+        -1: 'does not exist',
+        -2: 'version mismatch'
+    }
+    status = ROOT.gSystem.Load(library)
     if status < 0:
         sys.exit('Problem loading %s, %s' % (library, loadstatus[status]))
 
 
 def get_file(fname, mode='read'):
     """Open and return a ROOT file."""
+    from rplot.fixes import ROOT
     if os.path.exists(fname):
-        return TFile(fname, mode)
+        return ROOT.TFile(fname, mode)
     else:
         raise IOError('File %s does not exist!' % fname)
 
 
 def get_object(objname, rfile, subdir=''):
     """Get a ROOT object from a ROOT file by name."""
-    if len(subdir): subdir += '/'
+    if len(subdir):
+        subdir += '/'
     return rfile.Get('%s%s' % (subdir, objname))
 
 
 # RooFit wrappers
 def get_argset(args):
     """Return and argset of the RooFit objects."""
-    argset = RooArgSet()
+    from rplot.fixes import ROOT
+    argset = ROOT.RooArgSet()
     for arg in args:
-        if arg.InheritsFrom(RooAbsArg.Class()): argset.add(arg)
-        else: TypeError('%s should inherit from RooAbsArg' % arg.GetName())
+        if arg.InheritsFrom(ROOT.RooAbsArg.Class()):
+            argset.add(arg)
+        else:
+            TypeError('%s should inherit from RooAbsArg' % arg.GetName())
     return argset
 
 
 def get_arglist(args):
     """Return and arglist of the RooFit objects."""
-    arglist = RooArgList()
+    from rplot.fixes import ROOT
+    arglist = ROOT.RooArgList()
     for arg in args:
-        if arg.InheritsFrom(RooAbsArg.Class()): arglist.add(arg)
-        else: TypeError('%s should inherit from RooAbsArg' % arg.GetName())
+        if arg.InheritsFrom(ROOT.RooAbsArg.Class()):
+            arglist.add(arg)
+        else:
+            TypeError('%s should inherit from RooAbsArg' % arg.GetName())
     return arglist
 
 
@@ -91,19 +88,23 @@ def set_integrator_config():
 
     """
 
+    from rplot.fixes import ROOT
     # More precise integrals in RooFit
-    RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-9)
-    RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-9)
+    numintconf = ROOT.RooAbsReal.defaultIntegratorConfig()
+    numintconf.setEpsAbs(1e-9)
+    numintconf.setEpsRel(1e-9)
     # Set how intervals are determined and integrals calculated
-    RooAbsReal.defaultIntegratorConfig().getConfigSection('RooAdaptiveGaussKronrodIntegrator1D').setCatLabel('method','21Points')
-    RooAbsReal.defaultIntegratorConfig().getConfigSection('RooAdaptiveGaussKronrodIntegrator1D').setRealValue('maxSeg', 1000)
-    RooAbsReal.defaultIntegratorConfig().method1D().setLabel('RooAdaptiveGaussKronrodIntegrator1D')
-    RooAbsReal.defaultIntegratorConfig().method1DOpen().setLabel('RooAdaptiveGaussKronrodIntegrator1D')
+    numintconf.getConfigSection('RooAdaptiveGaussKronrodIntegrator1D').setCatLabel('method', '21Points')
+    numintconf.getConfigSection('RooAdaptiveGaussKronrodIntegrator1D').setRealValue('maxSeg', 1000)
+    numintconf.method1D().setLabel('RooAdaptiveGaussKronrodIntegrator1D')
+    numintconf.method1DOpen().setLabel('RooAdaptiveGaussKronrodIntegrator1D')
 
 
 def get_toy_dataset(varargset, PDF=None):
     """Return a toy dataset for the given PDF."""
 
+    from rplot.fixes import ROOT
+    from ROOT import TClass, RooAbsPdf, RooFit
     objclass = TClass.GetClass(PDF.ClassName())
     if objclass.InheritsFrom(RooAbsPdf.Class()):
         dataset = PDF.generate(varargset, 10000, RooFit.Name('toydataset'),
@@ -122,9 +123,11 @@ def get_dataset(varargset, ftree, cut='', cutVars=[], *cmdArgs):
 
     """
 
+    from rplot.fixes import ROOT
+    from ROOT import RooDataSet, RooFit
     varargsetclone = varargset.clone('varargsetclone')
     for cvar in cutVars:
-        varargsetclone.add(cvar) # Add selVar to apply cut
+        varargsetclone.add(cvar)  # Add selVar to apply cut
 
     tmpdataset = RooDataSet('dataset', 'Dataset', varargsetclone,
                             RooFit.Import(ftree), RooFit.Cut(cut), *cmdArgs)
@@ -148,6 +151,7 @@ def fill_dataset(varargset, ftree, wt, wtvar, cut=''):
     """
 
     from rplot.fixes import ROOT
+    from ROOT import RooDataSet, RooFit, TTreeFormula
     from rplot.tselect import Tsplice
     splice = Tsplice(ftree)
     splice.make_splice('sel', cut)
@@ -155,12 +159,12 @@ def fill_dataset(varargset, ftree, wt, wtvar, cut=''):
     formulae = {}
     for var in varargset:
         name = var.GetName()
-        formulae[name] = ROOT.TTreeFormula(name, name, ftree)
+        formulae[name] = TTreeFormula(name, name, ftree)
     name = wtvar.GetName()
-    formulae[name] = ROOT.TTreeFormula(name, wt, ftree)
+    formulae[name] = TTreeFormula(name, wt, ftree)
 
-    dataset = ROOT.RooDataSet('dataset', 'Dataset', varargset,
-                              ROOT.RooFit.WeightVar(wtvar))
+    dataset = RooDataSet('dataset', 'Dataset', varargset,
+                         RooFit.WeightVar(wtvar))
     for i in xrange(ftree.GetEntries()):
         ftree.GetEntry(i)
         for var, expr in formulae.iteritems():
@@ -180,10 +184,11 @@ def save_in_workspace(rfile, **argsets):
 
     """
 
+    from rplot.fixes import ROOT
     import traceback
     # Persistify variables, PDFs and datasets
-    workspace = RooWorkspace('workspace',
-                             'Workspace saved at %s' % get_timestamp())
+    workspace = ROOT.RooWorkspace('workspace',
+                                  'Workspace saved at %s' % get_timestamp())
     keys = argsets.keys()
     for key in keys:
         print 'Importing RooFit objects in %s list.' % key
