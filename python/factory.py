@@ -115,7 +115,7 @@ def get_toy_dataset(varargset, PDF=None):
         raise TypeError('PDF should inherit from RooAbsPdf.')
 
 
-def get_dataset(varargset, ftree, cut='', cutVars=[], *cmdArgs):
+def get_dataset(varargset, ftree, cut='', wt=''):
     """Return a dataset.
 
     Return a dataset from the ntuple `ftree'. Apply a selection cut
@@ -124,16 +124,21 @@ def get_dataset(varargset, ftree, cut='', cutVars=[], *cmdArgs):
     """
 
     from rplot.fixes import ROOT
-    from ROOT import RooDataSet, RooFit
-    varargsetclone = varargset.clone('varargsetclone')
-    for cvar in cutVars:
-        varargsetclone.add(cvar)  # Add selVar to apply cut
-
-    tmpdataset = RooDataSet('dataset', 'Dataset', varargsetclone,
-                            RooFit.Import(ftree), RooFit.Cut(cut), *cmdArgs)
-    dataset = tmpdataset.reduce(varargset)
-    del tmpdataset
-    return dataset
+    from rplot.tselect import Tsplice
+    splice = Tsplice(ftree)
+    splice.make_splice('sel', cut)
+    from ROOT import RooDataSet, RooFit, RooFormulaVar, RooArgList
+    tmpdst = RooDataSet('tmpdataset', '', varargset, RooFit.Import(ftree))
+    if wt:
+        wtvar = RooFormulaVar('wt', '@0', RooArgList(varargset[wt]))
+        wtvar = tmpdst.addColumn(wtvar)
+        varargset.remove(varargset[wt])
+        varargset.add(wtvar)
+        dst = RooDataSet('dataset', 'Dataset', varargset,
+                         RooFit.Import(tmpdst), RooFit.WeightVar(wtvar))
+        varargset.remove(wtvar)
+        dst = dst.reduce(varargset)
+    return dst
 
 
 def fill_dataset(varargset, ftree, wt, wtvar, cut=''):

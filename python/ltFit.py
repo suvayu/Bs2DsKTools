@@ -60,7 +60,7 @@ from ROOT import (RooFit, RooArgSet, RooArgList, RooAbsReal,
 
 # my stuff
 from factory import (load_library, set_integrator_config, fill_dataset,
-                     get_file, get_object, get_timestamp,
+                     get_file, get_object, get_timestamp, get_dataset,
                      save_in_workspace)
 
 set_integrator_config()
@@ -141,11 +141,12 @@ for mode, pidcut in [('DsPi', 'PIDK < 0'), ('DsK', 'PIDK > 10')]:
         wt = 'wt3'
     else:
         print 'Unknown PID selection. Weights not applied.'
-    wtvar = RooRealVar('wt', 'weight', 0.0, 1.0)
-    varlist += [wtvar]
+    wtvar = RooRealVar(wt, 'weight', 0.0, 1.0)
 
-    dataset = fill_dataset(RooArgSet(time, wtvar), ftree, wt, wtvar, cutstr)
-    dataset.SetName('%s_%s' % (dataset.GetName(), mode))
+    # dataset = fill_dataset(RooArgSet(time, wtvar), ftree, wt, wtvar, cutstr)
+    dataset = get_dataset(RooArgSet(time, wtvar), ftree, cutstr, wt)
+    name_title = '{}_{}'.format(dataset.GetName(), mode)
+    dataset.SetNameTitle(name_title, name_title)
     print '%s is weighted: %s' % (dataset.GetName(), dataset.isWeighted())
     dsetlist += [dataset]
 
