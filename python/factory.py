@@ -133,6 +133,45 @@ def get_dataset(varargset, ftree, cut='', cutVars=[], *cmdArgs):
     return dataset
 
 
+def fill_dataset(varargset, ftree, wt, wtvar, cut=''):
+    """Return a dataset (slow, get_dataset is more efficient).
+
+    Return a dataset from the ntuple `ftree', also apply `cut'.  Use
+    `wt' as the weight expression in the tree.  `wtvar' is the
+    corresponding RooRealVar weight.
+
+    The dataset is filled by iterating over the tree.  This is needed
+    when you want to ensure different datasets have the same weight
+    variable names, so that they can be combined later on.  This is
+    needed even if they are combined as different categories.
+
+    """
+
+    from rplot.fixes import ROOT
+    from rplot.tselect import Tsplice
+    splice = Tsplice(ftree)
+    splice.make_splice('sel', cut)
+
+    formulae = {}
+    for var in varargset:
+        name = var.GetName()
+        formulae[name] = ROOT.TTreeFormula(name, name, ftree)
+    name = wtvar.GetName()
+    formulae[name] = ROOT.TTreeFormula(name, wt, ftree)
+
+    dataset = ROOT.RooDataSet('dataset', 'Dataset', varargset,
+                              ROOT.RooFit.WeightVar(wtvar))
+    for i in xrange(ftree.GetEntries()):
+        ftree.GetEntry(i)
+        for var, expr in formulae.iteritems():
+            realvar = varargset.find(var)
+            if not realvar and wtvar.GetName() == var:
+                realvar = wtvar
+            realvar.setVal(expr.EvalInstance())
+        dataset.fill()
+    return dataset
+
+
 def save_in_workspace(rfile, **argsets):
     """Save RooFit objects in workspace and persistify.
 
