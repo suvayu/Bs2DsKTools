@@ -141,7 +141,8 @@ def fill_dataset(varargset, ftree, wt, wtvar, cut=''):
 
     Return a dataset from the ntuple `ftree', also apply `cut'.  Use
     `wt' as the weight expression in the tree.  `wtvar' is the
-    corresponding RooRealVar weight.
+    corresponding RooRealVar weight.  Note, varargset should contain
+    wtvar.
 
     The dataset is filled by iterating over the tree.  This is needed
     when you want to ensure different datasets have the same weight
@@ -159,9 +160,8 @@ def fill_dataset(varargset, ftree, wt, wtvar, cut=''):
     formulae = {}
     for var in varargset:
         name = var.GetName()
-        formulae[name] = TTreeFormula(name, name, ftree)
-    name = wtvar.GetName()
-    formulae[name] = TTreeFormula(name, wt, ftree)
+        expr = wt if var == wtvar else name
+        formulae[name] = TTreeFormula(name, expr, ftree)
 
     dataset = RooDataSet('dataset', 'Dataset', varargset,
                          RooFit.WeightVar(wtvar))
@@ -169,8 +169,6 @@ def fill_dataset(varargset, ftree, wt, wtvar, cut=''):
         ftree.GetEntry(i)
         for var, expr in formulae.iteritems():
             realvar = varargset.find(var)
-            if not realvar and wtvar.GetName() == var:
-                realvar = wtvar
             realvar.setVal(expr.EvalInstance())
         dataset.fill()
     return dataset
