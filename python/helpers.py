@@ -4,8 +4,6 @@
 
 """
 
-import re
-
 
 def sanitise_str(string, splchars=True):
     "Sanitise string for use as labels or filenames (as per flag)."
@@ -28,7 +26,7 @@ def sanitise_str(string, splchars=True):
 
 def sanitise_str_src(string):
     "Sanitise strings for use in names in source code."
-
+    import re
     return re.sub('[-%.+*?=()\[\]{} ^]', '_', string)
 
 
