@@ -71,6 +71,7 @@ dspi_dataset = dataset.reduce(RooFit.Cut('decaycat==0'))
 dsk_dataset = dataset.reduce(RooFit.Cut('decaycat==1'))
 ndspi = dspi_dataset.numEntries()
 ndsk = dsk_dataset.numEntries()
+print u'Dsπ: {}, DsK: {}'.format(ndspi, ndsk)
 
 
 # Plots: full range: 0.2 - 15 ps
@@ -86,11 +87,12 @@ DsK_Model.plotOn(tfr_fitres, RooFit.Name('hdsk_model'),
                  RooFit.LineColor(ROOT.kBlue+2))
 dspi_acceptance.plotOn(tfr_fitres, RooFit.Name('hdspi_acceptance'),
                        RooFit.LineColor(ROOT.kGreen),
-                       RooFit.Normalization(100, RooAbsReal.Relative))
+                       RooFit.Normalization(120, RooAbsReal.Relative))
 dsk_acceptance.plotOn(tfr_fitres, RooFit.Name('hdsk_acceptance'),
                       RooFit.LineColor(ROOT.kGreen+2),
-                      RooFit.Normalization(100, RooAbsReal.Relative))
+                      RooFit.Normalization(120, RooAbsReal.Relative))
 tfr_fitres.SetTitle('')
+tfr_fitres.SetAxisRange(0, 510, 'Y')
 
 
 # Pull distributions
@@ -98,7 +100,7 @@ dspi_pullhist = tfr_fitres.pullHist('hdspi_dataset', 'hdspi_model')
 dsk_pullhist = tfr_fitres.pullHist('hdsk_dataset', 'hdsk_model')
 
 # fit pulls
-tblhdr = '| {0:<{width}} | {1:<{width}} |'
+tblhdr = '| {0:^{width}} | {1:^{width}} |'
 tblrow = '| {0:>{sign}{width}e} | {1:>{sign}{width}e} |'
 print 'Power law acceptance with %s ratio:' % ratiofn
 print tblhdr.format('Mean', 'RMS', width=13)
@@ -110,15 +112,17 @@ print tblrow.format(dsk_pullhist.GetMean(2), dsk_pullhist.GetRMS(2),
 # Dsπ
 xaxisvar = RooRealConstant.value(0.0)
 tfr_pull1 = time.frame(RooFit.Range('full'), RooFit.Name('dspi_pull'))
-xaxisvar.plotOn(tfr_pull1, RooFit.LineColor(ROOT.kRed), RooFit.LineWidth(1))
+xaxisvar.plotOn(tfr_pull1, RooFit.LineColor(ROOT.kRed), RooFit.LineWidth(2))
 tfr_pull1.addPlotable(dspi_pullhist, 'P')
 tfr_pull1.SetTitle('')
+tfr_pull1.SetAxisRange(-5, 5, 'Y')
 
 # DsK
 tfr_pull2 = time.frame(RooFit.Range('full'), RooFit.Name('dsk_pull'))
-xaxisvar.plotOn(tfr_pull2, RooFit.LineColor(ROOT.kRed), RooFit.LineWidth(1))
+xaxisvar.plotOn(tfr_pull2, RooFit.LineColor(ROOT.kRed), RooFit.LineWidth(2))
 tfr_pull2.addPlotable(dsk_pullhist, 'P')
 tfr_pull2.SetTitle('')
+tfr_pull2.SetAxisRange(-5, 5, 'Y')
 
 
 ## Draw and print
