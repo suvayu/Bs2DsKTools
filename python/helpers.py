@@ -61,3 +61,48 @@ def rf_msg_lvl(lvl, topic, obj):
     for stream in xrange(msgsvc.numStreams()):
         if msgsvc.getStream(stream).match(lvl, topic, obj):
             msgsvc.setStreamStatus(stream, False)
+
+
+def rf_fr_ytitle(fr):
+    import re
+    re.IGNORECASE = True
+    try:
+        units = re.findall('\[[a-z]+\]', fr.GetXaxis().GetTitle())[-1]
+    except IndexError:          # no units found in axis title
+        units = ''
+    fr.GetYaxis().SetTitle('candidates / {bw} {unit}'.format(
+        bw=fr.getFitRangeBinW(), unit=units))
+    return fr
+
+
+def rf_fr_style(fr, xtitle=None, ytitle=None):
+    fr.SetTitle('')
+    # fr.SetAxisRange(0, 1.05*fr.GetMaximum(), 'Y')
+    if isinstance(xtitle, str):
+        fr.GetXaxis().SetTitle(xtitle)
+    if isinstance(ytitle, str):
+        fr.GetYaxis().SetTitle(ytitle)
+    else:
+        rf_fr_ytitle(fr)
+    return fr
+
+
+def plot_diff_canvas(sz=(1024, 640), frac=0.25):
+    import uuid
+    from rplot.fixes import ROOT
+    canvas = ROOT.TCanvas('c_{}'.format(uuid.uuid4()), '', 1024, 640+210)  # FIXME: calc
+    canvas.SetRightMargin(0.1)
+    canvas.cd()
+    plot = ROOT.TPad('p_{}'.format(uuid.uuid4()), '', 0.0, frac, 1.0, 1.0)
+    plot.SetBottomMargin(0.1)
+    diff = ROOT.TPad('p_{}'.format(uuid.uuid4()), '', 0.0, 0.0, 1.0, frac)
+    diff.SetTopMargin(0.0)
+    diff.SetBottomMargin(0.15)
+    plot.Draw()
+    diff.Draw()
+    return plot, diff, canvas
+
+
+def diff_axis_style(axis, divs):
+    axis.SetNdivisions(divs)
+    axis.SetLabelSize(0.1)

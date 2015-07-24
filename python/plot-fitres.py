@@ -10,13 +10,9 @@ optparser = argparse.ArgumentParser(description=__doc__)
 optparser.add_argument('filename', help='ROOT file with saved fit result')
 optparser.add_argument('-p', '--print', dest='doPrint', action='store_true',
                        help='Print to multi-page pdf file')
-optparser.add_argument('-l', '--log', action='store_true',
-                       help='Include logscale plot')
 
 options = optparser.parse_args()
 doPrint = options.doPrint
-logscale = options.log
-fname = options.filename
 
 from rplot.fixes import ROOT
 ROOT.gROOT.SetBatch(doPrint)
@@ -38,7 +34,7 @@ epsilon = 0.2
 tmax = 15.0
 
 # Get objects from workspace
-workspace, rfile = get_workspace(fname, 'workspace')
+workspace, rfile = get_workspace(options.filename, 'workspace')
 
 # sample filename: fitresult-cpowerlaw-w-flat-ratio-2013-02-22-Fri-20-27.root
 fnametokens = rfile.GetTitle().split('-')
@@ -57,6 +53,7 @@ roffset = workspace.var('roffset')
 rbeta = workspace.var('rbeta')
 
 # PDFs
+Bdecay = workspace.pdf('Bdecay')
 DsPi_Model = workspace.pdf('DsPi_Model')
 dspi_acceptance = workspace.function('dspi_acceptance')
 DsK_Model = workspace.pdf('DsK_Model')
@@ -75,29 +72,42 @@ print u'Dsπ: {}, DsK: {}'.format(ndspi, ndsk)
 
 
 # Plots: full range: 0.2 - 15 ps
+from helpers import rf_fr_style, diff_axis_style
 time.setRange('full', 0, tmax)
-tfr_fitres = time.frame(RooFit.Range('full'), RooFit.Name('time_fitres'))
-dspi_dataset.plotOn(tfr_fitres, RooFit.Name('hdspi_dataset'),
+tfr_fitres1 = time.frame(RooFit.Range('full'), RooFit.Name('time_fitres1'))
+dspi_dataset.plotOn(tfr_fitres1, RooFit.Name('hdspi_dataset'),
                     RooFit.MarkerStyle(ROOT.kOpenTriangleDown))
-DsPi_Model.plotOn(tfr_fitres, RooFit.Name('hdspi_model'),
+DsPi_Model.plotOn(tfr_fitres1, RooFit.Name('hdspi_model'),
                   RooFit.LineColor(ROOT.kBlue))
-dsk_dataset.plotOn(tfr_fitres, RooFit.Name('hdsk_dataset'),
-                   RooFit.MarkerStyle(ROOT.kFullTriangleUp))
-DsK_Model.plotOn(tfr_fitres, RooFit.Name('hdsk_model'),
-                 RooFit.LineColor(ROOT.kBlue+2))
-dspi_acceptance.plotOn(tfr_fitres, RooFit.Name('hdspi_acceptance'),
+dspi_acceptance.plotOn(tfr_fitres1, RooFit.Name('hdspi_acceptance'),
                        RooFit.LineColor(ROOT.kGreen),
-                       RooFit.Normalization(120, RooAbsReal.Relative))
-dsk_acceptance.plotOn(tfr_fitres, RooFit.Name('hdsk_acceptance'),
+                       RooFit.Normalization(100, RooAbsReal.Relative))
+rf_fr_style(tfr_fitres1)
+tfr_fitres1.SetAxisRange(0, 1.05*tfr_fitres1.GetMaximum(), 'Y')
+
+tfr_fitres2 = tfr_fitres1.emptyClone('tfr_fitres2')
+dsk_dataset.plotOn(tfr_fitres2, RooFit.Name('hdsk_dataset'),
+                   RooFit.MarkerStyle(ROOT.kFullTriangleUp))
+DsK_Model.plotOn(tfr_fitres2, RooFit.Name('hdsk_model'),
+                 RooFit.LineColor(ROOT.kBlue+2))
+dsk_acceptance.plotOn(tfr_fitres2, RooFit.Name('hdsk_acceptance'),
                       RooFit.LineColor(ROOT.kGreen+2),
-                      RooFit.Normalization(120, RooAbsReal.Relative))
-tfr_fitres.SetTitle('')
-tfr_fitres.SetAxisRange(0, 510, 'Y')
+                      RooFit.Normalization(10, RooAbsReal.Relative))
+rf_fr_style(tfr_fitres2)
+tfr_fitres2.SetAxisRange(0, 1.05*tfr_fitres2.GetMaximum(), 'Y')
+
+tfr_th = time.frame(RooFit.Name('tfr_th'))
+Bdecay.plotOn(tfr_th, RooFit.LineColor(ROOT.kRed))
+dspi_acceptance.plotOn(tfr_th, RooFit.LineColor(ROOT.kGreen),
+                       RooFit.Normalization(0.02, RooAbsReal.Relative))
+dsk_acceptance.plotOn(tfr_th, RooFit.LineColor(ROOT.kGreen+2),
+                      RooFit.Normalization(0.02, RooAbsReal.Relative))
+rf_fr_style(tfr_th, ytitle='')
 
 
 # Pull distributions
-dspi_pullhist = tfr_fitres.pullHist('hdspi_dataset', 'hdspi_model')
-dsk_pullhist = tfr_fitres.pullHist('hdsk_dataset', 'hdsk_model')
+dspi_pullhist = tfr_fitres1.pullHist('hdspi_dataset', 'hdspi_model')
+dsk_pullhist = tfr_fitres2.pullHist('hdsk_dataset', 'hdsk_model')
 
 # fit pulls
 tblhdr = '| {0:^{width}} | {1:^{width}} |'
@@ -114,53 +124,59 @@ xaxisvar = RooRealConstant.value(0.0)
 tfr_pull1 = time.frame(RooFit.Range('full'), RooFit.Name('dspi_pull'))
 xaxisvar.plotOn(tfr_pull1, RooFit.LineColor(ROOT.kRed), RooFit.LineWidth(2))
 tfr_pull1.addPlotable(dspi_pullhist, 'P')
-tfr_pull1.SetTitle('')
+rf_fr_style(tfr_pull1, xtitle='', ytitle='')
 tfr_pull1.SetAxisRange(-5, 5, 'Y')
+diff_axis_style(tfr_pull1.GetYaxis(), 5)
 
 # DsK
-tfr_pull2 = time.frame(RooFit.Range('full'), RooFit.Name('dsk_pull'))
+tfr_pull2 = tfr_pull1.emptyClone('dsk_pull')
 xaxisvar.plotOn(tfr_pull2, RooFit.LineColor(ROOT.kRed), RooFit.LineWidth(2))
 tfr_pull2.addPlotable(dsk_pullhist, 'P')
-tfr_pull2.SetTitle('')
+rf_fr_style(tfr_pull2, xtitle='', ytitle='')
 tfr_pull2.SetAxisRange(-5, 5, 'Y')
+diff_axis_style(tfr_pull2.GetYaxis(), 5)
 
 
 ## Draw and print
 # filenames
 timestamp = str(workspace.GetTitle())[19:]
-if logscale:
-    plotfile = 'plots/savedcanvas_%s_%s_%s.pdf' % ('log', ratiofn, timestamp)
-else:
-    plotfile = 'plots/savedcanvas_%s_%s.pdf' % (ratiofn, timestamp)
+plotfile = 'plots/savedcanvas_%s_%s.pdf' % (ratiofn, timestamp)
 
 # 16:10 canvas
-canvas = TCanvas('canvas', 'canvas', 1024, 640)
+from helpers import plot_diff_canvas
+plot, diff, canvas = plot_diff_canvas()
 
 # open pdf file
 if doPrint:
     canvas.Print(plotfile + '[')
 
-# full range
-tfr_fitres.Draw()
+# Dsπ
+plot.cd()
+tfr_fitres1.Draw()
+diff.cd()
+tfr_pull1.Draw()
+canvas.Update()
 if doPrint:
     canvas.Print(plotfile)
 
-# log scale
-if logscale:
-    ROOT.gPad.SetLogy(1)
-    tfr_fitres.Draw()
-    if doPrint:
-        canvas.Print(plotfile)
-    ROOT.gPad.SetLogy(0)
 
-# pull distributions
-ROOT.gPad.Clear()
-ROOT.gPad.Update()
-canvas.Divide(1, 2)
-canvas.cd(1)
-tfr_pull1.Draw()
-canvas.cd(2)
+def _clean(pad):
+    pad.Clear()
+    pad.Update()
+map(_clean, (plot, diff))
+
+# DsK
+plot.cd()
+tfr_fitres2.Draw()
+diff.cd()
 tfr_pull2.Draw()
+canvas.Update()
+if doPrint:
+    canvas.Print(plotfile)
+
+del plot, diff, canvas
+canvas = TCanvas('canvas', 'canvas', 1024, 640)
+tfr_th.Draw()
 if doPrint:
     canvas.Print(plotfile)
 
