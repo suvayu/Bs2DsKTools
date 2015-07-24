@@ -54,3 +54,12 @@ def suppress_warnings():
     import warnings
     warnings.filterwarnings(action='ignore', category=RuntimeWarning,
                             message='creating converter for unknown type.*')
+
+
+def rf_msg_lvl(lvl, topic, obj):
+    """Suppress RooFit logging"""
+    from rplot.fixes import ROOT
+    msgsvc = ROOT.RooMsgService.instance()
+    for stream in xrange(msgsvc.numStreams()):
+        if msgsvc.getStream(stream).match(lvl, topic, obj):
+            msgsvc.setStreamStatus(stream, False)
