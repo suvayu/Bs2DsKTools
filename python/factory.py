@@ -115,7 +115,7 @@ def get_toy_dataset(varargset, PDF=None):
         raise TypeError('PDF should inherit from RooAbsPdf.')
 
 
-def get_dataset(varargset, ftree, cut='', wt=''):
+def get_dataset(varargset, ftree, cut='', wt='', scale=1):
     """Return a dataset.
 
     Return a dataset from the ntuple `ftree'. Apply a selection cut
@@ -130,7 +130,8 @@ def get_dataset(varargset, ftree, cut='', wt=''):
     from ROOT import RooDataSet, RooFit, RooFormulaVar, RooArgList
     tmpdst = RooDataSet('tmpdataset', '', varargset, RooFit.Import(ftree))
     if wt:
-        wtvar = RooFormulaVar('wt', '@0', RooArgList(varargset[wt]))
+        wtvar = RooFormulaVar('wt', '{}*@0'.format(scale),
+                              RooArgList(varargset[wt]))
         wtvar = tmpdst.addColumn(wtvar)
         varargset.remove(varargset[wt])
         varargset.add(wtvar)
