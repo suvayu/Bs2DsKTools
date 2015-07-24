@@ -20,11 +20,16 @@ fname = options.filename
 
 from rplot.fixes import ROOT
 ROOT.gROOT.SetBatch(doPrint)
+ROOT.gErrorIgnoreLevel = ROOT.kWarning
 
 from ROOT import TCanvas, RooFit, RooAbsReal, RooRealConstant
 
 # my stuff
 from factory import load_library, set_integrator_config, get_workspace
+
+# suppress RooFit logging
+from helpers import rf_msg_lvl
+rf_msg_lvl(RooFit.ERROR, RooFit.Plotting, ROOT.RooPlot())
 
 # Load custom ROOT classes
 load_library('libacceptance.so')
