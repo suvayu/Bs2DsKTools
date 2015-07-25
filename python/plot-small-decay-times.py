@@ -7,8 +7,6 @@ PIDK cuts.  The goal is to find something that influences the Bs decay
 time distribution which in turn leads to less DsK events for very
 small decay times (< 0.5 ps).
 
-\033[1mNon-standard dependencies\033[0m: rootpy.{io,tree,plotting}
-
 @author Suvayu Ali
 @date   [2013-04-29 Mon]
 
@@ -52,8 +50,8 @@ trees = {
     'dspi': files['dspi'].Get('ftree')
 }
 
-variables = ('hMom.Pt()', 'hMom.Eta()', 'hIPchi2', 'time')
-prettyvars = ('h p_{T}', 'h #eta', 'h IP #chi^{2}', 'decay time')
+variables = ('hMom.Pt()', 'hMom.Eta()', 'hIPchi2')
+prettyvars = ('h p_{T} [MeV/c]', 'h #eta', 'h IP #chi^{2}')
 # variables = ['lab1_IPCHI2_OWNPV']
 # prettyvars = ['h IP #chi^{2}']
 
@@ -84,8 +82,8 @@ cuts['trig'] = cuts['HLT1'] + cuts['HLT2']
 
 htypes = [
     'nocuts', 'pid', 'bdt', 'trig',    # base
-    'pid_bdt', 'pid_trig', 'bdt_trig', # permutations of 2
-    'pid_bdt_trig'                     # all
+    # 'pid_bdt', 'pid_trig', 'bdt_trig', # permutations of 2
+    # 'pid_bdt_trig'                     # all
 ]
 
 histograms = []                 # list of dicts, keys: dsk, dspi
@@ -139,22 +137,22 @@ for htype in htypes:
 hists = map(lambda hs: (hs['dsk'], hs['dspi']), histograms)
 
 from rplot.rplot import Rplot
-plotter = Rplot(2, 2, 1200, 1000)
+plotter = Rplot(1, 3, 1024, 1920)
 canvas = plotter.prep_canvas()
 plotfile = 'plots/timelt2ps_%s.pdf' % sanitise_str_src('_'.join(variables))
 if doPrint:
     canvas.Print(plotfile + '[')
 
 # create legend
-legend = TLegend(0.45, 0.4, 0.88, 0.55)
-legend.SetLineColorAlpha(0, 100)
+legend = TLegend(0.6, 0.6, 0.95, 0.75)
+legend.SetLineWidth(0)
 legend.SetFillStyle(0)
 legend.SetTextSize(0.035)
 legend.SetHeader('%s ps'.format(sanitise_str(str(cuts['timelt2ps']))))
-plotter.add_legend(legend)
+plotter.add_legend(legend, 'lep')
 
-for i in xrange(0, len(hists), 4):
-    plotter.draw_hist(hists[i:i+4], 'e1', normalised=True)
+for i in xrange(0, len(hists), 3):
+    plotter.draw_hist(hists[i:i+3], 'e1', normalised=True)
     if doPrint:
         canvas.Print(plotfile)
 if doPrint:
