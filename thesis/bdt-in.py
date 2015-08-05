@@ -88,7 +88,7 @@ for var, mark in zip(variables, marks):
     hist.SetMarkerStyle(ROOT.kFullDotLarge)
     hist.SetMarkerSize(0.4)
     # hist.SetMarkerColor(ROOT.kBlack)
-    hist.SetXTitle(get_label(var))
+    hist.SetXTitle(get_label(var, units=True))
     hists[var] = (hist, mark)
 
 # plots
