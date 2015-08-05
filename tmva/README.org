@@ -203,6 +203,10 @@ Sets of input variables:
 - max_diff :: same as above, w/ new experimental variable (Rose & me)
   - maximum difference b/w D_{s} daughter track p_{T}
 - max_diffb :: same as above, but w/o decorrelation
+- tune :: retuned BDT params (BDTv2), input vars same as log3a (BDTv1)
+- tune_sw :: same as above, use sweights
+- tune_sw1 :: same as log3a (BDTv1), use sweights w/ offset
+- tune_sw2 :: same as tune (BDTv2), use sweights w/ offset
 
 *** Dependent variables (log3a)
 Training:
