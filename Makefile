@@ -14,8 +14,8 @@ libs:	$(LIBS)
 
 $(LIBS):%:	| lib inc
 	make -C $@ lib$@.so
-	cp -f $@/*.{so,pcm} lib/
-	cd inc && ln -sf ../$@/*.hxx .
+	ln -sf ../$@/*.{so,pcm} lib
+	ln -sf ../$@/*.hxx inc
 
 lib inc bin:%:
 	mkdir -p $@
