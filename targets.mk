@@ -8,4 +8,4 @@ clean:
 	rm -f *.o *.so
 
 cleanall:	clean
-	rm -f *Dict.{h,cxx}
+	rm -f *Dict{.h,.cxx,_rdict.pcm}

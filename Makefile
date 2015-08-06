@@ -29,5 +29,5 @@ lib inc bin:%:
 # 	$(CXX) $(OPTS) $(CXXFLAGS) -Isrc -Itests $(ROOTLIBS) $(ROOFITLIBS) -L. -lreadTree -lacceptance src/utils.cc $< -o $@
 
 cleanall clean:%:
-	rm -r lib/*
+	rm -rf lib/*
 	@for dir in $(LIBS); do make -C $$dir $@; done
