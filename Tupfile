@@ -1,0 +1,8 @@
+include_rules
+
+: |> mkdir -p lib inc |>
+
+preload acceptance
+preload readTree
+: foreach acceptance/*.so acceptance/*.pcm readTree/*.so readTree/*.pcm |> ln -sf ../%f lib |> lib/%g.%e
+: foreach acceptance/*.hxx readTree/*.hxx |> ln -sf ../%f inc |> inc/%g.%e

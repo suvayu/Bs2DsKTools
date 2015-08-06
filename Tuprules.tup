@@ -1,0 +1,24 @@
+# ROOT
+ROOTCONFIG	:= root-config
+ROOTCLING    	:= rootcling
+
+# compiler flags and options
+CC           	:= `$(ROOTCONFIG) --cc`
+CXX 	     	:= `$(ROOTCONFIG) --cxx`
+LD           	:= `$(ROOTCONFIG) --ld`
+
+OPTS	     	:= -g -Wall
+CXXFLAGS     	:= $(OPTS) -fPIC `$(ROOTCONFIG) --cflags`
+LDFLAGS      	:= $(OPTS) -shared `$(ROOTCONFIG) --ldflags`
+
+# linking to ROOT
+ROOTLIBS     	:= `$(ROOTCONFIG) --libs`
+ROOFITLIBS   	:= -lRooFitCore -lRooFit
+
+# common targets
+: *.hxx *LinkDef.h |> $(ROOTCLING) -f %o %f |> %dDict.cxx | %dDict_rdict.pcm
+: foreach *.cxx |> $(CXX) -c $(CXXFLAGS) -I. %f -o %o |> %B.o
+
+# macros
+!link = |> $(LD) $(LDFLAGS) $(ROOTLIBS) %f -o %o |>
+!link_rf = |> $(LD) $(LDFLAGS) $(ROOTLIBS) $(ROOFITLIBS) %f -o %o |>
