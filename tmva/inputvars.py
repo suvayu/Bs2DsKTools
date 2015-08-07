@@ -261,7 +261,7 @@ if options.scatter:
         plotter.draw_hist(hists[transform+'_corr'], opts)
         canvas.Update()
         if options.doprint:
-            canvas.Print('{}_correlation_grid_{}.png'.format(prefix, transform))
+            canvas.Print('{}_corrln_grid_{}.png'.format(prefix, transform))
             # canvas.Print('{}_correlation_grid.pdf'.format(prefix))
 
     # if options.doprint:
