@@ -35,6 +35,8 @@ optparser.add_argument('-v', dest='verbose', action='store_true',
                        help='Print linear correlation matrices')
 optparser.add_argument('-s', dest='scatter', action='store_true',
                        help='Make correlation scatter plots')
+optparser.add_argument('--dump', default=None, type=str,
+                       help='Dump correlation plots matching glob')
 options = optparser.parse_args()
 
 
@@ -64,15 +66,16 @@ prefix = 'plots/{}'.format(session)
 
 from config import transforms
 
+from fnmatch import fnmatchcase
 if options.transglob:
     # only process matching transforms
-    from fnmatch import fnmatchcase
     for key in transforms:
         if not fnmatchcase(key, options.transglob):
             del transforms[key]
 
 from fixes import ROOT
 ROOT.gROOT.SetBatch(options.batch)
+ROOT.gStyle.SetOptTitle(0)
 
 from utils import get_hists
 
@@ -136,9 +139,9 @@ if options.lcorrns or options.scatter:
     triu = np.triu_indices(dims)
 
 ## covariance matrices
+from utils import get_label
 if options.lcorrns:
     matrices = {}
-    from utils import get_label
     for transform in transforms:
         corrn = [
             ROOT.TH2D(transform+'_sig', 'Correlation matrix after {} transform (sig)'
@@ -257,9 +260,39 @@ if options.scatter:
     # if options.doprint:
     #     canvas.Print('{}_correlation_grid.pdf['.format(prefix))
 
+    def _draw_match(fname, hists):
+        for pair in hists:
+            myc = None
+            for obj in pair:
+                if fnmatchcase(obj.GetName(), options.dump):
+                    xaxis, yaxis = obj.GetXaxis(), obj.GetYaxis()
+                    xaxis.SetTitle(get_label(xaxis.GetTitle()))
+                    yaxis.SetTitle(get_label(yaxis.GetTitle()))
+                    yaxis.SetTitleOffset(1.25)
+                    if not myc:
+                        myc = ROOT.TCanvas('myc', '', 800, 500)
+                        myc.cd()
+                        obj.Draw()
+                    else:
+                        obj.Draw('same')
+            if myc:
+                myc.Print(fname)
+            del myc
+
+    # def _write(rfile, hists):
+    #     for pair in hists:
+    #         map(lambda h: rfile.WriteTObject(h) if h else None, pair)
+
+    if options.dump:
+        rfile = ROOT.TFile.Open('correlation_hists.root', 'recreate')
+
     for transform in transforms:
         plotter.draw_hist(hists[transform+'_corr'], opts)
         canvas.Update()
+        if options.dump:
+            # _write(rfile, hists[transform+'_corr'])
+            _draw_match('{}_matched_corrln_{}.png'.format(prefix, transform),
+                        hists[transform+'_corr'])
         if options.doprint:
             canvas.Print('{}_corrln_grid_{}.png'.format(prefix, transform))
             # canvas.Print('{}_correlation_grid.pdf'.format(prefix))
