@@ -42,7 +42,7 @@ optparser.add_argument('-i', dest='intervals', nargs='+', type=int,
                        help='Intervals of classifier cuts.')
 optparser.add_argument('-p', dest='doprint', action='store_true',
                        help='Print to png/pdf files.')
-optparser.add_argument('--backend', choices=['root', 'mpl'], default='root',
+optparser.add_argument('--backend', choices=['root', 'mpl'], default='mpl',
                        help='Plotting backend.  root -> png, mpl -> pdf')
 optparser.add_argument('-b', dest='batch', action='store_true', help='Batch mode.')
 options = optparser.parse_args()
