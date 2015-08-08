@@ -35,6 +35,8 @@ optparser.add_argument('-v', dest='verbose', action='store_true',
                        help='Print linear correlation matrices')
 optparser.add_argument('-s', dest='scatter', action='store_true',
                        help='Make correlation scatter plots')
+optparser.add_argument('--title', action='store_true',
+                       help='Add title to plots')
 optparser.add_argument('--dump', default=None, type=str,
                        help='Dump correlation plots matching glob')
 options = optparser.parse_args()
@@ -75,7 +77,7 @@ if options.transglob:
 
 from fixes import ROOT
 ROOT.gROOT.SetBatch(options.batch)
-ROOT.gStyle.SetOptTitle(0)
+ROOT.gStyle.SetOptTitle(options.title)
 
 from utils import get_hists
 
