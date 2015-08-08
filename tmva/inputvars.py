@@ -208,6 +208,12 @@ if options.lcorrns:
     canvas.SetRightMargin(0.15)
     for hist in ihists['file']:
         hist.SetStats(False)
+        axes = (hist.GetXaxis(), hist.GetYaxis())
+        for axis in axes:
+            sz = 1 + axis.GetNbins()
+            for i in xrange(1, sz):
+                axis.SetBinLabel(i, get_label(axis.GetBinLabel(i)))
+        hist.SetMarkerColor(ROOT.kBlack)
         hist.Draw('colz text')
         canvas.Update()
         if options.doprint:
