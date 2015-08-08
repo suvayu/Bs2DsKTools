@@ -293,7 +293,7 @@ if options.scatter:
         canvas.Update()
         if options.dump:
             # _write(rfile, hists[transform+'_corr'])
-            _draw_match('{}_matched_corrln_{}.png'.format(prefix, transform),
+            _draw_match('{}_matched_corrln_{}.pdf'.format(prefix, transform),
                         hists[transform+'_corr'])
         if options.doprint:
             canvas.Print('{}_corrln_grid_{}.png'.format(prefix, transform))
