@@ -51,6 +51,7 @@ if options.clnameglob:
 
 from fixes import ROOT
 ROOT.gROOT.SetBatch(options.batch)
+ROOT.gStyle.SetOptTitle(0)
 
 from utils import get_hists
 from rplot.rdir import Rdir
