@@ -182,7 +182,7 @@ else:                           # Matplotlib
         for k, cut in enumerate(mva_cuts):
             if not histos[k].GetEntries(): continue
             x, y, yerr = th12errorbar(histos[k], yerr=True, asym=True)
-            axes.errorbar(x, y, yerr=yerr, xerr=None, fmt=None,
+            axes.errorbar(x, y, yerr=yerr, xerr=None, fmt='none',
                           label='{}>{}'.format(classifier, cut))
         axes.legend(fontsize=10, numpoints=1, frameon=False, ncol=ncuts,
                     handler_map={mpl.lines.Line2D: HandlerErrorbar()})
