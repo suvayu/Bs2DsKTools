@@ -40,6 +40,8 @@ optparser.add_argument('-c', dest='classifier', choices=['BDTA', 'BDTG', 'BDTB']
                        default='BDTB', help='Classifier to use.')
 optparser.add_argument('-i', dest='intervals', nargs='+', type=int,
                        help='Intervals of classifier cuts.')
+optparser.add_argument('--title', action='store_true',
+                       help='Add title to plots.')
 optparser.add_argument('-p', dest='doprint', action='store_true',
                        help='Print to png/pdf files.')
 optparser.add_argument('--backend', choices=['root', 'mpl'], default='mpl',
@@ -61,6 +63,7 @@ if bool(session) != bool(conf):
 # batch mode
 from fixes import ROOT
 ROOT.gROOT.SetBatch(batch)
+ROOT.gStyle.SetOptTitle(title)
 
 
 ## read signal and background trees, define cuts
@@ -164,10 +167,11 @@ else:                           # Matplotlib
         canvas = FigureCanvasPdf(fig)
         axes = fig.add_subplot(111) # row, col, id (121+j, when plotting both)
         axes.grid(axis='y')
-        if bkgeff:
-            axes.set_title('Background rejection efficiency')
-        else:
-            axes.set_title('Signal selection efficiency')
+        if title:
+            if bkgeff:
+                axes.set_title('Background rejection efficiency')
+            else:
+                axes.set_title('Signal selection efficiency')
         axes.set_ylim(0, 3.5)
         axes.set_ylabel('Efficiency (w/ offset)')
         axes.set_xlim(*variables[var][1])
