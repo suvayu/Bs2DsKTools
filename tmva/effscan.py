@@ -79,6 +79,8 @@ else:
     conf = ConfigFile(conf)
     if conf.read() > 0:
         session = conf.get_session_config(session)
+        if not session:
+            sys.exit('No matching sessions found')
     else:
         sys.exit('No sesions found!')
     istmva = str(session.cut_bkg if bkgeff else session.cut_sig)
