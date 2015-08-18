@@ -7,7 +7,7 @@ efficiency and significances are evaluated at these cuts.
 
 Classifier range:
 - rest: (-1,1)
-- BDT w/ bagging: (-0.4,0.4)
+- BDT w/ bagging: (-0.3,0.3)
 
 Features:
 - Can run on normal ntuples, or TMVA output.
@@ -167,7 +167,7 @@ else:                           # isdata
         lambda tree, cut: tree.GetEntries('{}&&{}'.format(region3, cut.ge))
     ]
 
-from numpy import linspace, array
+from numpy import linspace, array, isnan
 if classifier == 'BDTB':
     clrange = (-0.3, 0.3)
 else:
@@ -178,7 +178,7 @@ cuts = linspace(clrange[0], clrange[1], 101)
 from utils import scan_range
 res = array(scan_range(nevts_passed, cuts, classifier, tree))
 
-# NOTE: filter runtime warning due do NaNs.  These entries are
+# NOTE: filter runtime warning due to NaNs.  These entries are
 # filtered away before filling the histograms.  They occur due to 0
 # efficiency for very large classifier cuts.
 import warnings
@@ -214,9 +214,9 @@ else:                        # isdata
         sgfs = evt_s / map(sqrt, evt_s + evt_b)
         # agns = eff_s * evt_s / (evt_s + evt_b)  # FIXME: requires eff_s
 
-from numpy import isnan                      # clean NaNs
-sgfs = map(lambda i: 0 if isnan(i) else i, sgfs)
-# agns = map(lambda i: 0 if isnan(i) else i, agns)
+        # clean NaNs
+        sgfs = map(lambda i: 0 if isnan(i) else i, sgfs)
+        # agns = map(lambda i: 0 if isnan(i) else i, agns)
 
 
 # fill histograms
@@ -229,10 +229,12 @@ hsigma = TProfile('hsigma', 'Significance', nbins, bins)
 # hagns  = TProfile('hagns', '#epsilon_{s}*purity = s/(s+b)', nbins, bins)
 
 from rplot.utils import th1fill
-map(th1fill(hist_s, 2), cuts, eff_s)
-map(th1fill(hist_b, 2), cuts, eff_b)
-map(th1fill(hsigma, 2), cuts, sgfs)
-# map(th1fill(hagns, 2), cuts, agns)
+if eff:
+    map(th1fill(hist_s, 2), cuts, eff_s)
+    map(th1fill(hist_b, 2), cuts, eff_b)
+if sgf:
+    map(th1fill(hsigma, 2), cuts, sgfs)
+    # map(th1fill(hagns, 2), cuts, agns)
 
 # plot
 import matplotlib as mpl
@@ -247,7 +249,7 @@ else:
 # PDF backend
 from matplotlib.backends.backend_pdf import PdfPages, FigureCanvasPdf
 if options.doprint:
-    pp = PdfPages('{}_significance_{}.pdf'.format(prefix, classifier))
+    pp = PdfPages('{}_sigscan_{}.pdf'.format(prefix, classifier))
 
 # use the API
 from matplotlib.figure import Figure
@@ -271,11 +273,12 @@ if eff and sgf:
 for hist in [hist_s, hist_b]:
     x, y, yerr = th12errorbar(hist, yerr=True)
     col = 'blue' if 'Signal' in hist.GetTitle() else 'red'
-    axes.errorbar(x, y, yerr=yerr, xerr=None, fmt=None, ecolor=col,
+    axes.errorbar(x, y, yerr=yerr, xerr=None, fmt='none', ecolor=col,
                   label=hist.GetTitle())
-x, y, yerr = th12errorbar(hsigma, yerr=True)
-axes2.errorbar(x, y, yerr=yerr, xerr=None, fmt=None, ecolor='black',
-               label=hist.GetTitle())
+if sgf:
+    x, y, yerr = th12errorbar(hsigma, yerr=True)
+    axes2.errorbar(x, y, yerr=yerr, xerr=None, fmt='none', ecolor='black',
+                   label=hist.GetTitle())
 
 # annotations
 if classifier == 'BDTGResponse_1':
