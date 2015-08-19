@@ -56,6 +56,7 @@ optparser.add_argument('--isdata', action='store_true',
                        help='Using data as input')
 optparser.add_argument('--ismc', action='store_true',
                        help='Using Monte Carlo as input')
+optparser.add_argument('--title', action='store_true', help='Add plot title')
 optparser.add_argument('-s', '--session', help='Mandatory TMVA training '
                        'session (required when using MC, otherwise '
                        'significance calculation is not possible)')
@@ -258,10 +259,11 @@ from rplot.r2mpl import th12errorbar
 fig = Figure()
 canvas = FigureCanvasPdf(fig)
 axes = fig.add_subplot(111)
-if eff and sgf:
-    axes.set_title('Efficiency & significance')
-else:
-    axes.set_title('Efficiency' if eff else 'Significance')
+if options.title:
+    if eff and sgf:
+        axes.set_title('Efficiency & significance')
+    else:
+        axes.set_title('Efficiency' if eff else 'Significance')
 axes.grid()
 axes.set_xlabel(cltitle[classifier])
 axes.set_xlim(clrange[0], clrange[1])
