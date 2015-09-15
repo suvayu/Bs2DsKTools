@@ -254,6 +254,7 @@ if options.doprint:
 
 # use the API
 from matplotlib.figure import Figure
+from matplotlib.legend_handler import HandlerErrorbar
 from rplot.r2mpl import th12errorbar
 
 fig = Figure()
@@ -267,7 +268,7 @@ if options.title:
 axes.grid()
 axes.set_xlabel(cltitle[classifier])
 axes.set_xlim(clrange[0], clrange[1])
-axes.set_ylabel('Efficiency' if eff else 'Significance')
+axes.set_ylabel('Sig. sel./Bkg. rej. efficiency' if eff else 'Significance')
 if eff and sgf:
     axes2 = axes.twinx()
     axes2.set_ylabel('Significance')
@@ -277,6 +278,9 @@ for hist in [hist_s, hist_b]:
     col = 'blue' if 'Signal' in hist.GetTitle() else 'red'
     axes.errorbar(x, y, yerr=yerr, xerr=None, fmt='none', ecolor=col,
                   label=hist.GetTitle())
+axes.legend(fontsize=10, numpoints=1, frameon=False, ncol=2,  # sig & bkg
+            handler_map={mpl.lines.Line2D: HandlerErrorbar()})
+
 if sgf:
     x, y, yerr = th12errorbar(hsigma, yerr=True)
     axes2.errorbar(x, y, yerr=yerr, xerr=None, fmt='none', ecolor='black',
