@@ -89,6 +89,8 @@ for var, mark in zip(variables, marks):
     hist.SetMarkerSize(0.4)
     # hist.SetMarkerColor(ROOT.kBlack)
     hist.SetXTitle(get_label(var, units=True))
+    hist.SetYTitle('Candidates')
+    hist.GetYaxis().SetTitleOffset(1.2)
     hists[var] = (hist, mark)
 
 # plots
@@ -99,13 +101,13 @@ for var, tup in hists.iteritems():
     if mark:
         axis = get_mark(hist, mark, options.yaxis)
         axis.SetLineWidth(2)
-        axis.SetLineColor(ROOT.kRed)
+        axis.SetLineColor(ROOT.kBlack)
         axis.Draw()
         if options.arrow:
             arr = get_arrow(mark, options.arrow, options.yaxis, 0.03, '|>')
             arr.SetLineWidth(2)
             arr.SetAngle(45)
-            arr.SetLineColor(ROOT.kRed)
-            arr.SetFillColor(ROOT.kRed)
+            arr.SetLineColor(ROOT.kBlack)
+            arr.SetFillColor(ROOT.kBlack)
             arr.Draw()
-    ROOT.gPad.Print('bdt_in_{}_{}.pdf'.format(options.ntuple, var))
+    ROOT.gPad.Print('{}_sideband_{}.pdf'.format(options.ntuple, var))
