@@ -24,17 +24,22 @@ hist_w1 = ROOT.TH1D('hist_w1', 'sw (mass \in [5310,5430])', 200, -0.2, 1.2)
 hist_w2 = ROOT.TH1D('hist_w2', 'sw (mass \notin [5310,5430])', 200, -0.2, 1.2)
 
 # axis titles
-blabel, swlabel = 'B mass [MeV]', '#it{s}-weights'
+blabel, swlabel, ylabel = 'B mass [MeV]', '#it{s}-weights', 'Candidates'
+
 titles = {
-    hist_m0: (blabel,),
-    hist_m1: (blabel,),
-    hist_m2: (blabel,),
-    hist_m3: (blabel,),
-    hist_w1: (swlabel,),
-    hist_w2: (swlabel,),
+    hist_m0: (blabel, ylabel),
+    hist_m1: (blabel, ylabel),
+    hist_m2: (blabel, ylabel),
+    hist_m3: (blabel, ylabel),
+    hist_w1: (swlabel, ylabel),
+    hist_w2: (swlabel, ylabel),
     'hist_2d': (blabel, swlabel)
 }
 
+hist_m0.SetLineColor(ROOT.kBlack)
+hist_m0.SetMarkerColor(ROOT.kBlack)
+hist_m1.SetLineColor(ROOT.kBlack)
+hist_m1.SetMarkerColor(ROOT.kBlack)
 hist_m3.SetLineColor(ROOT.kRed)
 hist_m3.SetMarkerColor(ROOT.kRed)
 hist_w2.SetLineColor(ROOT.kRed)
@@ -59,8 +64,8 @@ def annotate_mass(ymin, ymax, lo=5310, hi=5430):
     """Annotate signal mass range"""
     lo = ROOT.TLine(lo, ymin, lo, ymax)
     hi = ROOT.TLine(hi, ymin, hi, ymax)
-    lo.SetLineColor(ROOT.kAzure)
-    hi.SetLineColor(ROOT.kAzure)
+    lo.SetLineColor(ROOT.kBlack)
+    hi.SetLineColor(ROOT.kBlack)
     lo.Draw()
     hi.Draw()
     return (lo, hi)
@@ -86,6 +91,8 @@ for hist in hists:
     opts = 'e1'
     # No 2D histogram in this loop
     hist.GetXaxis().SetTitle(titles[hist][0])
+    hist.GetYaxis().SetTitle(titles[hist][1])
+    hist.GetYaxis().SetTitleOffset(1.25)
     if hname in ['hist_m3', 'hist_w2']:
         hist.Draw('{} same'.format(opts))
     else:
