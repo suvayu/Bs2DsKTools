@@ -133,6 +133,7 @@ else:
             hist[1].SetLineColor(cols[j])
             hist[1].GetXaxis().SetRangeUser(axis_range, 1.0)
             hist[1].GetYaxis().SetRangeUser(axis_range, 1.0)
+            hist[1].GetYaxis().SetTitleOffset(1.2)
             try:
                 info = sessions[fnames[i]]
             except KeyError:
