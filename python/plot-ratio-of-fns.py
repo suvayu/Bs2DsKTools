@@ -5,9 +5,7 @@
 """
 
 # Python modules
-import os
 import sys
-import math
 import numpy
 
 # option parsing
