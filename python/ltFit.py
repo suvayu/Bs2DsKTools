@@ -133,18 +133,22 @@ for mode, pidcut in [('DsPi', 'PIDK < 0'), ('DsK', 'PIDK > 10')]:
 
     if pidcut.find(' -5') > 0:
         wt = 'wt0'
+        scale = 1
     elif pidcut.find(' 0') > 0:
         wt = 'wt1'
+        scale = 1
     elif pidcut.find(' 5') > 0:
         wt = 'wt2'
+        scale = 1
     elif pidcut.find(' 10') > 0:
         wt = 'wt3'
+        scale = 10
     else:
         print 'Unknown PID selection. Weights not applied.'
     wtvar = RooRealVar(wt, 'weight', 0.0, 1.0)
 
     # dataset = fill_dataset(RooArgSet(time, wtvar), ftree, wt, wtvar, cutstr)
-    dataset = get_dataset(RooArgSet(time, wtvar), ftree, cutstr, wt)
+    dataset = get_dataset(RooArgSet(time, wtvar), ftree, cutstr, wt, scale)
     name_title = '{}_{}'.format(dataset.GetName(), mode)
     dataset.SetNameTitle(name_title, name_title)
     print '%s is weighted: %s' % (dataset.GetName(), dataset.isWeighted())
