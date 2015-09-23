@@ -109,7 +109,7 @@ for htype in htypes:
             # ensure identical binning
             hname = 'h{}_{}_{}'.format(mode, htype, sanitise_str_src(var))
             # print hname
-            hist = TH1D(hname, '{0} {1} {2};{2}'
+            hist = TH1D(hname, '{0};{1}'
                         .format(pmodes[mode], htype, prettyvars[v]), *binning)
             cut = cuts['timelt2ps']
             cut_tokens = htype.split('_')

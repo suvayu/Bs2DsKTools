@@ -100,8 +100,8 @@ for plot in plots:
 
 
 # legend
-legend = ROOT.TLegend(0.8, 0.7, 0.9, 0.8)
-legend.SetFillStyle(0)
+legend = ROOT.TLegend(0.8, 0.7, 0.89, 0.8)
+# legend.SetFillStyle(0)
 legend.SetFillColor(0)
 legend.SetLineWidth(0)
 legend.SetTextSize(0.035)
